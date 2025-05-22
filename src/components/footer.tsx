@@ -33,7 +33,7 @@ export default function Footer() {
 
         <div className="text-white p-10 w-fit h-[200px] absolute right-0 text-right text-xl px-[30px] mt-[35px]">
           ©2025 TaskHive
-          <div className="mb-5 mt-3">
+          <div className="mt-7">
             <a
               href="https://github.com/mihai888nextlab/taskhive"
               className="hover:text-primary transition-colors duration-300 text-lg"
