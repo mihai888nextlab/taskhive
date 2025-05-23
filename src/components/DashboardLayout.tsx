@@ -4,6 +4,8 @@ import { ReactNode } from "react";
 import { MdSpaceDashboard } from "react-icons/md";
 import { FaUserClock } from "react-icons/fa6";
 import { FaTasks } from "react-icons/fa";
+import { FaCalendarAlt } from "react-icons/fa"; // Import the calendar icon
+
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -35,6 +37,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: "Dashboard", path: "/app", icon: MdSpaceDashboard },
     { name: "Users", path: "/app/users", icon: FaUserClock },
     { name: "Tasks", path: "/app/profile", icon: FaTasks },
+    { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt }, // New Calendar menu item
   ];
 
   return (
