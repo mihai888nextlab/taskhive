@@ -1,12 +1,13 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { useAuth } from "../../pages/_app"; // Adjust path
 import { NextPageWithLayout } from "@/types";
+import Loading from "@/components/Loading";
 
 const DashboardOverviewPage: NextPageWithLayout = () => {
   const { user } = useAuth();
 
   if (!user) {
-    return <p>Loading dashboard content...</p>;
+    return <Loading />;
   }
 
   return (

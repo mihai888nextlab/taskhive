@@ -87,10 +87,9 @@ export default async function handler(
         companyId: savedCompany._id,
         firstName: savedUser.firstName, // Include for client-side convenience
         lastName: savedUser.lastName, // Include for client-side convenience
-        jobTitle: savedUser.jobTitle, // Include for client-side convenience
       },
       JWT_SECRET,
-      { expiresIn: "1h" } // Token expires in 1 hour
+      { expiresIn: "1d" } // Token expires in 1 hour
     );
 
     res.setHeader(
@@ -112,7 +111,6 @@ export default async function handler(
         email: savedUser.email,
         firstName: savedUser.firstName,
         lastName: savedUser.lastName,
-        jobTitle: savedUser.jobTitle,
       },
       company: savedCompany,
     });

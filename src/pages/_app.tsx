@@ -4,6 +4,7 @@ import { AppPropsWithLayout, AuthContextType, User } from "@/types";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { createContext, useContext, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -66,7 +67,43 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
     }
   }
 
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    in: { opacity: 1, y: 0 },
+    out: { opacity: 0, y: -20 },
+  };
+
+  const pageTransition = {
+    type: "tween",
+    ease: "easeOut", // Or "easeInOut", "anticipate"
+    duration: 0.3, // A shorter duration for snappier dashboard navigation
+  };
+
   const getLayout = Component.getLayout || ((page) => page);
+  let content = getLayout(<Component {...pageProps} />);
+
+  if (isDashboardRoute) {
+    content = (
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={router.pathname}
+          variants={pageVariants}
+          initial="initial"
+          animate="in"
+          exit="out"
+          transition={pageTransition}
+          style={{ position: "relative" }}
+        >
+          {content}
+        </motion.div>
+      </AnimatePresence>
+    );
+
+    // Show loading spinner for dashboard routes if user data is not ready
+    if (loadingUser && user === null && !router.pathname.startsWith("/auth")) {
+      return <p>Loading dashboard...</p>;
+    }
+  }
 
   return (
     <AuthContext.Provider
@@ -78,11 +115,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {isDashboardRoute
-        ? user || router.pathname.startsWith("/auth")
-          ? getLayout(<Component {...pageProps} />)
-          : null
-        : getLayout(<Component {...pageProps} />)}
+      {content}
     </AuthContext.Provider>
   );
 }

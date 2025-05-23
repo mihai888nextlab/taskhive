@@ -41,7 +41,7 @@ export default function Login() {
 
       if (response.ok) {
         // Redirect to dashboard or home page
-        router.push("/dashboard");
+        router.push("/app");
       } else {
         setError(data.message || "Login failed.");
       }
@@ -100,10 +100,7 @@ export default function Login() {
           </form>
           <p className="text-center text-sm text-gray-400 mt-4">
             Don't have an account?{" "}
-            <a
-              href="/register"
-              className="text-blue-500 hover:underline"
-            >
+            <a href="/register" className="text-blue-500 hover:underline">
               Register here
             </a>
           </p>
