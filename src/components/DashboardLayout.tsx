@@ -1,8 +1,10 @@
 import { useAuth } from "../pages/_app"; // Adjust path
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
-import { MdSpaceDashboard, MdSettings } from "react-icons/md"; // Import the settings icon
-import { FaUserClock, FaTasks, FaCalendarAlt } from "react-icons/fa"; // Import other icons
+import { MdSpaceDashboard } from "react-icons/md";
+import { FaUserClock } from "react-icons/fa6";
+import { FaTasks } from "react-icons/fa";
+import Link from "next/link";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -41,17 +43,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="flex w-full min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-[300px] bg-gray-800 text-white px-5 py-6 flex flex-col shadow-lg">
-        {/* Logo */}
+      <aside className="w-[300px] bg-gray-800 text-white px-5 py-6 flex flex-col">
         <img
-          src="logo.png"
-          className="w-[180px] mx-auto mb-8 transition-shadow duration-300"
+          src="http://localhost:3000/logo.png"
+          className="w-[150px] mx-auto mb-8"
           alt="Logo"
         />
-
-        {/* Navigation */}
         <nav>
-          <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">Main Menu</p>
+          <p className="text-gray-400 font-semibold text-sm uppercase">
+            Main Menu
+          </p>
           <ul className="mt-4 space-y-2">
             {menu.map((item) => (
               <li
@@ -62,10 +63,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     : "hover:bg-gray-700 hover:text-white text-gray-300"
                 }`}
               >
-                <a href={item.path} className="flex items-center">
-                  {item.icon && <item.icon className="mr-3 text-xl text-primary" />}
+                <Link href={item.path} className="flex items-center">
+                  {item.icon && (
+                    <item.icon className="mr-3 text-xl text-primary" />
+                  )}
                   {item.name}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

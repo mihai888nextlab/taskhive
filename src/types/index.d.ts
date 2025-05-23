@@ -36,3 +36,21 @@ export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
 export type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
+
+export type TableDataItem = {
+  id: string | number; // Fiecare rând ar trebui să aibă un ID unic
+  [key: string]: any; // Permite orice alte proprietăți
+};
+
+export type TableColumn<T extends TableDataItem> = {
+  key: keyof T | "actions";
+  header: string;
+  render?: (item: T) => React.ReactNode;
+  align?: "left" | "center" | "right";
+};
+
+export type TableAction<T extends TableDataItem> = {
+  label: string; // Textul butonului
+  onClick: (item: T) => void; // Funcția care se execută la click
+  className?: string; // Clase Tailwind suplimentare pentru stilizare
+};
