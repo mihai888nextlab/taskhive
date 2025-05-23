@@ -1,8 +1,8 @@
 import { useAuth } from "../pages/_app"; // Adjust path
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
-import { MdSpaceDashboard } from "react-icons/md";
-import { FaUserClock, FaTasks, FaCalendarAlt } from "react-icons/fa"; // Import icons
+import { MdSpaceDashboard, MdSettings } from "react-icons/md"; // Import the settings icon
+import { FaUserClock, FaTasks, FaCalendarAlt } from "react-icons/fa"; // Import other icons
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -35,6 +35,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: "Users", path: "/app/users", icon: FaUserClock },
     { name: "Tasks", path: "/app/profile", icon: FaTasks },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
+    { name: "Settings", path: "/app/settings", icon: MdSettings },
   ];
 
   return (
