@@ -10,15 +10,15 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user, setUser } = useAuth(); // useAuth hook already returns AuthContextType
+  const { user, setUser } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
       const res = await fetch("/api/auth/logout", { method: "POST" });
       if (res.ok) {
-        setUser(null); // Clear user state in context
-        router.push("/auth/login"); // Redirect to login
+        setUser(null);
+        router.push("/auth/login");
       } else {
         console.error("Logout failed");
       }
@@ -28,9 +28,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   if (!user) {
-    // This case should ideally be handled by _app.tsx redirecting,
-    // but a fallback is good.
-    return null; // Or a simple spinner if the redirect hasn't completed
+    return null; // Or a spinner
   }
 
   const menu = [
@@ -40,32 +38,42 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="flex w-full min-h-screen">
-      <aside className="w-[350px] px-5 py-6">
-        <img src="logo.png" className="w-[175px]" alt="" />
-        <nav className="mt-10">
-          <p className="text-primary font-semibold text-sm">Main menu</p>
-          <ul className="mt-2">
+    <div className="flex w-full min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <aside className="w-[300px] bg-gray-800 text-white px-5 py-6 flex flex-col">
+        <img src="logo.png" className="w-[150px] mx-auto mb-8" alt="Logo" />
+        <nav>
+          <p className="text-gray-400 font-semibold text-sm uppercase">Main Menu</p>
+          <ul className="mt-4 space-y-2">
             {menu.map((item) => (
               <li
                 key={item.name}
-                className="hover:bg-[#393E46] p-3 rounded-xl duration-300"
+                className={`p-3 rounded-lg transition-colors duration-300 ${
+                  router.pathname === item.path
+                    ? "bg-gray-700 text-white"
+                    : "hover:bg-gray-700 text-gray-300"
+                }`}
               >
-                <a
-                  href={item.path}
-                  className="flex items-center text-secondary transition-colors duration-300"
-                >
-                  {item.icon && (
-                    <item.icon className="mr-3 text-2xl text-primary" />
-                  )}
+                <a href={item.path} className="flex items-center">
+                  {item.icon && <item.icon className="mr-3 text-xl text-primary" />}
                   {item.name}
                 </a>
               </li>
             ))}
           </ul>
         </nav>
+        <button
+          onClick={handleLogout}
+          className="mt-auto bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors"
+        >
+          Logout
+        </button>
       </aside>
-      <main className="bg-white w-full">{children}</main>
+
+      {/* Main Content */}
+      <main className="flex-1 bg-white p-8 rounded-tl-lg shadow-lg">
+        {children}
+      </main>
     </div>
   );
 };

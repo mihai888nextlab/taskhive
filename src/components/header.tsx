@@ -37,6 +37,7 @@ export default function Header() {
         isScrolled ? "translate-y-0" : "-translate-y-5"
       }`}
     >
+      <title>TaskHive</title>
       <nav className="w-[1200px] h-full py-4 px-5 rounded-xl border-2 border-accent flex items-center justify-between bg-background">
         <div className="h-full py-2">
           <a href="/">
