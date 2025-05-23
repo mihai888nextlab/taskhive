@@ -1,5 +1,6 @@
 import FloatingLabelInput from "@/components/FloatingLabelInput";
 import Header from "@/components/header";
+import Loading from "@/components/Loading";
 import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
 
@@ -36,6 +37,12 @@ export default function Register() {
       return;
     }
 
+    if (values.userPassword !== values.confirmPassword) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -56,7 +63,7 @@ export default function Register() {
 
       if (response.ok) {
         // Redirect to login or a success page
-        router.push("/auth/login");
+        router.push("/app");
       } else {
         setError(data.message || "Registration failed.");
       }
@@ -71,6 +78,8 @@ export default function Register() {
   return (
     <div className="min-w-full min-h-screen bg-background text-white flex flex-col items-center">
       <Header />
+
+      {loading && <Loading />}
 
       <main className="w-[1200px] h-screen flex items-center justify-center">
         <div className="w-full max-w-md">
@@ -160,6 +169,13 @@ export default function Register() {
               }
               value={values.vatNumber}
             />
+
+            {error && (
+              <div className="text-red-500 text-sm text-center mt-4">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"

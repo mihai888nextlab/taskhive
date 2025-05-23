@@ -1,9 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { hash } from "bcrypt";
+import { sign } from "jsonwebtoken";
+import { serialize } from "cookie";
 import dbConnect from "@/db/dbConfig";
 import userModel from "@/db/models/userModel";
 import companyModel from "@/db/models/companyModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
+
+const JWT_SECRET = process.env.JWT_SECRET || "";
 
 export default async function handler(
   req: NextApiRequest,
@@ -74,23 +78,49 @@ export default async function handler(
       })
       .populate("companyId");
 
+    const token = sign(
+      {
+        userId: savedUser._id,
+        email: savedUser.email,
+        password: savedUser.password,
+        role: newUserCompany.role, // 'admin'
+        companyId: savedCompany._id,
+        firstName: savedUser.firstName, // Include for client-side convenience
+        lastName: savedUser.lastName, // Include for client-side convenience
+        jobTitle: savedUser.jobTitle, // Include for client-side convenience
+      },
+      JWT_SECRET,
+      { expiresIn: "1h" } // Token expires in 1 hour
+    );
+
+    res.setHeader(
+      "Set-Cookie",
+      serialize("auth_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Use secure in production
+        sameSite: "lax", // Or 'strict' for more security
+        maxAge: 60 * 60, // 1 hour (in seconds) - matches token expiration
+        path: "/",
+      })
+    );
+
     res.status(201).json({
       message: "User and company registered successfully.",
+      token, // Return the JWT token
       user: {
         _id: savedUser._id,
         email: savedUser.email,
         firstName: savedUser.firstName,
         lastName: savedUser.lastName,
+        jobTitle: savedUser.jobTitle,
       },
-      company: populatedUserCompany.companyId, // Return the populated company object
+      company: savedCompany,
     });
   } catch (error: any) {
     console.error("Registration error", error);
-    return res
-      .status(500)
-      .json({
-        message: "An error occurred during registration.",
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "An error occurred during registration.",
+      error: error.message,
+    });
   }
 }
