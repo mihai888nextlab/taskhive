@@ -1,4 +1,4 @@
-import { useAuth } from "../pages/_app"; // Adjust path
+import { useAuth } from "@/pages/_app"; // Adjust path
 import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
 import { MdSpaceDashboard } from "react-icons/md";

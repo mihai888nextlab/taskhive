@@ -1,7 +1,7 @@
 // src/pages/app/dashboard.tsx (or wherever you intend this file to be)
 
 import DashboardLayout from "@/components/DashboardLayout";
-import { useAuth } from "../../pages/_app"; // Adjust path if your _app.tsx is in a different location
+import { useAuth } from "@/pages/_app"; // Adjust path if your _app.tsx is in a different location
 import { NextPageWithLayout } from "@/types";
 import Loading from "@/components/Loading";
 import Link from "next/link";
