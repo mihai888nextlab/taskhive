@@ -1,4 +1,5 @@
 import React, { useState, InputHTMLAttributes } from "react";
+/** @jsx React.createElement */
 
 interface FloatingLabelInputProps
   extends InputHTMLAttributes<HTMLInputElement> {

@@ -2,6 +2,13 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useState } from "react";
 
+const tabs = [
+  { id: "profile", label: "Profile" },
+  { id: "security", label: "Security" },
+  { id: "notifications", label: "Notifications" },
+  { id: "appearance", label: "Appearance" },
+];
+
 const SettingsPage: NextPageWithLayout = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({
@@ -16,7 +23,7 @@ const SettingsPage: NextPageWithLayout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch("/api/update-profile", {
         method: "POST",
@@ -25,24 +32,23 @@ const SettingsPage: NextPageWithLayout = () => {
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (response.ok) {
+        const data = await response.json();
+        console.log("Profile updated successfully:", data);
+  
+        // Reload the page after a successful update
         alert("Profile updated successfully!");
+        window.location.reload(); // Reload the page
       } else {
-        alert("Failed to update profile. Please try again.");
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to update profile. Please try again.");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("An error occurred. Please try again.");
     }
   };
-
-  const tabs = [
-    { id: "profile", label: "Personal Information" },
-    { id: "security", label: "Security" },
-    { id: "notifications", label: "Notifications" },
-    { id: "appearance", label: "Appearance" },
-  ];
 
   return (
     <div className="min-w-full min-h-screen bg-gray-50 text-gray-800 flex">

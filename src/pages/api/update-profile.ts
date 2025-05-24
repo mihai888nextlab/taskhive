@@ -16,23 +16,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { firstName, lastName } = req.body;
 
-
   const cookies = cookie.parse(req.headers.cookie || "");
-    const token = cookies.auth_token;
-  
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
-    }
-  
+  const token = cookies.auth_token;
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  try {
     const decodedToken: JWTPayload | null = jwt.verify(
       token,
       process.env.JWT_SECRET || ""
     ) as JWTPayload;
 
-  try {
-    // Find the user by email and update their profile
+    // Find the user by ID and update their profile
     const updatedUser = await User.findOneAndUpdate(
-      { _id: decodedToken.userId }, // Find the user by email
+      { _id: decodedToken.userId }, // Find the user by ID
       { firstName, lastName }, // Update fields
       { new: true, runValidators: true } // Return the updated document and validate inputs
     );
@@ -41,6 +40,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    // Respond with success
+    res.status(200).json({
+      message: "Profile updated successfully",
+      updatedUser,
+    });
   } catch (error) {
     console.error("Error updating profile:", error);
     res.status(500).json({ error: "Internal server error" });
