@@ -24,8 +24,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     try {
       const res = await fetch("/api/auth/logout", { method: "POST" });
       if (res.ok) {
-        setUser(null);
-        router.push("/auth/login");
+        setUser(null); // Clear the user state
+        router.push("/"); // Redirect to the home page
       } else {
         console.error("Logout failed");
       }
@@ -50,11 +50,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     <div className="flex w-full min-h-screen bg-gray-100">
       {/* Sidebar */}
       <aside className="w-[300px] bg-gray-800 text-white px-5 py-6 flex flex-col">
-        <img
-          src="http://localhost:3000/logo.png"
-          className="w-[150px] mx-auto mb-8"
-          alt="Logo"
-        />
+        <Link href="/app">
+          <img
+            src="http://localhost:3000/logo.png"
+            className="w-[150px] mx-auto mb-8 cursor-pointer"
+            alt="Logo"
+          />
+        </Link>
         <nav>
           <p className="text-gray-400 font-semibold text-sm uppercase">
             Main Menu
@@ -102,20 +104,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         onClick={() => setIsAIWindowOpen(!isAIWindowOpen)} // Toggle AI window
         className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary text-white rounded-full shadow-lg hover:bg-primary-dark transition-all flex items-center justify-center space-x-2 active:scale-95"
       >
-        <span className="text-lg font-semibold">AI</span> {/* Increased font size */}
+        <span className="text-lg font-semibold">AI</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
+          className={`h-6 w-6 transform transition-transform duration-300 ${
+            isAIWindowOpen ? "rotate-45" : "rotate-0"
+          }`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
           strokeWidth={2}
         >
-          {isAIWindowOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          )}
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
         </svg>
       </button>
 

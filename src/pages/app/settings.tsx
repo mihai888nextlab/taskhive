@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const tabs = [
   { id: "profile", label: "Profile" },
@@ -15,6 +15,14 @@ const SettingsPage: NextPageWithLayout = () => {
     firstName: "",
     lastName: "",
   });
+  const [accountDetails, setAccountDetails] = useState<{
+    email: string;
+    password: string;
+    createdAt: string;
+    firstName: string;
+    lastName: string;
+  } | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,7 +31,7 @@ const SettingsPage: NextPageWithLayout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
       const response = await fetch("/api/update-profile", {
         method: "POST",
@@ -32,11 +40,11 @@ const SettingsPage: NextPageWithLayout = () => {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         console.log("Profile updated successfully:", data);
-  
+
         // Reload the page after a successful update
         alert("Profile updated successfully!");
         window.location.reload(); // Reload the page
@@ -49,6 +57,26 @@ const SettingsPage: NextPageWithLayout = () => {
       alert("An error occurred. Please try again.");
     }
   };
+
+  useEffect(() => {
+    if (activeTab === "security") {
+      const fetchAccountDetails = async () => {
+        try {
+          const res = await fetch("/api/security");
+          if (res.ok) {
+            const data = await res.json();
+            setAccountDetails(data);
+          } else {
+            console.error("Failed to fetch account details");
+          }
+        } catch (error) {
+          console.error("Error fetching account details:", error);
+        }
+      };
+
+      fetchAccountDetails();
+    }
+  }, [activeTab]);
 
   return (
     <div className="min-w-full min-h-screen bg-gray-50 text-gray-800 flex">
@@ -133,9 +161,67 @@ const SettingsPage: NextPageWithLayout = () => {
         {activeTab === "security" && (
           <div>
             <h2 className="text-3xl font-bold mb-6 text-gray-800">Security</h2>
-            <p className="text-gray-600">
-              Manage your password and enable two-factor authentication.
+            <p className="text-gray-600 mb-8">
+              Manage your password and view account details.
             </p>
+            {accountDetails ? (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    First Name
+                  </label>
+                  <p className="p-3 border border-gray-300 rounded-lg bg-gray-100">
+                    {accountDetails.firstName}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Last Name
+                  </label>
+                  <p className="p-3 border border-gray-300 rounded-lg bg-gray-100">
+                    {accountDetails.lastName}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Email
+                  </label>
+                  <p className="p-3 border border-gray-300 rounded-lg bg-gray-100">
+                    {accountDetails.email}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={accountDetails.password}
+                      readOnly
+                      className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Account Created
+                  </label>
+                  <p className="p-3 border border-gray-300 rounded-lg bg-gray-100">
+                    {new Date(accountDetails.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-500">Loading account details...</p>
+            )}
           </div>
         )}
 
