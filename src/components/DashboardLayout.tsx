@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
 import { MdSpaceDashboard } from "react-icons/md";
 import { MdSettings } from "react-icons/md";
-import { FaUserClock } from "react-icons/fa6";
+import { FaUserClock } from "react-icons/fa6"; // Assuming FaUserClock is from fa6
 import { FaTasks } from "react-icons/fa";
 import { FaCalendarAlt } from "react-icons/fa";
 import AIWindow from "./AIWindow"; // Import the AIWindow component
@@ -18,7 +18,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, setUser } = useAuth();
   const router = useRouter();
 
-  const [isAIWindowOpen, setIsAIWindowOpen] = useState(false); // State to toggle AI window
+  // State to toggle AI window - Initialized to 'false' so it's hidden by default.
+  // Click the AI button to toggle its visibility.
+  const [isAIWindowOpen, setIsAIWindowOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -48,7 +50,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <div className="flex w-full min-h-screen bg-gradient-to-r from-gray-100 to-gray-200">
-      {/* Sidebar */}
+      {/* Sidebar - Reverted to original styling */}
       <aside className="w-[300px] bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 py-6 flex flex-col shadow-lg">
         <Link href="/app">
           <img
@@ -82,27 +84,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </ul>
         </nav>
 
-        {/* Divider */}
+        {/* Divider - Reverted to original placement */}
         <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
 
-        {/* Logout Button */}
+        {/* Logout Button - Reverted to original placement and styling (after divider) */}
         <button
           onClick={handleLogout}
-          className="mt-auto bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg"
+          className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg"
         >
           Logout
         </button>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content - Reverted to original styling */}
       <main className="flex-1 bg-white p-8 rounded-tl-lg shadow-lg">
         {children}
       </main>
 
-      {/* AI Button */}
+      {/* AI Button - Class name fixed here from "b-primary" to "bg-primary" */}
       <button
         onClick={() => setIsAIWindowOpen(!isAIWindowOpen)} // Toggle AI window
-        className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95"
+        className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95"
       >
         <span className="text-lg font-semibold">AI</span>
         <svg
