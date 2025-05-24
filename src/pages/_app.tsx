@@ -110,6 +110,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       value={{ user, setUser, loadingUser, isDashboardRoute }}
     >
       <Head>
+        <link rel="icon" href="favicon.ico" />
         <title>Taskhive</title>
         <meta name="description" content="A employee management application" />
         <link rel="icon" href="/favicon.ico" />
