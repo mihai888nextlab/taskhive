@@ -122,7 +122,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </button>
 
       {/* AI Window */}
-      <AIWindow isOpen={isAIWindowOpen} onClose={() => setIsAIWindowOpen(false)} />
+      <AIWindow isOpen={isAIWindowOpen} onClose={() => setIsAIWindowOpen(false)}/>
     </div>
   );
 };

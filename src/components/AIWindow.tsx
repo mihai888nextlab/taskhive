@@ -60,7 +60,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed bottom-16 right-8 w-[500px] h-[600px] bg-white shadow-2xl rounded-xl p-6 border border-gray-300 animate-slide-up flex flex-col">
+    <div className="fixed bottom-16 right-8 w-[500px] h-[600px] z-50 bg-white shadow-2xl rounded-xl p-6 border border-gray-300 animate-slide-up flex flex-col">
       {/* Header */}
       <div className="flex justify-between items-center mb-4"> {/* Adjusted margin */}
         <h3 className="text-2xl font-bold text-gray-800">AI Assistant</h3>
