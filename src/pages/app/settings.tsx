@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useState, useEffect } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 
 const tabs = [
   { id: "profile", label: "Profile" },
@@ -45,9 +46,9 @@ const SettingsPage: NextPageWithLayout = () => {
         const data = await response.json();
         console.log("Profile updated successfully:", data);
 
-        // Reload the page after a successful update
         alert("Profile updated successfully!");
-        window.location.reload(); // Reload the page
+        // Consider updating local state instead of full reload for smoother UX
+        // window.location.reload();
       } else {
         const errorData = await response.json();
         alert(errorData.error || "Failed to update profile. Please try again.");
@@ -59,6 +60,26 @@ const SettingsPage: NextPageWithLayout = () => {
   };
 
   useEffect(() => {
+    if (activeTab === "profile") {
+      const fetchProfileData = async () => {
+        try {
+          const res = await fetch("/api/profile");
+          if (res.ok) {
+            const data = await res.json();
+            setFormData({
+              firstName: data.firstName || "",
+              lastName: data.lastName || "",
+            });
+          } else {
+            console.error("Failed to fetch profile data:", res.status, res.statusText);
+          }
+        } catch (error) {
+          console.error("Error fetching profile data:", error);
+        }
+      };
+      fetchProfileData();
+    }
+
     if (activeTab === "security") {
       const fetchAccountDetails = async () => {
         try {
@@ -67,91 +88,97 @@ const SettingsPage: NextPageWithLayout = () => {
             const data = await res.json();
             setAccountDetails(data);
           } else {
-            console.error("Failed to fetch account details");
+            console.error("Failed to fetch account details:", res.status, res.statusText);
+            setAccountDetails(null);
           }
         } catch (error) {
           console.error("Error fetching account details:", error);
+          setAccountDetails(null);
         }
       };
-
       fetchAccountDetails();
     }
   }, [activeTab]);
 
   return (
-    <div className="min-w-full min-h-screen bg-gray-50 text-gray-800 flex">
+    <div className="flex min-h-screen bg-gray-100 text-gray-900">
       {/* Sidebar */}
-      <aside className="w-[300px] bg-white shadow-lg p-6 rounded-lg">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Settings</h2>
-        <ul className="space-y-4">
-          {tabs.map((tab) => (
-            <li
-              key={tab.id}
-              className={`cursor-pointer p-3 rounded-lg text-lg font-medium transition-all duration-300 ${
-                activeTab === tab.id
-                  ? "bg-primary text-white shadow-md scale-105"
-                  : "text-gray-600 hover:bg-gray-100 hover:shadow-sm"
-              }`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </li>
-          ))}
-        </ul>
+      <aside className="w-1/4 max-w-xs bg-white border-r border-gray-200 p-8 shadow-sm">
+        <h2 className="text-3xl font-extrabold mb-8 text-gray-900">Settings</h2>
+        <nav>
+          <ul className="space-y-2">
+            {tabs.map((tab) => (
+              <li
+                key={tab.id}
+                className={`cursor-pointer px-4 py-3 rounded-md text-lg transition-all duration-200 ease-in-out
+                  ${
+                    activeTab === tab.id
+                      ? "bg-blue-400 text-white shadow-md" // Changed to gray-800 background, no bold text
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </li>
+            ))}
+          </ul>
+        </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 bg-white shadow-lg rounded-lg p-8 ml-6">
+      <main className="flex-1 p-10 bg-white border-l border-gray-200 rounded-lg shadow-lg mx-8 my-8">
         {activeTab === "profile" && (
           <div>
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">
+            <h2 className="text-4xl font-extrabold mb-4 text-gray-900">
               Personal Information
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-700 text-lg mb-8 border-b border-gray-200 pb-6">
               Update your personal details. This information will be displayed
               publicly, so be careful what you share.
             </p>
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form className="space-y-8 mt-6" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label htmlFor="firstName" className="block text-gray-700 font-medium mb-2">
                     First Name
                   </label>
                   <input
                     type="text"
+                    id="firstName"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900"
                     placeholder="Enter your first name"
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">
+                  <label htmlFor="lastName" className="block text-gray-700 font-medium mb-2">
                     Last Name
                   </label>
                   <input
                     type="text"
+                    id="lastName"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-300"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900"
                     placeholder="Enter your last name"
                   />
                 </div>
               </div>
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 mt-8">
                 <button
                   type="button"
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300"
+                  className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-all duration-200 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all duration-300"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-200 font-semibold shadow"
                 >
-                  Save
+                  Save Changes
                 </button>
               </div>
             </form>
@@ -160,17 +187,17 @@ const SettingsPage: NextPageWithLayout = () => {
 
         {activeTab === "security" && (
           <div>
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">Security</h2>
-            <p className="text-gray-600 mb-8">
+            <h2 className="text-4xl font-extrabold mb-4 text-gray-900">Security</h2>
+            <p className="text-gray-700 text-lg mb-8 border-b border-gray-200 pb-6">
               Manage your password and view account details.
             </p>
             {accountDetails ? (
-              <div className="space-y-6">
+              <div className="space-y-6 mt-6">
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
                     First Name
                   </label>
-                  <p className="p-3 border border-gray-300 rounded-lg bg-gray-100">
+                  <p className="px-4 py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
                     {accountDetails.firstName}
                   </p>
                 </div>
@@ -178,7 +205,7 @@ const SettingsPage: NextPageWithLayout = () => {
                   <label className="block text-gray-700 font-medium mb-2">
                     Last Name
                   </label>
-                  <p className="p-3 border border-gray-300 rounded-lg bg-gray-100">
+                  <p className="px-4 py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
                     {accountDetails.lastName}
                   </p>
                 </div>
@@ -186,7 +213,7 @@ const SettingsPage: NextPageWithLayout = () => {
                   <label className="block text-gray-700 font-medium mb-2">
                     Email
                   </label>
-                  <p className="p-3 border border-gray-300 rounded-lg bg-gray-100">
+                  <p className="px-4 py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
                     {accountDetails.email}
                   </p>
                 </div>
@@ -199,14 +226,15 @@ const SettingsPage: NextPageWithLayout = () => {
                       type={showPassword ? "text" : "password"}
                       value={accountDetails.password}
                       readOnly
-                      className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none text-gray-800"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition-colors duration-200"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
-                      {showPassword ? "Hide" : "Show"}
+                      {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                     </button>
                   </div>
                 </div>
@@ -214,34 +242,42 @@ const SettingsPage: NextPageWithLayout = () => {
                   <label className="block text-gray-700 font-medium mb-2">
                     Account Created
                   </label>
-                  <p className="p-3 border border-gray-300 rounded-lg bg-gray-100">
+                  <p className="px-4 py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
                     {new Date(accountDetails.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500">Loading account details...</p>
+              <p className="text-gray-500 italic mt-6">Loading account details...</p>
             )}
           </div>
         )}
 
         {activeTab === "notifications" && (
           <div>
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">
+            <h2 className="text-4xl font-extrabold mb-4 text-gray-900">
               Notifications
             </h2>
-            <p className="text-gray-600">
+            <p className="text-gray-700 text-lg mb-8 border-b border-gray-200 pb-6">
               Customize your notification preferences.
             </p>
+            <div className="mt-6 p-6 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
+              <p>Notification settings will go here (e.g., email alerts, push notifications).</p>
+            </div>
           </div>
         )}
 
         {activeTab === "appearance" && (
           <div>
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">
+            <h2 className="text-4xl font-extrabold mb-4 text-gray-900">
               Appearance
             </h2>
-            <p className="text-gray-600">Switch between light and dark mode.</p>
+            <p className="text-gray-700 text-lg mb-8 border-b border-gray-200 pb-6">
+              Switch between light and dark mode, or customize themes.
+            </p>
+            <div className="mt-6 p-6 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
+              <p>Appearance settings will go here (e.g., theme selection, font size).</p>
+            </div>
           </div>
         )}
       </main>

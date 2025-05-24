@@ -47,18 +47,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="flex w-full min-h-screen bg-gray-100">
+    <div className="flex w-full min-h-screen bg-gradient-to-r from-gray-100 to-gray-200">
       {/* Sidebar */}
-      <aside className="w-[300px] bg-gray-800 text-white px-5 py-6 flex flex-col">
+      <aside className="w-[300px] bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 py-6 flex flex-col shadow-lg">
         <Link href="/app">
           <img
             src="http://localhost:3000/logo.png"
-            className="w-[150px] mx-auto mb-8 cursor-pointer"
+            className="w-[150px] mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300"
             alt="Logo"
           />
         </Link>
         <nav>
-          <p className="text-gray-400 font-semibold text-sm uppercase">
+          <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">
             Main Menu
           </p>
           <ul className="mt-4 space-y-2">
@@ -67,15 +67,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 key={item.name}
                 className={`p-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md ${
                   router.pathname === item.path
-                    ? "bg-gray-700 text-white shadow-md"
+                    ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-md"
                     : "hover:bg-gray-700 hover:text-white text-gray-300"
                 }`}
               >
                 <Link href={item.path} className="flex items-center">
                   {item.icon && (
-                    <item.icon className="mr-3 text-xl text-primary" />
+                    <item.icon className="mr-3 text-xl text-primary-light" />
                   )}
-                  {item.name}
+                  <span className="font-medium">{item.name}</span>
                 </Link>
               </li>
             ))}
@@ -102,7 +102,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* AI Button */}
       <button
         onClick={() => setIsAIWindowOpen(!isAIWindowOpen)} // Toggle AI window
-        className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary text-white rounded-full shadow-lg hover:bg-primary-dark transition-all flex items-center justify-center space-x-2 active:scale-95"
+        className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95"
       >
         <span className="text-lg font-semibold">AI</span>
         <svg
