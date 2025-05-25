@@ -43,7 +43,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const menu = [
     { name: "Dashboard", path: "/app", icon: MdSpaceDashboard },
     { name: "Users", path: "/app/users", icon: FaUserClock },
-    { name: "Tasks", path: "/app/profile", icon: FaTasks },
+    { name: "Tasks", path: "/app/tasks", icon: FaTasks },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
     { name: "Settings", path: "/app/settings", icon: MdSettings },
   ];
