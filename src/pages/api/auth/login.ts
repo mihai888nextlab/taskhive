@@ -79,7 +79,7 @@ export default async function handler(
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // Use secure in production
         sameSite: "lax", // Or 'strict' for more security
-        maxAge: 60 * 60, // 1 hour (in seconds) - matches token expiration
+        maxAge: 5 * 60 * 60, // 1 hour (in seconds) - matches token expiration
         path: "/",
       })
     );

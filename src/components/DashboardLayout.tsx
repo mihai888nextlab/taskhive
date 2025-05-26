@@ -1,4 +1,4 @@
-import { useAuth } from "../pages/_app"; // Adjust path
+import { useAuth } from "@/pages/_app"; // Adjust path
 import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
 import { MdSpaceDashboard } from "react-icons/md";
@@ -43,7 +43,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const menu = [
     { name: "Dashboard", path: "/app", icon: MdSpaceDashboard },
     { name: "Users", path: "/app/users", icon: FaUserClock },
-    { name: "Tasks", path: "/app/profile", icon: FaTasks },
+    { name: "Tasks", path: "/app/tasks", icon: FaTasks },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
     { name: "Settings", path: "/app/settings", icon: MdSettings },
   ];
@@ -122,7 +122,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </button>
 
       {/* AI Window */}
-      <AIWindow isOpen={isAIWindowOpen} onClose={() => setIsAIWindowOpen(false)} />
+      <AIWindow isOpen={isAIWindowOpen} onClose={() => setIsAIWindowOpen(false)}/>
     </div>
   );
 };
