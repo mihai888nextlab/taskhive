@@ -1,8 +1,9 @@
+// pages/app/profile.tsx (Your main tasks page)
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { MdAddTask } from "react-icons/md"; // Icon for add task button
-import { FaEdit, FaTrash, FaCheckCircle, FaRegCircle, FaSpinner } from "react-icons/fa"; // Icons
+import { FaEdit, FaTrash, FaCheckCircle, FaRegCircle, FaSpinner, FaExclamationTriangle } from "react-icons/fa"; // Added FaExclamationTriangle
 
 // Re-define Task interface to match backend model
 interface Task {
@@ -15,6 +16,23 @@ interface Task {
   createdAt: string;
   updatedAt: string;
 }
+
+// --- Helper function for overdue status (can be moved to a utils file if preferred) ---
+const isTaskOverdue = (task: Task): boolean => {
+  // A task is overdue only if it's NOT completed and its deadline has passed.
+  if (task.completed) {
+    return false;
+  }
+  const deadlineDate = new Date(task.deadline);
+  const now = new Date();
+  // To compare only dates, set deadline to end of its day and 'now' to start of today.
+  deadlineDate.setHours(23, 59, 59, 999); // End of the deadline day
+  now.setHours(0, 0, 0, 0); // Start of today
+
+  return deadlineDate < now;
+};
+// --- End of helper function ---
+
 
 const TasksPage: NextPageWithLayout = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -42,7 +60,21 @@ const TasksPage: NextPageWithLayout = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to fetch tasks.");
       }
-      const data: Task[] = await response.json();
+      let data: Task[] = await response.json();
+
+      // --- REVISED SORTING LOGIC FOR TASKS PAGE (Sort by Deadline, then push completed to end) ---
+      data.sort((a, b) => {
+        // Prioritize by completion status: incomplete tasks first
+        if (a.completed && !b.completed) return 1;  // 'a' is completed, 'b' is not: 'a' goes after 'b'
+        if (!a.completed && b.completed) return -1; // 'a' is not completed, 'b' is: 'a' goes before 'b'
+
+        // If both are completed or both are incomplete, sort by deadline
+        const dateA = new Date(a.deadline).getTime();
+        const dateB = new Date(b.deadline).getTime();
+        return dateA - dateB; // Ascending order (earliest deadline first)
+      });
+      // --- END REVISED SORTING LOGIC ---
+
       setTasks(data);
     } catch (err) {
       console.error("Error fetching tasks:", err);
@@ -105,7 +137,7 @@ const TasksPage: NextPageWithLayout = () => {
         throw new Error(errorData.message || `Failed to ${editingTaskId ? 'update' : 'add'} task.`);
       }
 
-      // Re-fetch all tasks to get the latest state from the database
+      // Re-fetch all tasks to get the latest state from the database and re-apply sorting
       await fetchTasks();
 
       // Clear form fields and reset state
@@ -148,8 +180,8 @@ const TasksPage: NextPageWithLayout = () => {
 
       // Optimistically remove the task from the UI for immediate feedback
       setTasks(currentTasks => currentTasks.filter(task => task._id !== id));
-      // Optionally re-fetch after a short delay or just rely on optimistic update
-      // await fetchTasks(); // Uncomment if you prefer a full re-sync
+      // Re-fetch to confirm deletion and keep state consistent
+      await fetchTasks();
     } catch (err) {
       console.error("Error deleting task:", err);
       setListError((err as Error).message); // Set list-specific error
@@ -179,9 +211,8 @@ const TasksPage: NextPageWithLayout = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to update task completion status.");
       }
-      // If successful, the optimistic update is confirmed. No need to re-fetch all tasks.
-      // If you want to re-fetch to be absolutely sure, uncomment:
-      // await fetchTasks();
+      // Re-fetch to re-apply sorting (e.g., move completed tasks to the bottom)
+      await fetchTasks();
     } catch (err) {
       console.error("Error toggling task completion:", err);
       setListError((err as Error).message); // Set list-specific error
@@ -358,72 +389,102 @@ const TasksPage: NextPageWithLayout = () => {
             <p className="text-lg">Click the "Add New Task" button above to start organizing your life.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8"> {/* Adjusted for larger cards */}
-            {tasks.map((task) => (
-              <div
-                key={task._id}
-                className={`group flex flex-col justify-between bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100
-                  ${task.completed ? 'opacity-80 bg-green-50 border-l-8 border-green-400' : 'border-l-8 border-primary'}`}
-                aria-label={`Task: ${task.title}, Status: ${task.completed ? 'Completed' : 'Pending'}`}
-              >
-                {/* Task Content */}
-                <div className="flex-1">
-                    <h3 className={`text-2xl font-bold text-gray-900 leading-tight mb-3 break-words ${task.completed ? 'line-through text-gray-600' : ''}`}>
-                        {task.title}
-                    </h3>
-                    {task.description && (
-                        <p className={`text-gray-700 text-base mb-4 line-clamp-3 ${task.completed ? 'text-gray-500' : ''}`}>
-                            {task.description}
-                        </p>
-                    )}
-                    <p className={`text-gray-500 text-sm font-semibold ${task.completed ? 'text-gray-400' : ''}`}>
-                        Deadline: {new Date(task.deadline).toLocaleDateString(undefined, {
-                            year: 'numeric', month: 'long', day: 'numeric'
-                        })}
-                    </p>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {tasks.map((task) => {
+              const isOverdue = isTaskOverdue(task);
+              const isCompleted = task.completed;
 
-                {/* Actions Section */}
-                <div className="flex items-center justify-between pt-5 mt-5 border-t border-gray-100">
-                    {/* Checkbox/Toggle Button */}
-                    <button
-                        onClick={() => handleToggleComplete(task)}
-                        className="flex items-center text-lg font-semibold text-gray-700 p-3 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
-                        title={task.completed ? "Mark as Incomplete" : "Mark as Complete"}
-                        disabled={loading}
-                    >
-                        {task.completed ? (
-                            <FaCheckCircle className="text-green-500 text-3xl mr-2 group-hover:text-green-600 transition-colors" />
-                        ) : (
-                            <FaRegCircle className="text-gray-400 text-3xl mr-2 group-hover:text-primary transition-colors" />
-                        )}
-                        <span className="hidden sm:inline">
-                           {task.completed ? "Completed" : "Mark Complete"}
-                        </span>
-                    </button>
+              // --- Dynamic Styling for Card Background, Text Colors, and Icon ---
+              let cardBgClass = 'bg-white border-l-8 border-primary'; // Default for upcoming/pending
+              let titleClass = 'text-gray-900';
+              let descriptionClass = 'text-gray-700';
+              let deadlineClass = 'text-gray-500';
+              let statusIcon = <FaRegCircle className="text-gray-400 text-3xl mr-2 group-hover:text-primary transition-colors" />;
+              let statusTooltip = "Mark as Complete";
 
-                    {/* Action Buttons */}
-                    <div className="flex space-x-3">
-                        <button
-                            onClick={() => handleEditTask(task)}
-                            className="text-primary hover:text-primary-dark p-3 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                            title="Edit Task"
-                            disabled={loading || task.completed} // Disable edit if task is completed
-                        >
-                            <FaEdit className="text-2xl" />
-                        </button>
-                        <button
-                            onClick={() => handleDeleteTask(task._id)}
-                            className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Delete Task"
-                            disabled={loading}
-                        >
-                            <FaTrash className="text-2xl" />
-                        </button>
-                    </div>
+              if (isCompleted) {
+                cardBgClass = 'opacity-80 bg-green-50 border-l-8 border-green-400';
+                titleClass = 'line-through text-gray-600';
+                descriptionClass = 'line-through text-gray-500';
+                deadlineClass = 'text-gray-400';
+                statusIcon = <FaCheckCircle className="text-green-500 text-3xl mr-2 group-hover:text-green-600 transition-colors" />;
+                statusTooltip = "Mark as Incomplete";
+              } else if (isOverdue) {
+                cardBgClass = 'bg-red-50 border-l-8 border-red-400 shadow-lg'; // Keep red background
+                titleClass = 'text-gray-900 font-bold'; // Changed from text-red-800
+                descriptionClass = 'text-gray-700'; // Changed from text-red-700
+                deadlineClass = 'text-gray-600 font-semibold'; // Changed from text-red-600, slightly darker gray
+                statusIcon = <FaExclamationTriangle className="text-red-500 text-3xl mr-2" />; // Keep warning icon
+                statusTooltip = "Task is Overdue (Cannot complete directly)";
+              }
+              // --- End Dynamic Styling ---
+
+              return (
+                <div
+                  key={task._id}
+                  className={`group flex flex-col justify-between p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100 ${cardBgClass}`}
+                  aria-label={`Task: ${task.title}, Status: ${task.completed ? 'Completed' : 'Pending'}${isOverdue && !isCompleted ? ', Overdue' : ''}`}
+                >
+                  {/* Task Content */}
+                  <div className="flex-1">
+                      <h3 className={`text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}>
+                          {task.title}
+                      </h3>
+                      {task.description && (
+                          <p className={`text-base mb-4 line-clamp-3 ${descriptionClass}`}>
+                              {task.description}
+                          </p>
+                      )}
+                      <p className={`text-sm font-semibold ${deadlineClass}`}>
+                          Deadline: {new Date(task.deadline).toLocaleDateString(undefined, {
+                              year: 'numeric', month: 'long', day: 'numeric'
+                          })}
+                          {isOverdue && !isCompleted && (
+                            <span className="ml-2 px-2.5 py-1 bg-red-400 text-white text-xs rounded-full font-bold">OVERDUE</span>
+                          )}
+                      </p>
+                  </div>
+
+                  {/* Actions Section */}
+                  <div className="flex items-center justify-between pt-5 mt-5 border-t border-gray-100">
+                      {/* Checkbox/Toggle Button */}
+                      <button
+                          onClick={() => handleToggleComplete(task)}
+                          className={`flex items-center text-lg font-semibold p-3 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group
+                                    ${(isOverdue && !isCompleted) ? 'text-red-700 focus:ring-red-500' : 'text-gray-700 focus:ring-primary'}`}
+                          title={statusTooltip}
+                          aria-label={statusTooltip}
+                          disabled={loading || (isOverdue && !isCompleted)} // Disable if loading or overdue and not completed
+                      >
+                          {statusIcon}
+                          <span className="hidden sm:inline">
+                            {isOverdue && !isCompleted ? "Overdue" : (task.completed ? "Completed" : "Mark Complete")}
+                          </span>
+                      </button>
+
+                      {/* Action Buttons */}
+                      <div className="flex space-x-3">
+                          <button
+                              onClick={() => handleEditTask(task)}
+                              className="text-primary hover:text-primary-dark p-3 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                              title="Edit Task"
+                              disabled={loading || task.completed || isOverdue} // Disable edit if task is completed or overdue
+                          >
+                              <FaEdit className="text-2xl" />
+                          </button>
+                          <button
+                              onClick={() => handleDeleteTask(task._id)}
+                              className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Delete Task"
+                              disabled={loading}
+                          >
+                              <FaTrash className="text-2xl" />
+                          </button>
+                      </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>

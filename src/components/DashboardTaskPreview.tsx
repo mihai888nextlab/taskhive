@@ -45,20 +45,24 @@ const DashboardTaskPreview: React.FC = () => {
       }
       const data: Task[] = await response.json();
 
+      // Filter for incomplete tasks first, then sort them.
       const relevantTasks = data.filter(task => !task.completed);
 
       relevantTasks.sort((a, b) => {
         const aOverdue = isTaskOverdue(a);
         const bOverdue = isTaskOverdue(b);
 
+        // Overdue tasks come first
         if (aOverdue && !bOverdue) return -1;
         if (!aOverdue && bOverdue) return 1;
 
+        // Then by deadline for tasks within the same overdue status
         const dateA = new Date(a.deadline).getTime();
         const dateB = new Date(b.deadline).getTime();
         return dateA - dateB;
       });
 
+      // Display only the top 3 relevant tasks
       setTasks(relevantTasks.slice(0, 3));
 
     } catch (err) {
@@ -76,6 +80,10 @@ const DashboardTaskPreview: React.FC = () => {
   const handleToggleComplete = async (task: Task) => {
     setUpdatingTaskId(task._id);
 
+    // Optimistic UI update for the specific task in the preview
+    // Note: This optimistic update might cause the task to disappear
+    // immediately if it's completed and no longer relevant for the preview.
+    // The subsequent fetchTasks() will re-sync and re-sort.
     setTasks(currentTasks =>
       currentTasks.map(t =>
         t._id === task._id ? { ...t, completed: !t.completed } : t
@@ -94,10 +102,12 @@ const DashboardTaskPreview: React.FC = () => {
         throw new Error(errorData.message || "Failed to update task completion status.");
       }
 
+      // Re-fetch tasks to ensure the list is updated, sorted, and trimmed correctly
       fetchTasks();
 
     } catch (err) {
       console.error("Error toggling task completion:", err);
+      // Revert optimistic update if API call fails (only if it's still in the list)
       setTasks(currentTasks =>
         currentTasks.map(t =>
           t._id === task._id ? { ...t, completed: task.completed } : t
@@ -138,7 +148,7 @@ const DashboardTaskPreview: React.FC = () => {
         <ul className="space-y-5"> {/* Increased space between tasks */}
           {tasks.map((task) => {
             const isOverdue = isTaskOverdue(task);
-            const isCompleted = task.completed;
+            const isCompleted = task.completed; // In preview, we only show !completed tasks, but this check is good practice.
 
             let cardBgClass = 'bg-gradient-to-r from-blue-50 to-white border-primary-light/50';
             let titleClass = 'text-gray-900';
@@ -148,6 +158,7 @@ const DashboardTaskPreview: React.FC = () => {
             let tooltipText = "Mark as Complete";
 
             if (isCompleted) {
+              // Although filtered out, keeping this for completeness if filtering logic changes
               cardBgClass = 'bg-gradient-to-r from-green-50 to-green-100 border-green-200 opacity-80';
               titleClass = 'line-through text-gray-600';
               descriptionClass = 'line-through text-gray-500';
@@ -156,10 +167,10 @@ const DashboardTaskPreview: React.FC = () => {
               tooltipText = "Mark as Incomplete";
             } else if (isOverdue) {
               cardBgClass = 'bg-gradient-to-r from-red-50 to-red-100 border-red-200 shadow-lg';
-              titleClass = 'text-red-800 font-extrabold';
-              descriptionClass = 'text-red-700';
-              deadlineClass = 'text-red-600 font-bold';
-              icon = <FaExclamationTriangle className="text-red-500 text-4xl transition-transform duration-300 group-hover:scale-110" />; {/* Increased icon size */}
+              titleClass = 'text-gray-900 font-bold'; // Changed from text-red-800
+              descriptionClass = 'text-gray-700'; // Changed from text-red-700
+              deadlineClass = 'text-gray-600 font-semibold'; // Changed from text-red-600, slightly darker gray
+              icon = <FaExclamationTriangle className="text-red-500 text-4xl transition-transform duration-300 group-hover:scale-110" />; {/* Keep warning icon */}
               tooltipText = "Task is Overdue";
             }
 
@@ -207,7 +218,7 @@ const DashboardTaskPreview: React.FC = () => {
       )}
       <div className="text-center mt-8">
         <Link
-          href="/app/profile"
+          href="/app/tasks"
           className="inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
         >
           <span className="mr-3">View All Tasks</span>

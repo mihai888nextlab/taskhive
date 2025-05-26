@@ -11,13 +11,6 @@ import { FaUserClock, FaTasks, FaCalendarAlt } from 'react-icons/fa';
 const DashboardPage: NextPageWithLayout = () => {
   const cardData = [
     {
-      title: "Dashboard",
-      description: "Quick stats and summaries of your workspace activities.",
-      icon: MdSpaceDashboard,
-      path: "/app",
-      content: null, // No special content for dashboard card
-    },
-    {
       title: "Users",
       description: "Manage user accounts, roles, and permissions within your team.",
       icon: FaUserClock,
@@ -28,7 +21,7 @@ const DashboardPage: NextPageWithLayout = () => {
       title: "Tasks",
       description: "Organize and track your team's assignments and progress.",
       icon: FaTasks,
-      path: "/app/profile", // Link to the full tasks page
+      path: "/app/tasks", // Link to the full tasks page
       content: <DashboardTaskPreview />, // The task preview component goes here!
     },
     {
