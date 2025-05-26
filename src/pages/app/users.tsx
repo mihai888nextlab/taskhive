@@ -3,124 +3,208 @@ import { useAuth } from "../../pages/_app"; // Adjust path
 import { NextPageWithLayout, TableColumn, TableDataItem } from "@/types";
 import Loading from "@/components/Loading";
 import Table from "@/components/Table";
+import { useEffect, useState } from "react";
+import AddUsersModal from "@/components/modals/AddUserModal";
+import { setServers } from "dns";
 
 interface Project extends TableDataItem {
-  id: string;
-  clientName: string;
-  projectName: string;
-  status: "In Progres" | "Finalizat" | "In Asteptare" | "Anulat";
-  deadline: string;
-  budget: number;
+  user_id: string;
+  user_email: string;
+  user_firstName: string;
+  user_lastName: string;
+  companyId: string;
+  role: "string";
+  permissions: string[];
 }
 
 const DashboardOverviewPage: NextPageWithLayout = () => {
   const { user } = useAuth();
 
-  const projects: Project[] = [
+  const [users, setUsers] = useState<
     {
-      id: "1",
-      clientName: "Alfa Solutions SRL",
-      projectName: "Dezvoltare Aplicatie Mobila",
-      status: "In Progres",
-      deadline: "2024-07-15",
-      budget: 50000,
-    },
-    {
-      id: "2",
-      clientName: "Beta Corp SA",
-      projectName: "Design UX/UI Site Nou",
-      status: "Finalizat",
-      deadline: "2024-06-01",
-      budget: 12500,
-    },
-    {
-      id: "3",
-      clientName: "Gamma Tech",
-      projectName: "Optimizare SEO Campanie",
-      status: "In Asteptare",
-      deadline: "2024-08-30",
-      budget: 8000,
-    },
-    {
-      id: "4",
-      clientName: "Delta Services",
-      projectName: "Mentenanta Sistem CRM",
-      status: "In Progres",
-      deadline: "2024-09-10",
-      budget: 3000,
-    },
-    {
-      id: "5",
-      clientName: "Epsilon Innovations",
-      projectName: "Consultanta IT",
-      status: "Anulat",
-      deadline: "-",
-      budget: 2000,
-    },
-  ];
+      _id: string;
+      userId: {
+        _id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+      };
+      companyId: string;
+      role: "string";
+      permissions: string[];
+    }[]
+  >([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
 
   const projectColumns: TableColumn<Project>[] = [
-    { key: "clientName", header: "Nume Client" },
-    { key: "projectName", header: "Proiect" },
+    { key: "user_firstName", header: "First Name" },
+    { key: "user_lastName", header: "Last Name" },
+    { key: "user_email", header: "Email" },
     {
-      key: "status",
-      header: "Status",
-      align: "center",
+      key: "role",
+      header: "Role",
       render: (item: any) => {
-        // Logica pentru a afișa badge-uri colorate în funcție de status
         let badgeClasses = "";
         let textColor = "";
-        switch (item.status) {
-          case "In Progres":
-            badgeClasses = "bg-yellow-100";
-            textColor = "text-yellow-800";
-            break;
-          case "Finalizat":
-            badgeClasses = "bg-green-100";
-            textColor = "text-green-800";
-            break;
-          case "In Asteptare":
-            badgeClasses = "bg-blue-100";
-            textColor = "text-blue-800";
-            break;
-          case "Anulat":
+        switch (item.role) {
+          case "admin":
             badgeClasses = "bg-red-100";
             textColor = "text-red-800";
             break;
-          default:
-            badgeClasses = "bg-gray-100";
-            textColor = "text-gray-800";
+          case "user":
+            badgeClasses = "bg-blue-100";
+            textColor = "text-blue-800";
+            break;
         }
         return (
           <span
             className={`px-3 py-1 rounded-full text-xs font-semibold ${badgeClasses} ${textColor}`}
           >
-            {item.status}
+            {item.role}
           </span>
         );
       },
     },
-    { key: "deadline", header: "Deadline" },
-    {
-      key: "budget",
-      header: "Buget",
-      align: "right",
-      render: (item) => `${item.budget.toLocaleString()} €`, // Formatează bugetul
-    },
+    // {
+    //   key: "status",
+    //   header: "Status",
+    //   align: "center",
+    //   render: (item: any) => {
+    //     // Logica pentru a afișa badge-uri colorate în funcție de status
+    //     let badgeClasses = "";
+    //     let textColor = "";
+    //     switch (item.status) {
+    //       case "In Progres":
+    //         badgeClasses = "bg-yellow-100";
+    //         textColor = "text-yellow-800";
+    //         break;
+    //       case "Finalizat":
+    //         badgeClasses = "bg-green-100";
+    //         textColor = "text-green-800";
+    //         break;
+    //       case "In Asteptare":
+    //         badgeClasses = "bg-blue-100";
+    //         textColor = "text-blue-800";
+    //         break;
+    //       case "Anulat":
+    //         badgeClasses = "bg-red-100";
+    //         textColor = "text-red-800";
+    //         break;
+    //       default:
+    //         badgeClasses = "bg-gray-100";
+    //         textColor = "text-gray-800";
+    //     }
+    //     return (
+    //       <span
+    //         className={`px-3 py-1 rounded-full text-xs font-semibold ${badgeClasses} ${textColor}`}
+    //       >
+    //         {item.status}
+    //       </span>
+    //     );
+    //   },
+    // },
   ];
 
   if (!user) {
     return <Loading />;
   }
 
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("/api/get-users");
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      const data = await response.json();
+      console.log("Fetched users:", data.users);
+      setUsers(data.users);
+      setLoadingUsers(false);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setLoadingUsers(false);
+    }
+  };
+
+  const addUser = async (
+    email: string,
+    firstName: string,
+    lastName: string,
+    password: string,
+    role: string
+  ): Promise<string | undefined> => {
+    const response = await fetch("/api/add-user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        firstName,
+        lastName,
+        password,
+        role,
+      }),
+    });
+
+    if (!response.ok) {
+      //setError("Failed to add user");
+      return "Failed to add user";
+    }
+
+    const data = await response.json();
+
+    setLoadingUsers(true); // Set loading state to true while fetching users
+    fetchUsers(); // Refresh the user list after adding a new user
+    setAddUserModalOpen(false); // Close the modal after adding the user
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [user]);
+
   return (
     <div>
+      {loadingUsers && <Loading />}
+      {addUserModalOpen && (
+        <AddUsersModal
+          onClose={() => setAddUserModalOpen(false)}
+          onUserAdded={(
+            email: string,
+            firstName: string,
+            lastName: string,
+            password: string,
+            role: string
+          ) => {
+            return addUser(email, firstName, lastName, password, role);
+          }}
+        />
+      )}
+
       <h1 className="text-2xl font-bold">Users</h1>
+
+      <button
+        className="bg-blue-500 rounded-xl p-3 text-white font-semibold cursor-pointer"
+        onClick={() => setAddUserModalOpen(true)}
+      >
+        Add User
+      </button>
 
       <div className="container mx-auto p-4">
         <Table<Project> // Specificăm tipul generic aici
-          title="Lista Proiectelor"
-          data={projects}
+          title="Users List"
+          data={users.map((user) => ({
+            id: user._id,
+            user_id: user.userId._id,
+            user_email: user.userId.email,
+            user_firstName: user.userId.firstName,
+            user_lastName: user.userId.lastName,
+
+            companyId: user.companyId,
+            role: user.role,
+            permissions: user.permissions,
+          }))}
           columns={projectColumns}
           emptyMessage="Nu ai niciun proiect înregistrat. Începe unul nou!"
         />

@@ -13,7 +13,7 @@ const userCompanySchema = new Schema(
       ref: "Company",
       required: true,
     },
-    role: { type: String, required: true, enum: ["admin", "member", "editor"] },
+    role: { type: String, required: true, enum: ["admin", "user", "editor"] },
     permissions: [{ type: String }], // Array of permissions
   },
   { timestamps: true }

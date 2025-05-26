@@ -1,3 +1,4 @@
+import { dd } from "framer-motion/client";
 import React, { useState, InputHTMLAttributes } from "react";
 /** @jsx React.createElement */
 
@@ -5,6 +6,7 @@ interface FloatingLabelInputProps
   extends InputHTMLAttributes<HTMLInputElement> {
   id: string;
   label: string;
+  theme?: "light" | "dark";
 }
 
 const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
@@ -14,6 +16,7 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
   onChange,
   onFocus,
   onBlur,
+  theme = "dark",
   ...props
 }) => {
   const [inputValue, setInputValue] = useState<string>("");
@@ -45,18 +48,16 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
         onChange={handleInputChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className="
-          peer
-          w-full p-3 pt-6
-          border border-primary-300 dark:border-primary-600
+        className={`peer w-full p-3 pt-6
+          border
           rounded-md
-          bg-background dark:bg-primary-900
-          text-text dark:text-text
-          focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-accent
+          ${theme == "light" ? "bg-transparent " : "bg-background "}
+          ${theme == "light" ? "text-black" : "text-text"}
+          focus:outline-none focus:ring-2 focus:ring-primary
           transition-all duration-200 ease-in-out
           placeholder-transparent
           font-sans
-        "
+        `}
         placeholder={label}
         {...props}
       />
@@ -66,7 +67,7 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
           absolute
           left-3
           cursor-text
-          text-secondary dark:text-tertiary
+          ${theme == "light" ? "text-gray-500" : "text-secondary"}
           transition-all duration-200 ease-in-out
           ${
             isLabelFloated

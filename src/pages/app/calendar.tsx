@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import Calendar from "react-calendar";
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
-import "react-calendar/dist/Calendar.css"; // Keep this for base styles, we'll override with Tailwind
+import "react-calendar/dist/Calendar.css";
 
 const CalendarPage: NextPageWithLayout = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date()); // Initialize with current date
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
-  const handleDateChange = (date: Date) => {
+  const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
   };
 
@@ -17,7 +17,6 @@ const CalendarPage: NextPageWithLayout = () => {
       {/* Main content wrapper with fixed width and shadow */}
       {/* Retaining the previous max-w for the overall container, as the calendar's internal width will be set */}
       <main className="flex w-full max-w-[1400px] gap-8 rounded-lg shadow-xl overflow-hidden min-h-[700px]">
-
         {/* Left Panel: Selected Date and Events */}
         <div className="flex flex-col justify-between p-8 bg-gray-800 text-white rounded-l-lg flex-1 min-w-[350px]">
           <div>
@@ -41,7 +40,9 @@ const CalendarPage: NextPageWithLayout = () => {
             ) : (
               <div>
                 <h1 className="text-4xl font-bold">No Date Selected</h1>
-                <p className="text-2xl">Please select a date from the calendar.</p>
+                <p className="text-2xl">
+                  Please select a date from the calendar.
+                </p>
               </div>
             )}
           </div>
@@ -61,21 +62,23 @@ const CalendarPage: NextPageWithLayout = () => {
         {/* Retaining flex-3 here as it distributes the space, but the Calendar component inside will have a fixed width */}
         <div className="flex-3 bg-white p-8 rounded-r-lg flex justify-center items-center">
           <Calendar
-            onChange={handleDateChange}
+            onChange={(val, e) => handleDateChange(val)}
             value={selectedDate}
             showNeighboringMonth={false}
             // Custom styling for react-calendar
             // Set a fixed width for the calendar component itself
             className="border-none !bg-white text-gray-800 p-4"
-            style={{ width: '500px', maxWidth: '100%', height: 'auto' }} // Explicit width, ensure it's responsive
             // Custom day rendering to apply blue and red highlights
             tileClassName={({ date, view }) => {
               if (view === "month") {
                 const day = date.getDay(); // 0 for Sunday, 6 for Saturday
-                const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
+                const isSelected =
+                  selectedDate &&
+                  date.toDateString() === selectedDate.toDateString();
 
                 // Adjusted tile size for a more compact calendar look as seen in image_191dd6.png
-                let classes = "flex items-center justify-center rounded-md !w-12 !h-12 text-lg font-medium";
+                let classes =
+                  "flex items-center justify-center rounded-md !w-12 !h-12 text-lg font-medium";
 
                 if (isSelected) {
                   // Blue background for selected date, matching image_6065f0.png and image_607135.png
@@ -94,16 +97,18 @@ const CalendarPage: NextPageWithLayout = () => {
             }}
             // Navigation labels (Month Year)
             navigationLabel={({ date, label }) => (
-              <span className="font-bold text-blue-600 text-xl">
-                {label}
-              </span>
+              <span className="font-bold text-blue-600 text-xl">{label}</span>
             )}
             // Navigation buttons
             navigationAriaLabel="Navigate"
             next2Label={null}
             prev2Label={null}
-            nextLabel={<span className="text-blue-600 text-2xl font-bold">›</span>}
-            prevLabel={<span className="text-blue-600 text-2xl font-bold">‹</span>}
+            nextLabel={
+              <span className="text-blue-600 text-2xl font-bold">›</span>
+            }
+            prevLabel={
+              <span className="text-blue-600 text-2xl font-bold">‹</span>
+            }
           />
         </div>
       </main>
