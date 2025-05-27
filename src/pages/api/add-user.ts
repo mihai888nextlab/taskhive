@@ -101,34 +101,8 @@ export default async function handler(
     });
     await newUserCompany.save();
 
-    const token = sign(
-      {
-        userId: savedUser._id,
-        email: savedUser.email,
-        password: savedUser.password,
-        role: newUserCompany.role, // 'admin'
-        companyId: savedCompany._id,
-        firstName: savedUser.firstName, // Include for client-side convenience
-        lastName: savedUser.lastName, // Include for client-side convenience
-      },
-      JWT_SECRET,
-      { expiresIn: "1d" } // Token expires in 1 hour
-    );
-
-    res.setHeader(
-      "Set-Cookie",
-      serialize("auth_token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use secure in production
-        sameSite: "lax", // Or 'strict' for more security
-        maxAge: 5 * 60 * 60, // 1 hour (in seconds) - matches token expiration
-        path: "/",
-      })
-    );
-
     res.status(201).json({
       message: "User and company registered successfully.",
-      token, // Return the JWT token
       user: {
         _id: savedUser._id,
         email: savedUser.email,

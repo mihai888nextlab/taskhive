@@ -1,10 +1,28 @@
 import Loading from "@/components/Loading";
 import "@/styles/globals.css";
-import { AppPropsWithLayout, AuthContextType, User } from "@/types";
+import { AppPropsWithLayout } from "@/types";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, Dispatch, SetStateAction } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+
+// Define the User interface with the role property
+interface User {
+  _id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string; // Add the role property here
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface AuthContextType {
+  user: User | null;
+  setUser: Dispatch<SetStateAction<User | null>>;
+  loadingUser: boolean;
+  isDashboardRoute: boolean;
+}
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -22,7 +40,11 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           const res = await fetch("/api/user");
           if (res.ok) {
             const userData = await res.json();
-            setUser(userData.user);
+            setUser({
+              ...userData.user,
+              createdAt: new Date(userData.user.createdAt),
+              updatedAt: new Date(userData.user.updatedAt),
+            } as User); // Cast the user data to the User type
           } else if (res.status === 401) {
             setUser(null);
             if (

@@ -58,7 +58,7 @@ const DashboardPage: NextPageWithLayout = () => {
           ) : users.length > 0 ? (
             <>
               <Table
-                data={users.slice(0, 3).map((user) => ({
+                data={users.slice(0, 5).map((user) => ({
                   id: user._id,
                   firstName: user.userId.firstName,
                   lastName: user.userId.lastName,
@@ -73,7 +73,7 @@ const DashboardPage: NextPageWithLayout = () => {
               />
               <div className="text-center mt-8">
                 <Link
-                  href="/app/tasks"
+                  href="/app/users"
                   className="inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
                 >
                   <span className="mr-3">View All Users</span>

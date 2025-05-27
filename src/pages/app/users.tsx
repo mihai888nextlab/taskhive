@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import AddUsersModal from "@/components/modals/AddUserModal";
 import AddRoleModal from "@/components/modals/AddRoleModal"; // Import AddRoleModal
 import OrgChartModal from "@/components/modals/OrgChartModal"; // Import OrgChartModal
-import { setCookie } from 'nookies'; // Import nookies
 
 interface Project extends TableDataItem {
   user_id: string;
@@ -15,12 +14,16 @@ interface Project extends TableDataItem {
   user_firstName: string;
   user_lastName: string;
   companyId: string;
-  role: "string";
+  role: string;
   permissions: string[];
 }
 
+interface AuthUser {
+  role: string;
+}
+
 const DashboardOverviewPage: NextPageWithLayout = () => {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: AuthUser | null };
 
   const [users, setUsers] = useState<
     {
@@ -32,7 +35,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         lastName: string;
       };
       companyId: string;
-      role: "string";
+      role: string;
       permissions: string[];
     }[]
   >([]);
@@ -193,15 +196,6 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       const data = await response.json();
       console.log("Add user response:", data);
 
-      // Extract the new token from the response
-      const { token } = data;
-
-      // Set the new token in a cookie
-      setCookie(null, 'auth_token', token, {
-        maxAge: 30 * 24 * 60 * 60, // 30 days
-        path: '/',
-      });
-
       setLoadingUsers(true); // Set loading state to true while fetching users
       fetchUsers(); // Refresh the user list after adding a new user
       setAddUserModalOpen(false); // Close the modal after adding the user
@@ -283,27 +277,39 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           Add Role
         </button>
 
-        <button
-          className="inline-flex items-center justify-center bg-gradient-to-r from-sky-400 to-sky-600 hover:from-sky-600 hover:to-sky-400 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 transition-all duration-300 active:scale-95"
-          onClick={() => setOrgChartModalOpen(true)}
-        >
-          View Org Chart
-        </button>
+        {user && user.role === "admin" && (
+          <button
+            className="inline-flex items-center justify-center bg-gradient-to-r from-sky-400 to-sky-600 hover:from-sky-600 hover:to-sky-400 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+            onClick={() => setOrgChartModalOpen(true)}
+          >
+            View Org Chart
+          </button>
+        )}
       </div>
 
       <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
         <Table<Project>
           title="Users List"
-          data={users.map((user) => ({
-            id: user._id,
-            user_id: user.userId._id,
-            user_email: user.userId.email,
-            user_firstName: user.userId.firstName,
-            user_lastName: user.userId.lastName,
-            companyId: user.companyId,
-            role: user.role,
-            permissions: user.permissions,
-          }))}
+          data={[...users] // Create a copy to avoid mutating the original array
+            .sort((a, b) => {
+              if (a.role === "admin" && b.role !== "admin") {
+                return -1; // a comes before b
+              }
+              if (a.role !== "admin" && b.role === "admin") {
+                return 1; // b comes before a
+              }
+              return 0; // No change in order
+            })
+            .map((user) => ({
+              id: user._id,
+              user_id: user.userId._id,
+              user_email: user.userId.email,
+              user_firstName: user.userId.firstName,
+              user_lastName: user.userId.lastName,
+              companyId: user.companyId,
+              role: user.role,
+              permissions: user.permissions,
+            }))}
           columns={projectColumns}
           emptyMessage="No users registered."
         />

@@ -4,6 +4,7 @@ import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { JWTPayload, User } from "@/types";
 import userModel from "@/db/models/userModel";
+import userCompanyModel from "@/db/models/userCompanyModel"; // Import userCompanyModel
 
 export default async function userHandler(
   req: NextApiRequest,
@@ -39,13 +40,38 @@ export default async function userHandler(
     return res.status(402).json({ message: "Invalid or expired token" });
   }
 
-  const user = await userModel
-    .findOne({
-      _id: decodedToken.userId,
-      email: decodedToken.email,
-      password: decodedToken.password,
-    })
-    .select("-password");
+  try {
+    // Fetch user from userModel
+    const user = await userModel
+      .findOne({
+        _id: decodedToken.userId,
+        email: decodedToken.email,
+      })
+      .select("-password")
+      .lean(); // Use lean() for better performance
 
-  return res.status(200).json({ user });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Fetch user's role from userCompanyModel
+    const userCompany = await userCompanyModel.findOne({
+      userId: decodedToken.userId,
+    });
+
+    if (!userCompany) {
+      return res.status(404).json({ message: "UserCompany not found" });
+    }
+
+    // Combine user data and role
+    const userWithRole = {
+      ...user,
+      role: userCompany.role,
+    };
+
+    return res.status(200).json({ user: userWithRole });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 }

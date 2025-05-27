@@ -153,7 +153,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose, roles }) => {
           <div className="flex flex-grow">
             {/* Levels */}
             <div
-              className="w-3/4 flex flex-col items-start overflow-y-auto custom-scrollbar"
+              className="w-full flex flex-col items-start overflow-y-auto custom-scrollbar"
               style={{ maxHeight: "500px" }}
             >
               {levels.map((level, levelIndex) => (
