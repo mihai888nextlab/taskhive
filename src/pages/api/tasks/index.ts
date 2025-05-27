@@ -34,8 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "GET") {
     try {
-      // Only return tasks assigned to the authenticated user
-      const tasks = await Task.find({ userId }).sort({ createdAt: -1 });
+      // Only return tasks assigned to the authenticated user, and populate createdBy
+      const tasks = await Task.find({ userId }).sort({ createdAt: -1 }).populate('createdBy');
       res.status(200).json(tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
@@ -56,6 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         description,
         deadline: new Date(deadline), // Convert deadline string to Date object
         userId: assignedUserId, // Assign the task to the selected user
+        createdBy: userId, // Add this line!
       });
       res.status(201).json(newTask); // 201 Created
     } catch (error) {

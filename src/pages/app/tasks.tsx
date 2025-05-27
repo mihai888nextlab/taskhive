@@ -15,6 +15,11 @@ interface Task {
   userId: string;
   createdAt: string;
   updatedAt: string;
+  createdBy: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 // --- Helper function for overdue status (can be moved to a utils file if preferred) ---
@@ -475,6 +480,11 @@ const TasksPage: NextPageWithLayout = () => {
                             <span className="ml-2 px-2.5 py-1 bg-red-400 text-white text-xs rounded-full font-bold">OVERDUE</span>
                           )}
                       </p>
+                      {task.createdBy && (
+                        <div className="text-xs text-gray-500 mt-2">
+                          Assigned by: {task.createdBy.firstName} {task.createdBy.lastName} ({task.createdBy.email})
+                        </div>
+                      )}
                   </div>
 
                   {/* Actions Section */}

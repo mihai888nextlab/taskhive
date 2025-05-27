@@ -11,6 +11,7 @@ export interface ITask extends Document {
   userId: Types.ObjectId; // Link to the User model
   createdAt: Date;
   updatedAt: Date;
+  createdBy: Types.ObjectId;
 }
 
 const TaskSchema: Schema = new Schema(
@@ -35,6 +36,11 @@ const TaskSchema: Schema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User", // Reference the 'User' model
+      required: true,
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
   },
