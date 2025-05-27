@@ -20,4 +20,22 @@ const OrgChartSchema: Schema = new Schema({
   availableRoles: { type: [String], default: [] },
 });
 
-export default mongoose.models.OrgChart || mongoose.model<IOrgChart>("OrgChart", OrgChartSchema);
+// Option 1: Add a static method to get all roles, always including 'admin' on top
+OrgChartSchema.statics.getLevelsWithAdmin = function(levels: Level[]) {
+  // If 'admin' is not already in the first level, add it
+  if (!levels.length) return [{ id: 'admin-level', roles: ['admin'] }];
+  const firstLevel = levels[0];
+  const normalizedRoles = firstLevel.roles.map(r => r.trim().toLowerCase());
+  if (!normalizedRoles.includes('admin')) {
+    // Add 'admin' to the top
+    return [{ id: 'admin-level', roles: ['admin'] }, ...levels];
+  }
+  return levels;
+};
+
+// Extend the model type to include the static method
+interface OrgChartModelType extends mongoose.Model<IOrgChart> {
+  getLevelsWithAdmin(levels: Level[]): Level[];
+}
+
+export default (mongoose.models.OrgChart as OrgChartModelType) || mongoose.model<IOrgChart, OrgChartModelType>("OrgChart", OrgChartSchema);

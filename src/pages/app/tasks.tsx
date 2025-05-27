@@ -44,6 +44,8 @@ const TasksPage: NextPageWithLayout = () => {
   const [loading, setLoading] = useState<boolean>(true); // For initial data fetch and form submissions
   const [formError, setFormError] = useState<string | null>(null); // Specific error for the form
   const [listError, setListError] = useState<string | null>(null); // Specific error for task list fetch
+  const [usersBelowMe, setUsersBelowMe] = useState<any[]>([]);
+  const [assignedTo, setAssignedTo] = useState<string>("");
 
   // Function to fetch tasks from the API
   const fetchTasks = async () => {
@@ -89,6 +91,16 @@ const TasksPage: NextPageWithLayout = () => {
     fetchTasks();
   }, []);
 
+  // Fetch users below you on mount
+  useEffect(() => {
+    async function fetchUsersBelow() {
+      const res = await fetch("/api/roles-below-me");
+      const data = await res.json();
+      setUsersBelowMe(data.usersBelow || []);
+    }
+    fetchUsersBelow();
+  }, []);
+
   // Reset form fields
   const resetForm = () => {
     setTaskTitle("");
@@ -114,6 +126,7 @@ const TasksPage: NextPageWithLayout = () => {
       title: taskTitle.trim(),
       description: taskDescription.trim(),
       deadline: taskDeadline,
+      assignedTo,
     };
 
     try {
@@ -267,7 +280,7 @@ const TasksPage: NextPageWithLayout = () => {
         {/* Task Add/Edit Form */}
         <div
           id="task-form"
-          className={`transition-all duration-500 ease-in-out overflow-hidden ${showForm ? 'max-h-[500px] opacity-100 py-6' : 'max-h-0 opacity-0 py-0'}`}
+          className="transition-all duration-500 ease-in-out py-6"
         >
           <form onSubmit={handleAddTask} className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200 animate-fadeIn">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
@@ -334,28 +347,47 @@ const TasksPage: NextPageWithLayout = () => {
                 aria-label="Task description"
               ></textarea>
             </div>
+            <div className="mb-8">
+              <label htmlFor="assignedTo" className="block text-gray-700 text-sm font-semibold mb-2">
+                Assign To:
+              </label>
+              <select
+                id="assignedTo"
+                className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base"
+                value={assignedTo}
+                onChange={e => setAssignedTo(e.target.value)}
+                disabled={loading}
+              >
+                <option value="">Myself</option>
+                {usersBelowMe.map(u => (
+                  <option key={u.userId} value={u.userId}>
+                    {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="flex justify-end space-x-4">
-                <button
+              <button
                 type="submit"
                 className="inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
                 disabled={loading}
-                >
-                    {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}
-                    {editingTaskId ? "Update Task" : "Add Task"}
-                </button>
-                {editingTaskId && (
+              >
+                {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}
+                {editingTaskId ? "Update Task" : "Add Task"}
+              </button>
+              {editingTaskId && (
                 <button
-                    type="button"
-                    onClick={() => {
-                        resetForm();
-                        setShowForm(false);
-                    }}
-                    className="inline-flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
-                    disabled={loading}
+                  type="button"
+                  onClick={() => {
+                    resetForm();
+                    setShowForm(false);
+                  }}
+                  className="inline-flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
+                  disabled={loading}
                 >
-                    Cancel
+                  Cancel
                 </button>
-                )}
+              )}
             </div>
           </form>
         </div>

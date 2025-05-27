@@ -1,0 +1,77 @@
+{
+  "levels": [
+    {
+      "id": "level-1",
+      "roles": [
+        "admin",
+        "mortiimatiidedestept",
+        "dadsgfs",
+        "adfsgads",
+        "semi-admin"
+      ],
+      "_id": "683569f5f305426cc2387412"
+    },
+    {
+      "id": "level-2",
+      "roles": [
+        "adsghdfsa",
+        "doamneajuta",
+        "sfad",
+        "PulaMea",
+        "samoreudacaamvazutasaceva",
+        "mooorrr",
+        "pulameaingurata"
+      ],
+      "_id": "683569f5f305426cc2387413"
+    },
+    {
+      "id": "level-3",
+      "roles": [
+        "adsga"
+      ],
+      "_id": "683569f5f305426cc2387414"
+    },
+    {
+      "id": "level-4",
+      "roles": [
+        "adsgd"
+      ],
+      "_id": "683569f5f305426cc2387415"
+    },
+    {
+      "id": "level-5",
+      "roles": [
+        "afhds"
+      ],
+      "_id": "683569f5f305426cc2387416"
+    },
+    {
+      "id": "level-6",
+      "roles": [],
+      "_id": "683569f5f305426cc2387417"
+    },
+    {
+      "id": "level-7",
+      "roles": [],
+      "_id": "683569f5f305426cc2387418"
+    },
+    {
+      "id": "level-8",
+      "roles": [],
+      "_id": "683569f5f305426cc2387419"
+    },
+    {
+      "id": "level-9",
+      "roles": [],
+      "_id": "683576f57ac610d6ca3ff979"
+    },
+    {
+      "id": "e0bf1ef6-6c9b-4f49-ba78-3e914bad230a",
+      "roles": [
+        "smecherusuprem"
+      ],
+      "_id": "68358e0a4cde92021d5439f0"
+    }
+  ],
+  "availableRoles": []
+}

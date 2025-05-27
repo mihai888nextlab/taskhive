@@ -34,25 +34,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "GET") {
     try {
-      const tasks = await Task.find({ userId }).sort({ createdAt: -1 }); // Find tasks for this user, sort newest first
+      // Only return tasks assigned to the authenticated user
+      const tasks = await Task.find({ userId }).sort({ createdAt: -1 });
       res.status(200).json(tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({ message: "Failed to fetch tasks.", error: (error as Error).message });
     }
   } else if (req.method === "POST") {
-    const { title, description, deadline } = req.body;
+    const { title, description, deadline, assignedTo } = req.body;
 
     if (!title || !deadline) {
       return res.status(400).json({ message: "Title and deadline are required." });
     }
 
     try {
+      // Assign to selected user if provided, otherwise to the authenticated user
+      const assignedUserId = assignedTo ? Types.ObjectId.createFromHexString(assignedTo) : userId;
       const newTask = await Task.create({
         title,
         description,
         deadline: new Date(deadline), // Convert deadline string to Date object
-        userId: userId, // Assign the task to the authenticated user
+        userId: assignedUserId, // Assign the task to the selected user
       });
       res.status(201).json(newTask); // 201 Created
     } catch (error) {
