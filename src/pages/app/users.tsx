@@ -263,19 +263,23 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       </h1>
 
       <div className="flex space-x-4 mb-8 justify-center">
-        <button
-          className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
-          onClick={() => setAddUserModalOpen(true)}
-        >
-          Add User
-        </button>
+        {user && user.role === "admin" && (
+          <>
+            <button
+              className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              onClick={() => setAddUserModalOpen(true)}
+            >
+              Add User
+            </button>
 
-        <button
-          className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
-          onClick={() => setAddRoleModalOpen(true)}
-        >
-          Add Role
-        </button>
+            <button
+              className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              onClick={() => setAddRoleModalOpen(true)}
+            >
+              Add Role
+            </button>
+          </>
+        )}
 
         {user && user.role === "admin" && (
           <button
