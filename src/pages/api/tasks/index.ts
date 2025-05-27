@@ -34,6 +34,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "GET") {
     try {
+      if (req.query.assignedByMe === '1') {
+        // Return tasks assigned by the current user, populate userId (assignee)
+        const tasks = await Task.find({ createdBy: userId }).sort({ createdAt: -1 }).populate('createdBy').populate('userId');
+        return res.status(200).json(tasks);
+      }
       // Only return tasks assigned to the authenticated user, and populate createdBy
       const tasks = await Task.find({ userId }).sort({ createdAt: -1 }).populate('createdBy');
       res.status(200).json(tasks);
