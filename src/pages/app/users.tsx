@@ -5,7 +5,9 @@ import Loading from "@/components/Loading";
 import Table from "@/components/Table";
 import { useEffect, useState } from "react";
 import AddUsersModal from "@/components/modals/AddUserModal";
-import { setServers } from "dns";
+import AddRoleModal from "@/components/modals/AddRoleModal"; // Import AddRoleModal
+import OrgChartModal from "@/components/modals/OrgChartModal"; // Import OrgChartModal
+import { setCookie } from 'nookies'; // Import nookies
 
 interface Project extends TableDataItem {
   user_id: string;
@@ -37,10 +39,13 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
   const [loadingUsers, setLoadingUsers] = useState(true);
 
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [addRoleModalOpen, setAddRoleModalOpen] = useState(false); // State for Add Role Modal
+  const [orgChartModalOpen, setOrgChartModalOpen] = useState(false); // State for Org Chart Modal
+  const [roles, setRoles] = useState<string[]>([]); // Store roles
 
   const projectColumns: TableColumn<Project>[] = [
     { key: "user_firstName", header: "First Name" },
-    { key: "user_lastName", header: "Last Name" },
+    { key: "user_lastName", header: "First Name" },
     { key: "user_email", header: "Email" },
     {
       key: "role",
@@ -57,6 +62,10 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             badgeClasses = "bg-blue-100";
             textColor = "text-blue-800";
             break;
+          default:
+            badgeClasses = "bg-gray-100";
+            textColor = "text-gray-800";
+            break;
         }
         return (
           <span
@@ -67,44 +76,6 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         );
       },
     },
-    // {
-    //   key: "status",
-    //   header: "Status",
-    //   align: "center",
-    //   render: (item: any) => {
-    //     // Logica pentru a afișa badge-uri colorate în funcție de status
-    //     let badgeClasses = "";
-    //     let textColor = "";
-    //     switch (item.status) {
-    //       case "In Progres":
-    //         badgeClasses = "bg-yellow-100";
-    //         textColor = "text-yellow-800";
-    //         break;
-    //       case "Finalizat":
-    //         badgeClasses = "bg-green-100";
-    //         textColor = "text-green-800";
-    //         break;
-    //       case "In Asteptare":
-    //         badgeClasses = "bg-blue-100";
-    //         textColor = "text-blue-800";
-    //         break;
-    //       case "Anulat":
-    //         badgeClasses = "bg-red-100";
-    //         textColor = "text-red-800";
-    //         break;
-    //       default:
-    //         badgeClasses = "bg-gray-100";
-    //         textColor = "text-gray-800";
-    //     }
-    //     return (
-    //       <span
-    //         className={`px-3 py-1 rounded-full text-xs font-semibold ${badgeClasses} ${textColor}`}
-    //       >
-    //         {item.status}
-    //       </span>
-    //     );
-    //   },
-    // },
   ];
 
   if (!user) {
@@ -127,6 +98,70 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     }
   };
 
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch("/api/roles");
+      if (!response.ok) {
+        throw new Error("Failed to fetch roles");
+      }
+      const data = await response.json();
+      const fetchedRoles = data.map((role: { name: string }) => role.name);
+      setRoles(fetchedRoles);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
+  const addRole = async (roleName: string) => {
+    try {
+      const response = await fetch("/api/roles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: roleName }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add role");
+      }
+
+      // Fetch current org chart data
+      const orgChartResponse = await fetch("/api/org-chart");
+      if (!orgChartResponse.ok) {
+        throw new Error("Failed to fetch org chart");
+      }
+      const orgChartData = await orgChartResponse.json();
+
+      // Add new role to the first level
+      const updatedLevels = [...orgChartData.levels];
+      if (updatedLevels.length > 0) {
+        updatedLevels[0].roles.push(roleName);
+      } else {
+        updatedLevels.push({ id: "level-1", roles: [roleName] });
+      }
+
+      // Save updated org chart data to the database
+      const saveOrgChartResponse = await fetch("/api/org-chart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ levels: updatedLevels, availableRoles: orgChartData.availableRoles }),
+      });
+
+      if (!saveOrgChartResponse.ok) {
+        throw new Error("Failed to save org chart");
+      }
+
+      setRoles((prevRoles) => [...prevRoles, roleName]);
+      setOrgChartModalOpen(true);
+      try {
+        fetchRoles(); // Refresh the roles list
+      } catch (error) {
+        console.error("Error fetching roles after adding role:", error);
+      }
+    } catch (error) {
+      console.error("Error adding role:", error);
+    }
+  };
+
   const addUser = async (
     email: string,
     firstName: string,
@@ -134,65 +169,130 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     password: string,
     role: string
   ): Promise<string | undefined> => {
-    const response = await fetch("/api/add-user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        firstName,
-        lastName,
-        password,
-        role,
-      }),
-    });
+    try {
+      const response = await fetch("/api/add-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          firstName,
+          lastName,
+          password,
+          role,
+        }),
+      });
 
-    if (!response.ok) {
-      //setError("Failed to add user");
-      return "Failed to add user";
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Failed to add user. Server responded with:", errorText);
+        return `Failed to add user: ${errorText}`;
+      }
+
+      const data = await response.json();
+      console.log("Add user response:", data);
+
+      // Extract the new token from the response
+      const { token } = data;
+
+      // Set the new token in a cookie
+      setCookie(null, 'auth_token', token, {
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        path: '/',
+      });
+
+      setLoadingUsers(true); // Set loading state to true while fetching users
+      fetchUsers(); // Refresh the user list after adding a new user
+      setAddUserModalOpen(false); // Close the modal after adding the user
+      return undefined;
+    } catch (error: any) {
+      console.error("Error adding user:", error);
+      return `Error adding user: ${error.message}`;
     }
-
-    const data = await response.json();
-
-    setLoadingUsers(true); // Set loading state to true while fetching users
-    fetchUsers(); // Refresh the user list after adding a new user
-    setAddUserModalOpen(false); // Close the modal after adding the user
   };
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles(); // Fetch roles when the component mounts
   }, [user]);
 
   return (
-    <div>
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-8 font-sans overflow-hidden">
       {loadingUsers && <Loading />}
       {addUserModalOpen && (
         <AddUsersModal
           onClose={() => setAddUserModalOpen(false)}
-          onUserAdded={(
+          onUserAdded={async (
             email: string,
             firstName: string,
             lastName: string,
             password: string,
             role: string
           ) => {
-            return addUser(email, firstName, lastName, password, role);
+            try {
+              const result = await addUser(email, firstName, lastName, password, role);
+              if (result) {
+                console.error("Error adding user:", result);
+                return result;
+              } else {
+                fetchUsers(); // Refresh the user list after adding a new user
+                setAddUserModalOpen(false); // Close the modal after adding the user
+                return undefined;
+              }
+            } catch (error) {
+              console.error("Error adding user:", error);
+              return undefined;
+            }
           }}
         />
       )}
 
-      <h1 className="text-2xl font-bold">Users</h1>
+      {addRoleModalOpen && (
+        <AddRoleModal
+          onClose={() => setAddRoleModalOpen(false)}
+          onRoleAdded={(roleName: string) => {
+            addRole(roleName);
+          }}
+        />
+      )}
 
-      <button
-        className="bg-blue-500 rounded-xl p-3 text-white font-semibold cursor-pointer"
-        onClick={() => setAddUserModalOpen(true)}
-      >
-        Add User
-      </button>
+      {orgChartModalOpen && (
+        <OrgChartModal
+          onClose={() => setOrgChartModalOpen(false)}
+          roles={roles}
+        />
+      )}
 
-      <div className="container mx-auto p-4">
-        <Table<Project> // Specificăm tipul generic aici
+      <h1 className="text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight">
+        Manage Users
+      </h1>
+
+      <div className="flex space-x-4 mb-8 justify-center">
+        <button
+          className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+          onClick={() => setAddUserModalOpen(true)}
+        >
+          Add User
+        </button>
+
+        <button
+          className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+          onClick={() => setAddRoleModalOpen(true)}
+        >
+          Add Role
+        </button>
+
+        <button
+          className="inline-flex items-center justify-center bg-gradient-to-r from-sky-400 to-sky-600 hover:from-sky-600 hover:to-sky-400 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+          onClick={() => setOrgChartModalOpen(true)}
+        >
+          View Org Chart
+        </button>
+      </div>
+
+      <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
+        <Table<Project>
           title="Users List"
           data={users.map((user) => ({
             id: user._id,
@@ -200,13 +300,12 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             user_email: user.userId.email,
             user_firstName: user.userId.firstName,
             user_lastName: user.userId.lastName,
-
             companyId: user.companyId,
             role: user.role,
             permissions: user.permissions,
           }))}
           columns={projectColumns}
-          emptyMessage="Nu ai niciun proiect înregistrat. Începe unul nou!"
+          emptyMessage="No users registered."
         />
       </div>
     </div>

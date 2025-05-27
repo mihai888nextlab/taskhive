@@ -1,11 +1,8 @@
-import React from "react";
-import FloatingLabelInput from "../FloatingLabelInput";
-import { IoMdCloseCircle } from "react-icons/io";
+import React, { useState, useEffect } from "react";
+import { FaSpinner, FaTimes } from "react-icons/fa";
+import { setCookie } from 'nookies'; // Import nookies
 
-export default function AddUsersModal({
-  onClose,
-  onUserAdded,
-}: {
+interface AddUsersModalProps {
   onClose: () => void;
   onUserAdded: (
     email: string,
@@ -14,121 +11,168 @@ export default function AddUsersModal({
     password: string,
     role: string
   ) => Promise<string | undefined>;
-}) {
-  const [error, setError] = React.useState<string | null>(null);
+}
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) => {
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [roles, setRoles] = useState<string[]>([]); // Stocăm lista de roluri
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch roles from backend
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch("/api/roles");
+        if (!response.ok) {
+          throw new Error("Failed to fetch roles.");
+        }
+        const data = await response.json();
+        // Convert roles to lowercase
+        setRoles(data.map((role: { name: string }) => role.name.toLowerCase()));
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    };
+
+    fetchRoles();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const password = formData.get("password") as string;
-    const role = formData.get("role") as string;
-
-    console.log("Form submitted:", {
-      email,
-      firstName,
-      lastName,
-      password,
-      role,
-    });
 
     if (!email || !firstName || !lastName || !password || !role) {
       setError("All fields are required.");
       return;
     }
 
-    let data = await onUserAdded(email, firstName, lastName, password, role);
+    setLoading(true);
+    setError(null);
 
-    if (data) {
-      setError(data);
-      return;
+    try {
+      // Convert role to lowercase before passing it to onUserAdded
+      const lowercaseRole = role.toLowerCase();
+      const result = await onUserAdded(email, firstName, lastName, password, lowercaseRole);
+      if (result) {
+        setError(result);
+      } else {
+        onClose();
+      }
+    } catch (error: any) {
+      setError(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center z-50 bg-black/50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold w-56">Add User</h2>
+    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200 w-96">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-3xl font-bold text-gray-800 text-center">Add User</h2>
           <button
-            className="text-red-500 hover:text-red-700 cursor-pointer"
-            onClick={() => {
-              onClose();
-            }}
+            onClick={onClose}
+            className="text-gray-500 hover:text-red-500 transition-all text-2xl"
           >
-            <IoMdCloseCircle size={24} />
+            <FaTimes />
           </button>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4 space-y-3">
-            {/* <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label> */}
-            {/* <input
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm" role="alert">
+            <div className="flex items-center">
+              <svg className="h-6 w-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="font-bold">Error</p>
+                <p className="text-sm">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">Email:</label>
+            <input
               type="email"
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter user email"
-            /> */}
-            <FloatingLabelInput
-              id="firstName"
-              name="firstName"
-              label="First Name"
-              type="text"
-              theme="light"
-            />
-            <FloatingLabelInput
-              id="lastName"
-              name="lastName"
-              label="Last Name"
-              type="text"
-              theme="light"
-            />
-            <FloatingLabelInput
               id="email"
-              name="email"
-              label="Email"
-              type="email"
-              theme="light"
-            />
-            <FloatingLabelInput
-              id="password"
-              name="password"
-              label="Password"
-              type="password"
-              theme="light"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              required
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role
-            </label>
+          <div>
+            <label htmlFor="firstName" className="block text-gray-700 text-sm font-semibold mb-2">First Name:</label>
+            <input
+              type="text"
+              id="firstName"
+              placeholder="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="block text-gray-700 text-sm font-semibold mb-2">Last Name:</label>
+            <input
+              type="text"
+              id="lastName"
+              placeholder="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">Password:</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="role" className="block text-gray-700 text-sm font-semibold mb-2">Role:</label>
             <select
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              name="role"
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              required
             >
-              <option value="" disabled selected>
-                --- Select role ---
-              </option>
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
+              <option value="">Select Role</option>
+              {roles.map((role) => (
+                <option key={role} value={role}>{role}</option>
+              ))}
             </select>
           </div>
-
-          {error && (
-            <div className="text-red-500 text-sm mb-4 w-full text-center">
-              {error}
-            </div>
-          )}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white rounded-md py-2 hover:bg-blue-700 transition duration-200"
-          >
-            Add User
-          </button>
+          <div className="flex justify-end space-x-4">
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300"
+              disabled={loading}
+            >
+              {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}
+              Add User
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
-}
+};
+
+export default AddUsersModal;

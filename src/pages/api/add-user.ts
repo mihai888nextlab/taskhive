@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { hash } from "bcrypt";
+import { hash } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import { serialize } from "cookie";
 import dbConnect from "@/db/dbConfig";
@@ -44,12 +44,19 @@ export default async function handler(
       return res.status(401).json({ message: "No token provided" });
     }
 
-    const decodedToken: JWTPayload | null = jwt.verify(
-      tokenGet,
-      process.env.JWT_SECRET || ""
-    ) as JWTPayload;
+    let decodedToken: JWTPayload;
+    try {
+      decodedToken = jwt.verify(
+        tokenGet,
+        process.env.JWT_SECRET || ""
+      ) as JWTPayload;
+    } catch (jwtError: any) {
+      console.error("JWT Verification Error:", jwtError);
+      return res.status(402).json({ message: "Invalid or expired token" });
+    }
 
-    if (!decodedToken) {
+    if (!decodedToken || !decodedToken.companyId) {
+      console.error("Missing companyId in decoded token:", decodedToken);
       res.setHeader(
         "Set-Cookie",
         cookie.serialize("auth_token", "", {
@@ -60,7 +67,9 @@ export default async function handler(
           path: "/",
         })
       );
-      return res.status(402).json({ message: "Invalid or expired token" });
+      return res
+        .status(402)
+        .json({ message: "Invalid or expired token (companyId missing)" });
     }
 
     const hashedPassword = await hash(password, 10);
@@ -77,10 +86,17 @@ export default async function handler(
       _id: decodedToken.companyId,
     });
 
+    if (!savedCompany) {
+      console.error("Company not found for ID:", decodedToken.companyId);
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    // Convert role to lowercase before saving
+    const lowercaseRole = role.toLowerCase();
     const newUserCompany = new userCompanyModel({
       userId: savedUser._id,
       companyId: savedCompany._id,
-      role: role.toLowerCase(), // Ensure role is stored in lowercase
+      role: lowercaseRole, // Ensure role is stored in lowercase
       permissions: ["all"],
     });
     await newUserCompany.save();
@@ -121,11 +137,11 @@ export default async function handler(
       },
       company: savedCompany,
     });
-  } catch (error: any) {
-    console.error("Registration error", error);
+  } catch (dbError: any) {
+    console.error("Database/Server error:", dbError);
     return res.status(500).json({
       message: "An error occurred during registration.",
-      error: error.message,
+      error: dbError.message,
     });
   }
 }
