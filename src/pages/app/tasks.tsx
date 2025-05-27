@@ -51,6 +51,7 @@ const TasksPage: NextPageWithLayout = () => {
   const [listError, setListError] = useState<string | null>(null); // Specific error for task list fetch
   const [usersBelowMe, setUsersBelowMe] = useState<any[]>([]);
   const [assignedTo, setAssignedTo] = useState<string>("");
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
 
   // Function to fetch tasks from the API
   const fetchTasks = async () => {
@@ -245,6 +246,11 @@ const TasksPage: NextPageWithLayout = () => {
     }
   };
 
+  useEffect(() => {
+    // Try to get the current user's email from localStorage (or use your auth context if available)
+    const email = localStorage.getItem('userEmail');
+    if (email) setCurrentUserEmail(email);
+  }, []);
 
   return (
     // Outer container with a subtle gradient background for depth
@@ -265,13 +271,12 @@ const TasksPage: NextPageWithLayout = () => {
         {/* Add Task Button & Form Toggle - using primary and secondary colors */}
         <button
           onClick={() => {
-            setShowForm(!showForm);
-            if (showForm) {
+            if (!showForm) {
+              // Opening the form: reset fields
               resetForm();
-            } else {
               setEditingTaskId(null);
-              resetForm();
             }
+            setShowForm((prev) => !prev); // Always toggle
           }}
           className="mb-8 w-full py-4 px-6 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 text-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
           disabled={loading}
@@ -282,120 +287,118 @@ const TasksPage: NextPageWithLayout = () => {
           <span>{showForm ? "Hide Task Form" : "Add New Task"}</span>
         </button>
 
-        {/* Task Add/Edit Form */}
-        <div
-          id="task-form"
-          className="transition-all duration-500 ease-in-out py-6"
-        >
-          <form onSubmit={handleAddTask} className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200 animate-fadeIn">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-              {editingTaskId ? "Edit Task Details" : "Create New Task"}
-            </h2>
-            {formError && (
-              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm" role="alert">
-                <div className="flex items-center">
-                  <svg className="h-6 w-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <p className="font-bold">Validation Error</p>
-                    <p className="text-sm">{formError}</p>
+        {showForm && (
+          <div id="task-form" className="transition-all duration-500 ease-in-out py-6">
+            <form onSubmit={handleAddTask} className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200 animate-fadeIn">
+              <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+                {editingTaskId ? "Edit Task Details" : "Create New Task"}
+              </h2>
+              {formError && (
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm" role="alert">
+                  <div className="flex items-center">
+                    <svg className="h-6 w-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                      <p className="font-bold">Validation Error</p>
+                      <p className="text-sm">{formError}</p>
+                    </div>
                   </div>
                 </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label htmlFor="taskTitle" className="block text-gray-700 text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500">
+                    Title:
+                  </label>
+                  <input
+                    type="text"
+                    id="taskTitle"
+                    className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-base"
+                    placeholder="e.g., Prepare presentation for Q3 review"
+                    value={taskTitle}
+                    onChange={(e) => setTaskTitle(e.target.value)}
+                    required
+                    disabled={loading}
+                    aria-label="Task title"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="taskDeadline" className="block text-gray-700 text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500">
+                    Deadline:
+                  </label>
+                  <input
+                    type="date"
+                    id="taskDeadline"
+                    className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base"
+                    value={taskDeadline}
+                    onChange={(e) => setTaskDeadline(e.target.value)}
+                    required
+                    disabled={loading}
+                    aria-label="Task deadline date"
+                  />
+                </div>
               </div>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label htmlFor="taskTitle" className="block text-gray-700 text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500">
-                  Title:
+              <div className="mb-8">
+                <label htmlFor="taskDescription" className="block text-gray-700 text-sm font-semibold mb-2">
+                  Description (Optional):
                 </label>
-                <input
-                  type="text"
-                  id="taskTitle"
-                  className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-base"
-                  placeholder="e.g., Prepare presentation for Q3 review"
-                  value={taskTitle}
-                  onChange={(e) => setTaskTitle(e.target.value)}
-                  required
+                <textarea
+                  id="taskDescription"
+                  rows={4}
+                  className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base"
+                  placeholder="Add more details or sub-tasks here..."
+                  value={taskDescription}
+                  onChange={(e) => setTaskDescription(e.target.value)}
                   disabled={loading}
-                  aria-label="Task title"
-                />
+                  aria-label="Task description"
+                ></textarea>
               </div>
-              <div>
-                <label htmlFor="taskDeadline" className="block text-gray-700 text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500">
-                  Deadline:
+              <div className="mb-8">
+                <label htmlFor="assignedTo" className="block text-gray-700 text-sm font-semibold mb-2">
+                  Assign To:
                 </label>
-                <input
-                  type="date"
-                  id="taskDeadline"
+                <select
+                  id="assignedTo"
                   className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base"
-                  value={taskDeadline}
-                  onChange={(e) => setTaskDeadline(e.target.value)}
-                  required
-                  disabled={loading}
-                  aria-label="Task deadline date"
-                />
-              </div>
-            </div>
-            <div className="mb-8">
-              <label htmlFor="taskDescription" className="block text-gray-700 text-sm font-semibold mb-2">
-                Description (Optional):
-              </label>
-              <textarea
-                id="taskDescription"
-                rows={4}
-                className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base"
-                placeholder="Add more details or sub-tasks here..."
-                value={taskDescription}
-                onChange={(e) => setTaskDescription(e.target.value)}
-                disabled={loading}
-                aria-label="Task description"
-              ></textarea>
-            </div>
-            <div className="mb-8">
-              <label htmlFor="assignedTo" className="block text-gray-700 text-sm font-semibold mb-2">
-                Assign To:
-              </label>
-              <select
-                id="assignedTo"
-                className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base"
-                value={assignedTo}
-                onChange={e => setAssignedTo(e.target.value)}
-                disabled={loading}
-              >
-                <option value="">Myself</option>
-                {usersBelowMe.map(u => (
-                  <option key={u.userId} value={u.userId}>
-                    {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex justify-end space-x-4">
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
-                disabled={loading}
-              >
-                {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}
-                {editingTaskId ? "Update Task" : "Add Task"}
-              </button>
-              {editingTaskId && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetForm();
-                    setShowForm(false);
-                  }}
-                  className="inline-flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
+                  value={assignedTo}
+                  onChange={e => setAssignedTo(e.target.value)}
                   disabled={loading}
                 >
-                  Cancel
+                  <option value="">Myself</option>
+                  {usersBelowMe.map(u => (
+                    <option key={u.userId} value={u.userId}>
+                      {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
+                  disabled={loading}
+                >
+                  {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}
+                  {editingTaskId ? "Update Task" : "Add Task"}
                 </button>
-              )}
-            </div>
-          </form>
-        </div>
+                {editingTaskId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetForm();
+                      setShowForm(false);
+                    }}
+                    className="inline-flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
+                    disabled={loading}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        )}
 
         <h2 className="text-4xl font-bold text-gray-900 mb-8 mt-12 pb-4 border-b-4 border-primary-dark text-center">
             My Task List
@@ -510,7 +513,7 @@ const TasksPage: NextPageWithLayout = () => {
                               onClick={() => handleEditTask(task)}
                               className="text-primary hover:text-primary-dark p-3 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                               title="Edit Task"
-                              disabled={loading || task.completed || isOverdue} // Disable edit if task is completed or overdue
+                              disabled={loading || task.completed || isOverdue || (task.createdBy && task.createdBy.email !== currentUserEmail)} // Only allow edit if current user is the assigner
                           >
                               <FaEdit className="text-2xl" />
                           </button>
@@ -518,7 +521,7 @@ const TasksPage: NextPageWithLayout = () => {
                               onClick={() => handleDeleteTask(task._id)}
                               className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Delete Task"
-                              disabled={loading}
+                              disabled={loading || (task.createdBy && task.createdBy.email !== currentUserEmail)} // Only allow delete if current user is the assigner
                           >
                               <FaTrash className="text-2xl" />
                           </button>
