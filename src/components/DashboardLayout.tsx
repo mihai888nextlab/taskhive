@@ -20,19 +20,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, setUser } = useAuth();
   const router = useRouter();
 
-  // State to toggle AI window - Initialized to 'false' so it's hidden by default.
-  // Click the AI button to toggle its visibility.
+  // State to toggle AI window
   const [isAIWindowOpen, setIsAIWindowOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // --- Search Bar State ---
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  // Fetch users
   useEffect(() => {
-    // Fetch all users for search
     fetch("/api/get-users")
       .then(res => {
         if (!res.ok) {
@@ -41,7 +38,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         return res.json();
       })
       .then(data => {
-        console.log("Fetched users:", data); // Log the entire response
         setUsers(data.users || []);
       })
       .catch(error => {
@@ -49,12 +45,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       });
   }, []);
 
+  // Handle logout
   const handleLogout = async () => {
     try {
       const res = await fetch("/api/auth/logout", { method: "POST" });
       if (res.ok) {
-        setUser(null); // Clear the user state
-        router.push("/"); // Redirect to the home page
+        setUser(null);
+        router.push("/");
       } else {
         console.error("Logout failed");
       }
@@ -63,10 +60,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   };
 
-  if (!user) {
-    return null; // Or a spinner
-  }
-
+  // Ensure hooks are called consistently
   const menu = [
     { name: "Dashboard", path: "/app", icon: MdSpaceDashboard },
     { name: "Users", path: "/app/users", icon: FaUserClock },
@@ -76,11 +70,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: "Settings", path: "/app/settings", icon: MdSettings },
   ];
 
-  // --- Search Logic ---
+  // Search logic
   useEffect(() => {
-    console.log("Current search query:", search); // Debugging line
-    console.log("Current users:", users); // Debugging line
-
     if (!search.trim()) {
       setSearchResults([]);
       setShowDropdown(false);
@@ -88,17 +79,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
 
     const lower = search.toLowerCase();
-    // Search pages
     const pageResults = menu.filter(m => m.name.toLowerCase().includes(lower));
-    // Search users
+    
+    // Filter users based on the search input
     const userResults = users.filter(u =>
       (u.userId.firstName && u.userId.firstName.toLowerCase().includes(lower)) ||
       (u.userId.lastName && u.userId.lastName.toLowerCase().includes(lower)) ||
       (u.userId.email && u.userId.email.toLowerCase().includes(lower))
     );
 
-    console.log("User search results:", userResults); // Debugging line
-
+    // Set search results
     setSearchResults([
       ...pageResults.map(r => ({ type: "page", ...r })),
       ...userResults.map(u => ({
@@ -109,6 +99,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     ]);
     setShowDropdown(true);
   }, [search, users]);
+
+  // Check user at the end to ensure hooks are called consistently
+  if (!user) {
+    return null; // Or a spinner
+  }
 
   return (
     <div className="flex w-full min-h-screen bg-gradient-to-r from-gray-100 to-gray-200">
@@ -313,7 +308,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       )}
       {/* Main Content */}
-      <main className="flex-1 bg-white p-2 sm:p-4 md:p-8 rounded-tl-lg shadow-lg min-h-screen">
+      <main className="flex-1 p-8 bg-gray-100 rounded-tl-lg shadow-lg min-h-screen">
         {children}
       </main>
       {/* AI Button */}

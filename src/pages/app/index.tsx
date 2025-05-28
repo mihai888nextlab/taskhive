@@ -111,7 +111,7 @@ const DashboardPage: NextPageWithLayout = () => {
   ];
 
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-full rounded-lg shadow-inner">
+    <div className="p-8 bg-gray-100 min-h-full rounded-lg ">
       <h1 className="text-4xl font-extrabold text-gray-900 mb-10 text-center tracking-tight">
         Welcome to Your Dashboard!
       </h1>
