@@ -62,6 +62,12 @@ function getAssignerInfo(task: any): string | null {
   return null;
 }
 
+async function fetchCurrentUser() {
+  const res = await fetch('/api/current-user', { method: 'GET' });
+  if (!res.ok) throw new Error('Failed to fetch current user');
+  return await res.json();
+}
+
 const TasksPage: NextPageWithLayout = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskTitle, setTaskTitle] = useState<string>("");
@@ -151,6 +157,17 @@ const TasksPage: NextPageWithLayout = () => {
   useEffect(() => {
     fetchTasks();
     fetchAssignedTasks();
+  }, []);
+
+  // Fetch current user from backend
+  useEffect(() => {
+    fetchCurrentUser()
+      .then(user => {
+        setCurrentUserEmail(user.email.trim().toLowerCase());
+      })
+      .catch(() => {
+        setCurrentUserEmail("");
+      });
   }, []);
 
   // Reset form fields
@@ -291,15 +308,6 @@ const TasksPage: NextPageWithLayout = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail');
-    if (email) {
-      setCurrentUserEmail(email);
-    } else {
-      console.warn("No userEmail found in localStorage!");
-    }
-  }, []);
 
   return (
     // Outer container with a subtle gradient background for depth
@@ -541,6 +549,12 @@ const TasksPage: NextPageWithLayout = () => {
                 (typeof task.userId === 'string' && currentUserEmail && task.createdBy && task.createdBy.email === currentUserEmail) ||
                 (isUserObj(task.userId) && task.userId.email === currentUserEmail);
 
+              console.log('Task:', task.title, 'Assigner:', task.createdBy.email, 'Current user:', currentUserEmail);
+
+              const assignerEmail = task.createdBy?.email?.trim().toLowerCase() || "";
+              const userEmail = currentUserEmail.trim().toLowerCase();
+              const canEditOrDelete = assignerEmail === userEmail;
+
               return (
                 <div
                   key={task._id}
@@ -594,7 +608,7 @@ const TasksPage: NextPageWithLayout = () => {
                               onClick={() => handleEditTask(task)}
                               className="text-primary hover:text-primary-dark p-3 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                               title="Edit Task"
-                              disabled={loading || task.completed || isOverdue} // Only allow edit if current user is the assigner or assigned to
+                              disabled={loading || task.completed || isOverdue || !canEditOrDelete}
                           >
                               <FaEdit className="text-2xl" />
                           </button>
@@ -602,7 +616,7 @@ const TasksPage: NextPageWithLayout = () => {
                               onClick={() => handleDeleteTask(task._id)}
                               className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Delete Task"
-                              disabled={loading} // Only allow delete if current user is the assigner or assigned to
+                              disabled={loading || !canEditOrDelete}
                           >
                               <FaTrash className="text-2xl" />
                           </button>
@@ -684,6 +698,24 @@ const TasksPage: NextPageWithLayout = () => {
                     <div className="flex items-center text-lg font-semibold">
                       {statusIcon}
                       <span className="ml-2">{isCompleted ? 'Completed' : isOverdue ? 'Overdue' : 'In Progress'}</span>
+                    </div>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => handleEditTask(task)}
+                        className="text-primary hover:text-primary-dark p-3 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Edit Task"
+                        disabled={loading || task.completed || isOverdue}
+                      >
+                        <FaEdit className="text-2xl" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task._id)}
+                        className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Delete Task"
+                        disabled={loading}
+                      >
+                        <FaTrash className="text-2xl" />
+                      </button>
                     </div>
                   </div>
                 </div>
