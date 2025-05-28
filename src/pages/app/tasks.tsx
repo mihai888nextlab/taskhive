@@ -114,6 +114,7 @@ const TasksPage: NextPageWithLayout = () => {
       // --- END REVISED SORTING LOGIC ---
 
       setTasks(data);
+      localStorage.setItem('userTasks', JSON.stringify(data)); // <-- Store in localStorage
     } catch (err) {
       console.error("Error fetching tasks:", err);
       setListError((err as Error).message); // Set list-specific error
@@ -311,13 +312,13 @@ const TasksPage: NextPageWithLayout = () => {
 
   return (
     // Outer container with a subtle gradient background for depth
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-8 font-sans overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
       {/* Decorative background circles - using primary colors for consistency */}
       <div className="absolute top-10 left-1/4 w-48 h-48 bg-primary-light rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
       <div className="absolute bottom-10 right-1/4 w-64 h-64 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
       <div className="absolute top-1/2 left-1/2 w-56 h-56 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
 
-      <main className="relative z-10 w-full max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-8 md:p-12 transform transition-all duration-500 ease-in-out hover:shadow-3xl-lg ring-1 ring-gray-100">
+      <main className="relative z-10 w-full max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-2 sm:p-4 md:p-8 md:p-12 transform transition-all duration-500 ease-in-out hover:shadow-3xl-lg ring-1 ring-gray-100">
         <h1 className="text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight">
           Your Personal Task Manager
         </h1>
@@ -486,7 +487,7 @@ const TasksPage: NextPageWithLayout = () => {
             <p className="text-lg">Click the "Add New Task" button above to start organizing your life.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             {tasks.map((task) => {
               const isOverdue = isTaskOverdue(task);
               const isCompleted = task.completed;
@@ -558,16 +559,16 @@ const TasksPage: NextPageWithLayout = () => {
               return (
                 <div
                   key={task._id}
-                  className={`group flex flex-col justify-between p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100 ${cardBgClass}`}
+                  className={`group flex flex-col justify-between p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100 ${cardBgClass}`}
                   aria-label={`Task: ${task.title}, Status: ${task.completed ? 'Completed' : 'Pending'}${isOverdue && !isCompleted ? ', Overdue' : ''}`}
                 >
                   {/* Task Content */}
                   <div className="flex-1">
-                      <h3 className={`text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}>
+                      <h3 className={`text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}>
                           {task.title}
                       </h3>
                       {task.description && (
-                          <p className={`text-base mb-4 line-clamp-3 ${descriptionClass}`}>
+                          <p className={`text-base sm:text-lg md:text-xl mb-4 line-clamp-3 ${descriptionClass}`}>
                               {task.description}
                           </p>
                       )}
@@ -638,7 +639,7 @@ const TasksPage: NextPageWithLayout = () => {
             <p className="text-lg">Assign tasks to your team and track their progress here.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             {assignedTasks.map((task) => {
               const isOverdue = isTaskOverdue(task);
               const isCompleted = task.completed;
@@ -673,13 +674,13 @@ const TasksPage: NextPageWithLayout = () => {
               return (
                 <div
                   key={task._id}
-                  className={`group flex flex-col justify-between p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100 ${cardBgClass}`}
+                  className={`group flex flex-col justify-between p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100 ${cardBgClass}`}
                   aria-label={`Task: ${task.title}, Status: ${task.completed ? 'Completed' : 'Pending'}${isOverdue && !isCompleted ? ', Overdue' : ''}`}
                 >
                   <div className="flex-1">
-                    <h3 className={`text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}>{task.title}</h3>
+                    <h3 className={`text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}>{task.title}</h3>
                     {task.description && (
-                      <p className={`text-base mb-4 line-clamp-3 ${descriptionClass}`}>{task.description}</p>
+                      <p className={`text-base sm:text-lg md:text-xl mb-4 line-clamp-3 ${descriptionClass}`}>{task.description}</p>
                     )}
                     <p className={`text-sm font-semibold ${deadlineClass}`}>Deadline: {new Date(task.deadline).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                       {isOverdue && !isCompleted && (

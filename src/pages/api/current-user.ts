@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import * as cookie from "cookie";
 import dbConnect from "@/db/dbConfig";
 import User from "@/db/models/userModel";
+import userCompanyModel from "@/db/models/userCompanyModel";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect();
@@ -26,10 +27,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(404).json({ message: "User not found" });
   }
 
-  // Return only the current user's info
+  // Fetch user's role from userCompanyModel
+  const userCompany = await userCompanyModel.findOne({
+    userId: decoded.userId,
+  });
+
+  if (!userCompany) {
+    return res.status(404).json({ message: "UserCompany not found" });
+  }
+
+  // Return the current user's info, including role
   res.status(200).json({
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
+    role: userCompany.role || null,
   });
 } 

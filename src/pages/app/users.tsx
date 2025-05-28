@@ -212,7 +212,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
   }, [user]);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-8 font-sans overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
       {loadingUsers && <Loading />}
       {addUserModalOpen && (
         <AddUsersModal
@@ -230,8 +230,8 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
                 console.error("Error adding user:", result);
                 return result;
               } else {
-                fetchUsers(); // Refresh the user list after adding a new user
-                setAddUserModalOpen(false); // Close the modal after adding the user
+                fetchUsers();
+                setAddUserModalOpen(false);
                 return undefined;
               }
             } catch (error) {
@@ -241,7 +241,6 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           }}
         />
       )}
-
       {addRoleModalOpen && (
         <AddRoleModal
           onClose={() => setAddRoleModalOpen(false)}
@@ -250,59 +249,80 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           }}
         />
       )}
-
       {orgChartModalOpen && (
         <OrgChartModal
           onClose={() => setOrgChartModalOpen(false)}
           roles={roles}
         />
       )}
-
-      <h1 className="text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight">
         Manage Users
       </h1>
-
-      <div className="flex space-x-4 mb-8 justify-center">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-8 justify-center items-center">
         {user && user.role === "admin" && (
           <>
             <button
-              className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
               onClick={() => setAddUserModalOpen(true)}
             >
               Add User
             </button>
-
             <button
-              className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
               onClick={() => setAddRoleModalOpen(true)}
             >
               Add Role
             </button>
           </>
         )}
-
         {user && user.role === "admin" && (
           <button
-            className="inline-flex items-center justify-center bg-gradient-to-r from-sky-400 to-sky-600 hover:from-sky-600 hover:to-sky-400 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+            className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-sky-400 to-sky-600 hover:from-sky-600 hover:to-sky-400 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 transition-all duration-300 active:scale-95"
             onClick={() => setOrgChartModalOpen(true)}
           >
             View Org Chart
           </button>
         )}
       </div>
-
-      <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
+      {/* Card view for mobile only */}
+      <div className="flex flex-col gap-4 md:hidden">
+        {[...users]
+          .sort((a, b) => {
+            if (a.role === "admin" && b.role !== "admin") return -1;
+            if (a.role !== "admin" && b.role === "admin") return 1;
+            return 0;
+          })
+          .map((user) => (
+            <div key={user._id} className="bg-white rounded-xl shadow-md p-4 flex flex-col space-y-2">
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 font-semibold">First Name</span>
+                <span className="text-lg font-bold text-gray-900">{user.userId.firstName}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 font-semibold">Last Name</span>
+                <span className="text-lg font-bold text-gray-900">{user.userId.lastName}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 font-semibold">Email</span>
+                <span className="text-base text-gray-800 break-all">{user.userId.email}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 font-semibold">Role</span>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${user.role === "admin" ? "bg-red-100 text-red-800" : user.role === "user" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}>{user.role}</span>
+              </div>
+              {/* Add more fields or actions as needed */}
+            </div>
+          ))}
+      </div>
+      {/* Table view for desktop only */}
+      <div className="bg-white shadow-xl rounded-2xl overflow-x-auto hidden md:block">
         <Table<Project>
           title="Users List"
-          data={[...users] // Create a copy to avoid mutating the original array
+          data={[...users]
             .sort((a, b) => {
-              if (a.role === "admin" && b.role !== "admin") {
-                return -1; // a comes before b
-              }
-              if (a.role !== "admin" && b.role === "admin") {
-                return 1; // b comes before a
-              }
-              return 0; // No change in order
+              if (a.role === "admin" && b.role !== "admin") return -1;
+              if (a.role !== "admin" && b.role === "admin") return 1;
+              return 0;
             })
             .map((user) => ({
               id: user._id,
