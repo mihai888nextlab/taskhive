@@ -1,6 +1,15 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
+export interface IUser extends mongoose.Document {
+  email: string;
+  password: string; // Store hashed password
+  firstName: string;
+  lastName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const userSchema = new Schema(
   {
     email: { type: String, required: true, unique: true },

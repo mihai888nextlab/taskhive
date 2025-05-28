@@ -7,6 +7,7 @@ import { FaUserClock } from "react-icons/fa6"; // Assuming FaUserClock is from f
 import { FaTasks } from "react-icons/fa";
 import { FaCalendarAlt } from "react-icons/fa";
 import { FaBullhorn } from "react-icons/fa";
+import { IoIosChatboxes } from "react-icons/io";
 import AIWindow from "./AIWindow"; // Import the AIWindow component
 import { FaBars, FaTimes } from "react-icons/fa";
 
@@ -66,6 +67,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: "Users", path: "/app/users", icon: FaUserClock },
     { name: "Tasks", path: "/app/tasks", icon: FaTasks },
     { name: "Announcements", path: "/app/announcements", icon: FaBullhorn },
+    { name: "Comunication", path: "/app/communication", icon: IoIosChatboxes },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
     { name: "Settings", path: "/app/settings", icon: MdSettings },
   ];
@@ -327,7 +329,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           stroke="currentColor"
           strokeWidth={2}
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 4v16m8-8H4"
+          />
         </svg>
       </button>
       <AIWindow isOpen={isAIWindowOpen} onClose={() => setIsAIWindowOpen(false)}/>

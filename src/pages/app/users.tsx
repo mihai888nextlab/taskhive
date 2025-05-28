@@ -146,7 +146,10 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       const saveOrgChartResponse = await fetch("/api/org-chart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ levels: updatedLevels, availableRoles: orgChartData.availableRoles }),
+        body: JSON.stringify({
+          levels: updatedLevels,
+          availableRoles: orgChartData.availableRoles,
+        }),
       });
 
       if (!saveOrgChartResponse.ok) {
@@ -225,7 +228,13 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             role: string
           ) => {
             try {
-              const result = await addUser(email, firstName, lastName, password, role);
+              const result = await addUser(
+                email,
+                firstName,
+                lastName,
+                password,
+                role
+              );
               if (result) {
                 console.error("Error adding user:", result);
                 return result;

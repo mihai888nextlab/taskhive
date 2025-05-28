@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { hash } from "bcryptjs";
+import { hash } from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { serialize } from "cookie";
 import dbConnect from "@/db/dbConfig";
@@ -102,14 +102,7 @@ export default async function handler(
     await newUserCompany.save();
 
     res.status(201).json({
-      message: "User and company registered successfully.",
-      user: {
-        _id: savedUser._id,
-        email: savedUser.email,
-        firstName: savedUser.firstName,
-        lastName: savedUser.lastName,
-      },
-      company: savedCompany,
+      message: "User added successfully.",
     });
   } catch (dbError: any) {
     console.error("Database/Server error:", dbError);
