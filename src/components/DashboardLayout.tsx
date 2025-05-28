@@ -10,6 +10,7 @@ import { FaBullhorn } from "react-icons/fa";
 import { IoIosChatboxes } from "react-icons/io";
 import AIWindow from "./AIWindow"; // Import the AIWindow component
 import { FaBars, FaTimes } from "react-icons/fa";
+import { FaMoneyBillWave } from 'react-icons/fa'; // Import the finance icon
 
 import Link from "next/link";
 
@@ -67,9 +68,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: "Users", path: "/app/users", icon: FaUserClock },
     { name: "Tasks", path: "/app/tasks", icon: FaTasks },
     { name: "Announcements", path: "/app/announcements", icon: FaBullhorn },
-    { name: "Comunication", path: "/app/communication", icon: IoIosChatboxes },
+    { name: "Communication", path: "/app/communication", icon: IoIosChatboxes },
+    { name: "Finance", path: "/app/finance", icon: FaMoneyBillWave },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
     { name: "Settings", path: "/app/settings", icon: MdSettings },
+     // Add Finance link
   ];
 
   // Search logic
