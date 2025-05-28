@@ -75,6 +75,7 @@ const TasksPage: NextPageWithLayout = () => {
   const [usersBelowMe, setUsersBelowMe] = useState<any[]>([]);
   const [assignedTo, setAssignedTo] = useState<string>("");
   const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
+  const [assignedTasks, setAssignedTasks] = useState<Task[]>([]);
 
   // Function to fetch tasks from the API
   const fetchTasks = async () => {
@@ -128,6 +129,28 @@ const TasksPage: NextPageWithLayout = () => {
       setUsersBelowMe(data.usersBelow || []);
     }
     fetchUsersBelow();
+  }, []);
+
+  // Fetch tasks assigned by me
+  const fetchAssignedTasks = async () => {
+    try {
+      const response = await fetch("/api/tasks/assigned-by-me", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch assigned tasks.");
+      }
+      const data = await response.json();
+      setAssignedTasks(data);
+    } catch (err) {
+      console.error("Error fetching assigned tasks:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+    fetchAssignedTasks();
   }, []);
 
   // Reset form fields
@@ -584,6 +607,84 @@ const TasksPage: NextPageWithLayout = () => {
                               <FaTrash className="text-2xl" />
                           </button>
                       </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Tasks I Assigned to Others */}
+        <h2 className="text-4xl font-bold text-gray-900 mb-8 mt-16 pb-4 border-b-4 border-secondary text-center">
+          Tasks I Assigned to Others
+        </h2>
+        {assignedTasks.length === 0 ? (
+          <div className="text-center text-gray-600 text-xl mt-8 p-6 bg-secondary/10 rounded-lg border border-secondary/30 shadow-md">
+            <p className="font-semibold mb-3">You haven't assigned any tasks to others yet.</p>
+            <p className="text-lg">Assign tasks to your team and track their progress here.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {assignedTasks.map((task) => {
+              const isOverdue = isTaskOverdue(task);
+              const isCompleted = task.completed;
+              let cardBgClass = 'bg-white border-l-8 border-primary';
+              let titleClass = 'text-gray-900';
+              let descriptionClass = 'text-gray-700';
+              let deadlineClass = 'text-gray-500';
+              let statusIcon = <FaRegCircle className="text-gray-400 text-3xl mr-2 group-hover:text-primary transition-colors" />;
+              let statusTooltip = "Mark as Complete";
+              if (isCompleted) {
+                cardBgClass = 'opacity-80 bg-green-50 border-l-8 border-green-400';
+                titleClass = 'line-through text-gray-600';
+                descriptionClass = 'line-through text-gray-500';
+                deadlineClass = 'text-gray-400';
+                statusIcon = <FaCheckCircle className="text-green-500 text-3xl mr-2 group-hover:text-green-600 transition-colors" />;
+                statusTooltip = "Mark as Incomplete";
+              } else if (isOverdue) {
+                cardBgClass = 'bg-red-50 border-l-8 border-red-400 shadow-lg';
+                titleClass = 'text-gray-900 font-bold';
+                descriptionClass = 'text-gray-700';
+                deadlineClass = 'text-gray-600 font-semibold';
+                statusIcon = <FaExclamationTriangle className="text-red-500 text-3xl mr-2" />;
+                statusTooltip = "Task is Overdue (Cannot complete directly)";
+              }
+              // Get assignee info
+              let assigneeName = '';
+              let assigneeEmail = '';
+              if (task.userId && typeof task.userId === 'object' && 'email' in task.userId) {
+                assigneeEmail = (task.userId as { email: string }).email;
+                assigneeName = ((task.userId as any).firstName || '') + ' ' + ((task.userId as any).lastName || '');
+              }
+              return (
+                <div
+                  key={task._id}
+                  className={`group flex flex-col justify-between p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100 ${cardBgClass}`}
+                  aria-label={`Task: ${task.title}, Status: ${task.completed ? 'Completed' : 'Pending'}${isOverdue && !isCompleted ? ', Overdue' : ''}`}
+                >
+                  <div className="flex-1">
+                    <h3 className={`text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}>{task.title}</h3>
+                    {task.description && (
+                      <p className={`text-base mb-4 line-clamp-3 ${descriptionClass}`}>{task.description}</p>
+                    )}
+                    <p className={`text-sm font-semibold ${deadlineClass}`}>Deadline: {new Date(task.deadline).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {isOverdue && !isCompleted && (
+                        <span className="ml-2 px-2.5 py-1 bg-red-400 text-white text-xs rounded-full font-bold">OVERDUE</span>
+                      )}
+                    </p>
+                    {/* Show assignee info */}
+                    {assigneeEmail && (
+                      <div className="text-xs text-gray-500 mt-2">
+                        Assigned to: {assigneeName} ({assigneeEmail})
+                      </div>
+                    )}
+                  </div>
+                  {/* Actions Section (no edit/delete for assigned tasks) */}
+                  <div className="flex items-center justify-between pt-5 mt-5 border-t border-gray-100">
+                    <div className="flex items-center text-lg font-semibold">
+                      {statusIcon}
+                      <span className="ml-2">{isCompleted ? 'Completed' : isOverdue ? 'Overdue' : 'In Progress'}</span>
+                    </div>
                   </div>
                 </div>
               );
