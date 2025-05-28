@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaSpinner, FaCheckCircle, FaRegCircle, FaArrowRight, FaExclamationTriangle } from 'react-icons/fa';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 // Re-use the Task interface for consistency
 interface Task {
@@ -20,6 +21,7 @@ const DashboardTaskPreview: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
+  const router = useRouter();
 
   // Helper function to determine if a task is overdue
   const isTaskOverdue = (task: Task): boolean => {
@@ -116,6 +118,18 @@ const DashboardTaskPreview: React.FC = () => {
       setError((err as Error).message);
     } finally {
       setUpdatingTaskId(null);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (!res.ok) {
+        throw new Error("Logout failed");
+      }
+      router.push("/");
+    } catch (error) {
+      console.error("Error during logout:", error);
     }
   };
 

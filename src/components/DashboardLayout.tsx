@@ -29,6 +29,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [companyName, setCompanyName] = useState("Your Company");
 
   // Fetch users
   useEffect(() => {
@@ -46,6 +47,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         console.error("Error fetching users:", error);
       });
   }, []);
+
+  // Fetch company name from user context
+  useEffect(() => {
+    const fetchCompany = async () => {
+      if (user?._id) {
+        const response = await fetch(`/api/get-company?userId=${user._id}`);
+        if (response.ok) {
+          const companyData = await response.json();
+          setCompanyName(companyData.name);
+        } else {
+          console.error("Failed to fetch company");
+        }
+      }
+    };
+
+    fetchCompany();
+  }, [user]);
 
   // Handle logout
   const handleLogout = async () => {
@@ -173,7 +191,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* End Search Bar */}
         <nav>
           <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">
-            Main Menu
+            MAIN MENU - {companyName}
           </p>
           <ul className="mt-4 space-y-2">
             {menu.map((item) => (
@@ -273,7 +291,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             {/* End Search Bar Mobile */}
             <nav>
               <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">
-                Main Menu
+                MAIN MENU - {companyName}
               </p>
               <ul className="mt-4 space-y-2">
                 {menu.map((item) => (
