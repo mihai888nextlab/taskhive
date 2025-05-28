@@ -38,6 +38,29 @@ const isTaskOverdue = (task: Task): boolean => {
 };
 // --- End of helper function ---
 
+// Helper to check if userId is an object with email
+function isUserObj(user: any): user is { email: string } {
+  return user && typeof user === 'object' && 'email' in user && typeof user.email === 'string';
+}
+
+// Helper to get assigner info if not self-assigned
+function getAssignerInfo(task: any): string | null {
+  if (!task.createdBy || !task.userId) return null;
+  let assigneeEmail = '';
+  if (typeof task.userId === 'string') {
+    assigneeEmail = task.userId;
+  } else if (task.userId && typeof task.userId === 'object' && 'email' in task.userId) {
+    assigneeEmail = (task.userId as { email: string }).email;
+  }
+  if (
+    assigneeEmail &&
+    assigneeEmail.trim().toLowerCase() !== (task.createdBy as { email: string }).email.trim().toLowerCase()
+  ) {
+    const assigner = task.createdBy as { firstName?: string; lastName?: string; email: string };
+    return `Assigned by: ${assigner.firstName || ''} ${assigner.lastName || ''} (${assigner.email})`;
+  }
+  return null;
+}
 
 const TasksPage: NextPageWithLayout = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -247,9 +270,12 @@ const TasksPage: NextPageWithLayout = () => {
   };
 
   useEffect(() => {
-    // Try to get the current user's email from localStorage (or use your auth context if available)
     const email = localStorage.getItem('userEmail');
-    if (email) setCurrentUserEmail(email);
+    if (email) {
+      setCurrentUserEmail(email);
+    } else {
+      console.warn("No userEmail found in localStorage!");
+    }
   }, []);
 
   return (
@@ -459,6 +485,39 @@ const TasksPage: NextPageWithLayout = () => {
               }
               // --- End Dynamic Styling ---
 
+              // In the card rendering, update the 'Assigned by' line:
+              {task.createdBy && typeof task.createdBy === 'object' && 'email' in task.createdBy && task.userId && (
+                (() => {
+                  let assigneeEmail = '';
+                  if (typeof task.userId === 'string') {
+                    assigneeEmail = task.userId;
+                  } else if (task.userId && typeof task.userId === 'object' && 'email' in task.userId) {
+                    assigneeEmail = (task.userId as { email: string }).email;
+                  }
+                  // Only show if assigner and assignee are different
+                  if (
+                    assigneeEmail &&
+                    assigneeEmail.trim().toLowerCase() !== (task.createdBy as { email: string }).email.trim().toLowerCase()
+                  ) {
+                    const assigner = task.createdBy as { firstName?: string; lastName?: string; email: string };
+                    return (
+                      <div className="text-xs text-gray-500 mt-2">
+                        Assigned by: {assigner.firstName || ''} {assigner.lastName || ''} ({assigner.email})
+                      </div>
+                    );
+                  }
+                  return null;
+                })()
+              )}
+              
+              // In the button disabled logic, allow edit/delete if:
+              // - you are the assigner (createdBy.email === currentUserEmail)
+              // - OR the task is assigned to you (userId is your email or your ObjectId as string)
+              const isAssigner = task.createdBy && task.createdBy.email === currentUserEmail;
+              const isAssignee =
+                (typeof task.userId === 'string' && currentUserEmail && task.createdBy && task.createdBy.email === currentUserEmail) ||
+                (isUserObj(task.userId) && task.userId.email === currentUserEmail);
+
               return (
                 <div
                   key={task._id}
@@ -483,10 +542,9 @@ const TasksPage: NextPageWithLayout = () => {
                             <span className="ml-2 px-2.5 py-1 bg-red-400 text-white text-xs rounded-full font-bold">OVERDUE</span>
                           )}
                       </p>
-                      {task.createdBy && (
-                        <div className="text-xs text-gray-500 mt-2">
-                          Assigned by: {task.createdBy.firstName} {task.createdBy.lastName} ({task.createdBy.email})
-                        </div>
+                      {/* Show assigner info if not self-assigned */}
+                      {getAssignerInfo(task) && (
+                        <div className="text-xs text-gray-500 mt-2">{getAssignerInfo(task)}</div>
                       )}
                   </div>
 
@@ -513,7 +571,7 @@ const TasksPage: NextPageWithLayout = () => {
                               onClick={() => handleEditTask(task)}
                               className="text-primary hover:text-primary-dark p-3 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                               title="Edit Task"
-                              disabled={loading || task.completed || isOverdue || (task.createdBy && task.createdBy.email !== currentUserEmail)} // Only allow edit if current user is the assigner
+                              disabled={loading || task.completed || isOverdue} // Only allow edit if current user is the assigner or assigned to
                           >
                               <FaEdit className="text-2xl" />
                           </button>
@@ -521,7 +579,7 @@ const TasksPage: NextPageWithLayout = () => {
                               onClick={() => handleDeleteTask(task._id)}
                               className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Delete Task"
-                              disabled={loading || (task.createdBy && task.createdBy.email !== currentUserEmail)} // Only allow delete if current user is the assigner
+                              disabled={loading} // Only allow delete if current user is the assigner or assigned to
                           >
                               <FaTrash className="text-2xl" />
                           </button>
