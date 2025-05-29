@@ -10,7 +10,8 @@ import { FaBullhorn } from "react-icons/fa";
 import { IoIosChatboxes } from "react-icons/io";
 import AIWindow from "./AIWindow"; // Import the AIWindow component
 import { FaBars, FaTimes } from "react-icons/fa";
-import { FaMoneyBillWave } from "react-icons/fa"; // Import the finance icon
+import { FaMoneyBillWave } from "react-icons/fa"; // Correct import for the finance icon
+import { FaSignOutAlt } from "react-icons/fa"; // Import the logout icon
 
 import Link from "next/link";
 
@@ -218,12 +219,31 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             ))}
           </ul>
         </nav>
+        {/* Separator before user info */}
         <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
+        
+        {/* User Profile Section */}
+        <Link href="/app/settings" className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer">
+            {/* Placeholder for profile picture, using first letter of name */}
+            <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg">
+                {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
+            </div>
+            <div>
+                <p className="font-semibold text-white">
+                    {user.firstName} {user.lastName}
+                </p>
+                <p className="text-xs text-gray-400">
+                    {user.email}
+                </p>
+            </div>
+        </Link>
+
         <button
           onClick={handleLogout}
-          className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg"
+          className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center"
         >
-          Logout
+          <FaSignOutAlt className="mr-2" />
+          <span className="text-center">Logout</span>
         </button>
       </aside>
       {/* Sidebar drawer for mobile */}
@@ -340,7 +360,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 ))}
               </ul>
             </nav>
+            {/* Separator before user info */}
             <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
+
+            {/* User Profile Section Mobile */}
+            <Link href="/app/settings" className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer">
+                <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg">
+                    {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
+                </div>
+                <div>
+                    <p className="font-semibold text-white">
+                        {user.firstName} {user.lastName}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                        {user.email}
+                    </p>
+                </div>
+            </Link>
+
             <button
               onClick={() => {
                 setSidebarOpen(false);
@@ -348,7 +385,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               }}
               className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg"
             >
-              Logout
+              <FaSignOutAlt className="mr-2" />
+              <span className="text-center">Logout</span>
             </button>
           </aside>
         </div>
