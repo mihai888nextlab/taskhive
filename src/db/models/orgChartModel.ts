@@ -36,6 +36,9 @@ OrgChartSchema.statics.getLevelsWithAdmin = function (levels: Level[]) {
     // Add 'admin' to the top
     return [{ id: "admin-level", roles: ["admin"] }, ...levels];
   }
+  if (levels.length === 1) {
+    levels.push({ id: "default-level", roles: [] });
+  }
   return levels;
 };
 

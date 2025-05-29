@@ -50,6 +50,7 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
         conversationId: string;
         senderId: string;
         content: string;
+        type?: "text" | "file"; // Optional type, e.g., 'text', 'image', etc.
       }) => {
         console.log("Message received:", data);
         // TODO: Authenticate senderId
@@ -62,6 +63,7 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
             conversationId: data.conversationId,
             senderId: data.senderId,
             content: data.content,
+            type: data.type || "text", // Default to 'text' if type is not provided
           });
           await newMessage.save();
 
@@ -80,6 +82,7 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
             conversationId: data.conversationId,
             senderId: senderIdData,
             content: data.content,
+            type: data.type || "text",
             timestamp: new Date().toISOString(), // Use ISO string for consistency
           });
           console.log(`Message sent to room ${data.conversationId}`);

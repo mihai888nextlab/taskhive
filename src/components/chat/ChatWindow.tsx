@@ -5,6 +5,8 @@ import { useAuth } from "@/pages/_app";
 import { IUser } from "@/db/models/userModel";
 import { PopulatedConversation } from "./ConversationList";
 import Loading from "@/components/Loading";
+import { BsPaperclip } from "react-icons/bs";
+import FileCard from "@/components/FileCard";
 
 // Ensure these types match your backend models and API responses
 interface ChatMessage {
@@ -29,6 +31,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   const [newMessageContent, setNewMessageContent] = useState("");
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showFilesDropdown, setShowFilesDropdown] = useState(false);
+  const [userFiles, setUserFiles] = useState<
+    { fileName: string; fileLocation: string; fileSize: number }[]
+  >([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const conversationId = selectedConversation?._id?.toString(); // Extract ID from conversation object
@@ -46,11 +52,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       socket.disconnected ||
       socket.io.opts.query?.conversationId !== conversationId
     ) {
-      if (socket) socket.disconnect(); 
+      if (socket) socket.disconnect();
 
       socket = io({
         path: "/api/socket",
-        query: { conversationId, userId: user._id }, 
+        query: { conversationId, userId: user._id },
       });
 
       socket.on("connect", () => {
@@ -86,7 +92,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       ) {
         // Keep socket open if still on same conversation
       } else if (socket) {
-        socket.disconnect(); 
+        socket.disconnect();
       }
     };
   }, [conversationId, user]);
@@ -94,7 +100,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   // 2. Fetch initial messages (REST API)
   useEffect(() => {
     if (!user || !conversationId) {
-      setMessages([]); 
+      setMessages([]);
       return;
     }
 
@@ -135,18 +141,59 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       };
       socket.emit("sendMessage", messageData);
       setNewMessageContent("");
-      setError(null); 
+      setError(null);
     } else if (!newMessageContent.trim()) {
-      setError("Mesajul nu poate fi gol.");
+      setError("Message cannot be empty!");
     } else if (!socket || !socket.connected) {
       setError("Chat-ul nu este conectat. Te rugăm să încerci din nou.");
     }
   };
 
+  // Fetch user files when dropdown is opened
+  useEffect(() => {
+    if (showFilesDropdown && user) {
+      fetch("/api/getFiles")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data.files)) {
+            setUserFiles(
+              data.files
+                .filter((f: any) => f.uploadedBy === user._id)
+                .map((f: any) => ({
+                  fileName: f.fileName,
+                  fileLocation: f.fileLocation,
+                  fileSize: f.fileSize || 0, // Ensure fileSize is always a number
+                }))
+            );
+          }
+        });
+    }
+  }, [showFilesDropdown, user]);
+
+  const handleSendFile = (
+    fileUrl: string,
+    fileName: string,
+    fileSize: number
+  ) => {
+    if (user && socket && socket.connected && conversationId) {
+      const messageData = {
+        conversationId,
+        senderId: user._id,
+        content: JSON.stringify({ fileUrl, fileName, fileSize }),
+        type: "file" as const,
+      };
+      socket.emit("sendMessage", messageData);
+      setShowFilesDropdown(false);
+      setError(null);
+    }
+  };
+
   if (!selectedConversation) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-600 bg-white rounded-lg p-6 shadow-md shadow-inner"> 
-        <p className="text-xl font-semibold">Selectează o conversație sau începe una nouă</p>
+      <div className="flex flex-col items-center justify-center h-full text-gray-600 bg-white rounded-lg p-6 shadow-md shadow-inner">
+        <p className="text-xl font-semibold">
+          Selectează o conversație sau începe una nouă
+        </p>
       </div>
     );
   }
@@ -175,16 +222,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
   return (
     // Containerul principal al ferestrei de chat.
-    <div className="flex flex-col h-full bg-white rounded-lg text-gray-800 shadow-md"> 
+    <div className="flex flex-col h-full bg-white rounded-lg text-gray-800 shadow-md">
       {/* Antetul Chatului - mai mult contrast și stilizare - cu efect de Glassmorphism */}
-      <div className="p-4 border-b border-gray-300 bg-white/70 rounded-t-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10"> {/* Fundal translucid, umbră personalizată, efect de blur */}
+      <div className="p-4 border-b border-gray-300 bg-white/70 rounded-t-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10">
+        {" "}
+        {/* Fundal translucid, umbră personalizată, efect de blur */}
         <h3 className="font-semibold text-lg text-gray-800">
           {currentChatName}
         </h3>
       </div>
 
       {/* Zona de Mesaje - acum cu umbră internă pentru mai multă profunzime și fundal subtil */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar shadow-inner bg-gray-50"> {/* Fundal gri foarte subtil, umbră internă pentru efect de "adâncime" */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar shadow-inner bg-gray-50">
+        {" "}
+        {/* Fundal gri foarte subtil, umbră internă pentru efect de "adâncime" */}
         {loadingMessages ? (
           <div className="text-center text-gray-600">
             <Loading />
@@ -218,15 +269,52 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                 className={`flex ${isSender ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[70%] p-3 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out hover:scale-[1.01] hover:shadow-xl ${ // Colțuri mai rotunjite, umbră personalizată, efect de hover amplificat
+                  className={`max-w-[70%] p-3 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out hover:scale-[1.01] hover:shadow-xl ${
+                    // Colțuri mai rotunjite, umbră personalizată, efect de hover amplificat
                     isSender
-                      ? "bg-blue-500 text-white rounded-br-none ring-1 ring-blue-300" 
-                      : "bg-gray-300 text-gray-800 rounded-bl-none ring-1 ring-gray-100" 
+                      ? "bg-blue-500 text-white rounded-br-none ring-1 ring-blue-300"
+                      : "bg-gray-300 text-gray-800 rounded-bl-none ring-1 ring-gray-100"
                   }`}
                 >
-                  <div className={`font-semibold text-xs mb-1 ${isSender ? "text-white" : "text-gray-700"}`}>{senderName}</div> 
-                  <p className="text-sm break-words">{msg.content}</p>
-                  <span className={`text-xs opacity-75 mt-1 block text-right ${isSender ? "text-blue-100" : "text-gray-500"}`}> 
+                  <div
+                    className={`font-semibold text-xs mb-1 ${
+                      isSender ? "text-white" : "text-gray-700"
+                    }`}
+                  >
+                    {senderName}
+                  </div>
+                  {msg.type === "file" ? (
+                    (() => {
+                      let fileData: {
+                        fileUrl: string;
+                        fileName: string;
+                        fileSize?: number;
+                      } | null = null;
+                      try {
+                        fileData = JSON.parse(msg.content);
+                      } catch {
+                        fileData = null;
+                      }
+                      return fileData ? (
+                        <FileCard
+                          fileName={fileData.fileName}
+                          fileSize={fileData.fileSize || 0}
+                          downloadUrl={fileData.fileUrl}
+                        />
+                      ) : (
+                        <span className="text-red-500 text-xs">
+                          Fișier invalid
+                        </span>
+                      );
+                    })()
+                  ) : (
+                    <p className="text-sm break-words">{msg.content}</p>
+                  )}
+                  <span
+                    className={`text-xs opacity-75 mt-1 block text-right ${
+                      isSender ? "text-blue-100" : "text-gray-500"
+                    }`}
+                  >
                     {new Date(msg.timestamp).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -240,22 +328,55 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Formular de Trimitere Mesaj - mai mult contrast și stilizare - cu efect de Glassmorphism */}
+      {/* Formular de Trimitere Mesaj - cu butonul de atașament în stânga inputului */}
       <form
         onSubmit={handleSendMessage}
-        className="p-4 border-t border-gray-300 bg-white/70 flex space-x-2 rounded-b-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10" // Fundal translucid, umbră personalizată, efect de blur
+        className="p-4 border-t border-gray-300 bg-white/70 flex space-x-2 rounded-b-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10"
       >
+        <button
+          type="button"
+          className="flex items-center justify-center bg-gray-200 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-300 transition mr-2"
+          onClick={() => setShowFilesDropdown((v) => !v)}
+          tabIndex={-1}
+        >
+          <BsPaperclip className="text-xl" />
+        </button>
+        {showFilesDropdown && (
+          <div className="absolute bottom-20 left-8 bg-white border rounded-lg shadow-lg z-50 w-64 max-h-64 overflow-y-auto">
+            <div className="p-2 font-semibold border-b">Fișierele mele</div>
+            {userFiles.length === 0 ? (
+              <div className="p-2 text-gray-500">Nu ai fișiere încărcate.</div>
+            ) : (
+              userFiles.map((file) => (
+                <button
+                  key={file.fileLocation}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 transition"
+                  onClick={() =>
+                    handleSendFile(
+                      file.fileLocation,
+                      file.fileName,
+                      file.fileSize
+                    )
+                  } // Assuming size is not needed here
+                  type="button"
+                >
+                  {file.fileName}
+                </button>
+              ))
+            )}
+          </div>
+        )}
         <input
           type="text"
           value={newMessageContent}
           onChange={(e) => setNewMessageContent(e.target.value)}
           placeholder="Scrie un mesaj..."
-          className="flex-1 p-2 border border-gray-400 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 placeholder-gray-500 transition-all duration-200 ease-in-out" // Colțuri mai rotunjite, focus pronunțat, tranziție
+          className="flex-1 p-2 border border-gray-400 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 placeholder-gray-500 transition-all duration-200 ease-in-out"
           disabled={!user || loadingMessages}
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold" 
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
           disabled={!user || loadingMessages || !newMessageContent.trim()}
         >
           Trimite

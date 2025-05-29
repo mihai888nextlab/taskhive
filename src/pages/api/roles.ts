@@ -60,6 +60,7 @@ export default async function handler(
         name,
         companyId: decodedToken?.companyId,
       });
+
       res.status(201).json(newRole);
     } catch (error) {
       console.error("Error creating role:", error);
