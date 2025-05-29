@@ -5,6 +5,7 @@ import { useAuth } from "@/pages/_app";
 import { IConversation } from "@/db/models/conversationsModel";
 import { IUser } from "@/db/models/userModel";
 import { PopulatedConversation } from "./ConversationList";
+import Loading from "@/components/Loading";
 
 // Ensure these types match your backend models and API responses
 interface ChatMessage {
@@ -41,17 +42,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   useEffect(() => {
     if (!user || !conversationId) return;
 
-    // Only establish connection if not already connected or if conversationId changes
     if (
       !socket ||
       socket.disconnected ||
       socket.io.opts.query?.conversationId !== conversationId
     ) {
-      if (socket) socket.disconnect(); // Disconnect previous socket if exists
+      if (socket) socket.disconnect(); 
 
       socket = io({
         path: "/api/socket",
-        query: { conversationId, userId: user._id }, // Pass context data to server
+        query: { conversationId, userId: user._id }, 
       });
 
       socket.on("connect", () => {
@@ -66,7 +66,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       socket.on("messageReceived", (message: ChatMessage) => {
         console.log("New message received:", message);
         setMessages((prevMessages) => {
-          if (prevMessages.find((m) => m._id === message._id)) {
+          if (prevMessages.some((m) => m._id === message._id)) {
             return prevMessages;
           }
           return [...prevMessages, message];
@@ -79,9 +79,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       });
     }
 
-    // Clean up on component unmount or conversation change
     return () => {
-      // Don't disconnect if socket is used by another instance or if it's the same conversation
       if (
         socket &&
         socket.connected &&
@@ -89,7 +87,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       ) {
         // Keep socket open if still on same conversation
       } else if (socket) {
-        socket.disconnect(); // Disconnect if changing conversation or unmounting
+        socket.disconnect(); 
       }
     };
   }, [conversationId, user]);
@@ -97,7 +95,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   // 2. Fetch initial messages (REST API)
   useEffect(() => {
     if (!user || !conversationId) {
-      setMessages([]); // Clear messages if no conversation is selected
+      setMessages([]); 
       return;
     }
 
@@ -110,7 +108,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         );
         if (!res.ok) throw new Error("Failed to fetch initial messages");
         const data = await res.json();
-        // Assuming messages come with senderId populated
         setMessages(data.messages as ChatMessage[]);
       } catch (err: any) {
         console.error("Error fetching initial messages:", err);
@@ -135,11 +132,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         conversationId,
         senderId: user._id,
         content: newMessageContent.trim(),
-        type: "text" as "text", // Explicitly type for safety
+        type: "text" as "text", 
       };
       socket.emit("sendMessage", messageData);
       setNewMessageContent("");
-      setError(null); // Clear any previous errors
+      setError(null); 
     } else if (!newMessageContent.trim()) {
       setError("Mesajul nu poate fi gol.");
     } else if (!socket || !socket.connected) {
@@ -149,8 +146,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
   if (!selectedConversation) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-500">
-        <p className="text-xl">Selectează o conversație sau începe una nouă</p>
+      <div className="flex flex-col items-center justify-center h-full text-gray-600 bg-white rounded-lg p-6 shadow-md shadow-inner"> 
+        <p className="text-xl font-semibold">Selectează o conversație sau începe una nouă</p>
       </div>
     );
   }
@@ -178,22 +175,26 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   );
 
   return (
-    <div className="flex flex-col h-full bg-white border rounded-lg shadow-md">
-      <div className="p-4 border-b bg-gray-50">
+    // Containerul principal al ferestrei de chat.
+    <div className="flex flex-col h-full bg-white rounded-lg text-gray-800 shadow-md"> 
+      {/* Antetul Chatului - mai mult contrast și stilizare - cu efect de Glassmorphism */}
+      <div className="p-4 border-b border-gray-300 bg-white/70 rounded-t-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10"> {/* Fundal translucid, umbră personalizată, efect de blur */}
         <h3 className="font-semibold text-lg text-gray-800">
           {currentChatName}
         </h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      {/* Zona de Mesaje - acum cu umbră internă pentru mai multă profunzime și fundal subtil */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar shadow-inner bg-gray-50"> {/* Fundal gri foarte subtil, umbră internă pentru efect de "adâncime" */}
         {loadingMessages ? (
-          <div className="text-center text-gray-500">
-            Se încarcă mesajele...
+          <div className="text-center text-gray-600">
+            <Loading />
+            <p className="mt-2">Se încarcă mesajele...</p>
           </div>
         ) : error ? (
-          <div className="text-center text-red-500">{error}</div>
+          <div className="text-center text-red-600">{error}</div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-gray-500">
+          <div className="text-center text-gray-600">
             Fii primul care trimite un mesaj!
           </div>
         ) : (
@@ -214,19 +215,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
             return (
               <div
-                key={msg._id || Math.random()} // Fallback for key if _id is not immediately available
+                key={msg._id || Math.random()}
                 className={`flex ${isSender ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[70%] p-3 rounded-xl ${
+                  className={`max-w-[70%] p-3 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out hover:scale-[1.01] hover:shadow-xl ${ // Colțuri mai rotunjite, umbră personalizată, efect de hover amplificat
                     isSender
-                      ? "bg-blue-500 text-white rounded-br-none"
-                      : "bg-gray-200 text-gray-800 rounded-bl-none"
+                      ? "bg-blue-500 text-white rounded-br-none ring-1 ring-blue-300" 
+                      : "bg-gray-300 text-gray-800 rounded-bl-none ring-1 ring-gray-100" 
                   }`}
                 >
-                  <div className="font-semibold text-xs mb-1">{senderName}</div>
+                  <div className={`font-semibold text-xs mb-1 ${isSender ? "text-white" : "text-gray-700"}`}>{senderName}</div> 
                   <p className="text-sm break-words">{msg.content}</p>
-                  <span className="text-xs opacity-75 mt-1 block text-right">
+                  <span className={`text-xs opacity-75 mt-1 block text-right ${isSender ? "text-blue-100" : "text-gray-500"}`}> 
                     {new Date(msg.timestamp).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -240,21 +241,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Formular de Trimitere Mesaj - mai mult contrast și stilizare - cu efect de Glassmorphism */}
       <form
         onSubmit={handleSendMessage}
-        className="p-4 border-t bg-gray-50 flex space-x-2"
+        className="p-4 border-t border-gray-300 bg-white/70 flex space-x-2 rounded-b-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10" // Fundal translucid, umbră personalizată, efect de blur
       >
         <input
           type="text"
           value={newMessageContent}
           onChange={(e) => setNewMessageContent(e.target.value)}
           placeholder="Scrie un mesaj..."
-          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 p-2 border border-gray-400 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 placeholder-gray-500 transition-all duration-200 ease-in-out" // Colțuri mai rotunjite, focus pronunțat, tranziție
           disabled={!user || loadingMessages}
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold" 
           disabled={!user || loadingMessages || !newMessageContent.trim()}
         >
           Trimite

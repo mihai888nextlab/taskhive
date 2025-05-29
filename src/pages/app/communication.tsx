@@ -42,14 +42,14 @@ const Communication: NextPageWithLayout = () => {
         setConversations(data.conversations as PopulatedConversation[]);
       } catch (err: any) {
         console.error("Error fetching conversations:", err);
-        setError("Nu s-au putut încărca conversațiile.");
+        setError("Could not load conversations.");
       } finally {
         setLoadingConversations(false);
       }
     };
 
     fetchConversations();
-  }, [user]); // Re-fetch when user changes
+  }, [user]);
 
   const handleChatCreated = (newConversationId: string) => {
     // Re-fetch conversations to get the new one and update the list
@@ -76,7 +76,7 @@ const Communication: NextPageWithLayout = () => {
   const handleGroupChatCreated = (newConversationId: string) => {};
 
   return (
-    <div>
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
       {loadingUser && <Loading />}
       <div className="flex h-[calc(100vh-100px)]">
         {" "}
