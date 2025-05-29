@@ -10,6 +10,19 @@ interface NewDirectChatModalProps {
   onChatCreated: (conversationId: string) => void;
 }
 
+interface GetUsersResponse {
+  _id: string;
+  userId: {
+    _id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  companyId: string;
+  role: string;
+  permissions: string[];
+}
+
 const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
   isOpen,
   onClose,
@@ -17,13 +30,12 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
 }) => {
   const { user } = useAuth(); // Current user
   const [searchTerm, setSearchTerm] = useState("");
-  const [allUsers, setAllUsers] = useState<IUser[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
+  const [allUsers, setAllUsers] = useState<GetUsersResponse[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<GetUsersResponse[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [creatingChat, setCreatingChat] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all users (excluding current user)
   useEffect(() => {
     if (!isOpen || !user) return;
 
@@ -31,12 +43,12 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
       setLoadingUsers(true);
       setError(null);
       try {
-        const res = await fetch("/api/users"); // API to get all users
+        const res = await fetch("/api/get-users"); // API to get all users
         if (!res.ok) throw new Error("Failed to fetch users");
         const data = await res.json();
         // Filter out the current user
         const users = data.users.filter(
-          (u: IUser) => (u._id as string) !== user._id
+          (u: GetUsersResponse) => (u.userId._id as string) !== user._id
         );
         setAllUsers(users);
         setFilteredUsers(users);
@@ -59,11 +71,15 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
       setFilteredUsers(
         allUsers.filter(
           (u) =>
-            u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (u.firstName &&
-              u.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (u.lastName &&
-              u.lastName.toLowerCase().includes(searchTerm.toLowerCase()))
+            u.userId.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (u.userId.firstName &&
+              u.userId.firstName
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())) ||
+            (u.userId.lastName &&
+              u.userId.lastName
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase()))
         )
       );
     }
@@ -135,12 +151,12 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
               >
                 <div>
                   <p className="font-semibold">
-                    {u.firstName} {u.lastName}
+                    {u.userId.firstName} {u.userId.lastName}
                   </p>
-                  <p className="text-sm text-gray-600">{u.email}</p>
+                  <p className="text-sm text-gray-600">{u.userId.email}</p>
                 </div>
                 <button
-                  onClick={() => handleStartChat(u._id as string)}
+                  onClick={() => handleStartChat(u.userId._id as string)}
                   className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 disabled:opacity-50"
                   disabled={creatingChat}
                 >

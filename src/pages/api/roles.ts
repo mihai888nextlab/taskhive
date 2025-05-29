@@ -1,14 +1,20 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/db/dbConfig";
 import Role from "@/db/models/roleModel";
+import * as cookie from "cookie";
+import { JWTPayload } from "@/types";
+import jwt from "jsonwebtoken";
 
 const DEFAULT_ADMIN_ROLE = "admin";
 
-async function ensureAdminRoleExists() {
+async function ensureAdminRoleExists(companyId: string | null) {
   try {
-    const adminRole = await Role.findOne({ name: DEFAULT_ADMIN_ROLE });
+    const adminRole = await Role.findOne({
+      name: DEFAULT_ADMIN_ROLE,
+      companyId,
+    });
     if (!adminRole) {
-      await Role.create({ name: DEFAULT_ADMIN_ROLE });
+      await Role.create({ name: DEFAULT_ADMIN_ROLE, companyId });
       console.log("Default admin role created.");
     }
   } catch (error) {
@@ -16,15 +22,27 @@ async function ensureAdminRoleExists() {
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   await dbConnect();
 
-  // Ensure admin role exists on every request
-  await ensureAdminRoleExists();
+  const cookies = cookie.parse(req.headers.cookie || "");
+  const token = cookies.auth_token;
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+  const decodedToken: JWTPayload | null = jwt.verify(
+    token,
+    process.env.JWT_SECRET || ""
+  ) as JWTPayload;
+
+  await ensureAdminRoleExists(decodedToken?.companyId);
 
   if (req.method === "GET") {
     try {
-      const roles = await Role.find();
+      const roles = await Role.find({ companyId: decodedToken?.companyId });
       res.status(200).json(roles);
     } catch (error) {
       console.error("Error fetching roles:", error);
@@ -38,7 +56,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-      const newRole = await Role.create({ name });
+      const newRole = await Role.create({
+        name,
+        companyId: decodedToken?.companyId,
+      });
       res.status(201).json(newRole);
     } catch (error) {
       console.error("Error creating role:", error);

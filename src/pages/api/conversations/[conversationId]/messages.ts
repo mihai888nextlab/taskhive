@@ -42,7 +42,15 @@ export default async function handler(
         .populate("senderId", "firstName lastName email") // Populate sender details for display
         .exec();
 
-      res.status(200).json({ messages });
+      const transformedMessages = messages.map((msg: any) => {
+        const obj = msg.toObject();
+        return {
+          ...obj,
+          timestamp: obj.createdAt,
+        };
+      });
+
+      res.status(200).json({ messages: transformedMessages });
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Internal server error" });

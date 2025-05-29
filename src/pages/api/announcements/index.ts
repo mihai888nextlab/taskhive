@@ -1,12 +1,15 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import dbConnect from '@/db/dbConfig';
-import AnnouncementModel from '@/db/models/announcementModel';
-import UserModel from '@/db/models/userModel';
+import type { NextApiRequest, NextApiResponse } from "next";
+import dbConnect from "@/db/dbConfig";
+import AnnouncementModel from "@/db/models/announcementModel";
+import UserModel from "@/db/models/userModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
 import * as cookie from "cookie";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   await dbConnect();
 
   const cookies = cookie.parse(req.headers.cookie || "");
@@ -33,31 +36,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     userCompany = await userCompanyModel.findOne({ userId: user._id });
   }
 
-  if (req.method === 'GET') {
+  const companyUserRecords = await userCompanyModel
+    .find({ companyId: decoded.companyId })
+    .select("userId")
+    .lean();
+
+  const companyUserIds = companyUserRecords.map((record) => record.userId);
+
+  if (req.method === "GET") {
     // Anyone can view announcements
-    const announcements = await AnnouncementModel.find()
+    const announcements = await AnnouncementModel.find({
+      createdBy: { $in: companyUserIds },
+    })
       .sort({ createdAt: -1 })
-      .populate('createdBy', 'firstName lastName email');
+      .populate("createdBy", "firstName lastName email");
     return res.status(200).json(announcements);
   }
 
-  if (req.method === 'POST') {
+  if (req.method === "POST") {
     // Only admin can create
-    if (!user || !userCompany || (userCompany.role || '').toLowerCase() !== 'admin') {
-      return res.status(403).json({ message: 'Only admins can create announcements.' });
+    if (
+      !user ||
+      !userCompany ||
+      (userCompany.role || "").toLowerCase() !== "admin"
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Only admins can create announcements." });
     }
     const { title, content } = req.body;
     if (!title || !content) {
-      return res.status(400).json({ message: 'Title and content are required.' });
+      return res
+        .status(400)
+        .json({ message: "Title and content are required." });
     }
     const announcement = await AnnouncementModel.create({
       title,
       content,
       createdBy: user._id,
     });
-    await announcement.populate('createdBy', 'firstName lastName email');
+    await announcement.populate("createdBy", "firstName lastName email");
     return res.status(201).json(announcement);
   }
 
-  return res.status(405).json({ message: 'Method not allowed' });
-} 
+  return res.status(405).json({ message: "Method not allowed" });
+}

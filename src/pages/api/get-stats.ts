@@ -2,21 +2,64 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/db/dbConfig";
 import userModel from "@/db/models/userModel";
 import taskModel from "@/db/models/taskModel"; // Assuming you have a task model
+import userCompanyModel from "@/db/models/userCompanyModel";
+import * as cookie from "cookie";
+import jwt from "jsonwebtoken";
+import { JWTPayload } from "@/types";
+import { Types } from "mongoose";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   await dbConnect();
+
+  const cookies = cookie.parse(req.headers.cookie || "");
+  const token = cookies.auth_token;
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const decodedToken: JWTPayload | null = jwt.verify(
+    token,
+    process.env.JWT_SECRET || ""
+  ) as JWTPayload;
 
   try {
     // Get total users
-    const totalUsers = await userModel.countDocuments();
+    const totalUsers = await userCompanyModel
+      .find({ companyId: decodedToken.companyId })
+      .countDocuments();
 
     // Get users created in the last 7 days
     const last7Days = new Date();
     last7Days.setDate(last7Days.getDate() - 7);
-    const newUsers = await userModel.countDocuments({ createdAt: { $gte: last7Days } });
+    const newUsers = await userCompanyModel
+      .find({ companyId: decodedToken.companyId })
+      .countDocuments({
+        createdAt: { $gte: last7Days },
+      });
 
     // Get total tasks
-    const totalTasks = await taskModel.countDocuments();
+    const companyUserRecords = await userCompanyModel
+      .find({ companyId: decodedToken.companyId })
+      .select("userId") // Select only the userId field
+      .lean(); // Return plain JavaScript objects for efficiency
+
+    // Extract just the user IDs as an array of Mongoose ObjectIds
+    const companyUserIds = companyUserRecords.map(
+      (record) => new Types.ObjectId(record.userId)
+    );
+
+    const totalTasks = await taskModel
+      .find({
+        $or: [
+          { userId: { $in: companyUserIds } }, // Task assigned to a user in the company
+          { createdBy: { $in: companyUserIds } }, // Task created by a user in the company
+        ],
+      })
+      .countDocuments();
 
     // Get completed tasks in the last 7 days
     const completedTasks = await taskModel.countDocuments({

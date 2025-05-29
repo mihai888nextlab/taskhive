@@ -3,16 +3,21 @@ import React, { useState, useEffect } from "react";
 import { IConversation } from "@/db/models/conversationsModel";
 import { IUser } from "@/db/models/userModel";
 import { useAuth } from "@/pages/_app";
+import mongoose from "mongoose";
 
-export type PopulatedConversation = IConversation & {
-  participants: IUser[]; // Override the ObjectId[] with IUser[] for populated data
-};
+export interface PopulatedConversation extends mongoose.Document {
+  _id: string; // Assuming _id can be a string or number
+  type: "direct" | "group" | "project";
+  participants: IUser[];
+  name?: string;
+  lastMessage: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface ConversationListProps {
-  conversations: (IConversation & { participants: IUser[] })[]; // Conversations with populated participants
-  onSelectConversation: (
-    conversation: IConversation & { participants: IUser[] }
-  ) => void;
+  conversations: PopulatedConversation[]; // Conversations with populated participants
+  onSelectConversation: (conversation: PopulatedConversation) => void;
   selectedConversationId: string | null;
   onNewChatClick: () => void; // For opening NewDirectChatModal
   onNewGroupClick: () => void; // For opening NewGroupChatModal
@@ -32,10 +37,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const getConversationName = (conversation: PopulatedConversation) => {
     if (conversation.type === "direct") {
       const otherParticipant = conversation.participants.find(
-        (p) => p._id.toString() !== user?._id
+        (p) => String(p._id) !== user?._id
       );
       return otherParticipant
-        ? `${otherParticipant.firstNane || ""} ${
+        ? `${otherParticipant.firstName || ""} ${
             otherParticipant.lastName || ""
           }`.trim() || otherParticipant.email
         : "Unknown User";
@@ -64,7 +69,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                 clipRule="evenodd"
               />
             </svg>
-            Nouă conversație
+            New Chat
           </button>
           <button
             onClick={onNewGroupClick}
@@ -78,7 +83,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
             >
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 7.5c.04-.263.07-.527.07-.75a4.5 4.5 0 00-8.903-1.004c.009.07.017.14.026.21A4.5 4.5 0 0010 17a4.5 4.5 0 004.5-4.5c0-.17-.009-.34-.026-.51zm0 0a.75.75 0 00-.02-.21c-.02-.07-.04-.14-.06-.21M16.5 13a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0zM19.5 13a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z" />
             </svg>
-            Grup Nou
+            New Group
           </button>
         </div>
       </div>
@@ -108,7 +113,9 @@ const ConversationList: React.FC<ConversationListProps> = ({
                 {getConversationName(conversation)}
               </h4>
               {/* Optional: Display last message snippet */}
-              {/* <p className="text-sm text-gray-600 truncate">Last message content...</p> */}
+              <p className="text-sm text-gray-600 truncate">
+                {conversation.lastMessage || "No messages yet"}
+              </p>
             </div>
           ))
         )}

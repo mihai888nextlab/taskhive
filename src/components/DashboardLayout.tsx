@@ -10,7 +10,7 @@ import { FaBullhorn } from "react-icons/fa";
 import { IoIosChatboxes } from "react-icons/io";
 import AIWindow from "./AIWindow"; // Import the AIWindow component
 import { FaBars, FaTimes } from "react-icons/fa";
-import { FaMoneyBillWave } from 'react-icons/fa'; // Import the finance icon
+import { FaMoneyBillWave } from "react-icons/fa"; // Import the finance icon
 
 import Link from "next/link";
 
@@ -29,41 +29,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [companyName, setCompanyName] = useState("Your Company");
 
   // Fetch users
   useEffect(() => {
     fetch("/api/get-users")
-      .then(res => {
+      .then((res) => {
         if (!res.ok) {
           throw new Error("Network response was not ok");
         }
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         setUsers(data.users || []);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching users:", error);
       });
   }, []);
-
-  // Fetch company name from user context
-  useEffect(() => {
-    const fetchCompany = async () => {
-      if (user?._id) {
-        const response = await fetch(`/api/get-company?userId=${user._id}`);
-        if (response.ok) {
-          const companyData = await response.json();
-          setCompanyName(companyData.name);
-        } else {
-          console.error("Failed to fetch company");
-        }
-      }
-    };
-
-    fetchCompany();
-  }, [user]);
 
   // Handle logout
   const handleLogout = async () => {
@@ -71,7 +53,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       const res = await fetch("/api/auth/logout", { method: "POST" });
       if (res.ok) {
         setUser(null);
-        router.push("/");
+        router.push("/login");
       } else {
         console.error("Logout failed");
       }
@@ -90,7 +72,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: "Finance", path: "/app/finance", icon: FaMoneyBillWave },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
     { name: "Settings", path: "/app/settings", icon: MdSettings },
-     // Add Finance link
+    // Add Finance link
   ];
 
   // Search logic
@@ -102,22 +84,29 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
 
     const lower = search.toLowerCase();
-    const pageResults = menu.filter(m => m.name.toLowerCase().includes(lower));
-    
+    const pageResults = menu.filter((m) =>
+      m.name.toLowerCase().includes(lower)
+    );
+
     // Filter users based on the search input
-    const userResults = users.filter(u =>
-      (u.userId.firstName && u.userId.firstName.toLowerCase().includes(lower)) ||
-      (u.userId.lastName && u.userId.lastName.toLowerCase().includes(lower)) ||
-      (u.userId.email && u.userId.email.toLowerCase().includes(lower))
+    const userResults = users.filter(
+      (u) =>
+        (u.userId.firstName &&
+          u.userId.firstName.toLowerCase().includes(lower)) ||
+        (u.userId.lastName &&
+          u.userId.lastName.toLowerCase().includes(lower)) ||
+        (u.userId.email && u.userId.email.toLowerCase().includes(lower))
     );
 
     // Set search results
     setSearchResults([
-      ...pageResults.map(r => ({ type: "page", ...r })),
-      ...userResults.map(u => ({
+      ...pageResults.map((r) => ({ type: "page", ...r })),
+      ...userResults.map((u) => ({
         type: "user",
-        name: `${u.userId.firstName || ""} ${u.userId.lastName || ""}`.trim() || "Unknown User",
-        ...u
+        name:
+          `${u.userId.firstName || ""} ${u.userId.lastName || ""}`.trim() ||
+          "Unknown User",
+        ...u,
       })),
     ]);
     setShowDropdown(true);
@@ -152,7 +141,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <input
             type="text"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             onFocus={() => search && setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
             placeholder="Search pages or users..."
@@ -166,22 +155,38 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     key={result.name + idx}
                     href={result.path}
                     className="block px-4 py-3 hover:bg-primary/10 transition-colors flex items-center"
-                    onClick={() => { setSearch(""); setShowDropdown(false); }}
+                    onClick={() => {
+                      setSearch("");
+                      setShowDropdown(false);
+                    }}
                   >
-                    {result.icon && <result.icon className="mr-2 text-primary text-lg" />}
+                    {result.icon && (
+                      <result.icon className="mr-2 text-primary text-lg" />
+                    )}
                     <span className="font-semibold">{result.name}</span>
-                    <span className="ml-auto text-xs bg-primary text-white px-2 py-0.5 rounded">Page</span>
+                    <span className="ml-auto text-xs bg-primary text-white px-2 py-0.5 rounded">
+                      Page
+                    </span>
                   </Link>
                 ) : (
                   <Link
                     key={result.email + idx}
                     href={`/app/users#${result._id}`}
                     className="block px-4 py-3 hover:bg-primary/10 transition-colors flex items-center"
-                    onClick={() => { setSearch(""); setShowDropdown(false); }}
+                    onClick={() => {
+                      setSearch("");
+                      setShowDropdown(false);
+                    }}
                   >
-                    <span className="font-semibold">{result.name || "Unknown User"}</span>
-                    <span className="ml-2 text-xs text-gray-500">{result.email}</span>
-                    <span className="ml-auto text-xs bg-secondary text-white px-2 py-0.5 rounded">User</span>
+                    <span className="font-semibold">
+                      {result.name || "Unknown User"}
+                    </span>
+                    <span className="ml-2 text-xs text-gray-500">
+                      {result.email}
+                    </span>
+                    <span className="ml-auto text-xs bg-secondary text-white px-2 py-0.5 rounded">
+                      User
+                    </span>
                   </Link>
                 )
               )}
@@ -191,7 +196,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* End Search Bar */}
         <nav>
           <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">
-            MAIN MENU - {companyName}
+            MAIN MENU
           </p>
           <ul className="mt-4 space-y-2">
             {menu.map((item) => (
@@ -252,7 +257,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <input
                 type="text"
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 onFocus={() => search && setShowDropdown(true)}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
                 placeholder="Search pages or users..."
@@ -266,22 +271,40 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                         key={result.name + idx}
                         href={result.path}
                         className="block px-4 py-3 hover:bg-primary/10 transition-colors flex items-center"
-                        onClick={() => { setSearch(""); setShowDropdown(false); setSidebarOpen(false); }}
+                        onClick={() => {
+                          setSearch("");
+                          setShowDropdown(false);
+                          setSidebarOpen(false);
+                        }}
                       >
-                        {result.icon && <result.icon className="mr-2 text-primary text-lg" />}
+                        {result.icon && (
+                          <result.icon className="mr-2 text-primary text-lg" />
+                        )}
                         <span className="font-semibold">{result.name}</span>
-                        <span className="ml-auto text-xs bg-primary text-white px-2 py-0.5 rounded">Page</span>
+                        <span className="ml-auto text-xs bg-primary text-white px-2 py-0.5 rounded">
+                          Page
+                        </span>
                       </Link>
                     ) : (
                       <Link
                         key={result.email + idx}
                         href={`/app/users#${result._id}`}
                         className="block px-4 py-3 hover:bg-primary/10 transition-colors flex items-center"
-                        onClick={() => { setSearch(""); setShowDropdown(false); setSidebarOpen(false); }}
+                        onClick={() => {
+                          setSearch("");
+                          setShowDropdown(false);
+                          setSidebarOpen(false);
+                        }}
                       >
-                        <span className="font-semibold">{result.name || "Unknown User"}</span>
-                        <span className="ml-2 text-xs text-gray-500">{result.email}</span>
-                        <span className="ml-auto text-xs bg-secondary text-white px-2 py-0.5 rounded">User</span>
+                        <span className="font-semibold">
+                          {result.name || "Unknown User"}
+                        </span>
+                        <span className="ml-2 text-xs text-gray-500">
+                          {result.email}
+                        </span>
+                        <span className="ml-auto text-xs bg-secondary text-white px-2 py-0.5 rounded">
+                          User
+                        </span>
                       </Link>
                     )
                   )}
@@ -291,7 +314,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             {/* End Search Bar Mobile */}
             <nav>
               <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">
-                MAIN MENU - {companyName}
+                MAIN MENU
               </p>
               <ul className="mt-4 space-y-2">
                 {menu.map((item) => (
@@ -357,7 +380,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           />
         </svg>
       </button>
-      <AIWindow isOpen={isAIWindowOpen} onClose={() => setIsAIWindowOpen(false)}/>
+      <AIWindow
+        isOpen={isAIWindowOpen}
+        onClose={() => setIsAIWindowOpen(false)}
+      />
     </div>
   );
 };

@@ -71,7 +71,11 @@ const SettingsPage: NextPageWithLayout = () => {
               lastName: data.lastName || "",
             });
           } else {
-            console.error("Failed to fetch profile data:", res.status, res.statusText);
+            console.error(
+              "Failed to fetch profile data:",
+              res.status,
+              res.statusText
+            );
           }
         } catch (error) {
           console.error("Error fetching profile data:", error);
@@ -88,7 +92,11 @@ const SettingsPage: NextPageWithLayout = () => {
             const data = await res.json();
             setAccountDetails(data);
           } else {
-            console.error("Failed to fetch account details:", res.status, res.statusText);
+            console.error(
+              "Failed to fetch account details:",
+              res.status,
+              res.statusText
+            );
             setAccountDetails(null);
           }
         } catch (error) {
@@ -104,7 +112,9 @@ const SettingsPage: NextPageWithLayout = () => {
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 text-gray-900">
       {/* Sidebar */}
       <aside className="w-full md:w-1/4 max-w-xs bg-white border-r border-gray-200 p-4 sm:p-6 md:p-8 shadow-sm">
-        <h2 className="text-2xl sm:text-3xl font-extrabold mb-6 sm:mb-8 text-gray-900">Settings</h2>
+        <h2 className="text-2xl sm:text-3xl font-extrabold mb-6 sm:mb-8 text-gray-900">
+          Settings
+        </h2>
         <nav>
           <ul className="space-y-2">
             {tabs.map((tab) => (
@@ -135,10 +145,16 @@ const SettingsPage: NextPageWithLayout = () => {
               Update your personal details. This information will be displayed
               publicly, so be careful what you share.
             </p>
-            <form className="space-y-6 sm:space-y-8 mt-4 sm:mt-6" onSubmit={handleSubmit}>
+            <form
+              className="space-y-6 sm:space-y-8 mt-4 sm:mt-6"
+              onSubmit={handleSubmit}
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                 <div>
-                  <label htmlFor="firstName" className="block text-gray-700 font-medium mb-2">
+                  <label
+                    htmlFor="firstName"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
                     First Name
                   </label>
                   <input
@@ -152,7 +168,10 @@ const SettingsPage: NextPageWithLayout = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-gray-700 font-medium mb-2">
+                  <label
+                    htmlFor="lastName"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
                     Last Name
                   </label>
                   <input
@@ -185,7 +204,9 @@ const SettingsPage: NextPageWithLayout = () => {
         )}
         {activeTab === "security" && (
           <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 text-gray-900">Security</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 text-gray-900">
+              Security
+            </h2>
             <p className="text-gray-700 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
               Manage your password and view account details.
             </p>
@@ -217,27 +238,6 @@ const SettingsPage: NextPageWithLayout = () => {
                 </div>
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={accountDetails.password}
-                      readOnly
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none text-gray-800"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition-colors duration-200"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
                     Account Created
                   </label>
                   <p className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
@@ -246,7 +246,9 @@ const SettingsPage: NextPageWithLayout = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500 italic mt-6">Loading account details...</p>
+              <p className="text-gray-500 italic mt-6">
+                Loading account details...
+              </p>
             )}
           </div>
         )}
@@ -259,7 +261,10 @@ const SettingsPage: NextPageWithLayout = () => {
               Customize your notification preferences.
             </p>
             <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
-              <p>Notification settings will go here (e.g., email alerts, push notifications).</p>
+              <p>
+                Notification settings will go here (e.g., email alerts, push
+                notifications).
+              </p>
             </div>
           </div>
         )}
@@ -272,7 +277,10 @@ const SettingsPage: NextPageWithLayout = () => {
               Switch between light and dark mode, or customize themes.
             </p>
             <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
-              <p>Appearance settings will go here (e.g., theme selection, font size).</p>
+              <p>
+                Appearance settings will go here (e.g., theme selection, font
+                size).
+              </p>
             </div>
           </div>
         )}

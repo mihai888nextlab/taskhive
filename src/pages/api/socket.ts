@@ -5,6 +5,10 @@ import { parse } from "url";
 
 // Augment the type of res.socket.server to include io
 import type { Socket as NetSocket } from "net";
+import dbConnect from "@/db/dbConfig";
+import messagesModel from "@/db/models/messagesModel";
+import conversationsModel from "@/db/models/conversationsModel";
+import userModel from "@/db/models/userModel";
 
 type NextApiResponseWithSocket = NextApiResponse & {
   socket: NetSocket & {
@@ -53,20 +57,28 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
 
         // Save message to DB
         try {
-          // await dbConnect(); // Ensure DB connection
-          // const newMessage = new Message({
-          //   conversationId: data.conversationId,
-          //   senderId: data.senderId,
-          //   content: data.content,
-          //   timestamp: new Date(),
-          // });
-          // await newMessage.save();
+          await dbConnect(); // Ensure DB connection
+          const newMessage = new messagesModel({
+            conversationId: data.conversationId,
+            senderId: data.senderId,
+            content: data.content,
+          });
+          await newMessage.save();
+
+          await conversationsModel.updateOne(
+            { _id: data.conversationId },
+            { $set: { updatedAt: new Date(), lastMessage: data.content } }
+          );
+
+          let senderIdData = await userModel
+            .findById(data.senderId)
+            .select("firstName lastName email");
 
           // Emit the message to all clients in the room
           io.to(data.conversationId).emit("messageReceived", {
-            // _id: newMessage._id, // Send the saved message with its DB ID
+            _id: newMessage._id, // Send the saved message with its DB ID
             conversationId: data.conversationId,
-            senderId: data.senderId,
+            senderId: senderIdData,
             content: data.content,
             timestamp: new Date().toISOString(), // Use ISO string for consistency
           });

@@ -4,6 +4,7 @@ import io from "socket.io-client";
 import { useAuth } from "@/pages/_app";
 import { IConversation } from "@/db/models/conversationsModel";
 import { IUser } from "@/db/models/userModel";
+import { PopulatedConversation } from "./ConversationList";
 
 // Ensure these types match your backend models and API responses
 interface ChatMessage {
@@ -17,7 +18,7 @@ interface ChatMessage {
 }
 
 interface ChatWindowProps {
-  selectedConversation: (IConversation & { participants: IUser[] }) | null; // Pass the whole convo object
+  selectedConversation: PopulatedConversation | null; // Pass the whole convo object
 }
 
 let socket: ReturnType<typeof io>; // Declare socket outside to prevent re-initialization
@@ -65,7 +66,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       socket.on("messageReceived", (message: ChatMessage) => {
         console.log("New message received:", message);
         setMessages((prevMessages) => {
-          // Prevent duplicates if component re-renders quickly
           if (prevMessages.find((m) => m._id === message._id)) {
             return prevMessages;
           }
@@ -198,7 +198,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
           </div>
         ) : (
           messages.map((msg) => {
-            const isSender = msg.senderId === user?._id;
+            const isSender =
+              (typeof msg.senderId === "object"
+                ? msg.senderId._id
+                : msg.senderId) === user?._id;
             const senderInfo =
               typeof msg.senderId === "object" ? msg.senderId : null;
             const senderName = isSender

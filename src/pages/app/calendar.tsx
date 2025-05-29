@@ -1,15 +1,79 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import "react-calendar/dist/Calendar.css";
+import Link from "next/link";
+
+interface Task {
+  _id: string;
+  title: string;
+  description?: string;
+  deadline: string;
+  completed: boolean;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
 
 const CalendarPage: NextPageWithLayout = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [loading, setLoading] = useState<boolean>(false);
+  const [listError, setListError] = useState<string | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]); // Assuming Task is defined elsewhere
 
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
   };
+
+  const fetchTasks = async () => {
+    setLoading(true);
+    setListError(null); // Clear previous list errors
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch tasks.");
+      }
+      let data: Task[] = await response.json();
+
+      // --- REVISED SORTING LOGIC FOR TASKS PAGE (Sort by Deadline, then push completed to end) ---
+      data.sort((a, b) => {
+        // Prioritize by completion status: incomplete tasks first
+        if (a.completed && !b.completed) return 1; // 'a' is completed, 'b' is not: 'a' goes after 'b'
+        if (!a.completed && b.completed) return -1; // 'a' is not completed, 'b' is: 'a' goes before 'b'
+
+        // If both are completed or both are incomplete, sort by deadline
+        const dateA = new Date(a.deadline).getTime();
+        const dateB = new Date(b.deadline).getTime();
+        return dateA - dateB; // Ascending order (earliest deadline first)
+      });
+      // --- END REVISED SORTING LOGIC ---
+
+      setTasks(data);
+      localStorage.setItem("userTasks", JSON.stringify(data)); // <-- Store in localStorage
+    } catch (err) {
+      console.error("Error fetching tasks:", err);
+      setListError((err as Error).message); // Set list-specific error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch tasks on component mount
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   return (
     // The main container for the calendar layout, filling the dashboard content area
@@ -38,8 +102,12 @@ const CalendarPage: NextPageWithLayout = () => {
               </div>
             ) : (
               <div>
-                <h1 className="text-2xl sm:text-4xl font-bold">No Date Selected</h1>
-                <p className="text-lg sm:text-2xl">Please select a date from the calendar.</p>
+                <h1 className="text-2xl sm:text-4xl font-bold">
+                  No Date Selected
+                </h1>
+                <p className="text-lg sm:text-2xl">
+                  Please select a date from the calendar.
+                </p>
               </div>
             )}
           </div>
@@ -49,7 +117,47 @@ const CalendarPage: NextPageWithLayout = () => {
               Upcoming Events
             </h3>
             <ul className="space-y-3">
-              <li className="text-base sm:text-lg opacity-90">No events for this date.</li>
+              {loading ? (
+                <li className="text-gray-400">Loading events...</li>
+              ) : listError ? (
+                <li className="text-red-500">{listError}</li>
+              ) : selectedDate ? (
+                (() => {
+                  const eventsForDate = tasks.filter(
+                    (task) =>
+                      new Date(task.deadline).toDateString() ===
+                      selectedDate.toDateString()
+                  );
+                  if (eventsForDate.length === 0) {
+                    return (
+                      <li className="text-gray-400">No upcoming events.</li>
+                    );
+                  }
+                  return eventsForDate.map((task) => (
+                    <Link key={task._id} href={`/app/tasks/`}>
+                      <li
+                        className={`p-3 rounded-lg ${
+                          task.completed
+                            ? "bg-gray-700 opacity-70"
+                            : "bg-gray-800 hover:bg-gray-700"
+                        } transition-colors`}
+                      >
+                        <h4 className="font-semibold text-lg">
+                          {task.title}{" "}
+                          {task.completed && (
+                            <span className="text-green-400">(Completed)</span>
+                          )}
+                        </h4>
+                        <p className="text-sm text-gray-300">
+                          {new Date(task.deadline).toLocaleDateString()}
+                        </p>
+                      </li>
+                    </Link>
+                  ));
+                })()
+              ) : (
+                <li className="text-gray-400">No upcoming events.</li>
+              )}
             </ul>
           </div>
         </div>
@@ -86,16 +194,22 @@ const CalendarPage: NextPageWithLayout = () => {
               return null;
             }}
             navigationLabel={({ date, label }) => (
-              <span className="font-bold text-blue-600 text-lg sm:text-xl">{label}</span>
+              <span className="font-bold text-blue-600 text-lg sm:text-xl">
+                {label}
+              </span>
             )}
             navigationAriaLabel="Navigate"
             next2Label={null}
             prev2Label={null}
             nextLabel={
-              <span className="text-blue-600 text-xl sm:text-2xl font-bold">›</span>
+              <span className="text-blue-600 text-xl sm:text-2xl font-bold">
+                ›
+              </span>
             }
             prevLabel={
-              <span className="text-blue-600 text-xl sm:text-2xl font-bold">‹</span>
+              <span className="text-blue-600 text-xl sm:text-2xl font-bold">
+                ‹
+              </span>
             }
           />
         </div>

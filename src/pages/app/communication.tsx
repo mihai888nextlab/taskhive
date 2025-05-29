@@ -6,9 +6,10 @@ import { useAuth } from "../_app";
 import { useEffect, useState } from "react";
 import ConversationList, {
   PopulatedConversation,
-} from "@/components/ConversationList";
+} from "@/components/chat/ConversationList";
 import Loading from "@/components/Loading";
 import NewDirectChatModal from "@/components/chat/NewDirectChatModel";
+import NewGroupChatModal from "@/components/chat/NewGroupChatModal";
 
 const Communication: NextPageWithLayout = () => {
   const { user, loadingUser } = useAuth();
@@ -32,7 +33,7 @@ const Communication: NextPageWithLayout = () => {
       setLoadingConversations(true);
       setError(null);
       try {
-        const res = await fetch(`/api/conversations?userId=${user._id}`); // Fetch conversations for current user
+        const res = await fetch(`/api/conversations?userId=${user._id}`);
         if (!res.ok) {
           const errData = await res.json();
           throw new Error(errData.message || "Failed to fetch conversations");
@@ -72,6 +73,8 @@ const Communication: NextPageWithLayout = () => {
     }
   };
 
+  const handleGroupChatCreated = (newConversationId: string) => {};
+
   return (
     <div>
       {loadingUser && <Loading />}
@@ -98,11 +101,11 @@ const Communication: NextPageWithLayout = () => {
           onClose={() => setShowNewDirectChatModal(false)}
           onChatCreated={handleChatCreated}
         />
-        {/* <NewGroupChatModal
+        <NewGroupChatModal
           isOpen={showNewGroupChatModal}
           onClose={() => setShowNewGroupChatModal(false)}
           onChatCreated={handleChatCreated}
-        /> */}
+        />
       </div>
     </div>
   );

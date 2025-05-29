@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IRole extends Document {
   name: string;
+  companyId: mongoose.Types.ObjectId;
 }
 
 const RoleSchema: Schema = new Schema(
@@ -9,11 +10,14 @@ const RoleSchema: Schema = new Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
-      trim: true,
+    },
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Role || mongoose.model<IRole>("Role", RoleSchema);
+export default mongoose.models.Role || mongoose.model("Role", RoleSchema);
