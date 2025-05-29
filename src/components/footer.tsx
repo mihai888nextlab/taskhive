@@ -51,7 +51,7 @@ export default function Footer() {
               Contact
             </a>
             <a
-              target="_blank" href="https://docs.google.com/document/d/1Tp27zznysO2PBVL6t8UodaK5t6Mt793h/edit?usp=sharing&ouid=102360779176306286727&rtpof=true&sd=true"
+              target="_blank" href="https://drive.google.com/file/d/12ue5y65thsPObFLDn4PQFR94dA3rxMyf/view?usp=sharing"
               className="m-3 hover:text-primary transition-colors duration-300"
             >
               Documentation
