@@ -29,7 +29,10 @@ import { ReactElement, ReactNode } from "react";
 import { NextPage } from "next";
 import { AppProps } from "next/app";
 
-export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+export type NextPageWithLayout<P = Record<string, never>, IP = P> = NextPage<
+  P,
+  IP
+> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
 
@@ -39,7 +42,7 @@ export type AppPropsWithLayout = AppProps & {
 
 export type TableDataItem = {
   id: string | number; // Fiecare rând ar trebui să aibă un ID unic
-  [key: string]: any; // Permite orice alte proprietăți
+  [key: string]: unknown; // Permite orice alte proprietăți
 };
 
 export type TableColumn<T extends TableDataItem> = {

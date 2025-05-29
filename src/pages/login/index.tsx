@@ -1,5 +1,6 @@
 import FloatingLabelInput from "@/components/FloatingLabelInput";
 import Header from "@/components/header";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
 
@@ -45,8 +46,12 @@ export default function Login() {
       } else {
         setError(data.message || "Login failed.");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during login.");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An error occurred during login.");
+      }
       console.log(err);
     } finally {
       setLoading(false);
@@ -98,10 +103,10 @@ export default function Login() {
             </button>
           </form>
           <p className="text-center text-xs sm:text-sm text-gray-400 mt-4">
-            Don't have an account?{" "}
-            <a href="/register" className="text-blue-500 hover:underline">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="text-blue-500 hover:underline">
               Register here
-            </a>
+            </Link>
           </p>
         </div>
       </main>

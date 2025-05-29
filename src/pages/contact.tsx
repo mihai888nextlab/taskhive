@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Kanit } from "next/font/google";
 import Header from "@/components/header";
 import Footer from "@/components/footer";

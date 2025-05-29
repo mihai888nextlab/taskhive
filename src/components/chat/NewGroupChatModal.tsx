@@ -1,7 +1,6 @@
 // components/chat/NewGroupChatModal.tsx
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { IUser } from "@/db/models/userModel";
 import { useAuth } from "@/pages/_app"; // Custom hook to get current user
 
 interface NewGroupChatModalProps {
@@ -54,7 +53,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
         );
         setAllUsers(users);
         setFilteredUsers(users);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching users:", err);
         setError("Nu s-au putut încărca utilizatorii.");
       } finally {
@@ -145,9 +144,14 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
       const data = await res.json();
       onChatCreated(data.conversationId);
       onClose(); // Close modal
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error creating group chat:", err);
-      setError(err.message || "Eroare la crearea grupului.");
+      setError(
+        err && typeof err === "object" && "message" in err
+          ? (err as { message?: string }).message ||
+              "Eroare la crearea grupului."
+          : "Eroare la crearea grupului."
+      );
     } finally {
       setCreatingGroup(false);
     }

@@ -53,7 +53,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     {
       key: "role",
       header: "Role",
-      render: (item: any) => {
+      render: (item) => {
         let badgeClasses = "";
         let textColor = "";
         switch (item.role) {
@@ -80,10 +80,6 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       },
     },
   ];
-
-  if (!user) {
-    return <Loading />;
-  }
 
   const fetchUsers = async () => {
     try {
@@ -203,9 +199,11 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       fetchUsers(); // Refresh the user list after adding a new user
       setAddUserModalOpen(false); // Close the modal after adding the user
       return undefined;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error adding user:", error);
-      return `Error adding user: ${error.message}`;
+      return `Error adding user: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
     }
   };
 
@@ -213,6 +211,10 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     fetchUsers();
     fetchRoles(); // Fetch roles when the component mounts
   }, [user]);
+
+  if (!user) {
+    return <Loading />;
+  }
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
@@ -302,22 +304,49 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             return 0;
           })
           .map((user) => (
-            <div key={user._id} className="bg-white rounded-xl shadow-md p-4 flex flex-col space-y-2">
+            <div
+              key={user._id}
+              className="bg-white rounded-xl shadow-md p-4 flex flex-col space-y-2"
+            >
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 font-semibold">First Name</span>
-                <span className="text-lg font-bold text-gray-900">{user.userId.firstName}</span>
+                <span className="text-xs text-gray-500 font-semibold">
+                  First Name
+                </span>
+                <span className="text-lg font-bold text-gray-900">
+                  {user.userId.firstName}
+                </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 font-semibold">Last Name</span>
-                <span className="text-lg font-bold text-gray-900">{user.userId.lastName}</span>
+                <span className="text-xs text-gray-500 font-semibold">
+                  Last Name
+                </span>
+                <span className="text-lg font-bold text-gray-900">
+                  {user.userId.lastName}
+                </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 font-semibold">Email</span>
-                <span className="text-base text-gray-800 break-all">{user.userId.email}</span>
+                <span className="text-xs text-gray-500 font-semibold">
+                  Email
+                </span>
+                <span className="text-base text-gray-800 break-all">
+                  {user.userId.email}
+                </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 font-semibold">Role</span>
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${user.role === "admin" ? "bg-red-100 text-red-800" : user.role === "user" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}>{user.role}</span>
+                <span className="text-xs text-gray-500 font-semibold">
+                  Role
+                </span>
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                    user.role === "admin"
+                      ? "bg-red-100 text-red-800"
+                      : user.role === "user"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {user.role}
+                </span>
               </div>
               {/* Add more fields or actions as needed */}
             </div>

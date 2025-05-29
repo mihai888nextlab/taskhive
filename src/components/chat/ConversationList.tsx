@@ -1,6 +1,3 @@
-// components/chat/ConversationList.tsx
-import React, { useState, useEffect } from "react";
-import { IConversation } from "@/db/models/conversationsModel";
 import { IUser } from "@/db/models/userModel";
 import { useAuth } from "@/pages/_app";
 import mongoose from "mongoose";

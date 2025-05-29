@@ -1,7 +1,13 @@
 import { Kanit } from "next/font/google";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { FaUserShield, FaUsers, FaTasks, FaCalendarAlt, FaComments } from "react-icons/fa"; // Import icons
+import {
+  FaUserShield,
+  FaUsers,
+  FaTasks,
+  FaCalendarAlt,
+  FaComments,
+} from "react-icons/fa"; // Import icons
 
 const kanit = Kanit({
   subsets: ["latin"],
@@ -32,7 +38,9 @@ export default function Help() {
                 1. Admin Account
               </h2>
               <p className="text-lg leading-8 text-gray-300">
-                TaskHive allows you to create an admin account for your organization. As an admin, you can manage the structure of your organization and oversee all operations.
+                TaskHive allows you to create an admin account for your
+                organization. As an admin, you can manage the structure of your
+                organization and oversee all operations.
               </p>
             </div>
 
@@ -43,7 +51,9 @@ export default function Help() {
                 2. Adding Collaborators
               </h2>
               <p className="text-lg leading-8 text-gray-300">
-                You can add multiple collaborators or staff members to your organization. Each collaborator can be assigned specific roles and responsibilities.
+                You can add multiple collaborators or staff members to your
+                organization. Each collaborator can be assigned specific roles
+                and responsibilities.
               </p>
             </div>
 
@@ -54,7 +64,9 @@ export default function Help() {
                 3. Task Assignment
               </h2>
               <p className="text-lg leading-8 text-gray-300">
-                Tasks can be assigned to collaborators based on the company's hierarchy. The hierarchy is defined using a dynamic organizational chart created by the admin.
+                Tasks can be assigned to collaborators based on the
+                company&apos;s hierarchy. The hierarchy is defined using a
+                dynamic organizational chart created by the admin.
               </p>
             </div>
 
@@ -65,7 +77,8 @@ export default function Help() {
                 4. Calendar Integration
               </h2>
               <p className="text-lg leading-8 text-gray-300">
-                TaskHive includes an integrated calendar to help you track deadlines and manage schedules effectively.
+                TaskHive includes an integrated calendar to help you track
+                deadlines and manage schedules effectively.
               </p>
             </div>
 
@@ -76,7 +89,9 @@ export default function Help() {
                 5. Communication Channels
               </h2>
               <p className="text-lg leading-8 text-gray-300">
-                TaskHive provides communication channels for employees, enabling seamless collaboration and effective communication within the team.
+                TaskHive provides communication channels for employees, enabling
+                seamless collaboration and effective communication within the
+                team.
               </p>
             </div>
           </section>

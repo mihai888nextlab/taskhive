@@ -3,7 +3,14 @@ import "@/styles/globals.css";
 import { AppPropsWithLayout } from "@/types";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { createContext, useContext, useEffect, useState, Dispatch, SetStateAction } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 // Define the User interface with the role property
@@ -78,7 +85,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
       setLoadingUser(true);
       setUser(null);
     }
-  }, [router.pathname, isDashboardRoute, user]);
+  }, [router.pathname, isDashboardRoute, user, loadingUser, router]);
 
   if (isDashboardRoute && loadingUser && user === null) {
     if (

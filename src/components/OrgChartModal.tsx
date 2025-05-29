@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { v4 as uuidv4 } from 'uuid';
-import { FaPlus, FaSave, FaTimes } from 'react-icons/fa';
+import { v4 as uuidv4 } from "uuid";
+import { FaPlus, FaSave, FaTimes } from "react-icons/fa";
 
 interface OrgChartModalProps {
   onClose: () => void;
@@ -13,7 +13,7 @@ interface Level {
   roles: string[];
 }
 
-const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose, roles }) => {
+const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
   const [levels, setLevels] = useState<Level[]>([]);
   const [availableRoles, setAvailableRoles] = useState<string[]>([]);
   const fixedAdminRole = "admin";
@@ -63,7 +63,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose, roles }) => {
   };
 
   const onDragEnd = useCallback(
-    (result: any) => {
+    (result: { destination: any; source: any; draggableId: any }) => {
       const { destination, source, draggableId } = result;
 
       if (!destination) {
@@ -131,7 +131,9 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose, roles }) => {
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200 w-3/4 max-w-4xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 text-center">Organizational Chart</h2>
+          <h2 className="text-3xl font-bold text-gray-800 text-center">
+            Organizational Chart
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-red-500 transition-all text-2xl"
@@ -182,7 +184,11 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose, roles }) => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 ref={provided.innerRef}
-                                className={`bg-green-100 text-green-700 p-2 rounded-md my-1 shadow-sm cursor-grab transition-transform duration-200 ${snapshot.isDragging ? 'transform scale-105' : ''}`}
+                                className={`bg-green-100 text-green-700 p-2 rounded-md my-1 shadow-sm cursor-grab transition-transform duration-200 ${
+                                  snapshot.isDragging
+                                    ? "transform scale-105"
+                                    : ""
+                                }`}
                               >
                                 {role}
                               </div>

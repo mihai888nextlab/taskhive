@@ -1,7 +1,6 @@
 // components/chat/NewDirectChatModal.tsx
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
-import type { IUser } from "@/db/models/userModel"; // Adjust the import path as needed
 import { useAuth } from "@/pages/_app"; // Custom hook to get current user
 
 interface NewDirectChatModalProps {
@@ -52,7 +51,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
         );
         setAllUsers(users);
         setFilteredUsers(users);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching users:", err);
         setError("Nu s-au putut încărca utilizatorii.");
       } finally {
@@ -113,9 +112,13 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
       const data = await res.json();
       onChatCreated(data.conversationId); // Pass new conversation ID back to parent
       onClose(); // Close modal
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error creating direct chat:", err);
-      setError(err.message || "Eroare la crearea conversației directe.");
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Eroare la crearea conversației directe.";
+      setError(errorMessage);
     } finally {
       setCreatingChat(false);
     }

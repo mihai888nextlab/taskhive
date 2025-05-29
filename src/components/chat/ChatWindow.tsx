@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import { useAuth } from "@/pages/_app";
-import { IConversation } from "@/db/models/conversationsModel";
 import { IUser } from "@/db/models/userModel";
 import { PopulatedConversation } from "./ConversationList";
 import Loading from "@/components/Loading";
@@ -109,7 +108,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         if (!res.ok) throw new Error("Failed to fetch initial messages");
         const data = await res.json();
         setMessages(data.messages as ChatMessage[]);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching initial messages:", err);
         setError("Nu s-au putut încărca mesajele.");
       } finally {
@@ -132,7 +131,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         conversationId,
         senderId: user._id,
         content: newMessageContent.trim(),
-        type: "text" as "text", 
+        type: "text" as const, // Explicitly type for safety
       };
       socket.emit("sendMessage", messageData);
       setNewMessageContent("");

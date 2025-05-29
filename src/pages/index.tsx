@@ -1,6 +1,7 @@
 import { Kanit } from "next/font/google";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import Link from "next/link";
 
 const kanit = Kanit({
   subsets: ["latin"],
@@ -28,12 +29,12 @@ export default function Home() {
             goals with TaskHive.
           </p>
           <div className="flex space-x-4">
-            <a
+            <Link
               href="/register"
               className="bg-primary text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-primary-dark transition-colors"
             >
               Get Started for Free
-            </a>
+            </Link>
             <a
               href="/features"
               className="border-2 border-primary text-primary py-3 px-6 rounded-lg text-lg font-semibold hover:bg-primary hover:text-white transition-colors"
