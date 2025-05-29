@@ -12,6 +12,7 @@ import AIWindow from "./AIWindow"; // Import the AIWindow component
 import { FaBars, FaTimes } from "react-icons/fa";
 import { FaMoneyBillWave } from "react-icons/fa"; // Correct import for the finance icon
 import { FaSignOutAlt } from "react-icons/fa"; // Import the logout icon
+import { MdSdStorage } from "react-icons/md";
 
 import Link from "next/link";
 
@@ -71,6 +72,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { name: "Announcements", path: "/app/announcements", icon: FaBullhorn },
     { name: "Communication", path: "/app/communication", icon: IoIosChatboxes },
     { name: "Finance", path: "/app/finance", icon: FaMoneyBillWave },
+    { name: "Storage", path: "/app/storage", icon: MdSdStorage },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
     { name: "Settings", path: "/app/settings", icon: MdSettings },
     // Add Finance link
@@ -221,21 +223,22 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </nav>
         {/* Separator before user info */}
         <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
-        
+
         {/* User Profile Section */}
-        <Link href="/app/settings" className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer">
-            {/* Placeholder for profile picture, using first letter of name */}
-            <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg">
-                {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
-            </div>
-            <div>
-                <p className="font-semibold text-white">
-                    {user.firstName} {user.lastName}
-                </p>
-                <p className="text-xs text-gray-400">
-                    {user.email}
-                </p>
-            </div>
+        <Link
+          href="/app/settings"
+          className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
+        >
+          {/* Placeholder for profile picture, using first letter of name */}
+          <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg">
+            {user.firstName ? user.firstName[0].toUpperCase() : "U"}
+          </div>
+          <div>
+            <p className="font-semibold text-white">
+              {user.firstName} {user.lastName}
+            </p>
+            <p className="text-xs text-gray-400">{user.email}</p>
+          </div>
         </Link>
 
         <button
@@ -364,18 +367,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
 
             {/* User Profile Section Mobile */}
-            <Link href="/app/settings" className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer">
-                <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg">
-                    {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
-                </div>
-                <div>
-                    <p className="font-semibold text-white">
-                        {user.firstName} {user.lastName}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                        {user.email}
-                    </p>
-                </div>
+            <Link
+              href="/app/settings"
+              className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg">
+                {user.firstName ? user.firstName[0].toUpperCase() : "U"}
+              </div>
+              <div>
+                <p className="font-semibold text-white">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="text-xs text-gray-400">{user.email}</p>
+              </div>
             </Link>
 
             <button

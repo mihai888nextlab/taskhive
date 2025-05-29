@@ -575,8 +575,8 @@ const TasksPage: NextPageWithLayout = () => {
               No tasks added yet. Time to get productive!
             </p>
             <p className="text-lg">
-              Click the "Add New Task" button above to start organizing your
-              life.
+              Click the &quot;Add New Task&quot; button above to start
+              organizing your life.
             </p>
           </div>
         ) : (
@@ -786,7 +786,7 @@ const TasksPage: NextPageWithLayout = () => {
         {assignedTasks.length === 0 ? (
           <div className="text-center text-gray-600 text-xl mt-8 p-6 bg-secondary/10 rounded-lg border border-secondary/30 shadow-md">
             <p className="font-semibold mb-3">
-              You haven't assigned any tasks to others yet.
+              You haven&apos;t assigned any tasks to others yet.
             </p>
             <p className="text-lg">
               Assign tasks to your team and track their progress here.
