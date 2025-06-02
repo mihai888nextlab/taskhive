@@ -13,6 +13,7 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import { FaMoneyBillWave } from "react-icons/fa"; // Correct import for the finance icon
 import { FaSignOutAlt } from "react-icons/fa"; // Import the logout icon
 import { MdSdStorage } from "react-icons/md";
+import { FaClock } from 'react-icons/fa'; // Import the clock icon
 
 import Link from "next/link";
 
@@ -139,6 +140,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     },
     { name: "Announcements", path: "/app/announcements", icon: FaBullhorn },
     { name: "Finance", path: "/app/finance", icon: FaMoneyBillWave },
+    { name: "Time Tracking", path: "/app/time-tracking", icon: FaClock }, // Add Time Tracking link
     { name: "Storage", path: "/app/storage", icon: MdSdStorage },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
     { name: "Settings", path: "/app/settings", icon: MdSettings },

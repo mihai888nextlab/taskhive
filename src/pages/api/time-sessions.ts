@@ -1,0 +1,48 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import dbConnect from '@/db/dbConfig'; // Adjust the import based on your DB setup
+import TimeSession, { ITimeSession } from '@/db/models/timeSessionModel'; // Import the TimeSession model
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  await dbConnect(); // Ensure the database is connected
+
+  if (req.method === 'POST') {
+    const { userId, name, description, duration } = req.body;
+
+    console.log("Received data:", { userId, name, description, duration }); // Log received data
+
+    if (!userId || !name || duration === undefined) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const newSession = new TimeSession({
+      userId,
+      name,
+      description,
+      duration,
+    });
+
+    try {
+      const savedSession = await newSession.save();
+      return res.status(201).json(savedSession);
+    } catch (error) {
+      console.error("Error saving session:", error);
+      return res.status(500).json({ message: 'Failed to save session', error });
+    }
+  } else if (req.method === 'GET') {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    try {
+      const sessions = await TimeSession.find({ userId }).exec();
+      return res.status(200).json(sessions);
+    } catch (error) {
+      return res.status(500).json({ message: 'Failed to fetch sessions', error });
+    }
+  } else {
+    res.setHeader('Allow', ['POST', 'GET']);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+}
