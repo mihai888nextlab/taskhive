@@ -12,6 +12,7 @@ import {
   SetStateAction,
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ThemeProvider } from '@/components/ThemeContext';
 
 // Define the User interface with the role property
 interface User {
@@ -135,18 +136,20 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   }
 
   return (
-    <AuthContext.Provider
-      value={{ user, setUser, loadingUser, isDashboardRoute }}
-    >
-      <Head>
-        <link rel="icon" href="favicon.ico" />
-        <title>Taskhive</title>
-        <meta name="description" content="A employee management application" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <ThemeProvider>
+      <AuthContext.Provider
+        value={{ user, setUser, loadingUser, isDashboardRoute }}
+      >
+          <Head>
+            <link rel="icon" href="favicon.ico" />
+            <title>Taskhive</title>
+            <meta name="description" content="A employee management application" />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
 
-      {content}
-    </AuthContext.Provider>
+          {content}
+      </AuthContext.Provider>
+    </ThemeProvider>
   );
 }
 

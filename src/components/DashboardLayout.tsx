@@ -20,6 +20,12 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+// Define the Message interface
+interface Message {
+  read: boolean;
+  // Add other properties as needed
+}
+
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, setUser } = useAuth();
   const router = useRouter();
@@ -31,6 +37,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [tasksCount, setTasksCount] = useState(0); // State for incomplete tasks count
 
   // Fetch users
   useEffect(() => {
@@ -48,6 +55,62 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         console.error("Error fetching users:", error);
       });
   }, []);
+
+  // Fetch tasks
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch("/api/tasks");
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+      const data = await response.json();
+      const incompleteTasks = data.filter((task: any) => !task.completed);
+      setTasksCount(incompleteTasks.length);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+
+  // Call fetchTasks on component mount
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  // Function to create a new task
+  const createTask = async (taskData: { title: string; description: string; deadline: string }) => {
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskData),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create task");
+      }
+      // Refetch tasks to update the count
+      await fetchTasks();
+    } catch (error) {
+      console.error("Error creating task:", error);
+    }
+  };
+
+  // Function to complete a task
+  const completeTask = async (taskId: string) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH", // Assuming you have a PATCH endpoint for completing tasks
+      });
+      if (!response.ok) {
+        throw new Error("Failed to complete task");
+      }
+      // Refetch tasks to update the count
+      await fetchTasks();
+    } catch (error) {
+      console.error("Error completing task:", error);
+    }
+  };
 
   // Handle logout
   const handleLogout = async () => {
@@ -68,9 +131,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const menu = [
     { name: "Dashboard", path: "/app", icon: MdSpaceDashboard },
     { name: "Users", path: "/app/users", icon: FaUserClock },
-    { name: "Tasks", path: "/app/tasks", icon: FaTasks },
+    {
+      name: "Tasks",
+      path: "/app/tasks",
+      icon: FaTasks,
+      notification: tasksCount > 0 ? tasksCount : null, // Add notification count for tasks
+    },
     { name: "Announcements", path: "/app/announcements", icon: FaBullhorn },
-    { name: "Communication", path: "/app/communication", icon: IoIosChatboxes },
     { name: "Finance", path: "/app/finance", icon: FaMoneyBillWave },
     { name: "Storage", path: "/app/storage", icon: MdSdStorage },
     { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
@@ -167,9 +234,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                       <result.icon className="mr-2 text-primary text-lg" />
                     )}
                     <span className="font-semibold">{result.name}</span>
-                    <span className="ml-auto text-xs bg-primary text-white px-2 py-0.5 rounded">
-                      Page
-                    </span>
+                    {result.notification && (
+                      <span className="ml-auto bg-red-500 text-white rounded-full px-2 text-xs">
+                        {result.notification}
+                      </span>
+                    )}
                   </Link>
                 ) : (
                   <Link
@@ -211,11 +280,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     : "hover:bg-gray-700 hover:text-white text-gray-300"
                 }`}
               >
-                <Link href={item.path} className="flex items-center">
+                <Link
+                  href={item.path}
+                  className="flex items-center"
+                >
                   {item.icon && (
                     <item.icon className="mr-3 text-xl text-primary-light" />
                   )}
                   <span className="font-medium">{item.name}</span>
+                  {item.notification && (
+                    <span className="ml-auto bg-red-500 text-white rounded-full px-2 text-xs">
+                      {item.notification}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}
@@ -304,9 +381,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                           <result.icon className="mr-2 text-primary text-lg" />
                         )}
                         <span className="font-semibold">{result.name}</span>
-                        <span className="ml-auto text-xs bg-primary text-white px-2 py-0.5 rounded">
-                          Page
-                        </span>
+                        {result.notification && (
+                          <span className="ml-auto bg-red-500 text-white rounded-full px-2 text-xs">
+                            {result.notification}
+                          </span>
+                        )}
                       </Link>
                     ) : (
                       <Link
@@ -352,12 +431,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     <Link
                       href={item.path}
                       className="flex items-center"
-                      onClick={() => setSidebarOpen(false)}
                     >
                       {item.icon && (
                         <item.icon className="mr-3 text-xl text-primary-light" />
                       )}
                       <span className="font-medium">{item.name}</span>
+                      {item.notification && (
+                        <span className="ml-auto bg-red-500 text-white rounded-full px-2 text-xs">
+                          {item.notification}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 ))}

@@ -168,29 +168,30 @@ const DashboardPage: NextPageWithLayout = () => {
       icon: FaUserClock,
       path: "/app/users",
       content: (
-        <div>
+        <div className="flex flex-col h-full"> {/* Flex container to allow button positioning */}
           {loadingUsers ? (
             <p className="text-gray-600">Loading users...</p>
           ) : users.length > 0 ? (
             <>
-              <Table
-                data={users.slice(0, 5).map((user) => ({
-                  id: user._id,
-                  firstName: user.userId.firstName,
-                  lastName: user.userId.lastName,
-                  email: user.userId.email,
-                }))}
-                columns={[
-                  { key: "firstName", header: "First Name" },
-                  { key: "lastName", header: "Last Name" },
-                  { key: "email", header: "Email" },
-                ]}
-                emptyMessage="No users registered."
-              />
+              <div className="flex-grow"> {/* Allow this div to grow and push the button down */}
+                <Table
+                  data={users.slice(0, 5).map((user) => ({
+                    id: user._id,
+                    firstName: user.userId.firstName,
+                    lastName: user.userId.lastName,
+                    email: user.userId.email,
+                  }))}
+                  columns={[
+                    { key: "firstName", header: "First Name" },
+                    { key: "lastName", header: "Last Name" },
+                    { key: "email", header: "Email" },
+                  ]}
+                  emptyMessage="No users registered."
+                />
+              </div>
               <div className="text-center mt-8">
                 <Link
                   href="/app/users"
-                  // Original button style as per the request not to change other components
                   className="inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
                 >
                   <span className="mr-3">View All Users</span>

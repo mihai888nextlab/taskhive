@@ -2,6 +2,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
 
 const tabs = [
   { id: "profile", label: "Profile" },
@@ -11,6 +12,7 @@ const tabs = [
 ];
 
 const SettingsPage: NextPageWithLayout = () => {
+  const { theme, toggleTheme } = useTheme(); // Get the current theme and toggle function
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({
     firstName: "",
@@ -45,10 +47,7 @@ const SettingsPage: NextPageWithLayout = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("Profile updated successfully:", data);
-
         alert("Profile updated successfully!");
-        // Consider updating local state instead of full reload for smoother UX
-        // window.location.reload();
       } else {
         const errorData = await response.json();
         alert(errorData.error || "Failed to update profile. Please try again.");
@@ -71,11 +70,7 @@ const SettingsPage: NextPageWithLayout = () => {
               lastName: data.lastName || "",
             });
           } else {
-            console.error(
-              "Failed to fetch profile data:",
-              res.status,
-              res.statusText
-            );
+            console.error("Failed to fetch profile data:", res.status, res.statusText);
           }
         } catch (error) {
           console.error("Error fetching profile data:", error);
@@ -92,11 +87,7 @@ const SettingsPage: NextPageWithLayout = () => {
             const data = await res.json();
             setAccountDetails(data);
           } else {
-            console.error(
-              "Failed to fetch account details:",
-              res.status,
-              res.statusText
-            );
+            console.error("Failed to fetch account details:", res.status, res.statusText);
             setAccountDetails(null);
           }
         } catch (error) {
@@ -109,10 +100,10 @@ const SettingsPage: NextPageWithLayout = () => {
   }, [activeTab]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 text-gray-900">
+    <div className={`flex flex-col md:flex-row min-h-screen bg-${theme === 'light' ? 'gray-100' : 'gray-900'} text-${theme === 'light' ? 'gray-900' : 'white'}`}>
       {/* Sidebar */}
-      <aside className="w-full md:w-1/4 max-w-xs bg-white border-r border-gray-200 p-4 sm:p-6 md:p-8 shadow-sm">
-        <h2 className="text-2xl sm:text-3xl font-extrabold mb-6 sm:mb-8 text-gray-900">
+      <aside className={`w-full md:w-1/4 max-w-xs bg-${theme === 'light' ? 'white' : 'gray-800'} border-r border-gray-200 p-4 sm:p-6 md:p-8 shadow-sm`}>
+        <h2 className={`text-2xl sm:text-3xl font-extrabold mb-6 sm:mb-8 text-${theme === 'light' ? 'gray-900' : 'white'}`}>
           Settings
         </h2>
         <nav>
@@ -121,11 +112,7 @@ const SettingsPage: NextPageWithLayout = () => {
               <li
                 key={tab.id}
                 className={`cursor-pointer px-3 sm:px-4 py-2 sm:py-3 rounded-md text-base sm:text-lg transition-all duration-200 ease-in-out
-                  ${
-                    activeTab === tab.id
-                      ? "bg-blue-400 text-white shadow-md"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                  }`}
+                  ${activeTab === tab.id ? "bg-blue-400 text-white shadow-md" : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"}`}
                 onClick={() => setActiveTab(tab.id)}
               >
                 {tab.label}
@@ -135,13 +122,13 @@ const SettingsPage: NextPageWithLayout = () => {
         </nav>
       </aside>
       {/* Main Content */}
-      <main className="flex-1 p-2 sm:p-4 md:p-10 bg-white border-l border-gray-200 rounded-lg shadow-lg mx-0 md:mx-8 my-4 md:my-8">
+      <main className={`flex-1 p-2 sm:p-4 md:p-10 bg-${theme === 'light' ? 'white' : 'gray-800'} border-l border-gray-200 rounded-lg shadow-lg mx-0 md:mx-8 my-4 md:my-8`}>
         {activeTab === "profile" && (
-          <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 text-gray-900">
+          <div className={`text-${theme === 'light' ? 'gray-900' : 'white'}`}>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
               Personal Information
             </h2>
-            <p className="text-gray-700 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
+            <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
               Update your personal details. This information will be displayed
               publicly, so be careful what you share.
             </p>
@@ -153,7 +140,7 @@ const SettingsPage: NextPageWithLayout = () => {
                 <div>
                   <label
                     htmlFor="firstName"
-                    className="block text-gray-700 font-medium mb-2"
+                    className="block text-gray-300 font-medium mb-2"
                   >
                     First Name
                   </label>
@@ -170,7 +157,7 @@ const SettingsPage: NextPageWithLayout = () => {
                 <div>
                   <label
                     htmlFor="lastName"
-                    className="block text-gray-700 font-medium mb-2"
+                    className="block text-gray-300 font-medium mb-2"
                   >
                     Last Name
                   </label>
@@ -269,19 +256,16 @@ const SettingsPage: NextPageWithLayout = () => {
           </div>
         )}
         {activeTab === "appearance" && (
-          <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 text-gray-900">
+          <div className={`text-${theme === 'light' ? 'gray-900' : 'white'}`}>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
               Appearance
             </h2>
-            <p className="text-gray-700 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
+            <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
               Switch between light and dark mode, or customize themes.
             </p>
-            <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
-              <p>
-                Appearance settings will go here (e.g., theme selection, font
-                size).
-              </p>
-            </div>
+            <button onClick={toggleTheme} className={`mt-4 px-4 py-2 rounded-md bg-${theme === 'light' ? 'blue-600' : 'blue-400'} text-white`}>
+              Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+            </button>
           </div>
         )}
       </main>

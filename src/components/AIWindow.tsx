@@ -29,16 +29,26 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
     try {
+      // Updated contextual prompt
+      const contextualPrompt = `You are an advanced assistant for an organizing tool application. Your role is to provide detailed, accurate, and contextually relevant responses that help users effectively manage their tasks, roles, and organizational structures. When responding, consider the following:
+      - Provide clear explanations and actionable advice.
+      - Include examples or scenarios where applicable.
+      - Ensure that your responses are tailored to the needs of users looking to optimize their organizational processes.
+      - If necessary, suggest best practices for task management and role assignments.
+
+      User question: ${inputPrompt}`;
+
       const response = await fetch("/api/gemini", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: inputPrompt }),
+        body: JSON.stringify({ prompt: contextualPrompt }), // Use the updated contextual prompt
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Error response from AI:", errorData); // Log the error response
         throw new Error(errorData.message || "Failed to fetch response from AI.");
       }
 
