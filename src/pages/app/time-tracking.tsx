@@ -253,7 +253,7 @@ const TimeTrackingPage = () => {
               sessions.slice().reverse().map((session) => (
                 <li
                   key={session._id}
-                  className="bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200"
+                  className="bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-100 hover:border-blue-200 transition-transform transform hover:scale-101 hover:shadow-md transition-all duration-200"
                 >
                   <div className="flex-1 mb-2 sm:mb-0">
                     <p className="text-xl font-semibold text-gray-900">{session.name}</p>

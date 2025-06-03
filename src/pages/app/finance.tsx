@@ -182,7 +182,7 @@ const FinancePage = () => {
 
   return (
     <DashboardLayout>
-      <div className="bg-white rounded-lg shadow-xl p-8 mb-8">
+      <div className="bg-white rounded-lg shadow-xl p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100">
         <h1 className="text-4xl font-extrabold text-center mb-6 text-gray-800 flex items-center justify-center">
           Your Financial Overview
         </h1>
@@ -194,7 +194,7 @@ const FinancePage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-          <div className="bg-gray-50 p-6 rounded-lg shadow-md transition-transform transform hover:scale-101">
+          <div className="bg-gray-50 p-6 rounded-lg shadow-md transition-transform transform hover:scale-101 duration-200">
             <h2 className="text-2xl font-semibold mb-5 text-gray-700">Add New Expense:</h2>
             <form onSubmit={handleExpenseSubmit} className="space-y-4">
               <input
@@ -231,7 +231,7 @@ const FinancePage = () => {
             </form>
           </div>
 
-          <div className="bg-gray-50 p-6 rounded-lg shadow-md transition-transform transform hover:scale-101">
+          <div className="bg-gray-50 p-6 rounded-lg shadow-md transition-transform transform hover:scale-101 duration-200">
             <h2 className="text-2xl font-semibold mb-5 text-gray-700">Add New Income:</h2>
             <form onSubmit={handleIncomeSubmit} className="space-y-4">
               <input
@@ -281,7 +281,7 @@ const FinancePage = () => {
               <p className="text-gray-600 text-center py-4">No expenses recorded yet.</p>
             ) : (
               expenses.map(expense => (
-                <div key={expense._id} className="bg-red-50 border border-red-200 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition duration-200 hover:shadow-md">
+                <div key={expense._id} className="bg-red-50 border border-red-200 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200">
                   <div>
                     <h3 className="font-bold text-lg text-red-700">{expense.title}</h3>
                     <p className="text-gray-600 text-sm mt-1">{expense.description}</p>
@@ -311,7 +311,7 @@ const FinancePage = () => {
               <p className="text-gray-600 text-center py-4">No incomes recorded yet.</p>
             ) : (
               incomes.map(income => (
-                <div key={income._id} className="bg-green-50 border border-green-200 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition duration-200 hover:shadow-md">
+                <div key={income._id} className="bg-green-50 border border-green-200 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200">
                   <div>
                     <h3 className="font-bold text-lg text-green-700">{income.title}</h3>
                     <p className="text-gray-600 text-sm mt-1">{income.description}</p>
@@ -331,7 +331,14 @@ const FinancePage = () => {
             )}
           </div>
         </div>
+        
+      </div>
+      <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100 mt-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-blue-200 pb-2">
+          Financial Statistics (Last 7 Days)
+        </h2>
         <FinanceStatistics expensesData={expensesData} incomesData={incomesData} />
+        
       </div>
     </DashboardLayout>
   );

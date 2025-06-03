@@ -174,20 +174,20 @@ const DashboardPage: NextPageWithLayout = () => {
           ) : users.length > 0 ? (
             <>
               <div className="flex-grow"> {/* Allow this div to grow and push the button down */}
-                <Table
-                  data={users.slice(0, 5).map((user) => ({
-                    id: user._id,
-                    firstName: user.userId.firstName,
-                    lastName: user.userId.lastName,
-                    email: user.userId.email,
-                  }))}
-                  columns={[
-                    { key: "firstName", header: "First Name" },
-                    { key: "lastName", header: "Last Name" },
-                    { key: "email", header: "Email" },
-                  ]}
-                  emptyMessage="No users registered."
-                />
+              <Table
+                data={users.slice(0, 5).map((user) => ({
+                  id: user._id,
+                  firstName: user.userId.firstName,
+                  lastName: user.userId.lastName,
+                  email: user.userId.email,
+                }))}
+                columns={[
+                  { key: "firstName", header: "First Name" },
+                  { key: "lastName", header: "Last Name" },
+                  { key: "email", header: "Email" },
+                ]}
+                emptyMessage="No users registered."
+              />
               </div>
               <div className="text-center mt-8">
                 <Link
