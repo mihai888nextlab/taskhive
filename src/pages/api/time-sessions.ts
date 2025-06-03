@@ -41,8 +41,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (error) {
       return res.status(500).json({ message: 'Failed to fetch sessions', error });
     }
+  } else if (req.method === 'DELETE') {
+    const { id } = req.query; // Assuming the session ID is passed as a query parameter
+
+    if (!id) {
+      return res.status(400).json({ message: 'Session ID is required' });
+    }
+
+    try {
+      await TimeSession.findByIdAndDelete(id); // Delete the session by ID
+      return res.status(204).end(); // No content to return
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      return res.status(500).json({ message: 'Failed to delete session', error });
+    }
   } else {
-    res.setHeader('Allow', ['POST', 'GET']);
+    res.setHeader('Allow', ['POST', 'GET', 'DELETE']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
