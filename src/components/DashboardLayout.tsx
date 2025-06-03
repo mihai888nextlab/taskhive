@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { ReactNode, useState, useEffect } from "react";
 import { MdSpaceDashboard } from "react-icons/md";
 import { MdSettings } from "react-icons/md";
-import { FaUserClock } from "react-icons/fa6"; // Assuming FaUserClock is from fa6
+import { FaComments, FaUserClock } from "react-icons/fa6"; // Assuming FaUserClock is from fa6
 import { FaTasks } from "react-icons/fa";
 import { FaCalendarAlt } from "react-icons/fa";
 import { FaBullhorn } from "react-icons/fa";
@@ -139,6 +139,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       notification: tasksCount > 0 ? tasksCount : null, // Add notification count for tasks
     },
     { name: "Announcements", path: "/app/announcements", icon: FaBullhorn },
+    { name: "Communication", path: "/app/communication", icon: FaComments },
     { name: "Finance", path: "/app/finance", icon: FaMoneyBillWave },
     { name: "Time Tracking", path: "/app/time-tracking", icon: FaClock }, // Add Time Tracking link
     { name: "Storage", path: "/app/storage", icon: MdSdStorage },
