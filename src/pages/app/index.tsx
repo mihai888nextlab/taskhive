@@ -10,6 +10,7 @@ import { FaUserClock, FaTasks, FaCalendarAlt, FaArrowRight, FaMoneyBillWave } fr
 import { MdSettings } from 'react-icons/md';
 import Statistics from '@/components/Statistics';
 import { Expense, Income } from '@/db/models/expensesModel'; // Adjust the path accordingly
+import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
 
 interface Stats {
   totalUsers: number;
@@ -21,6 +22,7 @@ interface Stats {
 }
 
 const DashboardPage: NextPageWithLayout = () => {
+  const { theme } = useTheme(); // Get the current theme
   const [users, setUsers] = useState<
     {
       _id: string;
@@ -107,73 +109,41 @@ const DashboardPage: NextPageWithLayout = () => {
     fetchStats();
   }, []);
 
+  const cardBackground = theme === 'light' ? 'bg-white' : 'bg-gray-800';
+  const cardTextColor = theme === 'light' ? 'text-gray-900' : 'text-white';
+  const borderColor = theme === 'light' ? 'border-gray-100' : 'border-gray-700';
+
   // Define the FinancePreview content to be included in cardData
   // It uses the same styling as the User card's inner table
   const financeCardContent = (
-    <div className="space-y-4"> {/* Keep internal spacing */}
-      {/* Total Income Card */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <h4 className="text-lg font-bold text-gray-800 mb-1">Total Income</h4>
-        <p className="text-green-600 text-2xl font-bold">${totalIncomes.toFixed(2)}</p>
-      </div>
-
-      {/* Total Expenses Card */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <h4 className="text-lg font-bold text-gray-800 mb-1">Total Expenses</h4>
-        <p className="text-red-600 text-2xl font-bold">${totalExpenses.toFixed(2)}</p>
-      </div>
-
-      {/* Profit Card - styled dynamically */}
-      <div className={`
-          p-4 rounded-lg border shadow-sm
-          ${profit >= 0
-            ? 'bg-blue-50 border-blue-100'
-            : 'bg-red-50 border-red-100'
-          }
-        `}>
-        <h4 className="text-lg font-bold text-gray-800 mb-1">Net Profit / Loss</h4>
-        <p className={`text-2xl font-bold
-          ${profit >= 0 ? 'text-blue-600' : 'text-red-600'}
-        `}>
-          ${profit.toFixed(2)}
-        </p>
-      </div>
-
-      {/* View All Financials Button - styled as per the preview image */}
-      <div className="text-center mt-8">
-                <Link
-                  href="/app/finance"
-                  // Original button style as per the request not to change other components
-                  className="inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
-                >
-                  <span className="mr-3">View All Financials</span>
-                  <FaArrowRight className="text-xl transform transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-              </div>
+    <div className={`p-6 rounded-lg shadow-sm ${cardBackground} ${borderColor}`}>
+      <h4 className={`text-xl font-bold ${cardTextColor}`}>Total Income</h4>
+      <p className={`text-3xl font-bold ${cardTextColor}`}>${totalIncomes.toFixed(2)}</p>
+      <h4 className={`text-xl font-bold ${cardTextColor}`}>Total Expenses</h4>
+      <p className={`text-3xl font-bold ${cardTextColor}`}>${totalExpenses.toFixed(2)}</p>
+      <h4 className={`text-xl font-bold ${cardTextColor}`}>Net Profit / Loss</h4>
+      <p className={`text-3xl font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>${profit.toFixed(2)}</p>
     </div>
   );
 
   // Add the Finance card to your cardData array
   const cardData = [
     {
-      title: "Finance", // New card title
-      description: "Keep track of your income, expenses, and overall financial health.", // New description
-      icon: FaMoneyBillWave, // Icon for Finance
-      path: "/app/finance", // Path to the full finance page
-      content: financeCardContent, // Use the pre-defined content
+      title: "Finance",
+      description: "Keep track of your income, expenses, and overall financial health.",
+      icon: FaMoneyBillWave,
+      content: financeCardContent,
     },
     {
       title: "Users",
       description: "Manage user accounts, roles, and permissions within your team.",
       icon: FaUserClock,
-      path: "/app/users",
       content: (
-        <div className="flex flex-col h-full"> {/* Flex container to allow button positioning */}
+        <div className={`flex flex-col h-full ${cardBackground} ${borderColor}`}>
           {loadingUsers ? (
-            <p className="text-gray-600">Loading users...</p>
+            <p className={`text-gray-600 ${cardTextColor}`}>Loading users...</p>
           ) : users.length > 0 ? (
             <>
-              <div className="flex-grow"> {/* Allow this div to grow and push the button down */}
               <Table
                 data={users.slice(0, 5).map((user) => ({
                   id: user._id,
@@ -188,19 +158,12 @@ const DashboardPage: NextPageWithLayout = () => {
                 ]}
                 emptyMessage="No users registered."
               />
-              </div>
-              <div className="text-center mt-8">
-                <Link
-                  href="/app/users"
-                  className="inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
-                >
-                  <span className="mr-3">View All Users</span>
-                  <FaArrowRight className="text-xl transform transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-              </div>
+              <Link href="/app/users" className={`text-center mt-8 ${cardTextColor}`}>
+                View All Users
+              </Link>
             </>
           ) : (
-            <p className="text-gray-600 text-center p-5 bg-blue-50/20 rounded-md border border-blue-200 shadow-inner">
+            <p className={`text-gray-600 text-center p-5 ${cardBackground} rounded-md border border-gray-200 shadow-inner`}>
               No users registered yet.
             </p>
           )}
@@ -211,28 +174,25 @@ const DashboardPage: NextPageWithLayout = () => {
       title: "Tasks",
       description: "Organize and track your team's assignments and progress.",
       icon: FaTasks,
-      path: "/app/tasks",
       content: <DashboardTaskPreview />,
     },
     {
       title: "Calendar",
       description: "View deadlines, scheduled meetings, and project milestones.",
       icon: FaCalendarAlt,
-      path: "/app/calendar",
       content: null,
     },
     {
       title: "Settings",
       description: "Configure your application preferences, notifications, and integrations.",
       icon: MdSettings,
-      path: "/app/settings",
       content: null,
     },
   ];
 
   return (
-    <div className="p-8 bg-gray-100 min-h-full rounded-lg">
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-10 text-center tracking-tight">
+    <div className="p-8 min-h-full rounded-lg bg-transparent text-gray-900">
+      <h1 className="text-4xl font-extrabold mb-10 text-center tracking-tight">
         Welcome to Your Dashboard!
       </h1>
 
@@ -246,28 +206,22 @@ const DashboardPage: NextPageWithLayout = () => {
         )
       )}
 
-      {/* The grid now contains all card data, including Finance */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-8">
         {cardData.map((card) => (
           <div
             key={card.title}
-            className="group relative bg-white p-8 rounded-2xl shadow-xl border border-gray-100
-                       hover:shadow-2xl hover:border-primary-light transition-all duration-300 transform hover:-translate-y-2
-                       flex flex-col overflow-hidden"
+            className={`group relative ${cardBackground} p-8 rounded-2xl shadow-xl ${borderColor} transition-all duration-300 transform hover:-translate-y-2 flex flex-col overflow-hidden`}
           >
             <div className="flex items-center mb-4">
               <div className="p-3 bg-primary-light/10 rounded-full mr-4 flex-shrink-0">
-                {card.icon && <card.icon className="text-primary text-3xl" />}
+                {card.icon && <card.icon className={`text-primary text-3xl ${cardTextColor}`} />}
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 leading-snug">{card.title}</h2>
+              <h2 className={`text-2xl font-bold leading-snug ${cardTextColor}`}>{card.title}</h2>
             </div>
 
-            <p className="text-gray-700 text-base mb-4 flex-grow">{card.description}</p>
+            <p className={`text-base mb-4 flex-grow ${cardTextColor}`}>{card.description}</p>
 
-            {/* Render the content, which will be the FinancePreview component for the Finance card */}
             {card.content && <div className="mt-auto">{card.content}</div>}
-
-            <div className="absolute inset-0 bg-primary-light/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none"></div>
           </div>
         ))}
       </div>

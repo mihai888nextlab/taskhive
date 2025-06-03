@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import AddUsersModal from "@/components/modals/AddUserModal";
 import AddRoleModal from "@/components/modals/AddRoleModal"; // Import AddRoleModal
 import OrgChartModal from "@/components/modals/OrgChartModal"; // Import OrgChartModal
+import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
 
 interface Project extends TableDataItem {
   user_id: string;
@@ -24,6 +25,7 @@ interface AuthUser {
 
 const DashboardOverviewPage: NextPageWithLayout = () => {
   const { user } = useAuth() as { user: AuthUser | null };
+  const { theme } = useTheme(); // Get the current theme
 
   const [users, setUsers] = useState<
     {
@@ -48,7 +50,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
 
   const projectColumns: TableColumn<Project>[] = [
     { key: "user_firstName", header: "First Name" },
-    { key: "user_lastName", header: "First Name" },
+    { key: "user_lastName", header: "Last Name" },
     { key: "user_email", header: "Email" },
     {
       key: "role",
@@ -306,7 +308,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           .map((user) => (
             <div
               key={user._id}
-              className="bg-white rounded-xl shadow-md p-4 flex flex-col space-y-2"
+              className={`bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-xl shadow-md p-4 flex flex-col space-y-2`}
             >
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500 font-semibold">
@@ -353,7 +355,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           ))}
       </div>
       {/* Table view for desktop only */}
-      <div className="bg-white shadow-xl rounded-2xl overflow-x-auto hidden md:block">
+      <div className={`bg-${theme === 'light' ? 'white' : 'gray-800'} shadow-xl rounded-2xl overflow-x-auto hidden md:block`}>
         <Table<Project>
           title="Users List"
           data={[...users]
