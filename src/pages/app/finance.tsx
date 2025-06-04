@@ -3,6 +3,7 @@ import { FaMoneyBillWave, FaTrash } from 'react-icons/fa';
 import Loading from '@/components/Loading';
 import DashboardLayout from '@/components/DashboardLayout';
 import FinanceStatistics from '@/components/FinanceStatistics';
+import { useTheme } from '@/components/ThemeContext';
 
 interface Expense {
   _id: string;
@@ -21,6 +22,7 @@ interface Income {
 }
 
 const FinancePage = () => {
+  const { theme } = useTheme();
   const [userId, setUserId] = useState('');
   const [expenseTitle, setExpenseTitle] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
@@ -182,27 +184,27 @@ const FinancePage = () => {
 
   return (
     <DashboardLayout>
-      <div className="bg-white rounded-lg shadow-xl p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100">
-        <h1 className="text-4xl font-extrabold text-center mb-6 text-gray-800 flex items-center justify-center">
+      <div className={`rounded-lg shadow-xl p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+        <h1 className={`text-4xl font-extrabold text-center mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
           Your Financial Overview
         </h1>
 
         <div className="text-center mb-8">
-          <h2 className={`text-3xl font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <h2 className={`text-3xl font-bold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             Profit: ${profit.toFixed(2)}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-          <div className="bg-gray-50 p-6 rounded-lg shadow-md transition-transform transform hover:scale-101 duration-200">
-            <h2 className="text-2xl font-semibold mb-5 text-gray-700">Add New Expense:</h2>
+          <div className={`p-6 rounded-lg shadow-md transition-transform transform hover:scale-101 duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+            <h2 className={`text-2xl font-semibold mb-5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Add New Expense:</h2>
             <form onSubmit={handleExpenseSubmit} className="space-y-4">
               <input
                 type="text"
                 value={expenseTitle}
                 onChange={(e) => setExpenseTitle(e.target.value)}
                 placeholder="Expense Title"
-                className="border border-gray-300 p-3 w-full rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200"
+                className={`border border-gray-600 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'} p-3 w-full rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200`}
                 required
               />
               <input
@@ -210,7 +212,7 @@ const FinancePage = () => {
                 value={expenseAmount}
                 onChange={(e) => setExpenseAmount(e.target.value)}
                 placeholder="Amount (e.g., 50.00)"
-                className="border border-gray-300 p-3 w-full rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200"
+                className={`border border-gray-600 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'} p-3 w-full rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200`}
                 step="0.01"
                 required
               />
@@ -218,7 +220,7 @@ const FinancePage = () => {
                 value={expenseDescription}
                 onChange={(e) => setExpenseDescription(e.target.value)}
                 placeholder="Description of the expense"
-                className="border border-gray-300 p-3 w-full rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 h-24 resize-y"
+                className={`border border-gray-600 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'} p-3 w-full rounded-md focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 h-24 resize-y`}
                 required
               ></textarea>
               <button
@@ -231,15 +233,15 @@ const FinancePage = () => {
             </form>
           </div>
 
-          <div className="bg-gray-50 p-6 rounded-lg shadow-md transition-transform transform hover:scale-101 duration-200">
-            <h2 className="text-2xl font-semibold mb-5 text-gray-700">Add New Income:</h2>
+          <div className={`p-6 rounded-lg shadow-md transition-transform transform hover:scale-101 duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+            <h2 className={`text-2xl font-semibold mb-5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Add New Income:</h2>
             <form onSubmit={handleIncomeSubmit} className="space-y-4">
               <input
                 type="text"
                 value={incomeTitle}
                 onChange={(e) => setIncomeTitle(e.target.value)}
                 placeholder="Income Title"
-                className="border border-gray-300 p-3 w-full rounded-md focus:ring-2 focus:ring-green-400 focus:border-transparent transition duration-200"
+                className={`border border-gray-600 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'} p-3 w-full rounded-md focus:ring-2 focus:ring-green-400 focus:border-transparent transition duration-200`}
                 required
               />
               <input
@@ -247,7 +249,7 @@ const FinancePage = () => {
                 value={incomeAmount}
                 onChange={(e) => setIncomeAmount(e.target.value)}
                 placeholder="Amount (e.g., 100.00)"
-                className="border border-gray-300 p-3 w-full rounded-md focus:ring-2 focus:ring-green-400 focus:border-transparent transition duration-200"
+                className={`border border-gray-600 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'} p-3 w-full rounded-md focus:ring-2 focus:ring-green-400 focus:border-transparent transition duration-200`}
                 step="0.01"
                 required
               />
@@ -255,7 +257,7 @@ const FinancePage = () => {
                 value={incomeDescription}
                 onChange={(e) => setIncomeDescription(e.target.value)}
                 placeholder="Description of the income"
-                className="border border-gray-300 p-3 w-full rounded-md focus:ring-2 focus:ring-green-400 focus:border-transparent transition duration-200 h-24 resize-y"
+                className={`border border-gray-600 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'} p-3 w-full rounded-md focus:ring-2 focus:ring-green-400 focus:border-transparent transition duration-200 h-24 resize-y`}
                 required
               ></textarea>
               <button
@@ -271,26 +273,26 @@ const FinancePage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Expenses:</h2>
+            <h2 className={`text-2xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Your Expenses:</h2>
             {loading ? (
               <div className="text-center py-4">
                 <Loading />
-                <p className="text-gray-600 mt-2">Loading expenses...</p>
+                <p className="text-gray-400 mt-2">Loading expenses...</p>
               </div>
             ) : expenses.length === 0 ? (
-              <p className="text-gray-600 text-center py-4">No expenses recorded yet.</p>
+              <p className="text-gray-400 text-center py-4">No expenses recorded yet.</p>
             ) : (
               expenses.map(expense => (
-                <div key={expense._id} className="bg-red-50 border border-red-200 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200">
+                <div key={expense._id} className={`bg-red-800 border border-red-600 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200`}>
                   <div>
-                    <h3 className="font-bold text-lg text-red-700">{expense.title}</h3>
-                    <p className="text-gray-600 text-sm mt-1">{expense.description}</p>
-                    <p className="font-semibold text-red-600 mt-2">Amount: ${expense.amount.toFixed(2)}</p>
+                    <h3 className="font-bold text-lg text-red-300">{expense.title}</h3>
+                    <p className="text-gray-400 text-sm mt-1">{expense.description}</p>
+                    <p className="font-semibold text-red-300 mt-2">Amount: ${expense.amount.toFixed(2)}</p>
                   </div>
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleDeleteItem(expense._id, 'expense')}
-                      className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition duration-200"
+                      className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-600 transition duration-200"
                       title="Delete Expense"
                     >
                       <FaTrash size={20} />
@@ -301,26 +303,26 @@ const FinancePage = () => {
             )}
           </div>
           <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your Incomes:</h2>
+            <h2 className={`text-2xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Your Incomes:</h2>
             {loading ? (
               <div className="text-center py-4">
                 <Loading />
-                <p className="text-gray-600 mt-2">Loading incomes...</p>
+                <p className="text-gray-400 mt-2">Loading incomes...</p>
               </div>
             ) : incomes.length === 0 ? (
-              <p className="text-gray-600 text-center py-4">No incomes recorded yet.</p>
+              <p className="text-gray-400 text-center py-4">No incomes recorded yet.</p>
             ) : (
               incomes.map(income => (
-                <div key={income._id} className="bg-green-50 border border-green-200 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200">
+                <div key={income._id} className={`bg-green-800 border border-green-600 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200`}>
                   <div>
-                    <h3 className="font-bold text-lg text-green-700">{income.title}</h3>
-                    <p className="text-gray-600 text-sm mt-1">{income.description}</p>
-                    <p className="font-semibold text-green-600 mt-2">Amount: ${income.amount.toFixed(2)}</p>
+                    <h3 className="font-bold text-lg text-green-300">{income.title}</h3>
+                    <p className="text-gray-400 text-sm mt-1">{income.description}</p>
+                    <p className="font-semibold text-green-300 mt-2">Amount: ${income.amount.toFixed(2)}</p>
                   </div>
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleDeleteItem(income._id, 'income')}
-                      className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition duration-200"
+                      className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-600 transition duration-200"
                       title="Delete Income"
                     >
                       <FaTrash size={20} />
@@ -333,8 +335,8 @@ const FinancePage = () => {
         </div>
         
       </div>
-      <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100 mt-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-blue-200 pb-2">
+      <div className={`bg-gray-900 rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100 mt-8`}>
+        <h2 className={`text-2xl font-bold text-white mb-4 border-b-2 border-blue-200 pb-2`}>
           Financial Statistics (Last 7 Days)
         </h2>
         <FinanceStatistics expensesData={expensesData} incomesData={incomesData} />

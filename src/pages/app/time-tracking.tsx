@@ -3,8 +3,10 @@ import DashboardLayout from '@/components/DashboardLayout';
 import Loading from "@/components/Loading"; // Assuming you have a Loading component
 import { FaTrash } from "react-icons/fa"; // Import the delete icon
 import TimeStatistics from '@/components/TimeStatistics'; // Import the new chart component
+import { useTheme } from '@/components/ThemeContext'; // Import the theme context
 
 const TimeTrackingPage = () => {
+  const { theme } = useTheme(); // Get the current theme from context
   const [sessionName, setSessionName] = useState('');
   const [sessionDescription, setSessionDescription] = useState('');
   const [sessions, setSessions] = useState<any[]>([]); // Store sessions
@@ -184,15 +186,15 @@ const TimeTrackingPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight">
+      <div className={`relative min-h-screen p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}>
+        <h1 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight`}>
           Time Tracking
         </h1>
 
         {/* Main Timer and Controls Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200">
+        <div className={`rounded-2xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
           <div className="text-center mb-6">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 font-mono tracking-wide">
+            <h2 className={`text-4xl sm:text-5xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} font-mono tracking-wide`}>
               {formatTime(elapsedTime)}
             </h2>
           </div>
@@ -203,38 +205,38 @@ const TimeTrackingPage = () => {
               value={sessionName}
               onChange={(e) => setSessionName(e.target.value)}
               placeholder="Session Name"
-              className="w-full sm:w-auto flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400"
+              className={`w-full sm:w-auto flex-grow px-4 py-2 border ${theme === 'dark' ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200`}
             />
             <input
               type="text"
               value={sessionDescription}
               onChange={(e) => setSessionDescription(e.target.value)}
               placeholder="Session Description"
-              className="w-full sm:w-auto flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 text-gray-700 placeholder-gray-400"
+              className={`w-full sm:w-auto flex-grow px-4 py-2 border ${theme === 'dark' ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-700'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200`}
             />
             <button
               onClick={handleStart}
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-green-700 hover:from-green-700 hover:to-green-500 text-white font-bold py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              className={`w-full sm:w-auto inline-flex items-center justify-center ${theme === 'dark' ? 'bg-green-600' : 'bg-gradient-to-r from-green-500 to-green-700'} text-white font-bold py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
               disabled={isRunning}
             >
               Start
             </button>
             <button
               onClick={handleStop}
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-red-500 to-red-700 hover:from-red-700 hover:to-red-500 text-white font-bold py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              className={`w-full sm:w-auto inline-flex items-center justify-center ${theme === 'dark' ? 'bg-red-600' : 'bg-gradient-to-r from-red-500 to-red-700'} text-white font-bold py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
               disabled={!isRunning}
             >
               Stop
             </button>
             <button
               onClick={handleReset}
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-gray-500 to-gray-700 hover:from-gray-700 hover:to-gray-500 text-white font-bold py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              className={`w-full sm:w-auto inline-flex items-center justify-center ${theme === 'dark' ? 'bg-gray-600' : 'bg-gradient-to-r from-gray-500 to-gray-700'} text-white font-bold py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
             >
               Reset
             </button>
             <button
               onClick={handleSaveSession}
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              className={`w-full sm:w-auto inline-flex items-center justify-center ${theme === 'dark' ? 'bg-blue-600' : 'bg-gradient-to-r from-blue-500 to-blue-700'} text-white font-bold py-2 sm:py-2.5 px-4 sm:px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
             >
               Save Session
             </button>
@@ -242,35 +244,35 @@ const TimeTrackingPage = () => {
         </div>
 
         {/* Saved Sessions List Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-blue-200 pb-2">
+        <div className={`rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+          <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b-2 border-blue-200 pb-2`}>
             Saved Sessions
           </h2>
-          <ul className="space-y-4"> {/* Increased space between list items */}
+          <ul className="space-y-4">
             {sessions.length === 0 ? (
-              <p className="text-gray-600 italic text-center py-4">No sessions saved yet.</p>
+              <p className={`text-gray-600 italic text-center py-4 ${theme === 'dark' ? 'text-gray-400' : ''}`}>No sessions saved yet.</p>
             ) : (
               sessions.slice().reverse().map((session) => (
                 <li
                   key={session._id}
-                  className="bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center border border-gray-100 hover:border-blue-200 transition-transform transform hover:scale-101 hover:shadow-md transition-all duration-200"
+                  className={`p-4 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-100'} hover:border-blue-200 transition-transform transform hover:scale-101 hover:shadow-md transition-all duration-200`}
                 >
                   <div className="flex-1 mb-2 sm:mb-0">
-                    <p className="text-xl font-semibold text-gray-900">{session.name}</p>
-                    <p className="text-md text-gray-600">{session.description}</p>
+                    <p className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{session.name}</p>
+                    <p className={`text-md ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{session.description}</p>
                     {session.createdAt && (
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
                         Saved on: {new Date(session.createdAt).toLocaleString()}
                       </p>
                     )}
                   </div>
                   <div className="flex items-center">
-                    <span className="text-2xl font-mono text-blue-700 font-bold mr-4">
+                    <span className={`text-2xl font-mono ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'} font-bold mr-4`}>
                       {formatTime(session.duration)}
                     </span>
                     <button
                       onClick={() => handleDeleteSession(session._id)}
-                      className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95"
+                      className={`text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95`}
                       title="Delete Session"
                     >
                       <FaTrash className="text-lg" />
@@ -283,8 +285,8 @@ const TimeTrackingPage = () => {
         </div>
 
         {/* Statistics Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-blue-200 pb-2">
+        <div className={`rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+          <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b-2 border-blue-200 pb-2`}>
             Time Statistics (Last 7 Days)
           </h2>
           <TimeStatistics last7DaysHours={last7DaysHours} />

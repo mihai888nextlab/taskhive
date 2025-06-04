@@ -7,6 +7,7 @@ import { PopulatedConversation } from "./ConversationList";
 import Loading from "@/components/Loading";
 import { BsPaperclip } from "react-icons/bs";
 import FileCard from "@/components/FileCard";
+import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
 
 // Ensure these types match your backend models and API responses
 interface ChatMessage {
@@ -27,6 +28,7 @@ let socket: ReturnType<typeof io>; // Declare socket outside to prevent re-initi
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   const { user } = useAuth(); // Current logged-in user
+  const { theme } = useTheme(); // Get the current theme
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessageContent, setNewMessageContent] = useState("");
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -190,8 +192,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
   if (!selectedConversation) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-600 bg-white rounded-lg p-6 shadow-md shadow-inner">
-        <p className="text-xl font-semibold">
+      <div className={`flex flex-col items-center justify-center h-full text-gray-600 bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-lg p-6 shadow-md`}>
+        <p className="text-xl font-semibold text-white">
           Selectează o conversație sau începe una nouă
         </p>
       </div>
@@ -222,24 +224,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
   return (
     // Containerul principal al ferestrei de chat.
-    <div className="flex flex-col h-full bg-white rounded-lg text-gray-800 shadow-md">
+    <div className={`flex flex-col h-full bg-${theme === 'light' ? 'white' : 'gray-900'} rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} shadow-md`}>
       {/* Antetul Chatului - mai mult contrast și stilizare - cu efect de Glassmorphism */}
-      <div className="p-4 border-b border-gray-300 bg-white/70 rounded-t-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10">
+      <div className={`p-4 border-b border-gray-300 bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-t-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10`}>
         {" "}
         {/* Fundal translucid, umbră personalizată, efect de blur */}
-        <h3 className="font-semibold text-lg text-gray-800">
+        <h3 className="font-semibold text-lg text-white">
           {currentChatName}
         </h3>
       </div>
 
       {/* Zona de Mesaje - acum cu umbră internă pentru mai multă profunzime și fundal subtil */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar shadow-inner bg-gray-50">
+      <div className={`flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar shadow-inner bg-${theme === 'light' ? 'gray-50' : 'gray-800'}`}>
         {" "}
         {/* Fundal gri foarte subtil, umbră internă pentru efect de "adâncime" */}
         {loadingMessages ? (
           <div className="text-center text-gray-600">
             <Loading />
-            <p className="mt-2">Se încarcă mesajele...</p>
+            <p className="mt-2 text-white">Se încarcă mesajele...</p>
           </div>
         ) : error ? (
           <div className="text-center text-red-600">{error}</div>
@@ -273,12 +275,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                     // Colțuri mai rotunjite, umbră personalizată, efect de hover amplificat
                     isSender
                       ? "bg-blue-500 text-white rounded-br-none ring-1 ring-blue-300"
-                      : "bg-gray-300 text-gray-800 rounded-bl-none ring-1 ring-gray-100"
+                      : "bg-gray-700 text-white rounded-bl-none ring-1 ring-gray-600"
                   }`}
                 >
                   <div
                     className={`font-semibold text-xs mb-1 ${
-                      isSender ? "text-white" : "text-gray-700"
+                      isSender ? "text-white" : "text-gray-300"
                     }`}
                   >
                     {senderName}
@@ -312,7 +314,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                   )}
                   <span
                     className={`text-xs opacity-75 mt-1 block text-right ${
-                      isSender ? "text-blue-100" : "text-gray-500"
+                      isSender ? "text-blue-100" : "text-gray-400"
                     }`}
                   >
                     {new Date(msg.timestamp).toLocaleTimeString([], {
@@ -331,7 +333,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       {/* Formular de Trimitere Mesaj - cu butonul de atașament în stânga inputului */}
       <form
         onSubmit={handleSendMessage}
-        className="p-4 border-t border-gray-300 bg-white/70 flex space-x-2 rounded-b-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10"
+        className={`p-4 border-t border-gray-300 bg-${theme === 'light' ? 'white' : 'gray-800'} flex space-x-2 rounded-b-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10`}
       >
         <button
           type="button"
@@ -371,12 +373,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
           value={newMessageContent}
           onChange={(e) => setNewMessageContent(e.target.value)}
           placeholder="Scrie un mesaj..."
-          className="flex-1 p-2 border border-gray-400 bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 placeholder-gray-500 transition-all duration-200 ease-in-out"
+          className={`flex-1 p-2 border border-gray-400 bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-${theme === 'light' ? 'gray-800' : 'white'} placeholder-gray-500 transition-all duration-200 ease-in-out`}
           disabled={!user || loadingMessages}
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+          className={`bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold`}
           disabled={!user || loadingMessages || !newMessageContent.trim()}
         >
           Trimite

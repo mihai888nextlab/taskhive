@@ -173,7 +173,7 @@ const CalendarPage: NextPageWithLayout = () => {
             </div>
           </div>
           {/* Right Panel: Calendar */}
-          <div className="flex-3 bg-white p-4 sm:p-6 md:p-8 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex justify-center items-center w-full overflow-x-auto">
+          <div className={`flex-3 p-4 sm:p-6 md:p-8 rounded-b-lg md:rounded-r-lg md:rounded-bl-none flex justify-center items-center w-full overflow-x-auto ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
             <Calendar
               onChange={(val) => handleDateChange(val instanceof Date ? val : null)}
               value={selectedDate}

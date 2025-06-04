@@ -3,6 +3,7 @@ import FileUploadModal from "@/components/FileUploadModal";
 import FileCard from "@/components/FileCard";
 import { NextPageWithLayout } from "@/types";
 import { useState, useEffect } from "react";
+import { useTheme } from '@/components/ThemeContext';
 
 const MAX_STORAGE_BYTES = 1024 * 1024 * 1024; // 1 GB in bytes
 
@@ -14,6 +15,7 @@ type FileType = {
 };
 
 const Storage: NextPageWithLayout = () => {
+  const { theme } = useTheme();
   const [files, setFiles] = useState<FileType[]>([]);
   const [usedStorage, setUsedStorage] = useState<number>(0);
   const [uploadFileModal, setUploadFileModal] = useState<boolean>(false);
@@ -57,12 +59,12 @@ const Storage: NextPageWithLayout = () => {
   }, [uploadFileModal]); // refetch after upload modal closes
 
   return (
-    <div className="p-8 bg-gray-100 min-h-full rounded-lg">
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-10 text-center tracking-tight">
+    <div className={`p-8 bg-gray-100 text-gray-900 min-h-full rounded-lg`}>
+      <h1 className="text-4xl font-extrabold mb-10 text-center tracking-tight">
         Storage Management
       </h1>
       <div className="max-w-2/3 mx-auto">
-        <div className="mb-2 flex justify-between text-sm font-medium text-gray-700">
+        <div className="mb-2 flex justify-between text-sm font-medium">
           <span>{formatBytes(usedStorage)} used</span>
           <span>{percentUsed.toFixed(1)}% of 1 GB</span>
         </div>
@@ -94,6 +96,7 @@ const Storage: NextPageWithLayout = () => {
               fileName={file.fileName}
               fileSize={file.fileSize}
               downloadUrl={file.fileLocation}
+              theme={theme}
             />
           ))
         )}

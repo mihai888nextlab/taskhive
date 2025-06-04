@@ -10,6 +10,7 @@ import ConversationList, {
 import Loading from "@/components/Loading";
 import NewDirectChatModal from "@/components/chat/NewDirectChatModel";
 import NewGroupChatModal from "@/components/chat/NewGroupChatModal";
+import { useTheme } from '@/components/ThemeContext';
 
 const Communication: NextPageWithLayout = () => {
   const { user, loadingUser } = useAuth();
@@ -22,6 +23,7 @@ const Communication: NextPageWithLayout = () => {
   const [showNewGroupChatModal, setShowNewGroupChatModal] = useState(false);
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!user) {
@@ -76,7 +78,7 @@ const Communication: NextPageWithLayout = () => {
   const handleGroupChatCreated = (newConversationId: string) => {};
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
+    <div className={`relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}>
       {loadingUser && <Loading />}
       <div className="flex h-[calc(100vh-100px)]">
         {" "}

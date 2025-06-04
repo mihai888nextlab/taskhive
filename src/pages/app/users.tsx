@@ -308,43 +308,43 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           .map((user) => (
             <div
               key={user._id}
-              className={`bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-xl shadow-md p-4 flex flex-col space-y-2`}
+              className={`bg-${theme === 'dark' ? 'gray-800' : 'white'} rounded-xl shadow-md p-4 flex flex-col space-y-2`}
             >
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 font-semibold">
+                <span className="text-xs text-gray-400 font-semibold">
                   First Name
                 </span>
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-lg font-bold text-gray-100">
                   {user.userId.firstName}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 font-semibold">
+                <span className="text-xs text-gray-400 font-semibold">
                   Last Name
                 </span>
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-lg font-bold text-gray-100">
                   {user.userId.lastName}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 font-semibold">
+                <span className="text-xs text-gray-400 font-semibold">
                   Email
                 </span>
-                <span className="text-base text-gray-800 break-all">
+                <span className="text-base text-gray-200 break-all">
                   {user.userId.email}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 font-semibold">
+                <span className="text-xs text-gray-400 font-semibold">
                   Role
                 </span>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                     user.role === "admin"
-                      ? "bg-red-100 text-red-800"
+                      ? "bg-red-600 text-white"
                       : user.role === "user"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-gray-100 text-gray-800"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-600 text-white"
                   }`}
                 >
                   {user.role}
@@ -355,7 +355,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           ))}
       </div>
       {/* Table view for desktop only */}
-      <div className={`bg-${theme === 'light' ? 'white' : 'gray-800'} shadow-xl rounded-2xl overflow-x-auto hidden md:block`}>
+      <div className={`bg-${theme === 'dark' ? 'gray-800' : 'white'} shadow-xl rounded-2xl overflow-x-auto hidden md:block`}>
         <Table<Project>
           title="Users List"
           data={[...users]

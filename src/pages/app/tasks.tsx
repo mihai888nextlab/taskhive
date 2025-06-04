@@ -11,6 +11,7 @@ import {
   FaSpinner,
   FaExclamationTriangle,
 } from "react-icons/fa"; // Added FaExclamationTriangle
+import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
 
 // Re-define Task interface to match backend model
 interface Task {
@@ -92,6 +93,7 @@ async function fetchCurrentUser() {
 }
 
 const TasksPage: NextPageWithLayout = () => {
+  const { theme } = useTheme(); // Get the current theme
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskTitle, setTaskTitle] = useState<string>("");
   const [taskDescription, setTaskDescription] = useState<string>("");
@@ -349,17 +351,17 @@ const TasksPage: NextPageWithLayout = () => {
 
   return (
     // Outer container with a subtle gradient background for depth
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
+    <div className={`relative min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}>
       {/* Decorative background circles - using primary colors for consistency */}
       <div className="absolute top-10 left-1/4 w-48 h-48 bg-primary-light rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
       <div className="absolute bottom-10 right-1/4 w-64 h-64 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
       <div className="absolute top-1/2 left-1/2 w-56 h-56 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
 
-      <main className="relative z-10 w-full max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl p-2 sm:p-4 md:p-8 md:p-12 transform transition-all duration-500 ease-in-out hover:shadow-3xl-lg ring-1 ring-gray-100">
-        <h1 className="text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight">
+      <main className={`relative z-10 w-full max-w-6xl mx-auto bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-3xl shadow-2xl p-2 sm:p-4 md:p-8 md:p-12 transform transition-all duration-500 ease-in-out hover:shadow-3xl-lg ring-1 ring-gray-100`}>
+        <h1 className={`text-5xl font-extrabold text-${theme === 'light' ? 'gray-900' : 'white'} mb-6 text-center tracking-tighter leading-tight`}>
           Your Personal Task Manager
         </h1>
-        <p className="text-center text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
+        <p className={`text-center text-lg text-${theme === 'light' ? 'gray-600' : 'gray-400'} mb-10 max-w-2xl mx-auto`}>
           Organize your day, prioritize your goals, and track your progress with
           ease.
         </p>
@@ -374,7 +376,7 @@ const TasksPage: NextPageWithLayout = () => {
             }
             setShowForm((prev) => !prev); // Always toggle
           }}
-          className="mb-8 w-full py-4 px-6 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 text-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+          className={`mb-8 w-full py-4 px-6 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 text-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5`}
           disabled={loading}
           aria-expanded={showForm}
           aria-controls="task-form"
@@ -390,14 +392,14 @@ const TasksPage: NextPageWithLayout = () => {
           >
             <form
               onSubmit={handleAddTask}
-              className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200 animate-fadeIn"
+              className={`bg-${theme === 'light' ? 'gray-50' : 'gray-800'} p-8 rounded-2xl shadow-xl border border-gray-200 animate-fadeIn`}
             >
-              <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+              <h2 className={`text-3xl font-bold text-${theme === 'light' ? 'gray-800' : 'white'} mb-6 text-center`}>
                 {editingTaskId ? "Edit Task Details" : "Create New Task"}
               </h2>
               {formError && (
                 <div
-                  className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm"
+                  className={`bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm`}
                   role="alert"
                 >
                   <div className="flex items-center">
@@ -423,14 +425,14 @@ const TasksPage: NextPageWithLayout = () => {
                 <div>
                   <label
                     htmlFor="taskTitle"
-                    className="block text-gray-700 text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500"
+                    className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500`}
                   >
                     Title:
                   </label>
                   <input
                     type="text"
                     id="taskTitle"
-                    className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-base"
+                    className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-base`}
                     placeholder="e.g., Prepare presentation for Q3 review"
                     value={taskTitle}
                     onChange={(e) => setTaskTitle(e.target.value)}
@@ -442,14 +444,14 @@ const TasksPage: NextPageWithLayout = () => {
                 <div>
                   <label
                     htmlFor="taskDeadline"
-                    className="block text-gray-700 text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500"
+                    className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500`}
                   >
                     Deadline:
                   </label>
                   <input
                     type="date"
                     id="taskDeadline"
-                    className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base"
+                    className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
                     value={taskDeadline}
                     onChange={(e) => setTaskDeadline(e.target.value)}
                     required
@@ -461,14 +463,14 @@ const TasksPage: NextPageWithLayout = () => {
               <div className="mb-8">
                 <label
                   htmlFor="taskDescription"
-                  className="block text-gray-700 text-sm font-semibold mb-2"
+                  className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}
                 >
                   Description (Optional):
                 </label>
                 <textarea
                   id="taskDescription"
                   rows={4}
-                  className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base"
+                  className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base`}
                   placeholder="Add more details or sub-tasks here..."
                   value={taskDescription}
                   onChange={(e) => setTaskDescription(e.target.value)}
@@ -479,13 +481,13 @@ const TasksPage: NextPageWithLayout = () => {
               <div className="mb-8">
                 <label
                   htmlFor="assignedTo"
-                  className="block text-gray-700 text-sm font-semibold mb-2"
+                  className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}
                 >
                   Assign To:
                 </label>
                 <select
                   id="assignedTo"
-                  className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base"
+                  className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
                   disabled={loading}
@@ -501,7 +503,7 @@ const TasksPage: NextPageWithLayout = () => {
               <div className="flex justify-end space-x-4">
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
+                  className={`inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg`}
                   disabled={loading}
                 >
                   {loading && (
@@ -516,7 +518,7 @@ const TasksPage: NextPageWithLayout = () => {
                       resetForm();
                       setShowForm(false);
                     }}
-                    className="inline-flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
+                    className={`inline-flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg`}
                     disabled={loading}
                   >
                     Cancel
@@ -527,7 +529,7 @@ const TasksPage: NextPageWithLayout = () => {
           </div>
         )}
 
-        <h2 className="text-4xl font-bold text-gray-900 mb-8 mt-12 pb-4 border-b-4 border-primary-dark text-center">
+        <h2 className={`text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-8 mt-12 pb-4 border-b-4 border-primary-dark text-center`}>
           My Task List
         </h2>
 
@@ -535,13 +537,13 @@ const TasksPage: NextPageWithLayout = () => {
         {loading && tasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 bg-primary-light/10 rounded-lg shadow-inner animate-pulse">
             <FaSpinner className="animate-spin text-primary text-5xl mb-4" />
-            <p className="text-xl text-gray-700 font-semibold">
+            <p className={`text-xl text-${theme === 'light' ? 'gray-700' : 'gray-300'} font-semibold`}>
               Loading your tasks...
             </p>
           </div>
         ) : listError ? (
           <div
-            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-5 rounded-lg shadow-sm text-center mt-8"
+            className={`bg-red-100 border-l-4 border-red-500 text-red-700 p-5 rounded-lg shadow-sm text-center mt-8`}
             role="alert"
           >
             <div className="flex flex-col items-center">
@@ -560,7 +562,7 @@ const TasksPage: NextPageWithLayout = () => {
               <p className="text-base">{listError}</p>
               <button
                 onClick={fetchTasks}
-                className="mt-4 inline-flex items-center text-primary-dark hover:text-primary font-semibold underline transition-colors"
+                className={`mt-4 inline-flex items-center text-primary-dark hover:text-primary font-semibold underline transition-colors`}
               >
                 <FaSpinner
                   className={`mr-2 ${loading ? "animate-spin" : ""}`}
@@ -780,7 +782,7 @@ const TasksPage: NextPageWithLayout = () => {
         )}
 
         {/* Tasks I Assigned to Others */}
-        <h2 className="text-4xl font-bold text-gray-900 mb-8 mt-16 pb-4 border-b-4 border-secondary text-center">
+        <h2 className={`text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-8 mt-16 pb-4 border-b-4 border-secondary text-center`}>
           Tasks I Assigned to Others
         </h2>
         {assignedTasks.length === 0 ? (
