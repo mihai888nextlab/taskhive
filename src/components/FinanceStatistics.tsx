@@ -1,7 +1,7 @@
-// src/components/FinanceStatistics.tsx
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { useTheme } from '@/components/ThemeContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -11,6 +11,8 @@ interface FinanceStatisticsProps {
 }
 
 const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, incomesData }) => {
+  const { theme } = useTheme();
+  
   const data = {
     labels: ['Today', 'Yesterday', '2 Days Ago', '3 Days Ago', '4 Days Ago', '5 Days Ago', '6 Days Ago'],
     datasets: [
@@ -41,7 +43,8 @@ const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, inc
   };
 
   return (
-    <div className="mt-6">
+    <div className={`rounded-lg shadow-lg transition-transform transform hover:scale-101 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'} p-6`}>
+      <h2 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'} mb-4`}>Finance Overview</h2>
       <Bar data={data} options={options} />
     </div>
   );

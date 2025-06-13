@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { NextPageWithLayout } from '@/types';
 import DashboardTaskPreview from '@/components/DashboardTaskPreview';
-import FinancePreview from '@/components/FinancePreview';
+import FinancePreview from '@/components/DashboardFinancePreview'; // Ensure this matches your file name
 import Table from '@/components/Table';
 import Link from 'next/link';
 import { FaUserClock, FaTasks, FaCalendarAlt, FaArrowRight, FaMoneyBillWave } from 'react-icons/fa'; // Added FaMoneyBillWave
@@ -11,6 +11,7 @@ import { MdSettings } from 'react-icons/md';
 import Statistics from '@/components/Statistics';
 import { Expense, Income } from '@/db/models/expensesModel'; // Adjust the path accordingly
 import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
+import CalendarPreview from '@/components/DashboardCalendarPreview';
 
 interface Stats {
   totalUsers: number;
@@ -126,13 +127,18 @@ const DashboardPage: NextPageWithLayout = () => {
     </div>
   );
 
-  // Add the Finance card to your cardData array
+  // Add the Finance card to your cardData array using the FinancePreview component with its props
   const cardData = [
     {
       title: "Finance",
       description: "Keep track of your income, expenses, and overall financial health.",
       icon: FaMoneyBillWave,
-      content: financeCardContent,
+      content: (
+        <FinancePreview 
+          totalExpenses={totalExpenses} 
+          totalIncomes={totalIncomes} 
+          profit={profit} />
+      ),
     },
     {
       title: "Users",
@@ -158,9 +164,15 @@ const DashboardPage: NextPageWithLayout = () => {
                 ]}
                 emptyMessage="No users registered."
               />
-              <Link href="/app/users" className={`text-center mt-8 ${cardTextColor}`}>
-                View All Users
-              </Link>
+              <div className="text-center mt-8">
+                <Link
+                  href="/app/tasks"
+                  className="inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
+                >
+                  <span className="mr-3">View All Users</span>
+                  <FaArrowRight className="text-xl transform transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </div>
             </>
           ) : (
             <p className={`text-gray-600 text-center p-5 ${cardBackground} rounded-md border border-gray-200 shadow-inner`}>
@@ -180,7 +192,7 @@ const DashboardPage: NextPageWithLayout = () => {
       title: "Calendar",
       description: "View deadlines, scheduled meetings, and project milestones.",
       icon: FaCalendarAlt,
-      content: null,
+      content: <CalendarPreview />,
     },
     {
       title: "Settings",
@@ -221,7 +233,10 @@ const DashboardPage: NextPageWithLayout = () => {
 
             <p className={`text-base mb-4 flex-grow ${cardTextColor}`}>{card.description}</p>
 
-            {card.content && <div className="mt-auto">{card.content}</div>}
+            {card.content &&
+              // For the Calendar card, render the content without extra margin so that it fits perfectly
+              (card.title === "Calendar" ? card.content : <div className="mt-auto">{card.content}</div>)
+            }
           </div>
         ))}
       </div>

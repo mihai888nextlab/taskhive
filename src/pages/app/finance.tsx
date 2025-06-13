@@ -283,7 +283,7 @@ const FinancePage = () => {
               <p className="text-gray-400 text-center py-4">No expenses recorded yet.</p>
             ) : (
               expenses.map(expense => (
-                <div key={expense._id} className={`bg-red-800 border border-red-600 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200`}>
+                <div key={expense._id} className="bg-red-800 border border-red-600 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200">
                   <div>
                     <h3 className="font-bold text-lg text-red-300">{expense.title}</h3>
                     <p className="text-gray-400 text-sm mt-1">{expense.description}</p>
@@ -313,7 +313,7 @@ const FinancePage = () => {
               <p className="text-gray-400 text-center py-4">No incomes recorded yet.</p>
             ) : (
               incomes.map(income => (
-                <div key={income._id} className={`bg-green-800 border border-green-600 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200`}>
+                <div key={income._id} className="bg-green-800 border border-green-600 rounded-lg p-5 shadow-sm mb-4 flex items-center justify-between transition-transform hover:scale-101 hover:shadow-md transition-all duration-200">
                   <div>
                     <h3 className="font-bold text-lg text-green-300">{income.title}</h3>
                     <p className="text-gray-400 text-sm mt-1">{income.description}</p>
@@ -335,12 +335,11 @@ const FinancePage = () => {
         </div>
         
       </div>
-      <div className={`bg-gray-900 rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100 mt-8`}>
-        <h2 className={`text-2xl font-bold text-white mb-4 border-b-2 border-blue-200 pb-2`}>
+      <div className={`rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100 mt-8 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+        <h2 className={`text-2xl font-bold mb-4 border-b-2 pb-2 ${theme === 'dark' ? 'text-white border-blue-200' : 'text-gray-900 border-blue-200'}`}>
           Financial Statistics (Last 7 Days)
         </h2>
         <FinanceStatistics expensesData={expensesData} incomesData={incomesData} />
-        
       </div>
     </DashboardLayout>
   );

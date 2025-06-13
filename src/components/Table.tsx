@@ -66,7 +66,7 @@ function Table<T extends TableDataItem>({
                       {/* Dacă există o funcție `render`, o folosim. Altfel, afișăm valoarea direct. */}
                       {column.render
                         ? column.render(item)
-                        : item[column.key as keyof T]}
+                        : String(item[column.key as keyof T] ?? "")}
                     </td>
                   ))}
                   {actions && actions.length > 0 && (

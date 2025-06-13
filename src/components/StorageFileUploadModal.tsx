@@ -1,5 +1,5 @@
 import { useState } from "react";
-import FileCard from "./FileCard";
+import FileCard from "./StorageFileCard";
 
 interface FileUploadModalProps {
   open: boolean;

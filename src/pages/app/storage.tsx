@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import FileUploadModal from "@/components/FileUploadModal";
-import FileCard from "@/components/FileCard";
+import FileUploadModal from "@/components/StorageFileUploadModal";
+import FileCard from "@/components/StorageFileCard";
 import { NextPageWithLayout } from "@/types";
 import { useState, useEffect } from "react";
 import { useTheme } from '@/components/ThemeContext';
