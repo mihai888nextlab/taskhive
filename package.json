@@ -18,6 +18,7 @@
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "chart.js": "^3.9.1",
+    "chrono-node": "^2.8.3",
     "cookie": "^1.0.2",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.12.2",
