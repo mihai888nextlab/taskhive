@@ -1,16 +1,15 @@
-// pages/app/index.tsx
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { NextPageWithLayout } from '@/types';
 import DashboardTaskPreview from '@/components/DashboardTaskPreview';
-import FinancePreview from '@/components/DashboardFinancePreview'; // Ensure this matches your file name
+import FinancePreview from '@/components/DashboardFinancePreview';
 import Table from '@/components/Table';
 import Link from 'next/link';
-import { FaUserClock, FaTasks, FaCalendarAlt, FaArrowRight, FaMoneyBillWave } from 'react-icons/fa'; // Added FaMoneyBillWave
+import { FaUserClock, FaTasks, FaCalendarAlt, FaArrowRight, FaMoneyBillWave } from 'react-icons/fa';
 import { MdSettings } from 'react-icons/md';
 import Statistics from '@/components/Statistics';
-import { Expense, Income } from '@/db/models/expensesModel'; // Adjust the path accordingly
-import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
+import { Expense, Income } from '@/db/models/expensesModel';
+import { useTheme } from '@/components/ThemeContext';
 import CalendarPreview from '@/components/DashboardCalendarPreview';
 
 interface Stats {
@@ -23,7 +22,7 @@ interface Stats {
 }
 
 const DashboardPage: NextPageWithLayout = () => {
-  const { theme } = useTheme(); // Get the current theme
+  const { theme } = useTheme();
   const [users, setUsers] = useState<
     {
       _id: string;
@@ -42,7 +41,6 @@ const DashboardPage: NextPageWithLayout = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
 
-  // States for finance
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalIncomes, setTotalIncomes] = useState(0);
   const [profit, setProfit] = useState(0);
@@ -114,8 +112,6 @@ const DashboardPage: NextPageWithLayout = () => {
   const cardTextColor = theme === 'light' ? 'text-gray-900' : 'text-white';
   const borderColor = theme === 'light' ? 'border-gray-100' : 'border-gray-700';
 
-  // Define the FinancePreview content to be included in cardData
-  // It uses the same styling as the User card's inner table
   const financeCardContent = (
     <div className={`p-6 rounded-lg shadow-sm ${cardBackground} ${borderColor}`}>
       <h4 className={`text-xl font-bold ${cardTextColor}`}>Total Income</h4>
@@ -127,7 +123,6 @@ const DashboardPage: NextPageWithLayout = () => {
     </div>
   );
 
-  // Add the Finance card to your cardData array using the FinancePreview component with its props
   const cardData = [
     {
       title: "Finance",
@@ -234,7 +229,6 @@ const DashboardPage: NextPageWithLayout = () => {
             <p className={`text-base mb-4 flex-grow ${cardTextColor}`}>{card.description}</p>
 
             {card.content &&
-              // For the Calendar card, render the content without extra margin so that it fits perfectly
               (card.title === "Calendar" ? card.content : <div className="mt-auto">{card.content}</div>)
             }
           </div>

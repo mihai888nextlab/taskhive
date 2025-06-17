@@ -29,8 +29,12 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
     try {
-      // Updated contextual prompt
-      const contextualPrompt = `You are an advanced assistant for an organizing tool application. Your role is to provide detailed, accurate, and contextually relevant responses that help users effectively manage their tasks, roles, and organizational structures. When responding, consider the following:
+      // Only add the contextual prompt if it's not a task creation request
+      const isTaskRequest = inputPrompt.toLowerCase().includes("task") || 
+                          inputPrompt.toLowerCase().includes("create") || 
+                          inputPrompt.toLowerCase().includes("make");
+
+      const promptToSend = isTaskRequest ? inputPrompt : `You are an advanced assistant for an organizing tool application. Your role is to provide detailed, accurate, and contextually relevant responses that help users effectively manage their tasks, roles, and organizational structures. When responding, consider the following:
       - Provide clear explanations and actionable advice.
       - Include examples or scenarios where applicable.
       - Ensure that your responses are tailored to the needs of users looking to optimize their organizational processes.
@@ -43,20 +47,21 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: contextualPrompt }), // Use the updated contextual prompt
+        body: JSON.stringify({ prompt: promptToSend }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error response from AI:", errorData); // Log the error response
-        throw new Error(errorData.message || "Failed to fetch response from AI.");
+        console.error("Error response from AI:", data); // Log the error response
+        throw new Error(data.message || "Failed to process your request. Please try again.");
       }
 
-      const data = await response.json();
       setChatHistory((prev) => [...prev, { type: 'ai', text: data.response }]);
     } catch (error) {
       console.error("Error sending message to AI:", error);
-      setChatHistory((prev) => [...prev, { type: 'ai', text: `Error: ${(error as Error).message}` }]);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
+      setChatHistory((prev) => [...prev, { type: 'ai', text: `Error: ${errorMessage}` }]);
     } finally {
       setIsLoading(false);
     }

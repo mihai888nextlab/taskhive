@@ -19,6 +19,7 @@
     "bcryptjs": "^2.4.3",
     "chart.js": "^3.9.1",
     "cookie": "^1.0.2",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.12.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.0",
