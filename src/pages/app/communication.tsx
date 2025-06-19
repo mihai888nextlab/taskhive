@@ -1,3 +1,4 @@
+import React from 'react';
 import ChatWindow from "@/components/chat/ChatWindow";
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";

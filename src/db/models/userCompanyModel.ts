@@ -1,3 +1,4 @@
+import Company from './companyModel'; // <-- This import is REQUIRED and must be at the top!
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
@@ -14,7 +15,7 @@ const userCompanySchema = new Schema(
       required: true,
     },
     role: { type: String, required: true },
-    permissions: [{ type: String }], // Array of permissions
+    permissions: [{ type: String }],
   },
   { timestamps: true }
 );

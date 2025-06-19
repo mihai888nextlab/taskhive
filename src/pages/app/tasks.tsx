@@ -107,6 +107,7 @@ const TasksPage: NextPageWithLayout = () => {
   const [assignedTo, setAssignedTo] = useState<string>("");
   const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
   const [assignedTasks, setAssignedTasks] = useState<Task[]>([]);
+  const [sortBy, setSortBy] = useState<string>("default"); // New state for sorting preference
 
   // Function to fetch tasks from the API
   const fetchTasks = async () => {
@@ -125,21 +126,42 @@ const TasksPage: NextPageWithLayout = () => {
       }
       const data: Task[] = await response.json();
 
-      // --- REVISED SORTING LOGIC FOR TASKS PAGE (Sort by Deadline, then push completed to end) ---
-      data.sort((a, b) => {
-        // Prioritize by completion status: incomplete tasks first
-        if (a.completed && !b.completed) return 1; // 'a' is completed, 'b' is not: 'a' goes after 'b'
-        if (!a.completed && b.completed) return -1; // 'a' is not completed, 'b' is: 'a' goes before 'b'
+      let sortedData = [...data]; // Create a mutable copy for sorting
 
-        // If both are completed or both are incomplete, sort by deadline
-        const dateA = new Date(a.deadline).getTime();
-        const dateB = new Date(b.deadline).getTime();
-        return dateA - dateB; // Ascending order (earliest deadline first)
+      // --- REVISED GLOBAL SORTING LOGIC FOR ALL METHODS ---
+      sortedData.sort((a, b) => {
+        const isAOverdue = isTaskOverdue(a);
+        const isBOverdue = isTaskOverdue(b);
+
+        // Rule 1: Prioritize overdue incomplete tasks (always at the top)
+        if (isAOverdue && !a.completed && (!isBOverdue || b.completed)) return -1; // A is overdue & incomplete, B is not (or completed) -> A comes first
+        if (!isAOverdue && !b.completed && isBOverdue && !a.completed) return 1;  // B is overdue & incomplete, A is not (or completed) -> B comes first
+
+        // Rule 2: Completed tasks go to the bottom
+        if (a.completed && !b.completed) return 1;  // A is completed, B is not -> A goes after B
+        if (!a.completed && b.completed) return -1; // A is not completed, B is completed -> A goes before B
+
+        // If we reach here, tasks are in the same 'tier' (both overdue, both completed, or both incomplete & not overdue)
+        // Now apply the specific sorting method for the middle tier, and deadline sort for top/bottom tiers.
+        if (sortBy === "deadlineAsc" || isAOverdue || a.completed) {
+          // Sort by deadline (earliest first) if 'deadlineAsc' is selected, OR if both tasks are overdue, OR if both tasks are completed
+          const dateA = new Date(a.deadline).getTime();
+          const dateB = new Date(b.deadline).getTime();
+          return dateA - dateB; // Ascending
+        } else if (sortBy === "createdAtDesc") {
+          // Sort by created date (newest first) only for the "incomplete & not overdue" middle tier
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA; // Descending
+        }
+        
+        // Fallback for default or other unhandled cases (should ideally not be reached if logic is exhaustive)
+        return 0; 
       });
-      // --- END REVISED SORTING LOGIC ---
+      // --- END REVISED GLOBAL SORTING LOGIC ---
 
-      setTasks(data);
-      localStorage.setItem("userTasks", JSON.stringify(data)); // <-- Store in localStorage
+      setTasks(sortedData);
+      localStorage.setItem("userTasks", JSON.stringify(sortedData)); // <-- Store sorted data
     } catch (err) {
       console.error("Error fetching tasks:", err);
       setListError((err as Error).message); // Set list-specific error
@@ -148,10 +170,10 @@ const TasksPage: NextPageWithLayout = () => {
     }
   };
 
-  // Fetch tasks on component mount
+  // Fetch tasks on component mount and when sortBy changes
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [sortBy]); // Add sortBy to dependency array
 
   // Fetch users below you on mount
   useEffect(() => {
@@ -532,6 +554,21 @@ const TasksPage: NextPageWithLayout = () => {
         <h2 className={`text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-8 mt-12 pb-4 border-b-4 border-primary-dark text-center`}>
           My Task List
         </h2>
+
+        {/* Sorting Dropdown */}
+        <div className="mb-6 flex items-center justify-end">
+          <label htmlFor="sort-tasks" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mr-2`}>Sort By:</label>
+          <select
+            id="sort-tasks"
+            className={`w-full sm:w-auto py-2 px-3 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-base cursor-pointer`}
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            disabled={loading}
+          >
+            <option value="createdAtDesc">Created Date (Newest First)</option>
+            <option value="deadlineAsc">Deadline (Earliest First)</option>
+          </select>
+        </div>
 
         {/* Conditional rendering for loading, error, and empty states */}
         {loading && tasks.length === 0 ? (

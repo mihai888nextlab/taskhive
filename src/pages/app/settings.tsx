@@ -1,3 +1,4 @@
+import React from 'react';
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useState, useEffect } from "react";

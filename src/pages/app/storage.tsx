@@ -4,6 +4,7 @@ import FileCard from "@/components/StorageFileCard";
 import { NextPageWithLayout } from "@/types";
 import { useState, useEffect } from "react";
 import { useTheme } from '@/components/ThemeContext';
+import React from 'react';
 
 const MAX_STORAGE_BYTES = 1024 * 1024 * 1024; // 1 GB in bytes
 
