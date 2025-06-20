@@ -13,7 +13,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
   onSubmit,
   theme,
 }) => (
-  <div className={`text-${theme === 'light' ? 'gray-900' : 'white'}`}>
+  <div className={`text-${theme === 'light' ? 'gray-900' : 'white'} `}>
     <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
       Personal Information
     </h2>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import Loading from "@/components/Loading";
 import TimeStatistics from '@/components/TimeStatistics';
@@ -6,140 +6,108 @@ import { useTheme } from '@/components/ThemeContext';
 import TimerPanel from '@/components/time-tracking/TimerPanel';
 import SessionForm from '@/components/time-tracking/SessionForm';
 import SessionList from '@/components/time-tracking/SessionList';
+import TimeTrackingHeader from '@/components/time-tracking/TimeTrackingHeader';
+import PomodoroSavePanel from '@/components/time-tracking/PomodoroSavePanel';
+import StatisticsCard from '@/components/time-tracking/StatisticsCard';
 import { Pie } from 'react-chartjs-2';
 import { saveAs } from "file-saver";
+
+const WORK_DURATION = 25 * 60;
+const BREAK_DURATION = 5 * 60;
 
 const TimeTrackingPage = () => {
   const { theme } = useTheme();
   const [sessionName, setSessionName] = useState('');
   const [sessionDescription, setSessionDescription] = useState('');
-  const [sessionTag, setSessionTag] = useState(''); // Added state for session tag
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessionTag, setSessionTag] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [last7DaysHours, setLast7DaysHours] = useState<number[]>(Array(7).fill(0));
   const [pomodoroMode, setPomodoroMode] = useState(false);
   const [pomodoroPhase, setPomodoroPhase] = useState<'work' | 'break'>('work');
-  const [pomodoroTime, setPomodoroTime] = useState(25 * 60); // 25 min default
+  const [pomodoroTime, setPomodoroTime] = useState(WORK_DURATION);
   const [pomodoroCycles, setPomodoroCycles] = useState(0);
   const [pomodoroRunning, setPomodoroRunning] = useState(false);
-  const [pomodoroMessage, setPomodoroMessage] = useState(''); // Message state for Pomodoro actions
+  const [pomodoroMessage, setPomodoroMessage] = useState('');
 
-  // Pomodoro durations (customizable)
-  const WORK_DURATION = 25 * 60;
-  const BREAK_DURATION = 5 * 60;
-
+  // Fetch user
   useEffect(() => {
-    const fetchUserAndSessions = async () => {
-      setLoading(true);
-      try {
-        const userResponse = await fetch('/api/user');
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          setUser(userData.user);
-
-          if (userData.user?._id) {
-            const sessionsResponse = await fetch('/api/time-sessions?userId=' + userData.user._id);
-            if (sessionsResponse.ok) {
-              const sessionsData = await sessionsResponse.json();
-              setSessions(sessionsData.reverse());
-              calculateHours(sessionsData);
-            }
-          }
-        }
-      } finally {
-        setLoading(false);
+    const fetchUser = async () => {
+      const userResponse = await fetch('/api/user');
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setUser(userData.user);
       }
     };
-
-    fetchUserAndSessions();
+    fetchUser();
   }, []);
 
+  // Fetch sessions
+  const fetchSessions = useCallback(async () => {
+    if (!user?._id) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/time-sessions?userId=' + user._id);
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data.reverse());
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user?._id) fetchSessions();
+  }, [user, fetchSessions]);
+
+  // Timer logic
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRunning) {
-      interval = setInterval(() => {
-        setElapsedTime((prev) => prev + 1);
-      }, 1000);
+      interval = setInterval(() => setElapsedTime((prev) => prev + 1), 1000);
     }
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  const fetchSessionsAndUpdateStats = async () => {
-    if (user && user._id) {
-      try {
-        const response = await fetch('/api/time-sessions?userId=' + user._id);
-        if (response.ok) {
-          const data = await response.json();
-          setSessions(data);
-          calculateHours(data);
-        }
-      } catch {}
-    }
-  };
-
+  // Pomodoro logic
   useEffect(() => {
-    if (user) {
-      fetchSessionsAndUpdateStats();
-    }
-  }, [user]);
-
-  const handleStart = () => setIsRunning(true);
-  const handleStop = () => setIsRunning(false);
-  const handleReset = () => {
-    setElapsedTime(0);
-    setIsRunning(false);
-  };
-
-  const handleSaveSession = async () => {
-    if (!sessionName.trim() || !sessionDescription.trim() || !user || !user._id) return;
-    const sessionData = {
-      userId: user._id,
-      name: sessionName,
-      description: sessionDescription,
-      duration: elapsedTime,
-      tag: sessionTag, // Include tag in session data
-    };
-    try {
-      const response = await fetch('/api/time-sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sessionData),
-      });
-      if (response.ok) {
-        setSessionName('');
-        setSessionDescription('');
-        setSessionTag(''); // Reset tag
-        await fetchSessionsAndUpdateStats();
-        handleReset();
+    if (!pomodoroMode || !pomodoroRunning) return;
+    if (pomodoroTime === 0) {
+      if (pomodoroPhase === 'work') {
+        setPomodoroPhase('break');
+        setPomodoroTime(BREAK_DURATION);
+        setPomodoroCycles(c => c + 1);
+      } else {
+        setPomodoroPhase('work');
+        setPomodoroTime(WORK_DURATION);
       }
-    } catch {}
-  };
-
-  const handleDeleteSession = async (sessionId: string) => {
-    if (!user || !user._id) {
-      console.error("User ID is required for deletion.");
       return;
     }
+    const interval = setInterval(() => setPomodoroTime(t => t > 0 ? t - 1 : 0), 1000);
+    return () => clearInterval(interval);
+  }, [pomodoroMode, pomodoroRunning, pomodoroTime, pomodoroPhase]);
 
-    try {
-      console.log(`Attempting to delete session with ID: ${sessionId} for user ID: ${user._id}`);
-      const response = await fetch(`/api/time-sessions?id=${sessionId}&userId=${user._id}`, { method: 'DELETE' });
-      if (response.ok) {
-        console.log(`Successfully deleted session with ID: ${sessionId}`);
-        await fetchSessionsAndUpdateStats();
-      } else {
-        const errorData = await response.json();
-        console.error(`Failed to delete session. Status: ${response.status}, Message: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error("Error deleting session:", error);
+  useEffect(() => {
+    if (
+      pomodoroMode &&
+      pomodoroPhase === 'work' &&
+      pomodoroTime === 0
+    ) {
+      setSessionName('Pomodoro Session');
+      setSessionDescription('Completed a Pomodoro work session');
+      setSessionTag('Pomodoro');
+      setElapsedTime(WORK_DURATION);
+      setPomodoroRunning(false);
     }
-  };
+  }, [pomodoroMode, pomodoroPhase, pomodoroTime]);
 
-  const calculateHours = (sessions: any[]) => {
+  // Statistics
+  useEffect(() => {
+    if (!sessions.length) return;
     const last7DaysTotal = Array(7).fill(0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -153,7 +121,7 @@ const TimeTrackingPage = () => {
       }
     });
     setLast7DaysHours(last7DaysTotal.map(hours => hours / 3600));
-  };
+  }, [sessions]);
 
   const calculateStreak = (sessions: any[]) => {
     const days = new Set(
@@ -177,11 +145,12 @@ const TimeTrackingPage = () => {
   const pieData = {
     labels: Object.keys(tagTotals),
     datasets: [{
-      data: Object.values(tagTotals).map(d => d / 3600), // hours
+      data: Object.values(tagTotals).map(d => d / 3600),
       backgroundColor: ["#60a5fa", "#f87171", "#34d399", "#fbbf24", "#a78bfa", "#f472b6", "#38bdf8", "#facc15", "#818cf8"],
     }]
   };
 
+  // Handlers
   const handleExportCSV = () => {
     if (!sessions.length) return;
     const rows = [
@@ -199,44 +168,32 @@ const TimeTrackingPage = () => {
     saveAs(blob, "time_sessions.csv");
   };
 
-  useEffect(() => {
-    if (!pomodoroMode || !pomodoroRunning) return;
-    if (pomodoroTime === 0) {
-      if (pomodoroPhase === 'work') {
-        setPomodoroPhase('break');
-        setPomodoroTime(BREAK_DURATION);
-        setPomodoroCycles(c => c + 1);
-      } else {
-        setPomodoroPhase('work');
-        setPomodoroTime(WORK_DURATION);
-      }
-      return;
-    }
-    const interval = setInterval(() => {
-      setPomodoroTime(t => t > 0 ? t - 1 : 0);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [pomodoroMode, pomodoroRunning, pomodoroTime, pomodoroPhase]);
+  const handleSaveSession = async () => {
+    if (!sessionName.trim() || !sessionDescription.trim() || !user || !user._id) return;
+    await fetch('/api/time-sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: sessionName,
+        description: sessionDescription,
+        duration: elapsedTime,
+        tag: sessionTag,
+        userId: user._id,
+      }),
+    });
+    setSessionName('');
+    setSessionDescription('');
+    setSessionTag('');
+    setElapsedTime(0);
+    setIsRunning(false);
+    fetchSessions();
+  };
 
-  useEffect(() => {
-    // When a Pomodoro work session ends, prefill the session form
-    if (
-      pomodoroMode &&
-      pomodoroPhase === 'work' &&
-      pomodoroTime === 0
-    ) {
-      setSessionName('Pomodoro Session');
-      setSessionDescription('Completed a Pomodoro work session');
-      setSessionTag('Pomodoro');
-      setElapsedTime(WORK_DURATION);
-      setPomodoroRunning(false);
-    }
-    // eslint-disable-next-line
-  }, [pomodoroMode, pomodoroPhase, pomodoroTime]);
-
-  const canSavePomodoro = 
-    (pomodoroPhase === 'work' && pomodoroTime === 0) ||
-    (pomodoroPhase === 'break');
+  const handleDeleteSession = async (sessionId: string) => {
+    if (!user?._id) return;
+    await fetch(`/api/time-sessions?id=${sessionId}&userId=${user._id}`, { method: 'DELETE' });
+    fetchSessions();
+  };
 
   if (loading) {
     return <Loading />;
@@ -248,42 +205,23 @@ const TimeTrackingPage = () => {
         <h1 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight`}>
           Time Tracking
         </h1>
-        {/* Top controls */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-          <div className="flex flex-wrap gap-3 items-center">
-            <button
-              className="px-4 py-2 rounded-full bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all"
-              onClick={handleExportCSV}
-            >
-              Export Sessions as CSV
-            </button>
-            <button
-              className={`px-4 py-2 rounded-full font-semibold shadow transition-all duration-200 ${
-                pomodoroMode
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-200 text-gray-800 hover:bg-red-100"
-              }`}
-              onClick={() => {
-                setPomodoroMode(m => !m);
-                setPomodoroPhase('work');
-                setPomodoroTime(WORK_DURATION);
-                setPomodoroRunning(false);
-                setPomodoroCycles(0);
-              }}
-            >
-              {pomodoroMode ? "Exit Pomodoro Mode" : "Pomodoro Mode"}
-            </button>
-          </div>
-          <div className="flex justify-center md:justify-end">
-            <span className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full font-bold text-lg shadow">
-              🔥 Productivity Streak: {streak} day{streak !== 1 ? "s" : ""}
-            </span>
-          </div>
-        </div>
+        <TimeTrackingHeader
+          theme={theme}
+          streak={streak}
+          pomodoroMode={pomodoroMode}
+          onExport={handleExportCSV}
+          onPomodoroToggle={() => {
+            setPomodoroMode(m => !m);
+            setPomodoroPhase('work');
+            setPomodoroTime(WORK_DURATION);
+            setPomodoroRunning(false);
+            setPomodoroCycles(0);
+          }}
+        />
         {pomodoroMode ? (
           <>
             <TimerPanel
-              elapsedTime={pomodoroTime} // Pomodoro countdown
+              elapsedTime={pomodoroTime}
               isRunning={pomodoroRunning}
               onStart={() => setPomodoroRunning(true)}
               onStop={() => setPomodoroRunning(false)}
@@ -291,7 +229,7 @@ const TimeTrackingPage = () => {
                 setPomodoroRunning(false);
                 setPomodoroPhase('work');
                 setPomodoroTime(WORK_DURATION);
-                setPomodoroCycles(0); // <-- Reset cycles on reset
+                setPomodoroCycles(0);
               }}
               theme={theme}
               pomodoroMode={pomodoroMode}
@@ -301,65 +239,51 @@ const TimeTrackingPage = () => {
               workDuration={WORK_DURATION}
               breakDuration={BREAK_DURATION}
             />
-            <div className="flex flex-col items-center mb-8">
-              <button
-                className="px-6 py-3 rounded-xl bg-red-600 text-white font-bold shadow hover:bg-red-700 transition-all text-lg"
-                onClick={async () => {
-                  // Allow save if just finished a work interval (now in break mode and timer just reset)
-                  const justFinishedWork = pomodoroPhase === 'break';
-                  if (!(justFinishedWork)) {
-                    setPomodoroMessage("⏳ You can only save a Pomodoro session immediately after completing a work interval.");
-                    return;
-                  }
-                  if (!user || !user._id) {
-                    setPomodoroMessage("User not loaded. Please refresh the page.");
-                    return;
-                  }
-                  setPomodoroMessage('');
-                  const sessionData = {
-                    userId: user._id,
+            <PomodoroSavePanel
+              onSave={async () => {
+                const justFinishedWork = pomodoroPhase === 'break';
+                if (!justFinishedWork) {
+                  setPomodoroMessage("⏳ You can only save a Pomodoro session immediately after completing a work interval.");
+                  return;
+                }
+                if (!user || !user._id) {
+                  setPomodoroMessage("User not loaded. Please refresh the page.");
+                  return;
+                }
+                setPomodoroMessage('');
+                await fetch('/api/time-sessions', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
                     name: 'Pomodoro Session',
                     description: 'Completed a Pomodoro work session',
                     duration: WORK_DURATION,
                     tag: 'Pomodoro',
                     cycles: pomodoroCycles,
-                  };
-                  try {
-                    const response = await fetch('/api/time-sessions', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(sessionData),
-                    });
-                    if (response.ok) {
-                      await fetchSessionsAndUpdateStats();
-                      setElapsedTime(0);
-                      setPomodoroPhase('work');
-                      setPomodoroTime(WORK_DURATION);
-                      setPomodoroRunning(false);
-                      setPomodoroCycles(0); // <-- Reset cycles after saving
-                    }
-                  } catch {
-                    setPomodoroMessage("Failed to save session. Please try again.");
-                  }
-                }}
-              >
-                Save Pomodoro Session
-              </button>
-              {pomodoroMessage && (
-                <div className="mt-3 text-red-600 font-semibold text-center">
-                  {pomodoroMessage}
-                </div>
-              )}
-            </div>
+                    userId: user._id,
+                  }),
+                });
+                setElapsedTime(0);
+                setPomodoroPhase('work');
+                setPomodoroTime(WORK_DURATION);
+                setPomodoroRunning(false);
+                setPomodoroCycles(0);
+                fetchSessions();
+              }}
+              message={pomodoroMessage}
+            />
           </>
         ) : (
           <>
             <TimerPanel
-              elapsedTime={elapsedTime} // Stopwatch
+              elapsedTime={elapsedTime}
               isRunning={isRunning}
-              onStart={handleStart}
-              onStop={handleStop}
-              onReset={handleReset}
+              onStart={() => setIsRunning(true)}
+              onStop={() => setIsRunning(false)}
+              onReset={() => {
+                setElapsedTime(0);
+                setIsRunning(false);
+              }}
               theme={theme}
               pomodoroMode={false}
             />
@@ -380,20 +304,16 @@ const TimeTrackingPage = () => {
           onDelete={handleDeleteSession}
           theme={theme}
         />
-        <div className={`rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-          <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b-2 border-blue-200 pb-2`}>
-            Time Statistics (Last 7 Days)
-          </h2>
+        <StatisticsCard title="Time Statistics (Last 7 Days)" theme={theme}>
           <TimeStatistics last7DaysHours={last7DaysHours} />
-        </div>
-        <div className={`rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-          <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b-2 border-blue-200 pb-2`}>
-            Time by Tag (Last 7 Days)
-          </h2>
-          <div style={{ maxWidth: 260, maxHeight: 260 }}>
-            <Pie data={pieData} width={200} height={200} />
+        </StatisticsCard>
+        <StatisticsCard title="Time by Tag (Last 7 Days)" theme={theme}>
+          <div className="flex justify-center items-center" style={{ minHeight: 520 }}>
+            <div style={{ maxWidth: 540, maxHeight: 540, width: 540, height: 540 }}>
+              <Pie data={pieData} width={520} height={520} />
+            </div>
           </div>
-        </div>
+        </StatisticsCard>
       </div>
     </DashboardLayout>
   );

@@ -23,6 +23,32 @@ export default async function handler(
     process.env.JWT_SECRET || ""
   ) as JWTPayload;
 
+  if (req.method === "DELETE") {
+    const { id } = req.query;
+    if (!id) {
+      return res.status(400).json({ message: "File ID required" });
+    }
+    try {
+      await filesModel.findByIdAndDelete(id);
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to delete file" });
+    }
+  }
+
+  if (req.method === "PATCH") {
+    const { id, newName } = req.body;
+    if (!id || !newName) {
+      return res.status(400).json({ message: "File ID and new name required" });
+    }
+    try {
+      const updated = await filesModel.findByIdAndUpdate(id, { fileName: newName });
+      return res.status(200).json({ success: true, file: updated });
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to rename file" });
+    }
+  }
+
   if (req.method !== "GET") {
     res.setHeader("Allow", ["GET"]);
     return res

@@ -38,7 +38,7 @@ const SessionList: React.FC<SessionListProps> = ({
   onDelete,
   theme,
 }) => (
-  <div className={`rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+  <div className={`rounded-2xl shadow-xl p-6 sm:p-8 my-3 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
     <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b-2 border-blue-200 pb-2`}>
       Saved Sessions
     </h2>

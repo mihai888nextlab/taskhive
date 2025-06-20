@@ -6,7 +6,7 @@ import { IUser } from "@/db/models/userModel";
 import { PopulatedConversation } from "./ConversationList";
 import Loading from "@/components/Loading";
 import { BsPaperclip } from "react-icons/bs";
-import FileCard from "@/components/StorageFileCard";
+import FileCard from "@/components/storage/StorageFileCard";
 import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
 
 // Ensure these types match your backend models and API responses

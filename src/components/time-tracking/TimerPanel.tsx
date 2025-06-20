@@ -42,7 +42,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({
   const progress = pomodoroMode ? ((totalPhase - (pomodoroTime || 0)) / totalPhase) * 100 : 0;
 
   return (
-    <div className={`rounded-2xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+    <div className={`rounded-2xl p-6 sm:p-8 mb-2 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
       {pomodoroMode ? (
         <>
           <div className="mb-4 text-center">
@@ -97,6 +97,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({
         </button>
       </div>
     </div>
+    
   );
 };
 

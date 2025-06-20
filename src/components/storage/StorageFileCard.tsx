@@ -1,12 +1,14 @@
 import React from "react";
 import { IoIosDocument } from "react-icons/io";
 
-type FileCardProps = {
+export interface FileCardProps {
   fileName: string;
-  fileSize: number; // in bytes
+  fileSize: number;
   downloadUrl?: string;
-  theme?: 'light' | 'dark';
-};
+  theme: string;
+  fileIcon: React.ReactNode;
+  children?: React.ReactNode;
+}
 
 function formatBytes(bytes: number) {
   if (bytes >= 1024 * 1024 * 1024)
@@ -21,16 +23,18 @@ const FileCard: React.FC<FileCardProps> = ({
   fileSize,
   downloadUrl,
   theme,
-}) => {
-  return (
-    <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} shadow-md`}>
-      <div className="flex items-center gap-3">
-        <IoIosDocument className="text-3xl text-primary" />
-        <div>
-          <div className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{fileName}</div>
-          <div className="text-xs text-gray-500">{formatBytes(fileSize)}</div>
-        </div>
+  fileIcon,
+  children,
+}) => (
+  <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} shadow-md`}>
+    <div className="flex items-center gap-3">
+      <IoIosDocument className="text-3xl text-primary" />
+      <div>
+        <div className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{fileName}</div>
+        <div className="text-xs text-gray-500">{formatBytes(fileSize)}</div>
       </div>
+    </div>
+    <div className="flex items-center gap-2">
       {downloadUrl && (
         <a
           href={downloadUrl}
@@ -41,8 +45,9 @@ const FileCard: React.FC<FileCardProps> = ({
           Download
         </a>
       )}
+      {children}
     </div>
-  );
-};
+  </div>
+);
 
 export default FileCard;

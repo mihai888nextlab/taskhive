@@ -1,19 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FileCard from "./StorageFileCard";
 
 interface FileUploadModalProps {
   open: boolean;
   onClose: () => void;
+  droppedFiles?: FileList | null;
+  onUploadSuccess?: () => void;
 }
 
 export default function FileUploadModal({
   open,
   onClose,
+  droppedFiles,
+  onUploadSuccess,
 }: FileUploadModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+
+  // Use dropped file if present
+  useEffect(() => {
+    if (droppedFiles && droppedFiles.length > 0) {
+      setFile(droppedFiles[0]);
+      setPreview(URL.createObjectURL(droppedFiles[0]));
+    }
+  }, [droppedFiles]);
 
   if (!open) return null;
 
@@ -54,6 +66,7 @@ export default function FileUploadModal({
 
       if (res.ok) {
         setUploadedUrl(data.url);
+        if (onUploadSuccess) onUploadSuccess();
       } else {
         alert("Eroare la upload: " + data.error);
       }
@@ -83,11 +96,27 @@ export default function FileUploadModal({
           className="block w-full border p-2 mb-2"
         />
 
+        {preview && file && (
+          <div className="mb-2">
+            {file.type.startsWith("image/") ? (
+              <img
+                src={preview}
+                alt={file.name}
+                className="max-h-32 mx-auto rounded"
+              />
+            ) : (
+              <div className="text-center text-gray-500">{file.name}</div>
+            )}
+          </div>
+        )}
+
         {preview && file && uploadedUrl && (
           <FileCard
             fileName={file.name}
             fileSize={file.size}
             downloadUrl={uploadedUrl}
+            theme="light"
+            fileIcon={null}
           />
         )}
 
@@ -98,20 +127,6 @@ export default function FileUploadModal({
         >
           {uploading ? "Uploading..." : "Upload"}
         </button>
-
-        {/* {uploadedUrl && (
-          <div className="mt-3">
-            <p className="text-green-500">✅ Upload reușit!</p>
-            <a
-              href={uploadedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 underline"
-            >
-              Vezi fișierul
-            </a>
-          </div>
-        )} */}
       </div>
     </div>
   );
