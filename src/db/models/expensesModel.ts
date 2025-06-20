@@ -9,6 +9,9 @@ export interface Expense {
   description: string;
   type: "expense";
   companyId: string;
+  userId: string;
+  date: Date;
+  category: string;
 }
 
 export interface Income {
@@ -18,6 +21,9 @@ export interface Income {
   description: string;
   type: "income";
   companyId: string;
+  userId: string;
+  date: Date;
+  category: string;
 }
 
 const ExpenseSchema = new mongoose.Schema({
@@ -25,13 +31,14 @@ const ExpenseSchema = new mongoose.Schema({
   title: { type: String, required: true },
   amount: { type: Number, required: true },
   description: { type: String, required: true },
-  date: { type: Date, default: Date.now },
+  date: { type: Date, default: Date.now, required: true },
   type: { type: String, enum: ["expense", "income"], required: true },
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Company",
     required: true,
   },
+  category: { type: String, default: "General", required: true },
 });
 
 // Check if the model already exists

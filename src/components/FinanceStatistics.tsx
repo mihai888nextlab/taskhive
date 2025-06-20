@@ -8,13 +8,14 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 interface FinanceStatisticsProps {
   expensesData: number[]; // Array of expenses for the last 7 days
   incomesData: number[]; // Array of incomes for the last 7 days
+  labels: string[]; // Array of labels for the x-axis
 }
 
-const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, incomesData }) => {
+const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, incomesData, labels }) => {
   const { theme } = useTheme();
   
   const data = {
-    labels: ['Today', 'Yesterday', '2 Days Ago', '3 Days Ago', '4 Days Ago', '5 Days Ago', '6 Days Ago'],
+    labels,
     datasets: [
       {
         label: 'Expenses',

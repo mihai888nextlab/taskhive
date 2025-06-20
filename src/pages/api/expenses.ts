@@ -25,7 +25,7 @@ export default async function handler(
   ) as JWTPayload;
 
   if (req.method === "POST") {
-    const { title, amount, description, type } = req.body; // Ensure type is included
+    const { title, amount, description, type, category, date } = req.body; // <-- add date
 
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(decodedToken.userId)) {
@@ -39,6 +39,8 @@ export default async function handler(
       amount,
       description,
       type, // Ensure type is included here
+      category: category || "General", // Ensure category is included here
+      date, // <-- add date here
     });
 
     try {
@@ -51,8 +53,12 @@ export default async function handler(
         .json({ message: "Error saving expense", error: error.message });
     }
   } else if (req.method === "GET") {
-    // Use else if for better flow
-    const expenses = await Expense.find({ companyId: decodedToken.companyId });
+    // Optionally filter by userId/companyId if needed
+    const { userId, companyId } = req.query;
+    const filter: any = {};
+    if (userId) filter.userId = userId;
+    if (companyId) filter.companyId = companyId;
+    const expenses = await Expense.find(filter).sort({ date: -1 });
     return res.status(200).json(expenses);
   } else if (req.method === "DELETE") {
     // Add DELETE method handler
