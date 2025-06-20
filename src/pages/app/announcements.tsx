@@ -3,6 +3,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { FaBullhorn } from "react-icons/fa";
 import { useTheme } from '@/components/ThemeContext';
+import AnnouncementForm from "@/components/announcements/AnnouncementForm";
+import AnnouncementList from "@/components/announcements/AnnouncementList";
 
 interface Announcement {
   _id: string;
@@ -84,43 +86,16 @@ const AnnouncementsPage: NextPageWithLayout = () => {
               {showForm ? "Hide Announcement Form" : "Add New Announcement"}
             </button>
             {showForm && (
-              <form
+              <AnnouncementForm
+                title={title}
+                content={content}
+                loading={loading}
+                formError={formError}
+                theme={theme}
+                onTitleChange={setTitle}
+                onContentChange={setContent}
                 onSubmit={handleAddAnnouncement}
-                className={`bg-${theme === 'light' ? 'gradient-to-br from-gray-50 to-gray-100' : 'bg-gray-700'} p-8 rounded-2xl shadow-xl border border-gray-200 mb-8 animate-fadeIn`}
-              >
-                <h2 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'} mb-6 text-center`}>
-                  Create Announcement
-                </h2>
-                {formError && (
-                  <div className="bg-red-100 text-red-700 p-4 mb-6 rounded-lg font-semibold text-center">
-                    {formError}
-                  </div>
-                )}
-                <input
-                  type="text"
-                  placeholder="Title"
-                  className={`w-full mb-4 p-3 border border-primary/40 rounded-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-lg font-semibold shadow-sm`}
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-                <textarea
-                  placeholder="Content"
-                  className={`w-full mb-4 p-3 border border-primary/40 rounded-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base shadow-sm`}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  required
-                  rows={4}
-                  disabled={loading}
-                />
-                <button
-                  type="submit"
-                  className={`w-full py-3 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 text-lg`}
-                >
-                  Post Announcement
-                </button>
-              </form>
+              />
             )}
           </>
         )}
@@ -140,35 +115,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
-            {announcements.map((a) => (
-              <div
-                key={a._id}
-                className={`group flex flex-col md:flex-row items-start md:items-center p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-primary/20 border-l-8 border-primary bg-${theme === 'light' ? 'white' : 'gray-800'}`}
-              >
-                <div className="flex-shrink-0 mr-4 mb-4 md:mb-0">
-                  <FaBullhorn className="text-4xl text-primary drop-shadow-md" />
-                </div>
-                <div className="flex-1">
-                  <h3 className={`text-2xl md:text-3xl font-extrabold leading-tight mb-2 text-${theme === 'light' ? 'gray-900' : 'white'} tracking-tight group-hover:text-primary-dark transition-colors`}>
-                    {a.title}
-                  </h3>
-                  <p className={`mb-4 text-base md:text-lg text-${theme === 'light' ? 'gray-700' : 'gray-300'} whitespace-pre-line`}>
-                    {a.content}
-                  </p>
-                  <div className={`flex flex-wrap items-center text-xs text-${theme === 'light' ? 'gray-500' : 'gray-400'} mt-2`}>
-                    <span className="mr-2">Posted by:</span>
-                    <span className="font-semibold text-primary-dark mr-2">
-                      {a.createdBy.firstName} {a.createdBy.lastName}
-                    </span>
-                    <span className="mr-2">({a.createdBy.email})</span>
-                    <span className="mx-2">•</span>
-                    <span>{new Date(a.createdAt).toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <AnnouncementList announcements={announcements} theme={theme} />
         )}
       </main>
     </div>

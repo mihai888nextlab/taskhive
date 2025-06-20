@@ -2,7 +2,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useAuth } from "../../pages/_app"; // Adjust path
 import { NextPageWithLayout, TableColumn, TableDataItem } from "@/types";
 import Loading from "@/components/Loading";
-import Table from "@/components/Table";
+import Table from "@/components/dashboard/Table";
 import { useEffect, useState } from "react";
 import AddUsersModal from "@/components/modals/AddUserModal";
 import AddRoleModal from "@/components/modals/AddRoleModal"; // Import AddRoleModal

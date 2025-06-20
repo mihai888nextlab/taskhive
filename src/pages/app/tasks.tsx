@@ -1,19 +1,13 @@
-// pages/app/profile.tsx (Your main tasks page)
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
-import { MdAddTask } from "react-icons/md"; // Icon for add task button
-import {
-  FaEdit,
-  FaTrash,
-  FaCheckCircle,
-  FaRegCircle,
-  FaSpinner,
-  FaExclamationTriangle,
-} from "react-icons/fa"; // Added FaExclamationTriangle
-import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
+import { MdAddTask } from "react-icons/md";
+import { FaSpinner } from "react-icons/fa";
+import { useTheme } from "@/components/ThemeContext";
+import TaskForm from "@/components/tasks/TaskForm";
+import TaskList from "@/components/tasks/TaskList";
+import TaskSortDropdown from "@/components/tasks/TaskSortDropdown";
 
-// Re-define Task interface to match backend model
 interface Task {
   _id: string;
   title: string;
@@ -30,152 +24,92 @@ interface Task {
   };
 }
 
-// --- Helper function for overdue status (can be moved to a utils file if preferred) ---
-const isTaskOverdue = (task: Task): boolean => {
-  // A task is overdue only if it's NOT completed and its deadline has passed.
-  if (task.completed) {
-    return false;
-  }
-  const deadlineDate = new Date(task.deadline);
-  const now = new Date();
-  // To compare only dates, set deadline to end of its day and 'now' to start of today.
-  deadlineDate.setHours(23, 59, 59, 999); // End of the deadline day
-  now.setHours(0, 0, 0, 0); // Start of today
-
-  return deadlineDate < now;
-};
-// --- End of helper function ---
-
-// Helper to check if userId is an object with email
-function isUserObj(user: { email: any }): user is { email: string } {
-  return (
-    user &&
-    typeof user === "object" &&
-    "email" in user &&
-    typeof user.email === "string"
-  );
-}
-
-// Helper to get assigner info if not self-assigned
-function getAssignerInfo(task: any): string | null {
-  if (!task.createdBy || !task.userId) return null;
-  let assigneeEmail = "";
-  if (typeof task.userId === "string") {
-    assigneeEmail = task.userId;
-  } else if (
-    task.userId &&
-    typeof task.userId === "object" &&
-    "email" in task.userId
-  ) {
-    assigneeEmail = (task.userId as { email: string }).email;
-  }
-  if (
-    assigneeEmail &&
-    assigneeEmail.trim().toLowerCase() !==
-      (task.createdBy as { email: string }).email.trim().toLowerCase()
-  ) {
-    const assigner = task.createdBy as {
-      firstName?: string;
-      lastName?: string;
-      email: string;
-    };
-    return `Assigned by: ${assigner.firstName || ""} ${
-      assigner.lastName || ""
-    } (${assigner.email})`;
-  }
-  return null;
-}
-
 async function fetchCurrentUser() {
   const res = await fetch("/api/current-user", { method: "GET" });
   if (!res.ok) throw new Error("Failed to fetch current user");
   return await res.json();
 }
 
-const TasksPage: NextPageWithLayout = () => {
-  const { theme } = useTheme(); // Get the current theme
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [taskTitle, setTaskTitle] = useState<string>("");
-  const [taskDescription, setTaskDescription] = useState<string>("");
-  const [taskDeadline, setTaskDeadline] = useState<string>("");
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true); // For initial data fetch and form submissions
-  const [formError, setFormError] = useState<string | null>(null); // Specific error for the form
-  const [listError, setListError] = useState<string | null>(null); // Specific error for task list fetch
-  const [usersBelowMe, setUsersBelowMe] = useState<any[]>([]);
-  const [assignedTo, setAssignedTo] = useState<string>("");
-  const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
-  const [assignedTasks, setAssignedTasks] = useState<Task[]>([]);
-  const [sortBy, setSortBy] = useState<string>("default"); // New state for sorting preference
+const isTaskOverdue = (task: Task): boolean => {
+  if (task.completed) return false;
+  const deadlineDate = new Date(task.deadline);
+  const now = new Date();
+  deadlineDate.setHours(23, 59, 59, 999);
+  now.setHours(0, 0, 0, 0);
+  return deadlineDate < now;
+};
 
-  // Function to fetch tasks from the API
+const TasksPage: NextPageWithLayout = () => {
+  const { theme } = useTheme();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [assignedTasks, setAssignedTasks] = useState<Task[]>([]);
+  const [usersBelowMe, setUsersBelowMe] = useState<any[]>([]);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
+
+  // Form state
+  const [showForm, setShowForm] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDeadline, setTaskDeadline] = useState("");
+  const [assignedTo, setAssignedTo] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // UI state
+  const [loading, setLoading] = useState(true);
+  const [listError, setListError] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>("createdAtDesc");
+
+  // Fetch tasks
   const fetchTasks = async () => {
     setLoading(true);
-    setListError(null); // Clear previous list errors
+    setListError(null);
     try {
       const response = await fetch("/api/tasks", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch tasks.");
-      }
+      if (!response.ok) throw new Error("Failed to fetch tasks.");
       const data: Task[] = await response.json();
-
-      let sortedData = [...data]; // Create a mutable copy for sorting
-
-      // --- REVISED GLOBAL SORTING LOGIC FOR ALL METHODS ---
+      let sortedData = [...data];
       sortedData.sort((a, b) => {
         const isAOverdue = isTaskOverdue(a);
         const isBOverdue = isTaskOverdue(b);
-
-        // Rule 1: Prioritize overdue incomplete tasks (always at the top)
-        if (isAOverdue && !a.completed && (!isBOverdue || b.completed)) return -1; // A is overdue & incomplete, B is not (or completed) -> A comes first
-        if (!isAOverdue && !b.completed && isBOverdue && !a.completed) return 1;  // B is overdue & incomplete, A is not (or completed) -> B comes first
-
-        // Rule 2: Completed tasks go to the bottom
-        if (a.completed && !b.completed) return 1;  // A is completed, B is not -> A goes after B
-        if (!a.completed && b.completed) return -1; // A is not completed, B is completed -> A goes before B
-
-        // If we reach here, tasks are in the same 'tier' (both overdue, both completed, or both incomplete & not overdue)
-        // Now apply the specific sorting method for the middle tier, and deadline sort for top/bottom tiers.
+        if (isAOverdue && !a.completed && (!isBOverdue || b.completed)) return -1;
+        if (!isAOverdue && !b.completed && isBOverdue && !a.completed) return 1;
+        if (a.completed && !b.completed) return 1;
+        if (!a.completed && b.completed) return -1;
         if (sortBy === "deadlineAsc" || isAOverdue || a.completed) {
-          // Sort by deadline (earliest first) if 'deadlineAsc' is selected, OR if both tasks are overdue, OR if both tasks are completed
-          const dateA = new Date(a.deadline).getTime();
-          const dateB = new Date(b.deadline).getTime();
-          return dateA - dateB; // Ascending
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
         } else if (sortBy === "createdAtDesc") {
-          // Sort by created date (newest first) only for the "incomplete & not overdue" middle tier
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateB - dateA; // Descending
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         }
-        
-        // Fallback for default or other unhandled cases (should ideally not be reached if logic is exhaustive)
-        return 0; 
+        return 0;
       });
-      // --- END REVISED GLOBAL SORTING LOGIC ---
-
       setTasks(sortedData);
-      localStorage.setItem("userTasks", JSON.stringify(sortedData)); // <-- Store sorted data
     } catch (err) {
-      console.error("Error fetching tasks:", err);
-      setListError((err as Error).message); // Set list-specific error
+      setListError((err as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch tasks on component mount and when sortBy changes
-  useEffect(() => {
-    fetchTasks();
-  }, [sortBy]); // Add sortBy to dependency array
+  // Fetch assigned tasks
+  const fetchAssignedTasks = async () => {
+    try {
+      const response = await fetch("/api/tasks/assigned-by-me", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) throw new Error("Failed to fetch assigned tasks.");
+      const data = await response.json();
+      setAssignedTasks(data);
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
 
-  // Fetch users below you on mount
+  // Fetch users below
   useEffect(() => {
     async function fetchUsersBelow() {
       const res = await fetch("/api/roles-below-me");
@@ -185,67 +119,46 @@ const TasksPage: NextPageWithLayout = () => {
     fetchUsersBelow();
   }, []);
 
-  // Fetch tasks assigned by me
-  const fetchAssignedTasks = async () => {
-    try {
-      const response = await fetch("/api/tasks/assigned-by-me", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch assigned tasks.");
-      }
-      const data = await response.json();
-      setAssignedTasks(data);
-    } catch (err) {
-      console.error("Error fetching assigned tasks:", err);
-    }
-  };
+  // Fetch current user
+  useEffect(() => {
+    fetchCurrentUser()
+      .then((user) => setCurrentUserEmail(user.email.trim().toLowerCase()))
+      .catch(() => setCurrentUserEmail(""));
+  }, []);
 
+  // Fetch tasks on mount and when sortBy changes
   useEffect(() => {
     fetchTasks();
+  }, [sortBy]);
+
+  useEffect(() => {
     fetchAssignedTasks();
   }, []);
 
-  // Fetch current user from backend
-  useEffect(() => {
-    fetchCurrentUser()
-      .then((user) => {
-        setCurrentUserEmail(user.email.trim().toLowerCase());
-      })
-      .catch(() => {
-        setCurrentUserEmail("");
-      });
-  }, []);
-
-  // Reset form fields
+  // Form handlers
   const resetForm = () => {
     setTaskTitle("");
     setTaskDescription("");
     setTaskDeadline("");
     setEditingTaskId(null);
-    setFormError(null); // Clear form error on reset
+    setFormError(null);
+    setAssignedTo("");
   };
 
-  // Function to handle adding a new task or updating an existing one
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!taskTitle.trim() || !taskDeadline.trim()) {
       setFormError("Task title and deadline are required!");
       return;
     }
-
-    setLoading(true); // Indicate loading for form submission
-    setFormError(null); // Clear previous form error
-
+    setLoading(true);
+    setFormError(null);
     const taskData = {
       title: taskTitle.trim(),
       description: taskDescription.trim(),
       deadline: taskDeadline,
       assignedTo,
     };
-
     try {
       let response;
       if (editingTaskId) {
@@ -261,27 +174,12 @@ const TasksPage: NextPageWithLayout = () => {
           body: JSON.stringify(taskData),
         });
       }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message ||
-            `Failed to ${editingTaskId ? "update" : "add"} task.`
-        );
-      }
-
-      // Re-fetch all tasks to get the latest state from the database and re-apply sorting
+      if (!response.ok) throw new Error("Failed to save task.");
       await fetchTasks();
-
-      // Clear form fields and reset state
       resetForm();
-      setShowForm(false); // Hide form after successful submission
+      setShowForm(false);
     } catch (err) {
-      console.error(
-        `Error ${editingTaskId ? "updating" : "adding"} task:`,
-        err
-      );
-      setFormError((err as Error).message); // Set form-specific error
+      setFormError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -290,77 +188,47 @@ const TasksPage: NextPageWithLayout = () => {
   const handleEditTask = (task: Task) => {
     setTaskTitle(task.title);
     setTaskDescription(task.description || "");
-    const deadlineDate = new Date(task.deadline);
-    setTaskDeadline(deadlineDate.toISOString().split("T")[0]); // Format for input type="date"
+    setTaskDeadline(new Date(task.deadline).toISOString().split("T")[0]);
     setEditingTaskId(task._id);
-    setShowForm(true); // Always show the form when editing
-    setFormError(null); // Clear any existing form errors
+    setShowForm(true);
+    setFormError(null);
+    setAssignedTo(typeof task.userId === "string" ? task.userId : "");
   };
 
   const handleDeleteTask = async (id: string) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this task? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
-
-    setLoading(true); // Indicate loading for delete operation
-    setListError(null); // Clear list error
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
+    setLoading(true);
+    setListError(null);
     try {
-      const response = await fetch(`/api/tasks/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete task.");
-      }
-
-      // Optimistically remove the task from the UI for immediate feedback
-      setTasks((currentTasks) =>
-        currentTasks.filter((task) => task._id !== id)
-      );
-      // Re-fetch to confirm deletion and keep state consistent
+      const response = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Failed to delete task.");
+      setTasks((currentTasks) => currentTasks.filter((task) => task._id !== id));
       await fetchTasks();
     } catch (err) {
-      console.error("Error deleting task:", err);
-      setListError((err as Error).message); // Set list-specific error
+      setListError((err as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleToggleComplete = async (task: Task) => {
-    // Optimistic UI update
     setTasks((currentTasks) =>
       currentTasks.map((t) =>
         t._id === task._id ? { ...t, completed: !t.completed } : t
       )
     );
-
-    setLoading(true); // Indicate loading for toggle operation
-    setListError(null); // Clear list error
+    setLoading(true);
+    setListError(null);
     try {
       const response = await fetch(`/api/tasks/${task._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed: !task.completed }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Failed to update task completion status."
-        );
-      }
-      // Re-fetch to re-apply sorting (e.g., move completed tasks to the bottom)
+      if (!response.ok) throw new Error("Failed to update task.");
       await fetchTasks();
     } catch (err) {
-      console.error("Error toggling task completion:", err);
-      setListError((err as Error).message); // Set list-specific error
-      // Revert optimistic update if API call fails
+      setListError((err as Error).message);
       setTasks((currentTasks) =>
         currentTasks.map((t) =>
           t._id === task._id ? { ...t, completed: task.completed } : t
@@ -372,33 +240,27 @@ const TasksPage: NextPageWithLayout = () => {
   };
 
   return (
-    // Outer container with a subtle gradient background for depth
-    <div className={`relative min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}>
-      {/* Decorative background circles - using primary colors for consistency */}
+    <div className="relative min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
+      {/* Decorative background */}
       <div className="absolute top-10 left-1/4 w-48 h-48 bg-primary-light rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
       <div className="absolute bottom-10 right-1/4 w-64 h-64 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
       <div className="absolute top-1/2 left-1/2 w-56 h-56 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
 
-      <main className={`relative z-10 w-full max-w-6xl mx-auto bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-3xl shadow-2xl p-2 sm:p-4 md:p-8 md:p-12 transform transition-all duration-500 ease-in-out hover:shadow-3xl-lg ring-1 ring-gray-100`}>
+      <main className={`relative z-10 w-full max-w-6xl mx-auto bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-3xl shadow-2xl p-2 sm:p-4 md:p-8 md:p-12`}>
         <h1 className={`text-5xl font-extrabold text-${theme === 'light' ? 'gray-900' : 'white'} mb-6 text-center tracking-tighter leading-tight`}>
           Your Personal Task Manager
         </h1>
         <p className={`text-center text-lg text-${theme === 'light' ? 'gray-600' : 'gray-400'} mb-10 max-w-2xl mx-auto`}>
-          Organize your day, prioritize your goals, and track your progress with
-          ease.
+          Organize your day, prioritize your goals, and track your progress with ease.
         </p>
 
-        {/* Add Task Button & Form Toggle - using primary and secondary colors */}
+        {/* Add Task Button */}
         <button
           onClick={() => {
-            if (!showForm) {
-              // Opening the form: reset fields
-              resetForm();
-              setEditingTaskId(null);
-            }
-            setShowForm((prev) => !prev); // Always toggle
+            if (!showForm) resetForm();
+            setShowForm((prev) => !prev);
           }}
-          className={`mb-8 w-full py-4 px-6 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 text-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5`}
+          className="mb-8 w-full py-4 px-6 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 text-lg"
           disabled={loading}
           aria-expanded={showForm}
           aria-controls="task-form"
@@ -407,170 +269,42 @@ const TasksPage: NextPageWithLayout = () => {
           <span>{showForm ? "Hide Task Form" : "Add New Task"}</span>
         </button>
 
-        {showForm && (
-          <div
-            id="task-form"
-            className="transition-all duration-500 ease-in-out py-6"
-          >
-            <form
-              onSubmit={handleAddTask}
-              className={`bg-${theme === 'light' ? 'gray-50' : 'gray-800'} p-8 rounded-2xl shadow-xl border border-gray-200 animate-fadeIn`}
-            >
-              <h2 className={`text-3xl font-bold text-${theme === 'light' ? 'gray-800' : 'white'} mb-6 text-center`}>
-                {editingTaskId ? "Edit Task Details" : "Create New Task"}
-              </h2>
-              {formError && (
-                <div
-                  className={`bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm`}
-                  role="alert"
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className="h-6 w-6 text-red-500 mr-3"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <div>
-                      <p className="font-bold">Validation Error</p>
-                      <p className="text-sm">{formError}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label
-                    htmlFor="taskTitle"
-                    className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500`}
-                  >
-                    Title:
-                  </label>
-                  <input
-                    type="text"
-                    id="taskTitle"
-                    className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-base`}
-                    placeholder="e.g., Prepare presentation for Q3 review"
-                    value={taskTitle}
-                    onChange={(e) => setTaskTitle(e.target.value)}
-                    required
-                    disabled={loading}
-                    aria-label="Task title"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="taskDeadline"
-                    className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500`}
-                  >
-                    Deadline:
-                  </label>
-                  <input
-                    type="date"
-                    id="taskDeadline"
-                    className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
-                    value={taskDeadline}
-                    onChange={(e) => setTaskDeadline(e.target.value)}
-                    required
-                    disabled={loading}
-                    aria-label="Task deadline date"
-                  />
-                </div>
-              </div>
-              <div className="mb-8">
-                <label
-                  htmlFor="taskDescription"
-                  className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}
-                >
-                  Description (Optional):
-                </label>
-                <textarea
-                  id="taskDescription"
-                  rows={4}
-                  className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base`}
-                  placeholder="Add more details or sub-tasks here..."
-                  value={taskDescription}
-                  onChange={(e) => setTaskDescription(e.target.value)}
-                  disabled={loading}
-                  aria-label="Task description"
-                ></textarea>
-              </div>
-              <div className="mb-8">
-                <label
-                  htmlFor="assignedTo"
-                  className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}
-                >
-                  Assign To:
-                </label>
-                <select
-                  id="assignedTo"
-                  className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
-                  value={assignedTo}
-                  onChange={(e) => setAssignedTo(e.target.value)}
-                  disabled={loading}
-                >
-                  <option value="">Myself</option>
-                  {usersBelowMe.map((u) => (
-                    <option key={u.userId} value={u.userId}>
-                      {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex justify-end space-x-4">
-                <button
-                  type="submit"
-                  className={`inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg`}
-                  disabled={loading}
-                >
-                  {loading && (
-                    <FaSpinner className="animate-spin mr-3 text-xl" />
-                  )}
-                  {editingTaskId ? "Update Task" : "Add Task"}
-                </button>
-                {editingTaskId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      resetForm();
-                      setShowForm(false);
-                    }}
-                    className={`inline-flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg`}
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-        )}
+        {/* Task Form */}
+        <TaskForm
+          show={showForm}
+          loading={loading}
+          editingTaskId={editingTaskId}
+          taskTitle={taskTitle}
+          taskDescription={taskDescription}
+          taskDeadline={taskDeadline}
+          assignedTo={assignedTo}
+          usersBelowMe={usersBelowMe}
+          formError={formError}
+          theme={theme}
+          onTitleChange={setTaskTitle}
+          onDescriptionChange={setTaskDescription}
+          onDeadlineChange={setTaskDeadline}
+          onAssignedToChange={setAssignedTo}
+          onSubmit={handleAddTask}
+          onCancel={() => {
+            resetForm();
+            setShowForm(false);
+          }}
+        />
 
         <h2 className={`text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-8 mt-12 pb-4 border-b-4 border-primary-dark text-center`}>
           My Task List
         </h2>
 
         {/* Sorting Dropdown */}
-        <div className="mb-6 flex items-center justify-end">
-          <label htmlFor="sort-tasks" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mr-2`}>Sort By:</label>
-          <select
-            id="sort-tasks"
-            className={`w-full sm:w-auto py-2 px-3 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-base cursor-pointer`}
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            disabled={loading}
-          >
-            <option value="createdAtDesc">Created Date (Newest First)</option>
-            <option value="deadlineAsc">Deadline (Earliest First)</option>
-          </select>
-        </div>
+        <TaskSortDropdown
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          loading={loading}
+          theme={theme}
+        />
 
-        {/* Conditional rendering for loading, error, and empty states */}
+        {/* Task List */}
         {loading && tasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 bg-primary-light/10 rounded-lg shadow-inner animate-pulse">
             <FaSpinner className="animate-spin text-primary text-5xl mb-4" />
@@ -579,31 +313,15 @@ const TasksPage: NextPageWithLayout = () => {
             </p>
           </div>
         ) : listError ? (
-          <div
-            className={`bg-red-100 border-l-4 border-red-500 text-red-700 p-5 rounded-lg shadow-sm text-center mt-8`}
-            role="alert"
-          >
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-5 rounded-lg shadow-sm text-center mt-8" role="alert">
             <div className="flex flex-col items-center">
-              <svg
-                className="h-10 w-10 text-red-500 mb-3"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <FaSpinner className={`mr-2 ${loading ? "animate-spin" : ""}`} />
               <p className="font-bold text-lg mb-2">Failed to Load Tasks</p>
               <p className="text-base">{listError}</p>
               <button
                 onClick={fetchTasks}
-                className={`mt-4 inline-flex items-center text-primary-dark hover:text-primary font-semibold underline transition-colors`}
+                className="mt-4 inline-flex items-center text-primary-dark hover:text-primary font-semibold underline transition-colors"
               >
-                <FaSpinner
-                  className={`mr-2 ${loading ? "animate-spin" : ""}`}
-                />{" "}
                 Try again
               </button>
             </div>
@@ -614,208 +332,19 @@ const TasksPage: NextPageWithLayout = () => {
               No tasks added yet. Time to get productive!
             </p>
             <p className="text-lg">
-              Click the &quot;Add New Task&quot; button above to start
-              organizing your life.
+              Click the &quot;Add New Task&quot; button above to start organizing your life.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-            {tasks.map((task) => {
-              const isOverdue = isTaskOverdue(task);
-              const isCompleted = task.completed;
-
-              // --- Dynamic Styling for Card Background, Text Colors, and Icon ---
-              let cardBgClass = "bg-white border-l-8 border-primary"; // Default for upcoming/pending
-              let titleClass = "text-gray-900";
-              let descriptionClass = "text-gray-700";
-              let deadlineClass = "text-gray-500";
-              let statusIcon = (
-                <FaRegCircle className="text-gray-400 text-3xl mr-2 group-hover:text-primary transition-colors" />
-              );
-              let statusTooltip = "Mark as Complete";
-
-              if (isCompleted) {
-                cardBgClass =
-                  "opacity-80 bg-green-50 border-l-8 border-green-400";
-                titleClass = "line-through text-gray-600";
-                descriptionClass = "line-through text-gray-500";
-                deadlineClass = "text-gray-400";
-                statusIcon = (
-                  <FaCheckCircle className="text-green-500 text-3xl mr-2 group-hover:text-green-600 transition-colors" />
-                );
-                statusTooltip = "Mark as Incomplete";
-              } else if (isOverdue) {
-                cardBgClass = "bg-red-50 border-l-8 border-red-400 shadow-lg"; // Keep red background
-                titleClass = "text-gray-900 font-bold"; // Changed from text-red-800
-                descriptionClass = "text-gray-700"; // Changed from text-red-700
-                deadlineClass = "text-gray-600 font-semibold"; // Changed from text-red-600, slightly darker gray
-                statusIcon = (
-                  <FaExclamationTriangle className="text-red-500 text-3xl mr-2" />
-                ); // Keep warning icon
-                statusTooltip = "Task is Overdue (Cannot complete directly)";
-              }
-              // --- End Dynamic Styling ---
-
-              // In the card rendering, update the 'Assigned by' line:
-              {
-                task.createdBy &&
-                  typeof task.createdBy === "object" &&
-                  "email" in task.createdBy &&
-                  task.userId &&
-                  (() => {
-                    let assigneeEmail = "";
-                    if (typeof task.userId === "string") {
-                      assigneeEmail = task.userId;
-                    } else if (
-                      task.userId &&
-                      typeof task.userId === "object" &&
-                      "email" in task.userId
-                    ) {
-                      assigneeEmail = (task.userId as { email: string }).email;
-                    }
-                    // Only show if assigner and assignee are different
-                    if (
-                      assigneeEmail &&
-                      assigneeEmail.trim().toLowerCase() !==
-                        (task.createdBy as { email: string }).email
-                          .trim()
-                          .toLowerCase()
-                    ) {
-                      const assigner = task.createdBy as {
-                        firstName?: string;
-                        lastName?: string;
-                        email: string;
-                      };
-                      return (
-                        <div className="text-xs text-gray-500 mt-2">
-                          Assigned by: {assigner.firstName || ""}{" "}
-                          {assigner.lastName || ""} ({assigner.email})
-                        </div>
-                      );
-                    }
-                    return null;
-                  })();
-              }
-
-              // In the button disabled logic, allow edit/delete if:
-              // - you are the assigner (createdBy.email === currentUserEmail)
-              // - OR the task is assigned to you (userId is your email or your ObjectId as string)
-              // const isAssigner = task.createdBy && task.createdBy.email === currentUserEmail;
-              // const isAssignee =
-              //   (typeof task.userId === 'string' && currentUserEmail && task.createdBy && task.createdBy.email === currentUserEmail) ||
-              //   (isUserObj(task.userId) && task.userId.email === currentUserEmail);
-
-              console.log(
-                "Task:",
-                task.title,
-                "Assigner:",
-                task.createdBy.email,
-                "Current user:",
-                currentUserEmail
-              );
-
-              const assignerEmail =
-                task.createdBy?.email?.trim().toLowerCase() || "";
-              const userEmail = currentUserEmail.trim().toLowerCase();
-              const canEditOrDelete = assignerEmail === userEmail;
-
-              return (
-                <div
-                  key={task._id}
-                  className={`group flex flex-col justify-between p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100 ${cardBgClass}`}
-                  aria-label={`Task: ${task.title}, Status: ${
-                    task.completed ? "Completed" : "Pending"
-                  }${isOverdue && !isCompleted ? ", Overdue" : ""}`}
-                >
-                  {/* Task Content */}
-                  <div className="flex-1">
-                    <h3
-                      className={`text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}
-                    >
-                      {task.title}
-                    </h3>
-                    {task.description && (
-                      <p
-                        className={`text-base sm:text-lg md:text-xl mb-4 line-clamp-3 ${descriptionClass}`}
-                      >
-                        {task.description}
-                      </p>
-                    )}
-                    <p className={`text-sm font-semibold ${deadlineClass}`}>
-                      Deadline:{" "}
-                      {new Date(task.deadline).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                      {isOverdue && !isCompleted && (
-                        <span className="ml-2 px-2.5 py-1 bg-red-400 text-white text-xs rounded-full font-bold">
-                          OVERDUE
-                        </span>
-                      )}
-                    </p>
-                    {/* Show assigner info if not self-assigned */}
-                    {getAssignerInfo(task) && (
-                      <div className="text-xs text-gray-500 mt-2">
-                        {getAssignerInfo(task)}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions Section */}
-                  <div className="flex items-center justify-between pt-5 mt-5 border-t border-gray-100">
-                    {/* Checkbox/Toggle Button */}
-                    <button
-                      onClick={() => handleToggleComplete(task)}
-                      className={`flex items-center text-lg font-semibold p-3 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group
-                                    ${
-                                      isOverdue && !isCompleted
-                                        ? "text-red-700 focus:ring-red-500"
-                                        : "text-gray-700 focus:ring-primary"
-                                    }`}
-                      title={statusTooltip}
-                      aria-label={statusTooltip}
-                      disabled={loading || (isOverdue && !isCompleted)} // Disable if loading or overdue and not completed
-                    >
-                      {statusIcon}
-                      <span className="hidden sm:inline">
-                        {isOverdue && !isCompleted
-                          ? "Overdue"
-                          : task.completed
-                          ? "Completed"
-                          : "Mark Complete"}
-                      </span>
-                    </button>
-
-                    {/* Action Buttons */}
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => handleEditTask(task)}
-                        className="text-primary hover:text-primary-dark p-3 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Edit Task"
-                        disabled={
-                          loading ||
-                          task.completed ||
-                          isOverdue ||
-                          !canEditOrDelete
-                        }
-                      >
-                        <FaEdit className="text-2xl" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTask(task._id)}
-                        className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Delete Task"
-                        disabled={loading || !canEditOrDelete}
-                      >
-                        <FaTrash className="text-2xl" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <TaskList
+            tasks={tasks}
+            currentUserEmail={currentUserEmail}
+            loading={loading}
+            onEdit={handleEditTask}
+            onDelete={handleDeleteTask}
+            onToggleComplete={handleToggleComplete}
+            isTaskOverdue={isTaskOverdue}
+          />
         )}
 
         {/* Tasks I Assigned to Others */}
@@ -832,140 +361,15 @@ const TasksPage: NextPageWithLayout = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-            {assignedTasks.map((task) => {
-              const isOverdue = isTaskOverdue(task);
-              const isCompleted = task.completed;
-              let cardBgClass = "bg-white border-l-8 border-primary";
-              let titleClass = "text-gray-900";
-              let descriptionClass = "text-gray-700";
-              let deadlineClass = "text-gray-500";
-              let statusIcon = (
-                <FaRegCircle className="text-gray-400 text-3xl mr-2 group-hover:text-primary transition-colors" />
-              );
-              let statusTooltip = "Mark as Complete";
-              if (isCompleted) {
-                cardBgClass =
-                  "opacity-80 bg-green-50 border-l-8 border-green-400";
-                titleClass = "line-through text-gray-600";
-                descriptionClass = "line-through text-gray-500";
-                deadlineClass = "text-gray-400";
-                statusIcon = (
-                  <FaCheckCircle className="text-green-500 text-3xl mr-2 group-hover:text-green-600 transition-colors" />
-                );
-                statusTooltip = "Mark as Incomplete";
-              } else if (isOverdue) {
-                cardBgClass = "bg-red-50 border-l-8 border-red-400 shadow-lg";
-                titleClass = "text-gray-900 font-bold";
-                descriptionClass = "text-gray-700";
-                deadlineClass = "text-gray-600 font-semibold";
-                statusIcon = (
-                  <FaExclamationTriangle className="text-red-500 text-3xl mr-2" />
-                );
-                statusTooltip = "Task is Overdue (Cannot complete directly)";
-              }
-              // Get assignee info
-              let assigneeName = "";
-              let assigneeEmail = "";
-              if (
-                task.userId &&
-                typeof task.userId === "object" &&
-                "email" in task.userId
-              ) {
-                assigneeEmail = (task.userId as { email: string }).email;
-                assigneeName =
-                  ((
-                    task.userId as {
-                      lastName: string;
-                      firstName: string;
-                      email: string;
-                    }
-                  ).firstName || "") +
-                  " " +
-                  ((
-                    task.userId as {
-                      lastName: string;
-                      firstName: string;
-                      email: string;
-                    }
-                  ).lastName || "");
-              }
-              return (
-                <div
-                  key={task._id}
-                  className={`group flex flex-col justify-between p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-gray-100 ${cardBgClass}`}
-                  aria-label={`Task: ${task.title}, Status: ${
-                    task.completed ? "Completed" : "Pending"
-                  }${isOverdue && !isCompleted ? ", Overdue" : ""}`}
-                >
-                  <div className="flex-1">
-                    <h3
-                      className={`text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}
-                    >
-                      {task.title}
-                    </h3>
-                    {task.description && (
-                      <p
-                        className={`text-base sm:text-lg md:text-xl mb-4 line-clamp-3 ${descriptionClass}`}
-                      >
-                        {task.description}
-                      </p>
-                    )}
-                    <p className={`text-sm font-semibold ${deadlineClass}`}>
-                      Deadline:{" "}
-                      {new Date(task.deadline).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                      {isOverdue && !isCompleted && (
-                        <span className="ml-2 px-2.5 py-1 bg-red-400 text-white text-xs rounded-full font-bold">
-                          OVERDUE
-                        </span>
-                      )}
-                    </p>
-                    {/* Show assignee info */}
-                    {assigneeEmail && (
-                      <div className="text-xs text-gray-500 mt-2">
-                        Assigned to: {assigneeName} ({assigneeEmail})
-                      </div>
-                    )}
-                  </div>
-                  {/* Actions Section (no edit/delete for assigned tasks) */}
-                  <div className="flex items-center justify-between pt-5 mt-5 border-t border-gray-100">
-                    <div className="flex items-center text-lg font-semibold">
-                      {statusIcon}
-                      <span className="ml-2">
-                        {isCompleted
-                          ? "Completed"
-                          : isOverdue
-                          ? "Overdue"
-                          : "In Progress"}
-                      </span>
-                    </div>
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => handleEditTask(task)}
-                        className="text-primary hover:text-primary-dark p-3 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Edit Task"
-                        disabled={loading || task.completed || isOverdue}
-                      >
-                        <FaEdit className="text-2xl" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTask(task._id)}
-                        className="text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Delete Task"
-                        disabled={loading}
-                      >
-                        <FaTrash className="text-2xl" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <TaskList
+            tasks={assignedTasks}
+            currentUserEmail={currentUserEmail}
+            loading={loading}
+            onEdit={handleEditTask}
+            onDelete={handleDeleteTask}
+            onToggleComplete={() => {}}
+            isTaskOverdue={isTaskOverdue}
+          />
         )}
       </main>
     </div>

@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
-import { useState, useEffect } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
-import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
+import { useTheme } from '@/components/ThemeContext';
+import SettingsSidebar from "@/components/settings/SettingsSidebar";
+import ProfileTab from "@/components/settings/ProfileTab";
+import SecurityTab from "@/components/settings/SecurityTab";
+import NotificationsTab from "@/components/settings/NotificationsTab";
+import AppearanceTab from "@/components/settings/AppearanceTab";
 
 const tabs = [
   { id: "profile", label: "Profile" },
@@ -13,7 +16,7 @@ const tabs = [
 ];
 
 const SettingsPage: NextPageWithLayout = () => {
-  const { theme, toggleTheme } = useTheme(); // Get the current theme and toggle function
+  const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({
     firstName: "",
@@ -26,7 +29,6 @@ const SettingsPage: NextPageWithLayout = () => {
     firstName: string;
     lastName: string;
   } | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,26 +37,20 @@ const SettingsPage: NextPageWithLayout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const response = await fetch("/api/update-profile", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       if (response.ok) {
         const data = await response.json();
-        console.log("Profile updated successfully:", data);
         alert("Profile updated successfully!");
       } else {
         const errorData = await response.json();
         alert(errorData.error || "Failed to update profile. Please try again.");
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
       alert("An error occurred. Please try again.");
     }
   };
@@ -70,16 +66,11 @@ const SettingsPage: NextPageWithLayout = () => {
               firstName: data.firstName || "",
               lastName: data.lastName || "",
             });
-          } else {
-            console.error("Failed to fetch profile data:", res.status, res.statusText);
           }
-        } catch (error) {
-          console.error("Error fetching profile data:", error);
-        }
+        } catch {}
       };
       fetchProfileData();
     }
-
     if (activeTab === "security") {
       const fetchAccountDetails = async () => {
         try {
@@ -88,11 +79,9 @@ const SettingsPage: NextPageWithLayout = () => {
             const data = await res.json();
             setAccountDetails(data);
           } else {
-            console.error("Failed to fetch account details:", res.status, res.statusText);
             setAccountDetails(null);
           }
-        } catch (error) {
-          console.error("Error fetching account details:", error);
+        } catch {
           setAccountDetails(null);
         }
       };
@@ -101,180 +90,36 @@ const SettingsPage: NextPageWithLayout = () => {
   }, [activeTab]);
 
   return (
-    <div className={`flex flex-col md:flex-row min-h-screen 'gray-100' text-${theme === 'light' ? 'gray-900' : 'white'}`}>
-      {/* Sidebar */}
-      <aside className={`w-full md:w-1/4 max-w-xs bg-${theme === 'light' ? 'white' : 'gray-800'} border-r border-gray-200 p-4 sm:p-6 md:p-8 shadow-sm`}>
-        <h2 className={`text-2xl sm:text-3xl font-extrabold mb-6 sm:mb-8 text-${theme === 'light' ? 'gray-900' : 'white'}`}>
-          Settings
-        </h2>
-        <nav>
-          <ul className="space-y-2">
-            {tabs.map((tab) => (
-              <li
-                key={tab.id}
-                className={`cursor-pointer px-3 sm:px-4 py-2 sm:py-3 rounded-md text-base sm:text-lg transition-all duration-200
-                  ${activeTab === tab.id ? "bg-blue-400 text-white shadow-md" : `text-${theme === 'light' ? 'gray-700' : 'white'} hover:bg-gray-100 hover:text-gray-900`}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
-      {/* Main Content */}
+    <div className={`flex flex-col md:flex-row min-h-screen bg-gray-100 text-${theme === 'light' ? 'gray-900' : 'white'}`}>
+      <SettingsSidebar
+        tabs={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        theme={theme}
+      />
       <main className={`flex-1 p-2 sm:p-4 md:p-10 bg-${theme === 'light' ? 'white' : 'gray-800'} border-l border-gray-200 rounded-lg shadow-lg mx-0 md:mx-8 my-4 md:my-8`}>
         {activeTab === "profile" && (
-          <div className={`text-${theme === 'light' ? 'gray-900' : 'white'}`}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
-              Personal Information
-            </h2>
-            <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
-              Update your personal details. This information will be displayed
-              publicly, so be careful what you share.
-            </p>
-            <form
-              className="space-y-6 sm:space-y-8 mt-4 sm:mt-6"
-              onSubmit={handleSubmit}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-                <div>
-                  <label
-                    htmlFor="firstName"
-                    className="block text-gray-300 font-medium mb-2"
-                  >
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900"
-                    placeholder="Enter your first name"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="lastName"
-                    className="block text-gray-300 font-medium mb-2"
-                  >
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900"
-                    placeholder="Enter your last name"
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200 mt-6 sm:mt-8">
-                <button
-                  type="button"
-                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-all duration-200 font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-200 font-semibold shadow"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
+          <ProfileTab
+            formData={formData}
+            onInputChange={handleInputChange}
+            onSubmit={handleSubmit}
+            theme={theme}
+          />
         )}
         {activeTab === "security" && (
-          <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 text-gray-900">
-              Security
-            </h2>
-            <p className="text-gray-700 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
-              Manage your password and view account details.
-            </p>
-            {accountDetails ? (
-              <div className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    First Name
-                  </label>
-                  <p className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
-                    {accountDetails.firstName}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Last Name
-                  </label>
-                  <p className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
-                    {accountDetails.lastName}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Email
-                  </label>
-                  <p className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
-                    {accountDetails.email}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Account Created
-                  </label>
-                  <p className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800">
-                    {new Date(accountDetails.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-500 italic mt-6">
-                Loading account details...
-              </p>
-            )}
-          </div>
+          <SecurityTab accountDetails={accountDetails} />
         )}
         {activeTab === "notifications" && (
-          <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 text-gray-900">
-              Notifications
-            </h2>
-            <p className="text-gray-700 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
-              Customize your notification preferences.
-            </p>
-            <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-gray-50 border border-gray-200 rounded-md text-gray-700">
-              <p>
-                Notification settings will go here (e.g., email alerts, push
-                notifications).
-              </p>
-            </div>
-          </div>
+          <NotificationsTab />
         )}
         {activeTab === "appearance" && (
-          <div className={`text-${theme === 'light' ? 'gray-900' : 'white'}`}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
-              Appearance
-            </h2>
-            <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
-              Switch between light and dark mode, or customize themes.
-            </p>
-            <button onClick={toggleTheme} className={`mt-4 px-4 py-2 rounded-md bg-${theme === 'light' ? 'blue-600' : 'blue-400'} text-white`}>
-              Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
-            </button>
-          </div>
+          <AppearanceTab theme={theme} toggleTheme={toggleTheme} />
         )}
       </main>
     </div>
   );
 };
 
-// Assign the layout to the page
 SettingsPage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
