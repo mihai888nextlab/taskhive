@@ -5,6 +5,9 @@ import { FaBullhorn } from "react-icons/fa";
 import { useTheme } from '@/components/ThemeContext';
 import AnnouncementForm from "@/components/announcements/AnnouncementForm";
 import AnnouncementList from "@/components/announcements/AnnouncementList";
+import { saveAs } from "file-saver";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Announcement {
   _id: string;
@@ -12,6 +15,8 @@ interface Announcement {
   content: string;
   createdAt: string;
   createdBy: { firstName: string; lastName: string; email: string };
+  category: string;
+  pinned: boolean;
 }
 
 const AnnouncementsPage: NextPageWithLayout = () => {
@@ -19,15 +24,33 @@ const AnnouncementsPage: NextPageWithLayout = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [category, setCategory] = useState("All");
+  const [pinned, setPinned] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formError, setFormError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [showPinned, setShowPinned] = useState(true);
+  const [expiresAt, setExpiresAt] = useState("");
+  const [pomodoroMessage, setPomodoroMessage] = useState('');
+
+  const categories = ["All", "Update", "Event", "Alert"];
 
   useEffect(() => {
     fetch("/api/announcements")
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text);
+        }
+        return res.json();
+      })
       .then(setAnnouncements)
+      .catch(err => {
+        setFormError("Failed to load announcements: " + err.message);
+      })
       .finally(() => setLoading(false));
     fetch("/api/current-user")
       .then((res) => res.json())
@@ -36,10 +59,59 @@ const AnnouncementsPage: NextPageWithLayout = () => {
 
   const isAdmin = currentUser?.role === "admin";
 
+  // Pin toggle handler
+  const handlePinToggle = async (id: string, pinned: boolean) => {
+    setLoading(true);
+    try {
+      await fetch(`/api/announcements/${id}/pin`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pinned }),
+      });
+      setAnnouncements(anns =>
+        anns.map(a => a._id === id ? { ...a, pinned } : a)
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Comment handler (demo: local, could be API)
+  const handleComment = (id: string, comment: string) => {
+    // Optionally send to backend
+    // For demo, do nothing
+  };
+
+  // Export as CSV
+  const handleExportCSV = () => {
+    if (!announcements || announcements.length === 0) {
+      alert("No announcements to export.");
+      return;
+    }
+    const rows = [
+      ["Title", "Content", "Category", "Pinned", "Created At", "Created By"],
+      ...announcements
+        .filter(a => a.category !== "All")
+        .map(a => [
+          a.title,
+          (a.content || "").replace(/\n/g, " "),
+          a.category,
+          a.pinned ? "Yes" : "No",
+          new Date(a.createdAt).toLocaleString(),
+          a.createdBy
+            ? `${a.createdBy.firstName} ${a.createdBy.lastName} (${a.createdBy.email})`
+            : "",
+        ])
+    ];
+    const csv = rows.map(r => r.map(f => `"${String(f).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    saveAs(blob, "announcements.csv");
+  };
+
   const handleAddAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !content.trim()) {
-      setFormError("Title and content are required!");
+    if (!title.trim() || !content.trim() || !category) {
+      setFormError("Title, content, and category are required!");
       return;
     }
     setFormError(null);
@@ -48,7 +120,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
       const res = await fetch("/api/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ title, content, category, pinned, expiresAt }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -58,6 +130,9 @@ const AnnouncementsPage: NextPageWithLayout = () => {
       setAnnouncements([newAnnouncement, ...announcements]);
       setTitle("");
       setContent("");
+      setCategory("");
+      setPinned(false);
+      setExpiresAt("");
       setShowForm(false);
     } catch (err: any) {
       setFormError(err.message);
@@ -65,6 +140,34 @@ const AnnouncementsPage: NextPageWithLayout = () => {
       setLoading(false);
     }
   };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this announcement?")) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/announcements/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to delete announcement");
+      }
+      setAnnouncements(anns => anns.filter(a => a._id !== id));
+    } catch (err: any) {
+      setFormError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredAnnouncements = announcements
+    .filter(a =>
+      (categoryFilter === "All" || a.category === categoryFilter) &&
+      (a.title.toLowerCase().includes(search.toLowerCase()) ||
+       a.content.toLowerCase().includes(search.toLowerCase()))
+    )
+    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const pinnedAnnouncements = filteredAnnouncements.filter(a => a.pinned);
+  const otherAnnouncements = filteredAnnouncements.filter(a => !a.pinned);
 
   return (
     <div className={`relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}>
@@ -89,16 +192,55 @@ const AnnouncementsPage: NextPageWithLayout = () => {
               <AnnouncementForm
                 title={title}
                 content={content}
+                category={category}
+                pinned={pinned}
+                expiresAt={expiresAt}
                 loading={loading}
                 formError={formError}
                 theme={theme}
                 onTitleChange={setTitle}
                 onContentChange={setContent}
+                onCategoryChange={setCategory}
+                onPinnedChange={setPinned}
+                onExpiresAtChange={setExpiresAt}
                 onSubmit={handleAddAnnouncement}
               />
             )}
           </>
         )}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+          <input
+            type="text"
+            placeholder="🔍 Search announcements..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="px-4 py-2 rounded-full border shadow-sm w-full sm:w-64"
+            aria-label="Search announcements"
+          />
+          <select
+            value={categoryFilter}
+            onChange={e => setCategoryFilter(e.target.value)}
+            className="px-4 py-2 rounded-full border shadow-sm"
+            aria-label="Filter by category"
+          >
+            <option key="All" value="All">All</option>
+            {categories.filter(cat => cat !== "All").map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <button
+            className="px-4 py-2 rounded-full bg-yellow-400 text-white font-semibold shadow"
+            onClick={() => setShowPinned(v => !v)}
+          >
+            {showPinned ? "Hide Pinned" : "Show Pinned"}
+          </button>
+          <button
+            className="px-4 py-2 rounded-full bg-green-500 text-white font-semibold shadow"
+            onClick={handleExportCSV}
+          >
+            Export CSV
+          </button>
+        </div>
         {loading ? (
           <div className="flex flex-col items-center justify-center h-48 bg-primary-light/10 rounded-lg shadow-inner animate-pulse">
             <FaBullhorn className="animate-bounce text-primary text-5xl mb-4" />
@@ -115,7 +257,29 @@ const AnnouncementsPage: NextPageWithLayout = () => {
             </p>
           </div>
         ) : (
-          <AnnouncementList announcements={announcements} theme={theme} />
+          <>
+            {showPinned && pinnedAnnouncements.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-lg font-bold text-yellow-600 mb-2">📌 Pinned</h2>
+                <AnnouncementList
+                  announcements={pinnedAnnouncements}
+                  theme={theme}
+                  isAdmin={isAdmin}
+                  onPinToggle={handlePinToggle}
+                  onComment={handleComment}
+                  onDelete={handleDelete}
+                />
+              </div>
+            )}
+            <AnnouncementList
+              announcements={otherAnnouncements}
+              theme={theme}
+              isAdmin={isAdmin}
+              onPinToggle={handlePinToggle}
+              onComment={handleComment}
+              onDelete={handleDelete}
+            />
+          </>
         )}
       </main>
     </div>

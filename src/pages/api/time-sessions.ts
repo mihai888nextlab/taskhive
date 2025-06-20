@@ -6,9 +6,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   await dbConnect(); // Ensure the database is connected
 
   if (req.method === 'POST') {
-    const { userId, name, description, duration } = req.body;
+    const { userId, name, description, duration, tag, cycles } = req.body; // <-- add tag
 
-    console.log("Received data:", { userId, name, description, duration }); // Log received data
+    console.log("Received data:", { userId, name, description, duration, tag, cycles }); // Log received data
 
     if (!userId || !name || duration === undefined) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -19,6 +19,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       name,
       description,
       duration,
+      tag, // <-- add tag
+      cycles, // <-- add this
     });
 
     try {

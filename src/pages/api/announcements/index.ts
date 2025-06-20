@@ -64,19 +64,30 @@ export default async function handler(
         .status(403)
         .json({ message: "Only admins can create announcements." });
     }
-    const { title, content } = req.body;
-    if (!title || !content) {
+    const { title, content, category, pinned, expiresAt } = req.body;
+    if (!title || !content || !category) {
       return res
         .status(400)
-        .json({ message: "Title and content are required." });
+        .json({ message: "Title, content, and category are required." });
     }
-    const announcement = await AnnouncementModel.create({
-      title,
-      content,
-      createdBy: user._id,
-    });
-    await announcement.populate("createdBy", "firstName lastName email");
-    return res.status(201).json(announcement);
+    try {
+      const announcement = await AnnouncementModel.create({
+        title,
+        content,
+        category,
+        pinned: !!pinned,
+        expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+        createdBy: user._id,
+      });
+      await announcement.populate("createdBy", "firstName lastName email");
+      return res.status(201).json(announcement);
+    } catch (err: any) {
+      return res
+        .status(500)
+        .json({
+          message: err.message || "Failed to create announcement.",
+        });
+    }
   }
 
   return res.status(405).json({ message: "Method not allowed" });

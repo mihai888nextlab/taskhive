@@ -58,7 +58,7 @@ const Communication: NextPageWithLayout = () => {
     // Re-fetch conversations to get the new one and update the list
     if (user) {
       fetch(`/api/conversations?userId=${user._id}`)
-        .then((res) => res.json())
+        .then((res) => res.json()) // !!! PROMISE
         .then((data) => {
           setConversations(data.conversations as PopulatedConversation[]);
           // Optionally, auto-select the newly created chat

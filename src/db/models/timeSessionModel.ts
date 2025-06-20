@@ -6,6 +6,7 @@ export interface ITimeSession extends mongoose.Document {
   description: string; // Description of the session
   duration: number; // Duration in seconds
   createdAt: Date; // Timestamp of when the session was created
+  cycles?: number;
 }
 
 const timeSessionSchema = new mongoose.Schema({
@@ -14,6 +15,8 @@ const timeSessionSchema = new mongoose.Schema({
   description: { type: String, required: true },
   duration: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now },
+  tag: { type: String, default: "General" },
+  cycles: { type: Number, default: 1 },
 });
 
 // Check if the model already exists to avoid overwriting

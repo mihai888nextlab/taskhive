@@ -7,6 +7,8 @@ interface Session {
   description: string;
   duration: number;
   createdAt?: string;
+  tag?: string;
+  cycles?: number; // <-- add this
 }
 
 interface SessionListProps {
@@ -20,6 +22,15 @@ const formatTime = (timeInSeconds: number) => {
   const minutes = Math.floor((timeInSeconds % 3600) / 60);
   const seconds = timeInSeconds % 60;
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+const tagColors: Record<string, string> = {
+  Pomodoro: "bg-red-500",
+  "Deep Work": "bg-blue-500",
+  Meeting: "bg-green-500",
+  Break: "bg-yellow-500",
+  Learning: "bg-purple-500",
+  General: "bg-gray-400",
 };
 
 const SessionList: React.FC<SessionListProps> = ({
@@ -50,8 +61,17 @@ const SessionList: React.FC<SessionListProps> = ({
               )}
             </div>
             <div className="flex items-center">
-              <span className={`text-2xl font-mono ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'} font-bold mr-4`}>
-                {formatTime(session.duration)}
+              {session.tag === "Pomodoro" ? (
+                <span className="text-lg font-mono text-red-500 font-bold mr-4">
+                  {session.cycles ?? 1} cycle{(session.cycles ?? 1) > 1 ? "s" : ""}
+                </span>
+              ) : (
+                <span className={`text-2xl font-mono ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'} font-bold mr-4`}>
+                  {formatTime(session.duration)}
+                </span>
+              )}
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white ${tagColors[session.tag ?? "General"]}`}>
+                {session.tag || "General"}
               </span>
               <button
                 onClick={() => onDelete(session._id)}
