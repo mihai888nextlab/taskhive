@@ -66,6 +66,7 @@ export default async function handler(
       userId: savedUser._id,
       companyId: savedCompany._id,
       role: "admin",
+      departmentId: "admin-department", // <-- Add this line!
       permissions: ["all"],
     });
     await newUserCompany.save();

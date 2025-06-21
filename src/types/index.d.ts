@@ -23,6 +23,8 @@ export interface JWTPayload {
   firstName: string;
   lastName: string;
   jobTitle: string;
+  role?: string;
+  departmentId?: string;
 }
 
 import { ReactElement, ReactNode } from "react";

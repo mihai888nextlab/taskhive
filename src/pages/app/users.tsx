@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import AddUsersModal from "@/components/modals/AddUserModal";
 import AddRoleModal from "@/components/modals/AddRoleModal"; // Import AddRoleModal
 import OrgChartModal from "@/components/modals/OrgChartModal"; // Import OrgChartModal
+import UserProfileModal from "@/components/modals/UserProfileModal";
 import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
 
 interface Project extends TableDataItem {
@@ -35,6 +36,8 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         email: string;
         firstName: string;
         lastName: string;
+        profileImage?: { data: string; contentType: string; uploadedAt: string; fileName?: string };
+        description?: string;
       };
       companyId: string;
       role: string;
@@ -47,11 +50,37 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
   const [addRoleModalOpen, setAddRoleModalOpen] = useState(false); // State for Add Role Modal
   const [orgChartModalOpen, setOrgChartModalOpen] = useState(false); // State for Org Chart Modal
   const [roles, setRoles] = useState<string[]>([]); // Store roles
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   const projectColumns: TableColumn<Project>[] = [
-    { key: "user_firstName", header: "First Name" },
-    { key: "user_lastName", header: "Last Name" },
-    { key: "user_email", header: "Email" },
+    {
+      key: "user_firstName",
+      header: "First Name",
+      render: (item) => (
+        <span>
+          {item.user_firstName}
+        </span>
+      ),
+    },
+    {
+      key: "user_lastName",
+      header: "Last Name",
+      render: (item) => (
+        <span>
+          {item.user_lastName}
+        </span>
+      ),
+    },
+    {
+      key: "user_email",
+      header: "Email",
+      render: (item) => (
+        <span>
+          {item.user_email}
+        </span>
+      ),
+    },
     {
       key: "role",
       header: "Role",
@@ -132,12 +161,24 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       }
       const orgChartData = await orgChartResponse.json();
 
-      // Add new role to the first level
-      const updatedLevels = [...orgChartData.levels];
-      if (updatedLevels.length > 0) {
-        updatedLevels[0].roles.push(roleName);
+      // ✅ New code (works with departments/levels structure)
+      const departments = orgChartData.departments || [];
+      const availableDept = departments.find((d: any) => d.id === "available-roles");
+
+      if (availableDept) {
+        // Add to first level of Available Roles department
+        if (availableDept.levels.length > 0) {
+          availableDept.levels[0].roles.push(roleName);
+        } else {
+          availableDept.levels.push({ id: "available-roles-level", roles: [roleName] });
+        }
       } else {
-        updatedLevels.push({ id: "level-1", roles: [roleName] });
+        // If not found, create Available Roles department
+        departments.unshift({
+          id: "available-roles",
+          name: "Available Roles",
+          levels: [{ id: "available-roles-level", roles: [roleName] }],
+        });
       }
 
       // Save updated org chart data to the database
@@ -145,8 +186,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          levels: updatedLevels,
-          availableRoles: orgChartData.availableRoles,
+          departments,
         }),
       });
 
@@ -209,6 +249,17 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     }
   };
 
+  const handleUserClick = (userId: string) => {
+    const userObj = users.find((u) => u.userId._id === userId);
+    if (userObj) {
+      setSelectedUser({
+        ...userObj.userId, // This must include profileImage and description
+        role: userObj.role,
+      });
+      setProfileModalOpen(true);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchRoles(); // Fetch roles when the component mounts
@@ -265,7 +316,13 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       {orgChartModalOpen && (
         <OrgChartModal
           onClose={() => setOrgChartModalOpen(false)}
-          roles={roles}
+        />
+      )}
+      {profileModalOpen && (
+        <UserProfileModal
+          open={profileModalOpen}
+          onClose={() => setProfileModalOpen(false)}
+          user={selectedUser}
         />
       )}
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight">
@@ -306,9 +363,11 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             return 0;
           })
           .map((user) => (
-            <div
+            <button
               key={user._id}
-              className={`bg-${theme === 'dark' ? 'gray-800' : 'white'} rounded-xl shadow-md p-4 flex flex-col space-y-2`}
+              className={`bg-${theme === 'dark' ? 'gray-800' : 'white'} rounded-xl shadow-md p-4 flex flex-col space-y-2 cursor-pointer text-left transition hover:ring-2 hover:ring-blue-400`}
+              onClick={() => handleUserClick(user.userId._id)}
+              type="button"
             >
               <div className="flex flex-col">
                 <span className="text-xs text-gray-400 font-semibold">
@@ -350,8 +409,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
                   {user.role}
                 </span>
               </div>
-              {/* Add more fields or actions as needed */}
-            </div>
+            </button>
           ))}
       </div>
       {/* Table view for desktop only */}
@@ -376,6 +434,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             }))}
           columns={projectColumns}
           emptyMessage="No users registered."
+          rowOnClick={(item) => handleUserClick(item.user_id)}
         />
       </div>
     </div>

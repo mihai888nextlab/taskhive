@@ -5,11 +5,14 @@ import jwt from "jsonwebtoken";
 import { JWTPayload, User } from "@/types";
 import userModel from "@/db/models/userModel";
 import userCompanyModel from "@/db/models/userCompanyModel"; // Import userCompanyModel
+import dbConnect from "@/db/dbConfig"; // or "@/db/connect" if that's your file
 
 export default async function userHandler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await dbConnect(); // <-- Add this line
+
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" });
   }

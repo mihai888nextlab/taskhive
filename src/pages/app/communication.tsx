@@ -12,6 +12,7 @@ import Loading from "@/components/Loading";
 import NewDirectChatModal from "@/components/chat/NewDirectChatModel";
 import NewGroupChatModal from "@/components/chat/NewGroupChatModal";
 import { useTheme } from '@/components/ThemeContext';
+import { useRouter } from "next/router";
 
 const Communication: NextPageWithLayout = () => {
   const { user, loadingUser } = useAuth();
@@ -25,6 +26,7 @@ const Communication: NextPageWithLayout = () => {
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { theme } = useTheme();
+  const router = useRouter();
 
   useEffect(() => {
     if (!user) {
@@ -53,6 +55,16 @@ const Communication: NextPageWithLayout = () => {
 
     fetchConversations();
   }, [user]);
+
+  useEffect(() => {
+    if (router.query.userId && conversations.length > 0) {
+      const convo = conversations.find(c =>
+        c.participants.some(p => p._id === router.query.userId)
+      );
+      if (convo) setSelectedConversation(convo);
+      // Optionally, if no conversation exists, open a new chat modal
+    }
+  }, [router.query.userId, conversations]);
 
   const handleChatCreated = (newConversationId: string) => {
     // Re-fetch conversations to get the new one and update the list

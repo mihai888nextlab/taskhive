@@ -9,6 +9,7 @@ import userCompanyModel from "@/db/models/userCompanyModel";
 import * as cookie from "cookie";
 import { JWTPayload } from "@/types";
 import jwt from "jsonwebtoken";
+import OrgChart from "@/db/models/orgChartModel"; // Import the OrgChart model
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
@@ -93,11 +94,42 @@ export default async function handler(
 
     // Convert role to lowercase before saving
     const lowercaseRole = role.toLowerCase();
+
+    // 1. Fetch the org chart for the company
+    const orgChart = await OrgChart.findOne({ companyId: savedCompany._id }).lean();
+    if (!orgChart) {
+      return res.status(404).json({ message: "Org chart not found." });
+    }
+
+    // 2. Find the department containing the role
+    let departmentId: string | null = null;
+    for (const dept of orgChart.departments) {
+      for (const level of dept.levels) {
+        if (level.roles.some((r: string) => r.trim().toLowerCase() === role.trim().toLowerCase())) {
+          departmentId = dept.id;
+          break;
+        }
+      }
+      if (departmentId) break;
+    }
+
+    if (!departmentId) {
+      return res.status(400).json({ message: "Role is not assigned to any department." });
+    }
+
+    // 3. Now create the userCompany with departmentId
     const newUserCompany = new userCompanyModel({
       userId: savedUser._id,
       companyId: savedCompany._id,
-      role: lowercaseRole, // Ensure role is stored in lowercase
+      role: lowercaseRole,
+      departmentId, // <-- THIS MUST BE PRESENT!
       permissions: ["all"],
+    });
+    console.log("Creating userCompany with:", {
+      userId: savedUser._id,
+      companyId: savedCompany._id,
+      role: lowercaseRole,
+      departmentId,
     });
     await newUserCompany.save();
 

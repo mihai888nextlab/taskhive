@@ -1,53 +1,66 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import dbConnect from "@/db/dbConfig"; // Import the database connection utility
-import User from "@/db/models/userModel"; // Import the Mongoose user model
-import { JWTPayload } from "@/types";
-import jwt from "jsonwebtoken";
+import dbConnect from "@/db/dbConfig";
+import userModel from "@/db/models/userModel";
 import * as cookie from "cookie";
+import jwt from "jsonwebtoken";
+import { NextApiRequest, NextApiResponse } from "next";
+import { JWTPayload } from "@/types";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Ensure the database is connected
+  console.log("API HIT /api/update-profile");
+
   await dbConnect();
+  console.log("DB Connected");
 
   // Allow only POST requests
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    console.log("Wrong method:", req.method);
+    return res.status(405).end();
   }
-
-  const { firstName, lastName } = req.body;
 
   const cookies = cookie.parse(req.headers.cookie || "");
   const token = cookies.auth_token;
 
   if (!token) {
-    return res.status(401).json({ message: "No token provided" });
+    console.log("No token");
+    return res.status(401).json({ message: "No token" });
+  }
+
+  let decoded: JWTPayload;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET || "") as JWTPayload;
+    console.log("JWT decoded:", decoded);
+  } catch (err) {
+    console.log("JWT error:", err);
+    return res.status(401).json({ message: "Invalid token" });
   }
 
   try {
-    const decodedToken: JWTPayload | null = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as JWTPayload;
+    const { firstName, lastName, description } = req.body;
+    console.log("Updating user:", decoded.userId, firstName, lastName);
 
-    // Find the user by ID and update their profile
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: decodedToken.userId }, // Find the user by ID
-      { firstName, lastName }, // Update fields
-      { new: true, runValidators: true } // Return the updated document and validate inputs
-    );
+    // Build update object only with non-empty fields
+    const updateFields: Record<string, any> = {};
+    if (firstName && firstName.trim() !== "") updateFields.firstName = firstName;
+    if (lastName && lastName.trim() !== "") updateFields.lastName = lastName;
+    if (typeof description === "string") updateFields.description = description;
 
-    // If no user is found, return a 404 error
+    const updatedUser = await userModel
+      .findByIdAndUpdate(
+        decoded.userId,
+        updateFields,
+        { new: true }
+      )
+      .select("-password");
+
     if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+      console.log("User not found");
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Respond with success
-    res.status(200).json({
-      message: "Profile updated successfully",
-      updatedUser,
-    });
+    console.log("User updated:", updatedUser);
+    return res.status(200).json({ user: updatedUser });
   } catch (error) {
-    console.error("Error updating profile:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Update error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 }

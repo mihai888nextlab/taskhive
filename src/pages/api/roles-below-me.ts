@@ -34,30 +34,50 @@ export default async function handler(
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 
-  // 2. Get user's role (from JWT or DB)
+  // 2. Get user's role and departmentId (from JWT or DB)
   let userRole = decodedToken.role;
+  let userDepartmentId = decodedToken.departmentId;
 
-  // If userRole is missing or empty, fetch from userCompanyModel
-  if (!userRole || typeof userRole !== "string" || !userRole.trim()) {
+  // If missing, fetch from userCompanyModel
+  if (!userRole || !userDepartmentId) {
     const userCompany = await userCompanyModel.findOne({
       userId: decodedToken.userId,
     });
-    if (!userCompany || !userCompany.role) {
+    if (!userCompany || !userCompany.role || !userCompany.departmentId) {
       return res.status(404).json({
-        message: "UserCompany or user role not found",
+        message: "UserCompany or user role/department not found",
         decodedToken,
         userCompany,
       });
     }
     userRole = userCompany.role;
+    userDepartmentId = userCompany.departmentId;
   }
 
-  // Now, only proceed if userRole is a valid string
-  if (!userRole || typeof userRole !== "string") {
-    return res
-      .status(400)
-      .json({ message: "User role is undefined or not a string", userRole });
+  // --- ADMIN OVERRIDE ---
+  if (userRole.trim().toLowerCase() === "admin") {
+    // Return all users except the current admin
+    const users = await userCompanyModel
+      .find({
+        companyId: decodedToken.companyId,
+        userId: { $ne: decodedToken.userId },
+      })
+      .lean();
+
+    const userIds = users.map((u) => u.userId);
+    const userDetails = await userModel.find({ _id: { $in: userIds } }).lean();
+
+    const usersWithDetails = users.map((u) => {
+      const userInfo = userDetails.find((ud) => ud && ud._id && ud._id.toString() === u.userId.toString());
+      return {
+        ...u,
+        user: userInfo || null,
+      };
+    });
+
+    return res.status(200).json({ rolesBelow: [], usersBelow: usersWithDetails });
   }
+  // --- END ADMIN OVERRIDE ---
 
   // 3. Fetch org chart
   const orgChart = await OrgChart.findOne({
@@ -67,49 +87,46 @@ export default async function handler(
     return res.status(404).json({ message: "Org chart not found" });
   }
 
-  // Use the static method to always include 'admin' at the top
-  const levels = OrgChart.getLevelsWithAdmin(orgChart.levels || []);
+  // 4. Find the user's department in the org chart
+  const department = orgChart.departments.find(
+    (d: any) => d.id === userDepartmentId
+  );
+  if (!department) {
+    return res.status(404).json({ message: "Department not found in org chart" });
+  }
+
+  // 5. Find the user's level index in that department
   let userLevelIndex = -1;
-
-  // Normalize userRole for comparison
-  const normalizedUserRole = userRole.trim().toLowerCase();
-
-  for (let i = 0; i < levels.length; i++) {
-    // Normalize all roles in this level
-    const normalizedRoles = levels[i].roles.map((r: string) =>
+  for (let i = 0; i < department.levels.length; i++) {
+    const normalizedRoles = department.levels[i].roles.map((r: string) =>
       r.trim().toLowerCase()
     );
-    if (normalizedRoles.includes(normalizedUserRole)) {
+    if (normalizedRoles.includes(userRole.trim().toLowerCase())) {
       userLevelIndex = i;
       break;
     }
   }
   if (userLevelIndex === -1) {
-    // Debug log
     return res.status(400).json({
-      message: "User's role not found in org chart",
-      userRole: userRole,
-      normalizedUserRole,
-      orgChartRoles: levels.flatMap((l: { roles: string[] }) => l.roles),
-      normalizedOrgChartRoles: levels.flatMap((l: { roles: string[] }) =>
-        l.roles.map((r: string) => r.trim().toLowerCase())
-      ),
+      message: "User's role not found in department",
+      userRole,
+      departmentId: userDepartmentId,
+      department,
     });
   }
 
-  // 5. Collect all roles in lower levels
+  // 6. Collect all roles in lower levels in this department
   const rolesBelow: string[] = [];
-  for (let i = userLevelIndex + 1; i < levels.length; i++) {
-    rolesBelow.push(...levels[i].roles);
+  for (let i = userLevelIndex + 1; i < department.levels.length; i++) {
+    rolesBelow.push(...department.levels[i].roles);
   }
-
-  // Remove duplicates (if any)
   const uniqueRolesBelow = Array.from(new Set(rolesBelow));
 
-  // 6. Find all users with roles in uniqueRolesBelow
+  // 7. Find all users with roles in uniqueRolesBelow and in the same department
   const usersBelow = await userCompanyModel
     .find({
-      role: { $in: uniqueRolesBelow },
+      role: { $in: uniqueRolesBelow.map(r => r.toLowerCase()) },
+      departmentId: userDepartmentId,
       companyId: decodedToken.companyId,
     })
     .lean();
@@ -121,7 +138,6 @@ export default async function handler(
   // Map user details to userCompany entries
   const usersWithDetails = usersBelow.map((u) => {
     const userInfo = userDetails.find((ud) => {
-      // Ensure _id exists and convert to string for comparison
       return ud && ud._id && ud._id.toString() === u.userId.toString();
     });
     return {

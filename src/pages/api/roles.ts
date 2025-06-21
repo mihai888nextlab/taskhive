@@ -56,6 +56,15 @@ export default async function handler(
     }
 
     try {
+      // ADD THIS CHECK:
+      const existingRole = await Role.findOne({
+        name,
+        companyId: decodedToken?.companyId,
+      });
+      if (existingRole) {
+        return res.status(409).json({ message: "Role already exists." });
+      }
+
       const newRole = await Role.create({
         name,
         companyId: decodedToken?.companyId,

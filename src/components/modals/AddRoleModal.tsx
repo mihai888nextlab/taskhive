@@ -10,14 +10,37 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
   const [roleName, setRoleName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (roleName.trim()) {
       setLoading(true);
-      onRoleAdded(roleName.trim());
-      setRoleName("");
-      onClose();
-      setLoading(false);
+      try {
+        const response = await fetch("/api/roles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: roleName }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 409) {
+            // Role already exists, ignore or show a message
+            // Optionally: return here or continue
+            // Example: just return silently
+            return;
+            // Or show a toast: toast.info("Role already exists");
+          } else {
+            throw new Error("Failed to add role");
+          }
+        }
+
+        onRoleAdded(roleName.trim());
+        setRoleName("");
+        onClose();
+      } catch (error) {
+        // handle error
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

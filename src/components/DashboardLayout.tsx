@@ -21,6 +21,20 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+// Define the User interface to include profilePhoto
+interface User {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  profileImage?: {
+    data: string;
+    contentType: string;
+    uploadedAt: string;
+    fileName?: string;
+  };
+  // Add other properties as needed
+}
+
 // Define the Message interface
 interface Message {
   read: boolean;
@@ -28,7 +42,7 @@ interface Message {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user, setUser } = useAuth();
+  const { user, setUser } = useAuth() as { user: User | null; setUser: (user: User | null) => void };
   const router = useRouter();
 
   // State to toggle AI window
@@ -309,9 +323,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           href="/app/settings"
           className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
         >
-          {/* Placeholder for profile picture, using first letter of name */}
-          <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg">
-            {user.firstName ? user.firstName[0].toUpperCase() : "U"}
+          <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg overflow-hidden">
+            {user.profileImage && typeof user.profileImage === "object" && user.profileImage.data ? (
+              <img
+                src={user.profileImage.data}
+                alt="Profile"
+                className="w-10 h-10 object-cover rounded-full"
+              />
+            ) : (
+              user.firstName ? user.firstName[0].toUpperCase() : "U"
+            )}
           </div>
           <div>
             <p className="font-semibold text-white">
@@ -457,8 +478,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               href="/app/settings"
               className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg">
-                {user.firstName ? user.firstName[0].toUpperCase() : "U"}
+              <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg overflow-hidden">
+                {user.profileImage && typeof user.profileImage === "object" && user.profileImage.data ? (
+                  <img
+                    src={user.profileImage.data}
+                    alt="Profile"
+                    className="w-10 h-10 object-cover rounded-full"
+                  />
+                ) : (
+                  user.firstName ? user.firstName[0].toUpperCase() : "U"
+                )}
               </div>
               <div>
                 <p className="font-semibold text-white">

@@ -21,6 +21,7 @@ const SettingsPage: NextPageWithLayout = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    description: "",
   });
   const [accountDetails, setAccountDetails] = useState<{
     email: string;
@@ -30,7 +31,7 @@ const SettingsPage: NextPageWithLayout = () => {
     lastName: string;
   } | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -65,6 +66,7 @@ const SettingsPage: NextPageWithLayout = () => {
             setFormData({
               firstName: data.firstName || "",
               lastName: data.lastName || "",
+              description: data.description || "",
             });
           }
         } catch {}

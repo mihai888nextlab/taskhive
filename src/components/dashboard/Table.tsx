@@ -7,6 +7,7 @@ interface DataTableProps<T extends TableDataItem> {
   actions?: TableAction<T>[];
   title?: string;
   emptyMessage?: string;
+  rowOnClick?: (item: T) => void;
 }
 
 function Table<T extends TableDataItem>({
@@ -15,6 +16,7 @@ function Table<T extends TableDataItem>({
   actions,
   title,
   emptyMessage = "Nu există date de afișat.",
+  rowOnClick,
 }: DataTableProps<T>) {
   return (
     <div className="bg-white shadow-lg rounded-xl overflow-hidden">
@@ -51,10 +53,15 @@ function Table<T extends TableDataItem>({
               </tr>
             </thead>
             <tbody className="text-gray-700 text-sm font-light divide-y divide-gray-200">
-              {data.map((item) => (
+              {data.map((item, idx) => (
                 <tr
-                  key={item.id}
-                  className="hover:bg-blue-50 transition-colors duration-150 ease-in-out"
+                  key={item.id || idx}
+                  className={`hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
+                    rowOnClick
+                      ? "cursor-pointer"
+                      : ""
+                  }`}
+                  onClick={rowOnClick ? () => rowOnClick(item) : undefined}
                 >
                   {columns.map((column) => (
                     <td

@@ -5,19 +5,31 @@ interface Level {
   roles: string[];
 }
 
-interface IOrgChart extends Document {
+interface Department {
+  id: string;
+  name: string;
   levels: Level[];
+}
+
+export interface IOrgChart extends Document {
+  departments: Department[];
   availableRoles: string[];
   companyId: mongoose.Types.ObjectId;
 }
 
+const LevelSchema = new Schema({
+  id: { type: String, required: true },
+  roles: { type: [String], default: [] },
+});
+
+const DepartmentSchema = new Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  levels: { type: [LevelSchema], default: [] },
+});
+
 const OrgChartSchema: Schema = new Schema({
-  levels: [
-    {
-      id: { type: String, required: true },
-      roles: { type: [String], default: [] },
-    },
-  ],
+  departments: { type: [DepartmentSchema], default: [] },
   availableRoles: { type: [String], default: [] },
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
