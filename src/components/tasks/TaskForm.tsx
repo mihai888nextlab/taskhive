@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FaSpinner } from "react-icons/fa";
 
 interface TaskFormProps {
@@ -12,10 +12,12 @@ interface TaskFormProps {
   usersBelowMe: any[];
   formError: string | null;
   theme: string;
+  important: boolean;
   onTitleChange: (v: string) => void;
   onDescriptionChange: (v: string) => void;
   onDeadlineChange: (v: string) => void;
   onAssignedToChange: (v: string) => void;
+  onImportantChange: (v: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }
@@ -31,13 +33,27 @@ const TaskForm: React.FC<TaskFormProps> = ({
   usersBelowMe,
   formError,
   theme,
+  important,
   onTitleChange,
   onDescriptionChange,
   onDeadlineChange,
   onAssignedToChange,
+  onImportantChange,
   onSubmit,
   onCancel,
 }) => {
+  // Keep local state in sync with prop for controlled checkbox
+  const [localImportant, setLocalImportant] = useState(important);
+
+  useEffect(() => {
+    setLocalImportant(important);
+  }, [important]);
+
+  const handleImportantChange = (checked: boolean) => {
+    setLocalImportant(checked);
+    onImportantChange(checked);
+  };
+
   if (!show) return null;
   return (
     <div id="task-form" className="transition-all duration-500 ease-in-out py-6">
@@ -127,6 +143,19 @@ const TaskForm: React.FC<TaskFormProps> = ({
               </option>
             ))}
           </select>
+        </div>
+        <div className="mb-8 flex items-center">
+          <input
+            id="important"
+            type="checkbox"
+            checked={localImportant}
+            onChange={e => handleImportantChange(e.target.checked)}
+            className="mr-2"
+            disabled={loading}
+          />
+          <label htmlFor="important" className={`text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold`}>
+            Mark as Important
+          </label>
         </div>
         <div className="flex justify-end space-x-4">
           <button

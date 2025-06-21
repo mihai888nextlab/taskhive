@@ -7,6 +7,7 @@ interface Task {
   description?: string;
   deadline: string;
   completed: boolean;
+  important?: boolean;
   userId: any;
   createdAt: string;
   updatedAt: string;
@@ -21,6 +22,7 @@ interface TaskCardProps {
   onDelete: (id: string) => void;
   onToggleComplete: (task: Task) => void;
   isTaskOverdue: (task: Task) => boolean;
+  forceAllowEditDelete?: boolean;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -31,7 +33,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onDelete,
   onToggleComplete,
   isTaskOverdue,
+  forceAllowEditDelete,
 }) => {
+  console.log("TaskCard task:", task);
+
   const isOverdue = isTaskOverdue(task);
   const isCompleted = task.completed;
 
@@ -60,7 +65,24 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   const assignerEmail = task.createdBy?.email?.trim().toLowerCase() || "";
   const userEmail = currentUserEmail.trim().toLowerCase();
-  const canEditOrDelete = assignerEmail === userEmail;
+  const canEditOrDelete = forceAllowEditDelete || assignerEmail === userEmail;
+
+  // Normalize emails for comparison
+  const taskAssigneeEmail = typeof task.userId === 'object' && task.userId?.email ? task.userId.email.trim().toLowerCase() : '';
+  const taskCreatorEmail = task.createdBy?.email ? task.createdBy.email.trim().toLowerCase() : '';
+
+  // Logic for showing "Assigned by"
+  // We want to show "Assigned by" ONLY if:
+  // 1. We are NOT in the "assigned by me" view (i.e., forceAllowEditDelete is false or undefined)
+  // 2. The task is assigned TO the current user
+  // 3. The current user is NOT the creator/assigner of the task
+  const showAssignedBy =
+    !forceAllowEditDelete && // This ensures we are not in the 'assigned by me' list
+    task.createdBy &&
+    typeof task.createdBy === "object" &&
+    task.createdBy.email &&
+    taskAssigneeEmail === userEmail && // The task is assigned to the current user
+    taskCreatorEmail !== userEmail; // The current user is NOT the one who created it
 
   return (
     <div
@@ -70,6 +92,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
       <div className="flex-1">
         <h3 className={`text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-3 break-words ${titleClass}`}>
           {task.title}
+          {task.important && (
+            <FaExclamationTriangle className="inline ml-2 text-yellow-500" title="Important" />
+          )}
         </h3>
         {task.description && (
           <p className={`text-base sm:text-lg md:text-xl mb-4 line-clamp-3 ${descriptionClass}`}>
@@ -84,6 +109,35 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </span>
           )}
         </p>
+        {/* Show "Assigned to" only if in assigned-by-me list */}
+        {forceAllowEditDelete &&
+          task.userId &&
+          typeof task.userId === "object" &&
+          task.userId.email && (
+            <p className="text-sm text-gray-700 mt-2">
+              <span className="font-semibold">Assigned to:</span>{" "}
+              {task.userId.firstName} {task.userId.lastName} ({task.userId.email})
+            </p>
+        )}
+        {/* Show "Assigned by" only if:
+            - NOT in assigned-by-me list (forceAllowEditDelete is false/undefined)
+            - The task is assigned to me (task.userId.email === currentUserEmail)
+            - The assigner is NOT me (task.createdBy.email !== currentUserEmail)
+        */}
+        {!forceAllowEditDelete &&
+          task.createdBy &&
+          typeof task.createdBy === "object" &&
+          task.createdBy.email &&
+          task.userId &&
+          typeof task.userId === "object" &&
+          task.userId.email &&
+          task.userId.email === currentUserEmail &&
+          task.createdBy.email !== currentUserEmail && (
+            <p className="text-sm text-gray-700 mt-2">
+              <span className="font-semibold">Assigned by:</span>{" "}
+              {task.createdBy.firstName} {task.createdBy.lastName} ({task.createdBy.email})
+            </p>
+        )}
       </div>
       <div className="flex items-center justify-between pt-5 mt-5 border-t border-gray-100">
         <button

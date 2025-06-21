@@ -12,6 +12,7 @@ export interface ITask extends Document {
   createdAt: Date;
   updatedAt: Date;
   createdBy: Types.ObjectId;
+  important: boolean; // <-- Add this
 }
 
 const TaskSchema: Schema = new Schema(
@@ -42,6 +43,10 @@ const TaskSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    important: {
+      type: Boolean,
+      default: false,
     },
   },
   {

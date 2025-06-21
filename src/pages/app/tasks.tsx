@@ -6,7 +6,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useTheme } from "@/components/ThemeContext";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskList from "@/components/tasks/TaskList";
-import TaskSortDropdown from "@/components/tasks/TaskSortDropdown";
+import AssignedTasksList from "@/components/tasks/AssignedTasksList";
 
 interface Task {
   _id: string;
@@ -22,6 +22,7 @@ interface Task {
     lastName: string;
     email: string;
   };
+  important?: boolean;
 }
 
 async function fetchCurrentUser() {
@@ -53,6 +54,7 @@ const TasksPage: NextPageWithLayout = () => {
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDeadline, setTaskDeadline] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
+  const [important, setImportant] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // UI state
@@ -75,16 +77,21 @@ const TasksPage: NextPageWithLayout = () => {
       sortedData.sort((a, b) => {
         const isAOverdue = isTaskOverdue(a);
         const isBOverdue = isTaskOverdue(b);
+
+        // 1. Overdue tasks (not completed) first
         if (isAOverdue && !a.completed && (!isBOverdue || b.completed)) return -1;
-        if (!isAOverdue && !b.completed && isBOverdue && !a.completed) return 1;
+        if (isBOverdue && !b.completed && (!isAOverdue || a.completed)) return 1;
+
+        // 2. Important tasks (not completed, not overdue) next
+        if (a.important && !a.completed && !isAOverdue && (!b.important || b.completed || isBOverdue)) return -1;
+        if (b.important && !b.completed && !isBOverdue && (!a.important || a.completed || isAOverdue)) return 1;
+
+        // 3. Then by completion
         if (a.completed && !b.completed) return 1;
         if (!a.completed && b.completed) return -1;
-        if (sortBy === "deadlineAsc" || isAOverdue || a.completed) {
-          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-        } else if (sortBy === "createdAtDesc") {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        }
-        return 0;
+
+        // 4. Then by deadline
+        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
       });
       setTasks(sortedData);
     } catch (err) {
@@ -143,6 +150,7 @@ const TasksPage: NextPageWithLayout = () => {
     setEditingTaskId(null);
     setFormError(null);
     setAssignedTo("");
+    setImportant(false);
   };
 
   const handleAddTask = async (e: React.FormEvent) => {
@@ -158,6 +166,7 @@ const TasksPage: NextPageWithLayout = () => {
       description: taskDescription.trim(),
       deadline: taskDeadline,
       assignedTo,
+      important,
     };
     try {
       let response;
@@ -175,7 +184,8 @@ const TasksPage: NextPageWithLayout = () => {
         });
       }
       if (!response.ok) throw new Error("Failed to save task.");
-      await fetchTasks();
+      await fetchTasks();            // <-- Refresh your own tasks
+      await fetchAssignedTasks();    // <-- Refresh assigned-by-me tasks
       resetForm();
       setShowForm(false);
     } catch (err) {
@@ -193,6 +203,7 @@ const TasksPage: NextPageWithLayout = () => {
     setShowForm(true);
     setFormError(null);
     setAssignedTo(typeof task.userId === "string" ? task.userId : "");
+    setImportant(task.important || false);
   };
 
   const handleDeleteTask = async (id: string) => {
@@ -281,10 +292,12 @@ const TasksPage: NextPageWithLayout = () => {
           usersBelowMe={usersBelowMe}
           formError={formError}
           theme={theme}
+          important={important}
           onTitleChange={setTaskTitle}
           onDescriptionChange={setTaskDescription}
           onDeadlineChange={setTaskDeadline}
           onAssignedToChange={setAssignedTo}
+          onImportantChange={setImportant}
           onSubmit={handleAddTask}
           onCancel={() => {
             resetForm();
@@ -295,14 +308,6 @@ const TasksPage: NextPageWithLayout = () => {
         <h2 className={`text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-8 mt-12 pb-4 border-b-4 border-primary-dark text-center`}>
           My Task List
         </h2>
-
-        {/* Sorting Dropdown */}
-        <TaskSortDropdown
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          loading={loading}
-          theme={theme}
-        />
 
         {/* Task List */}
         {loading && tasks.length === 0 ? (
@@ -361,14 +366,13 @@ const TasksPage: NextPageWithLayout = () => {
             </p>
           </div>
         ) : (
-          <TaskList
-            tasks={assignedTasks}
-            currentUserEmail={currentUserEmail}
+          <AssignedTasksList
+            assignedTasks={assignedTasks}
             loading={loading}
             onEdit={handleEditTask}
             onDelete={handleDeleteTask}
-            onToggleComplete={() => {}}
             isTaskOverdue={isTaskOverdue}
+            currentUserEmail={currentUserEmail}
           />
         )}
       </main>

@@ -42,13 +42,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const taskId = new Types.ObjectId(id); // Convert string ID to Mongoose ObjectId
 
   if (req.method === "PUT") {
-    const { title, description, deadline, completed } = req.body;
+    const { title, description, deadline, completed, important } = req.body;
 
     try {
       // Find the task by ID and userId to ensure ownership
       const updatedTask = await Task.findOneAndUpdate(
         { _id: taskId, userId: userId }, // Find by task ID AND user ID
-        { title, description, deadline: deadline ? new Date(deadline) : undefined, completed }, // Update fields
+        { title, description, deadline: deadline ? new Date(deadline) : undefined, completed, important }, // Update fields
         { new: true, runValidators: true } // Return updated document, run schema validators
       );
 
@@ -65,19 +65,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ message: "Failed to update task.", error: (error as Error).message });
     }
   } else if (req.method === "DELETE") {
-    try {
-      // Find and delete the task by ID and userId to ensure ownership
-      const deletedTask = await Task.findOneAndDelete({ _id: taskId, userId: userId });
+    // Only allow if userId matches
+    const task = await Task.findById(id);
+    if (!task) return res.status(404).json({ message: "Task not found" });
 
-      if (!deletedTask) {
-        return res.status(404).json({ message: "Task not found or you don't have permission to delete it." });
-      }
+    const isAssignee = String(task.userId) === String(decodedToken.userId);
+    const isAssigner = String(task.createdBy) === String(decodedToken.userId);
 
-      res.status(200).json({ message: "Task deleted successfully." });
-    } catch (error) {
-      console.error("Error deleting task:", error);
-      res.status(500).json({ message: "Failed to delete task.", error: (error as Error).message });
+    if (!isAssignee && !isAssigner) {
+      return res.status(403).json({ message: "Not allowed" });
     }
+
+    await Task.deleteOne({ _id: id });
+    return res.status(200).json({ success: true });
   } else {
     res.setHeader("Allow", ["PUT", "DELETE"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);

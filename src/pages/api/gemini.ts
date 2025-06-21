@@ -180,9 +180,26 @@ User request: "${prompt}"`;
     // Fallback: Call the Gemini API if the prompt is not a task creation command.
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const result = await model.generateContent(prompt);
+
+      // Prompt engineering: system message for business/organization assistant
+      const systemPrompt = `
+You are Hive, an advanced AI assistant specialized in business, organization, and association management. 
+Your main goals are to help users:
+1. Organize and prioritize tasks, projects, and deadlines efficiently.
+2. Suggest best practices for team collaboration and communication.
+3. Provide actionable advice for role assignment and responsibility delegation.
+4. Offer insights on workflow optimization and productivity improvement.
+5. Answer questions about organizational structure, policies, and management strategies.
+6. Give clear, concise, and professional responses tailored to business and organizational contexts.
+7. When appropriate, provide examples, templates, or step-by-step guides.
+8. Always maintain a helpful, supportive, and proactive tone.
+
+User request: ${prompt}
+      `.trim();
+
+      const result = await model.generateContent(systemPrompt);
       const responseGen = await result.response;
-      const text = responseGen.text();
+      const text = await responseGen.text();
       res.status(200).json({ response: text });
     } catch (error) {
       console.error('Error calling Gemini API:', error);
