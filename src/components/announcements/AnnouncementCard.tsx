@@ -54,13 +54,13 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
   // Expiry logic
   const expired =
     announcement.expiresAt &&
-    new Date(announcement.expiresAt) < new Date();
+    new Date(new Date(announcement.expiresAt).setHours(23, 59, 59, 999)) < new Date();
+
+  if (expired) return null;
 
   // Comments (demo: local state)
   const [comments, setComments] = useState<string[]>([]);
   const [commentInput, setCommentInput] = useState("");
-
-  if (expired) return null;
 
   return (
     <div

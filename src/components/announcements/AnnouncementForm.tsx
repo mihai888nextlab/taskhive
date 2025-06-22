@@ -68,33 +68,67 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
     />
     <div className="text-xs text-gray-400 mb-4">You can use <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer" className="underline">Markdown</a> for formatting.</div>
     <div className="flex flex-col sm:flex-row gap-4 mb-4">
-      <select
-        value={category}
-        onChange={e => onCategoryChange(e.target.value)}
-        className="flex-1 px-4 py-2 rounded-lg border"
-        required
-        aria-label="Category"
-      >
-        <option value="">Select category</option>
-        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-      </select>
-      <label className="flex items-center gap-2 text-sm font-medium">
+      {/* Category Selector */}
+      <div className="flex-1 flex flex-col">
+        <label
+          className={`mb-1 font-semibold ${theme === 'light' ? 'text-black' : 'text-gray-200'}`}
+          htmlFor="category"
+        >
+          Category
+        </label>
+        <select
+          id="category"
+          value={category}
+          onChange={e => onCategoryChange(e.target.value)}
+          className={`px-4 py-2 rounded-lg border ${theme === 'light' ? 'text-black' : 'text-gray-200'}`}
+          aria-label="Category"
+        >
+          <option value="" disabled>
+            Select category
+          </option>
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+      {/* Pin to Top Checkbox */}
+      <div className="flex flex-col justify-center items-center sm:w-32">
+        <label className="inline-flex items-center cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={pinned}
+            onChange={e => onPinnedChange(e.target.checked)}
+            className="form-checkbox h-5 w-5 text-primary rounded transition"
+            disabled={loading}
+          />
+          <span className={`ml-2 text-sm font-medium ${theme === 'light' ? 'text-black' : 'text-gray-200'}`}>
+            Pin to top
+          </span>
+        </label>
+      </div>
+      {/* Date Selector */}
+      <div className="flex-1 flex flex-col">
+        <label
+          className={`mb-1 font-semibold ${theme === 'light' ? 'text-black' : 'text-gray-200'}`}
+          htmlFor="expiresAt"
+        >
+          Expiry Date
+        </label>
         <input
-          type="checkbox"
-          checked={pinned}
-          onChange={e => onPinnedChange(e.target.checked)}
-          className="rounded"
+          id="expiresAt"
+          type="date"
+          value={expiresAt}
+          onChange={e => onExpiresAtChange(e.target.value)}
+          className={`px-4 py-2 rounded-lg border ${theme === 'light' ? 'text-black' : 'text-gray-200'}`}
+          aria-label="Expiry date"
+          min={new Date().toISOString().split("T")[0]}
         />
-        Pin to top
-      </label>
-      <input
-        type="date"
-        value={expiresAt}
-        onChange={e => onExpiresAtChange(e.target.value)}
-        className="flex-1 px-4 py-2 rounded-lg border"
-        aria-label="Expiry date"
-        min={new Date().toISOString().split("T")[0]}
-      />
+        <span className="text-xs text-gray-400 mt-2 ml-1 italic">
+          This is the date when the announcement will expire (it will be visible through this date).
+        </span>
+      </div>
     </div>
     <button
       type="submit"

@@ -265,6 +265,24 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     fetchRoles(); // Fetch roles when the component mounts
   }, [user]);
 
+  useEffect(() => {
+    function handleOpenUserProfile(e: CustomEvent) {
+      const userId = e.detail;
+      const userObj = users.find((u) => u.userId._id === userId);
+      if (userObj) {
+        setSelectedUser({
+          ...userObj.userId,
+          role: userObj.role,
+        });
+        setProfileModalOpen(true);
+      }
+    }
+    window.addEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+    return () => {
+      window.removeEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+    };
+  }, [users]);
+
   if (!user) {
     return <Loading />;
   }
