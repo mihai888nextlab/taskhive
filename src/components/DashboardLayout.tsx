@@ -39,11 +39,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   // Fetch users
   useEffect(() => {
+    if (!user) return;
     fetch("/api/get-users")
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!res.ok) return [];
         return res.json();
       })
       .then((data) => {
@@ -52,83 +51,88 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       .catch((error) => {
         console.error("Error fetching users:", error);
       });
-  }, []);
+  }, [user]);
 
   useEffect(() => {
+    if (!user) return;
     // Fetch tasks
     fetch("/api/tasks")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : [])
       .then(data => setTasks(data))
       .catch(() => {});
 
     // Fetch announcements
     fetch("/api/announcements")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : { announcements: [] })
       .then(data => setAnnouncements(data.announcements || []))
       .catch(() => {});
 
     // Fetch calendar events
     fetch("/api/calendar")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : { events: [] })
       .then(data => setCalendarEvents(data.events || []))
       .catch(() => {});
 
     // Fetch storage files
     fetch("/api/storage")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : { files: [] })
       .then(data => setStorageFiles(data.files || []))
       .catch(() => {});
 
     // Fetch time tracking
     fetch("/api/time-tracking")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : { entries: [] })
       .then(data => setTimeTracking(data.entries || []))
       .catch(() => {});
 
     // Fetch finance records
     fetch("/api/finance")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : { records: [] })
       .then(data => setFinanceRecords(data.records || []))
       .catch(() => {});
 
     // Fetch expenses
     fetch("/api/expenses")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : [])
       .then(data => setExpenses(data || []))
       .catch(() => {});
 
-    // Fetch incomes (if you have a separate endpoint)
+    // Fetch incomes
     fetch("/api/incomes")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : [])
       .then(data => setIncomes(data || []))
       .catch(() => {});
 
     // Fetch time sessions
     fetch("/api/time-sessions")
-      .then(res => res.json())
+      .then(res => res.ok ? res.json() : [])
       .then(data => setTimeSessions(Array.isArray(data) ? data : (data.sessions || [])))
       .catch(() => {});
-  }, []);
+  }, [user]);
 
-  // Fetch tasks
+  // Fetch tasks count
   const fetchTasks = async () => {
+    if (!user) return;
     try {
       const response = await fetch("/api/tasks");
       if (!response.ok) {
-        throw new Error("Failed to fetch tasks");
+        setTasksCount(0);
+        return;
       }
       const data = await response.json();
       const incompleteTasks = data.filter((task: any) => !task.completed);
       setTasksCount(incompleteTasks.length);
     } catch (error) {
+      setTasksCount(0);
       console.error("Error fetching tasks:", error);
     }
   };
 
-  // Call fetchTasks on component mount
+  // Call fetchTasks on component mount and when user changes
   useEffect(() => {
+    if (!user) return;
     fetchTasks();
-  }, []);
+  }, [user]);
 
   // Function to create a new task
   const createTask = async (taskData: { title: string; description: string; deadline: string }) => {
@@ -171,6 +175,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       setUser(null);
+      // Clear sensitive state
+      setUsers([]);
+      setTasks([]);
+      setAnnouncements([]);
+      setCalendarEvents([]);
+      setStorageFiles([]);
+      setTimeTracking([]);
+      setFinanceRecords([]);
+      setExpenses([]);
+      setIncomes([]);
+      setTimeSessions([]);
+      setTasksCount(0);
       router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);

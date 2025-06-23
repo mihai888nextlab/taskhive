@@ -150,7 +150,8 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         body: JSON.stringify({ name: roleName }),
       });
 
-      if (!response.ok) {
+      if (!response.ok && response.status !== 409) {
+        // Only throw if it's not a "role already exists" error
         throw new Error("Failed to add role");
       }
 
@@ -167,9 +168,9 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
 
       if (availableDept) {
         // Add to first level of Available Roles department
-        if (availableDept.levels.length > 0) {
+        if (availableDept.levels.length > 0 && !availableDept.levels[0].roles.includes(roleName)) {
           availableDept.levels[0].roles.push(roleName);
-        } else {
+        } else if (availableDept.levels.length === 0) {
           availableDept.levels.push({ id: "available-roles-level", roles: [roleName] });
         }
       } else {

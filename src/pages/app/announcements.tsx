@@ -24,7 +24,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState("All");
+  const [category, setCategory] = useState("Update"); // Use a valid default
   const [pinned, setPinned] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -130,7 +130,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
       setAnnouncements([newAnnouncement, ...announcements]);
       setTitle("");
       setContent("");
-      setCategory("");
+      setCategory("Update"); // Reset to a valid category
       setPinned(false);
       setExpiresAt("");
       setShowForm(false);

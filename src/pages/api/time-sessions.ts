@@ -1,12 +1,22 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import dbConnect from '@/db/dbConfig'; // Adjust the import based on your DB setup
-import TimeSession, { ITimeSession } from '@/db/models/timeSessionModel'; // Import the TimeSession model
+import dbConnect from '@/db/dbConfig';
+import TimeSession, { ITimeSession } from '@/db/models/timeSessionModel';
+import mongoose from 'mongoose'; // <-- Add this
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect(); // Ensure the database is connected
 
   if (req.method === 'POST') {
-    const { userId, name, description, duration, tag, cycles } = req.body; // <-- add tag
+    let { userId, name, description, duration, tag, cycles } = req.body; // <-- add tag
+
+    // Convert userId to ObjectId if it's a string
+    if (typeof userId === "string") {
+      try {
+        userId = new mongoose.Types.ObjectId(userId);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid userId format' });
+      }
+    }
 
     console.log("Received data:", { userId, name, description, duration, tag, cycles }); // Log received data
 
