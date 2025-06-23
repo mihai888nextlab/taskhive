@@ -1,4 +1,3 @@
-import { dd } from "framer-motion/client";
 import React, { useState, InputHTMLAttributes } from "react";
 /** @jsx React.createElement */
 
@@ -24,17 +23,23 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
-    onChange && onChange(e);
+    if (onChange) {
+      onChange(e);
+    }
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
-    onFocus && onFocus(e);
+    if (onFocus) {
+      onFocus(e);
+    }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
-    onBlur && onBlur(e);
+    if (onBlur) {
+      onBlur(e);
+    }
   };
 
   const isLabelFloated = isFocused || inputValue !== "";

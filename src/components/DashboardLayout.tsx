@@ -21,8 +21,30 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isAIWindowOpen, setIsAIWindowOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  type PageResult = {
+    type: "page";
+    name: string;
+    path: string;
+    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    notification?: number | null;
+  };
+  type UserResult = { type: "user"; name: string; email: string; _id: string };
+  type SearchResult = PageResult | UserResult;
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  interface UserId {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    _id?: string;
+  }
+
+  interface User {
+    userId: UserId;
+    _id: string;
+    [key: string]: unknown; // Use unknown instead of any for additional properties
+  }
+
+  const [users, setUsers] = useState<User[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [tasksCount, setTasksCount] = useState(0); // State for incomplete tasks count
   const [tasks, setTasks] = useState<any[]>([]);
@@ -119,14 +141,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         setTasksCount(0);
         return;
       }
-      const data = await response.json();
-      const incompleteTasks = data.filter((task: any) => !task.completed);
+      const data: Task[] = await response.json();
+      const incompleteTasks = data.filter((task: Task) => !task.completed);
       setTasksCount(incompleteTasks.length);
     } catch (error) {
       setTasksCount(0);
       console.error("Error fetching tasks:", error);
     }
-  };
+  }, []);
 
   // Call fetchTasks on component mount and when user changes
   useEffect(() => {
@@ -135,40 +157,43 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [user]);
 
   // Function to create a new task
-  const createTask = async (taskData: { title: string; description: string; deadline: string }) => {
-    try {
-      const response = await fetch("/api/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskData),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to create task");
-      }
-      // Refetch tasks to update the count
-      await fetchTasks();
-    } catch (error) {
-      console.error("Error creating task:", error);
-    }
-  };
+
+  //create task nu e folosit deloc. til comentez si til decomentezi tu mai tarziu @crstiSTG
+  // const createTask = async (taskData: { title: string; description: string; deadline: string }) => {
+  //   try {
+  //     const response = await fetch("/api/tasks", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(taskData),
+  //     });
+  //     if (!response.ok) {
+  //       throw new Error("Failed to create task");
+  //     }
+  //     // Refetch tasks to update the count
+  //     await fetchTasks();
+  //   } catch (error) {
+  //     console.error("Error creating task:", error);
+  //   }
+  // };
 
   // Function to complete a task
-  const completeTask = async (taskId: string) => {
-    try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PATCH", // Assuming you have a PATCH endpoint for completing tasks
-      });
-      if (!response.ok) {
-        throw new Error("Failed to complete task");
-      }
-      // Refetch tasks to update the count
-      await fetchTasks();
-    } catch (error) {
-      console.error("Error completing task:", error);
-    }
-  };
+  //la fel
+  // const completeTask = async (taskId: string) => {
+  //   try {
+  //     const response = await fetch(`/api/tasks/${taskId}`, {
+  //       method: "PATCH", // Assuming you have a PATCH endpoint for completing tasks
+  //     });
+  //     if (!response.ok) {
+  //       throw new Error("Failed to complete task");
+  //     }
+  //     // Refetch tasks to update the count
+  //     await fetchTasks();
+  //   } catch (error) {
+  //     console.error("Error completing task:", error);
+  //   }
+  // };
 
   // Handler for logout
   const handleLogout = async () => {

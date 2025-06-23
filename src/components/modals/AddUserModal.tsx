@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { FaSpinner, FaTimes } from "react-icons/fa";
-import { setCookie } from 'nookies'; // Import nookies
 
 interface AddUsersModalProps {
   onClose: () => void;
@@ -13,7 +12,10 @@ interface AddUsersModalProps {
   ) => Promise<string | undefined>;
 }
 
-const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) => {
+const AddUsersModal: React.FC<AddUsersModalProps> = ({
+  onClose,
+  onUserAdded,
+}) => {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -56,14 +58,24 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
     try {
       // Convert role to lowercase before passing it to onUserAdded
       const lowercaseRole = role.toLowerCase();
-      const result = await onUserAdded(email, firstName, lastName, password, lowercaseRole);
+      const result = await onUserAdded(
+        email,
+        firstName,
+        lastName,
+        password,
+        lowercaseRole
+      );
       if (result) {
         setError(result);
       } else {
         onClose();
       }
-    } catch (error: any) {
-      setError(error.message || "An unexpected error occurred.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || "An unexpected error occurred.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
@@ -74,7 +86,9 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200 w-96">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-3xl font-bold text-gray-800 text-center">Add User</h2>
+          <h2 className="text-3xl font-bold text-gray-800 text-center">
+            Add User
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-red-500 transition-all text-2xl"
@@ -83,10 +97,21 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
           </button>
         </div>
         {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm" role="alert">
+          <div
+            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm"
+            role="alert"
+          >
             <div className="flex items-center">
-              <svg className="h-6 w-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <svg
+                className="h-6 w-6 text-red-500 mr-3"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
               </svg>
               <div>
                 <p className="font-bold">Error</p>
@@ -97,7 +122,12 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">Email:</label>
+            <label
+              htmlFor="email"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Email:
+            </label>
             <input
               type="email"
               id="email"
@@ -109,7 +139,12 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
             />
           </div>
           <div>
-            <label htmlFor="firstName" className="block text-gray-700 text-sm font-semibold mb-2">First Name:</label>
+            <label
+              htmlFor="firstName"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              First Name:
+            </label>
             <input
               type="text"
               id="firstName"
@@ -121,7 +156,12 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
             />
           </div>
           <div>
-            <label htmlFor="lastName" className="block text-gray-700 text-sm font-semibold mb-2">Last Name:</label>
+            <label
+              htmlFor="lastName"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Last Name:
+            </label>
             <input
               type="text"
               id="lastName"
@@ -133,7 +173,12 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">Password:</label>
+            <label
+              htmlFor="password"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Password:
+            </label>
             <input
               type="password"
               id="password"
@@ -145,7 +190,12 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
             />
           </div>
           <div>
-            <label htmlFor="role" className="block text-gray-700 text-sm font-semibold mb-2">Role:</label>
+            <label
+              htmlFor="role"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Role:
+            </label>
             <select
               id="role"
               value={role}
@@ -155,7 +205,9 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({ onClose, onUserAdded }) =
             >
               <option value="">Select Role</option>
               {roles.map((role) => (
-                <option key={role} value={role}>{role}</option>
+                <option key={role} value={role}>
+                  {role}
+                </option>
               ))}
             </select>
           </div>
