@@ -1,7 +1,7 @@
 // components/chat/NewGroupChatModal.tsx
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { useAuth } from "@/pages/_app"; // Custom hook to get current user
+import { useAuth } from "@/hooks/useAuth"; // Custom hook to get current user
 
 interface NewGroupChatModalProps {
   isOpen: boolean;

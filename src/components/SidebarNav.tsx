@@ -1,5 +1,6 @@
-import DashboardSearch from "@/components/DashboardSearch";
 import Link from "next/link";
+import Image from "next/image";
+import UniversalSearchBar from "./UniversalSearchBar";
 
 type MenuItem = {
   name: string;
@@ -20,17 +21,6 @@ type SidebarNavProps = {
   user: User;
   router: { pathname: string };
   handleLogout: () => void;
-  users: any[];
-  tasks: any[];
-  announcements: any[];
-  calendarEvents: any[];
-  storageFiles: any[];
-  timeTracking: any[];
-  financeRecords: any[];
-  expenses: any[];
-  incomes: any[];
-  timeSessions: any[];
-  onUserCardClick: (user: any) => void;
   // Add notification props here:
   tasksCount?: number;
   unreadAnnouncements?: number;
@@ -42,45 +32,32 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   user,
   router,
   handleLogout,
-  users,
-  tasks,
-  announcements,
-  calendarEvents,
-  storageFiles,
-  timeTracking,
-  financeRecords,
-  expenses,
-  incomes,
-  timeSessions,
-  onUserCardClick,
   tasksCount = 0,
   unreadAnnouncements = 0,
   unreadMessages = 0,
 }) => {
-const menuWithNotifications = menu.map((item) => {
+  const menuWithNotifications = menu.map((item) => {
     if (item.name === "Tasks" && tasksCount > 0) {
-        return { ...item, notification: tasksCount };
+      return { ...item, notification: tasksCount };
     }
     if (item.name === "Announcements" && unreadAnnouncements > 0) {
-        return { ...item, notification: unreadAnnouncements };
+      return { ...item, notification: unreadAnnouncements };
     }
     if (item.name === "Communication" && unreadMessages > 0) {
-        return { ...item, notification: unreadMessages };
+      return { ...item, notification: unreadMessages };
     }
     return { ...item, notification: item.notification };
-});
+  });
 
   return (
     <aside className="hidden md:flex w-[300px] bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 py-6 flex-col shadow-lg">
       <Link href="/app">
-        <img
-          src="http://localhost:3000/logo.png"
-          className="w-[150px] mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300"
-          alt="Logo"
-        />
+        <div className="relative w-[150px] h-full mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300">
+          <Image src="/logo.png" alt="Logo" fill={true} />
+        </div>
       </Link>
       {/* Search Bar */}
-      <DashboardSearch
+      {/* <DashboardSearch
         menu={menu}
         users={users}
         tasks={tasks}
@@ -93,7 +70,8 @@ const menuWithNotifications = menu.map((item) => {
         incomes={incomes}
         timeSessions={timeSessions}
         onUserCardClick={onUserCardClick}
-      />
+      /> */}
+      <UniversalSearchBar />
       {/* Navigation */}
       <nav>
         <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">
@@ -132,14 +110,16 @@ const menuWithNotifications = menu.map((item) => {
         className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
       >
         <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg overflow-hidden">
-          {user.profileImage && typeof user.profileImage === "object" && user.profileImage.data ? (
-            <img
-              src={user.profileImage.data}
-              alt="Profile"
-              className="w-10 h-10 object-cover rounded-full"
-            />
+          {user.profileImage &&
+          typeof user.profileImage === "object" &&
+          user.profileImage.data ? (
+            <div className="relative w-10 h-10 object-cover rounded-full">
+              <Image src={user.profileImage.data} alt="Profile" fill={true} />
+            </div>
+          ) : user.firstName ? (
+            user.firstName[0].toUpperCase()
           ) : (
-            user.firstName ? user.firstName[0].toUpperCase() : "U"
+            "U"
           )}
         </div>
         <div>

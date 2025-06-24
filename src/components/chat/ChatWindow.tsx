@@ -1,13 +1,13 @@
 // components/ChatWindow.tsx
 import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
-import { useAuth } from "@/pages/_app";
+import { useAuth } from "@/hooks/useAuth"; // Custom hook to get current user
 import { IUser } from "@/db/models/userModel";
 import { PopulatedConversation } from "./ConversationList";
 import Loading from "@/components/Loading";
 import { BsPaperclip } from "react-icons/bs";
 import FileCard from "@/components/storage/StorageFileCard";
-import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
+import { useTheme } from "@/components/ThemeContext"; // Import the useTheme hook
 
 // Ensure these types match your backend models and API responses
 interface ChatMessage {

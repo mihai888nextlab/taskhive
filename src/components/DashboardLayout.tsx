@@ -1,4 +1,4 @@
-import { useAuth } from "@/pages/_app";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/router";
 import { ReactNode, useState, useEffect } from "react";
 import SidebarNav from "@/components/SidebarNav";
@@ -14,23 +14,23 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user, setUser } = useAuth() as { user: any; setUser: (user: any) => void };
+  const { user, loadingUser, isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
   // State to toggle AI window
   const [isAIWindowOpen, setIsAIWindowOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  type PageResult = {
-    type: "page";
-    name: string;
-    path: string;
-    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    notification?: number | null;
-  };
-  type UserResult = { type: "user"; name: string; email: string; _id: string };
-  type SearchResult = PageResult | UserResult;
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  // const [search, setSearch] = useState("");
+  // type PageResult = {
+  //   type: "page";
+  //   name: string;
+  //   path: string;
+  //   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  //   notification?: number | null;
+  // };
+  // type UserResult = { type: "user"; name: string; email: string; _id: string };
+  // type SearchResult = PageResult | UserResult;
+  // const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   interface UserId {
     firstName?: string;
     lastName?: string;
@@ -44,175 +44,33 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     [key: string]: unknown; // Use unknown instead of any for additional properties
   }
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [tasksCount, setTasksCount] = useState(0); // State for incomplete tasks count
   const [tasks, setTasks] = useState<any[]>([]);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
-  const [storageFiles, setStorageFiles] = useState<any[]>([]);
-  const [timeTracking, setTimeTracking] = useState<any[]>([]);
-  const [financeRecords, setFinanceRecords] = useState<any[]>([]);
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [incomes, setIncomes] = useState<any[]>([]);
-  const [timeSessions, setTimeSessions] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
-  // Fetch users
   useEffect(() => {
-    if (!user) return;
-    fetch("/api/get-users")
-      .then((res) => {
-        if (!res.ok) return [];
-        return res.json();
-      })
-      .then((data) => {
-        setUsers(data.users || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
-  }, [user]);
+    if (!loadingUser && !isAuthenticated) {
+      // Asigură-te că nu redirecționezi la infinit dacă pagina curentă este deja pagina de login
+      if (router.pathname !== "/login") {
+        router.push("/login");
+      }
+    }
+  }, [loadingUser, isAuthenticated, router]);
 
   useEffect(() => {
     if (!user) return;
     // Fetch tasks
     fetch("/api/tasks")
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setTasks(data))
-      .catch(() => {});
-
-    // Fetch announcements
-    fetch("/api/announcements")
-      .then(res => res.ok ? res.json() : { announcements: [] })
-      .then(data => setAnnouncements(data.announcements || []))
-      .catch(() => {});
-
-    // Fetch calendar events
-    fetch("/api/calendar")
-      .then(res => res.ok ? res.json() : { events: [] })
-      .then(data => setCalendarEvents(data.events || []))
-      .catch(() => {});
-
-    // Fetch storage files
-    fetch("/api/storage")
-      .then(res => res.ok ? res.json() : { files: [] })
-      .then(data => setStorageFiles(data.files || []))
-      .catch(() => {});
-
-    // Fetch time tracking
-    fetch("/api/time-tracking")
-      .then(res => res.ok ? res.json() : { entries: [] })
-      .then(data => setTimeTracking(data.entries || []))
-      .catch(() => {});
-
-    // Fetch finance records
-    fetch("/api/finance")
-      .then(res => res.ok ? res.json() : { records: [] })
-      .then(data => setFinanceRecords(data.records || []))
-      .catch(() => {});
-
-    // Fetch expenses
-    fetch("/api/expenses")
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setExpenses(data || []))
-      .catch(() => {});
-
-    // Fetch incomes
-    fetch("/api/incomes")
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setIncomes(data || []))
-      .catch(() => {});
-
-    // Fetch time sessions
-    fetch("/api/time-sessions")
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setTimeSessions(Array.isArray(data) ? data : (data.sessions || [])))
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setTasks(data))
       .catch(() => {});
   }, [user]);
 
-  // Fetch tasks count
-  const fetchTasks = async () => {
-    if (!user) return;
-    try {
-      const response = await fetch("/api/tasks");
-      if (!response.ok) {
-        setTasksCount(0);
-        return;
-      }
-      const data: Task[] = await response.json();
-      const incompleteTasks = data.filter((task: Task) => !task.completed);
-      setTasksCount(incompleteTasks.length);
-    } catch (error) {
-      setTasksCount(0);
-      console.error("Error fetching tasks:", error);
-    }
-  }, []);
-
-  // Call fetchTasks on component mount and when user changes
-  useEffect(() => {
-    if (!user) return;
-    fetchTasks();
-  }, [user]);
-
-  // Function to create a new task
-
-  //create task nu e folosit deloc. til comentez si til decomentezi tu mai tarziu @crstiSTG
-  // const createTask = async (taskData: { title: string; description: string; deadline: string }) => {
-  //   try {
-  //     const response = await fetch("/api/tasks", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(taskData),
-  //     });
-  //     if (!response.ok) {
-  //       throw new Error("Failed to create task");
-  //     }
-  //     // Refetch tasks to update the count
-  //     await fetchTasks();
-  //   } catch (error) {
-  //     console.error("Error creating task:", error);
-  //   }
-  // };
-
-  // Function to complete a task
-  //la fel
-  // const completeTask = async (taskId: string) => {
-  //   try {
-  //     const response = await fetch(`/api/tasks/${taskId}`, {
-  //       method: "PATCH", // Assuming you have a PATCH endpoint for completing tasks
-  //     });
-  //     if (!response.ok) {
-  //       throw new Error("Failed to complete task");
-  //     }
-  //     // Refetch tasks to update the count
-  //     await fetchTasks();
-  //   } catch (error) {
-  //     console.error("Error completing task:", error);
-  //   }
-  // };
-
-  // Handler for logout
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      setUser(null);
+      logout(); // Call the logout function from useAuth
       // Clear sensitive state
-      setUsers([]);
       setTasks([]);
-      setAnnouncements([]);
-      setCalendarEvents([]);
-      setStorageFiles([]);
-      setTimeTracking([]);
-      setFinanceRecords([]);
-      setExpenses([]);
-      setIncomes([]);
-      setTimeSessions([]);
-      setTasksCount(0);
-      router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -248,20 +106,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         user={user}
         router={router}
         handleLogout={handleLogout}
-        users={users}
-        tasks={tasks}
-        announcements={announcements}
-        calendarEvents={calendarEvents}
-        storageFiles={storageFiles}
-        timeTracking={timeTracking}
-        financeRecords={financeRecords}
-        expenses={expenses}
-        incomes={incomes}
-        timeSessions={timeSessions}
-        onUserCardClick={(user) => {
-          setSelectedUser(user);
-          setProfileModalOpen(true);
-        }}
       />
       {/* Sidebar drawer for mobile */}
       <MobileSidebar

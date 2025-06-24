@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { useAuth } from "../../pages/_app"; // Adjust path
+import { useAuth } from "@/hooks/useAuth";
 import { NextPageWithLayout, TableColumn, TableDataItem } from "@/types";
 import Loading from "@/components/Loading";
 import Table from "@/components/dashboard/Table";
@@ -8,7 +8,7 @@ import AddUsersModal from "@/components/modals/AddUserModal";
 import AddRoleModal from "@/components/modals/AddRoleModal"; // Import AddRoleModal
 import OrgChartModal from "@/components/modals/OrgChartModal"; // Import OrgChartModal
 import UserProfileModal from "@/components/modals/UserProfileModal";
-import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
+import { useTheme } from "@/components/ThemeContext"; // Import the useTheme hook
 
 interface Project extends TableDataItem {
   user_id: string;
@@ -20,12 +20,8 @@ interface Project extends TableDataItem {
   permissions: string[];
 }
 
-interface AuthUser {
-  role: string;
-}
-
 const DashboardOverviewPage: NextPageWithLayout = () => {
-  const { user } = useAuth() as { user: AuthUser | null };
+  const { user } = useAuth();
   const { theme } = useTheme(); // Get the current theme
 
   const [users, setUsers] = useState<
@@ -36,7 +32,12 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         email: string;
         firstName: string;
         lastName: string;
-        profileImage?: { data: string; contentType: string; uploadedAt: string; fileName?: string };
+        profileImage?: {
+          data: string;
+          contentType: string;
+          uploadedAt: string;
+          fileName?: string;
+        };
         description?: string;
       };
       companyId: string;
@@ -57,29 +58,17 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     {
       key: "user_firstName",
       header: "First Name",
-      render: (item) => (
-        <span>
-          {item.user_firstName}
-        </span>
-      ),
+      render: (item) => <span>{item.user_firstName}</span>,
     },
     {
       key: "user_lastName",
       header: "Last Name",
-      render: (item) => (
-        <span>
-          {item.user_lastName}
-        </span>
-      ),
+      render: (item) => <span>{item.user_lastName}</span>,
     },
     {
       key: "user_email",
       header: "Email",
-      render: (item) => (
-        <span>
-          {item.user_email}
-        </span>
-      ),
+      render: (item) => <span>{item.user_email}</span>,
     },
     {
       key: "role",
@@ -164,14 +153,22 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
 
       // ✅ New code (works with departments/levels structure)
       const departments = orgChartData.departments || [];
-      const availableDept = departments.find((d: any) => d.id === "available-roles");
+      const availableDept = departments.find(
+        (d: any) => d.id === "available-roles"
+      );
 
       if (availableDept) {
         // Add to first level of Available Roles department
-        if (availableDept.levels.length > 0 && !availableDept.levels[0].roles.includes(roleName)) {
+        if (
+          availableDept.levels.length > 0 &&
+          !availableDept.levels[0].roles.includes(roleName)
+        ) {
           availableDept.levels[0].roles.push(roleName);
         } else if (availableDept.levels.length === 0) {
-          availableDept.levels.push({ id: "available-roles-level", roles: [roleName] });
+          availableDept.levels.push({
+            id: "available-roles-level",
+            roles: [roleName],
+          });
         }
       } else {
         // If not found, create Available Roles department
@@ -278,9 +275,15 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         setProfileModalOpen(true);
       }
     }
-    window.addEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+    window.addEventListener(
+      "open-user-profile",
+      handleOpenUserProfile as EventListener
+    );
     return () => {
-      window.removeEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+      window.removeEventListener(
+        "open-user-profile",
+        handleOpenUserProfile as EventListener
+      );
     };
   }, [users]);
 
@@ -333,9 +336,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         />
       )}
       {orgChartModalOpen && (
-        <OrgChartModal
-          onClose={() => setOrgChartModalOpen(false)}
-        />
+        <OrgChartModal onClose={() => setOrgChartModalOpen(false)} />
       )}
       {profileModalOpen && (
         <UserProfileModal
@@ -384,7 +385,9 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           .map((user) => (
             <button
               key={user._id}
-              className={`bg-${theme === 'dark' ? 'gray-800' : 'white'} rounded-xl shadow-md p-4 flex flex-col space-y-2 cursor-pointer text-left transition hover:ring-2 hover:ring-blue-400`}
+              className={`bg-${
+                theme === "dark" ? "gray-800" : "white"
+              } rounded-xl shadow-md p-4 flex flex-col space-y-2 cursor-pointer text-left transition hover:ring-2 hover:ring-blue-400`}
               onClick={() => handleUserClick(user.userId._id)}
               type="button"
             >
@@ -432,7 +435,11 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           ))}
       </div>
       {/* Table view for desktop only */}
-      <div className={`bg-${theme === 'dark' ? 'gray-800' : 'white'} shadow-xl rounded-2xl overflow-x-auto hidden md:block`}>
+      <div
+        className={`bg-${
+          theme === "dark" ? "gray-800" : "white"
+        } shadow-xl rounded-2xl overflow-x-auto hidden md:block`}
+      >
         <Table<Project>
           title="Users List"
           data={[...users]

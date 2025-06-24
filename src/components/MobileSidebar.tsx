@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FaTimes, FaSignOutAlt } from "react-icons/fa";
+import Image from "next/image";
 
 type MenuItem = {
   name: string;
@@ -55,12 +56,14 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
           <FaTimes />
         </button>
         <Link href="/app">
-          <img
-            src="http://localhost:3000/logo.png"
-            className="w-[120px] mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300"
-            alt="Logo"
-            onClick={() => setSidebarOpen(false)}
-          />
+          <div className="w-[120px] h-full mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              fill={true}
+              onClick={() => setSidebarOpen(false)}
+            />
+          </div>
         </Link>
         {/* Search Bar Mobile */}
         {searchInput}
@@ -103,14 +106,18 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
           className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
         >
           <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg overflow-hidden">
-            {user.profileImage && typeof user.profileImage === "object" && user.profileImage.data ? (
+            {user.profileImage &&
+            typeof user.profileImage === "object" &&
+            user.profileImage.data ? (
               <img
                 src={user.profileImage.data}
                 alt="Profile"
                 className="w-10 h-10 object-cover rounded-full"
               />
+            ) : user.firstName ? (
+              user.firstName[0].toUpperCase()
             ) : (
-              user.firstName ? user.firstName[0].toUpperCase() : "U"
+              "U"
             )}
           </div>
           <div>
