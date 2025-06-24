@@ -30,6 +30,7 @@ export type FinanceItem = Expense | Income;
 
 export default function useFinancePageLogic() {
   const { theme } = useTheme();
+  const [companyId, setCompanyId] = useState<string | null>(null);
   const [userId, setUserId] = useState('');
   const [expenseForm, setExpenseForm] = useState({ title: '', amount: '', description: '', date: new Date(), category: categories[0] });
   const [incomeForm, setIncomeForm] = useState({ title: '', amount: '', description: '', date: new Date(), category: categories[0] });
@@ -53,6 +54,18 @@ export default function useFinancePageLogic() {
   const [statsRange, setStatsRange] = useState<'week' | 'month'>('week');
   const undoTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // Fetch current user and set companyId
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const res = await fetch('/api/user');
+      if (res.ok) {
+        const data = await res.json();
+        setCompanyId(data.user.companyId);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
+
   // Fetch user and finance data
   useEffect(() => {
     const fetchUsers = async () => {
@@ -68,9 +81,10 @@ export default function useFinancePageLogic() {
   }, []);
 
   const fetchFinanceData = async () => {
+    if (!companyId) return;
     setLoading(true);
     try {
-      const response = await fetch('/api/expenses');
+      const response = await fetch(`/api/expenses?companyId=${companyId}`);
       if (response.ok) {
         const data = await response.json();
         setExpenses(data.filter((item: any) => item.type === 'expense'));
@@ -115,9 +129,9 @@ export default function useFinancePageLogic() {
   };
 
   useEffect(() => {
-    fetchFinanceData();
+    if (companyId) fetchFinanceData();
     // eslint-disable-next-line
-  }, []);
+  }, [companyId]);
 
   // Filtering, searching, sorting
   useEffect(() => {

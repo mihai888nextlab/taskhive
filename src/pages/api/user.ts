@@ -70,6 +70,7 @@ export default async function userHandler(
     const userWithRole = {
       ...user,
       role: userCompany.role,
+      companyId: userCompany.companyId, // <-- Add this line
     };
 
     return res.status(200).json({ user: userWithRole });

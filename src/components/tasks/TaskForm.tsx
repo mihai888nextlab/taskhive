@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaSpinner } from "react-icons/fa";
 
 interface TaskFormProps {
@@ -44,6 +44,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
 }) => {
   // Keep local state in sync with prop for controlled checkbox
   const [localImportant, setLocalImportant] = useState(important);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
+  const [descriptionManuallyEdited, setDescriptionManuallyEdited] = useState(false);
+  const prevTitleRef = useRef(taskTitle);
 
   useEffect(() => {
     setLocalImportant(important);
@@ -53,6 +56,46 @@ const TaskForm: React.FC<TaskFormProps> = ({
     setLocalImportant(checked);
     onImportantChange(checked);
   };
+
+  // Auto-generate description when title changes and description is empty
+  useEffect(() => {
+    let ignore = false;
+    const shouldGenerate =
+      !!taskTitle && !descriptionManuallyEdited && taskDescription === "";
+
+    if (!shouldGenerate) {
+      setGeneratingDescription(false);
+      return;
+    }
+
+    const generateDescription = async () => {
+      setGeneratingDescription(true);
+      try {
+        const res = await fetch("/api/gemini-generate-description", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: taskTitle }),
+        });
+        const data = await res.json();
+        if (!ignore && data.description) {
+          onDescriptionChange(data.description);
+        }
+      } finally {
+        if (!ignore) setGeneratingDescription(false);
+      }
+    };
+    generateDescription();
+    return () => {
+      ignore = true;
+    };
+    // eslint-disable-next-line
+  }, [taskTitle, descriptionManuallyEdited, taskDescription]);
+
+  useEffect(() => {
+    if (taskDescription === "") {
+      setDescriptionManuallyEdited(false);
+    }
+  }, [taskDescription]);
 
   if (!show) return null;
   return (
@@ -120,10 +163,18 @@ const TaskForm: React.FC<TaskFormProps> = ({
             className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base`}
             placeholder="Add more details or sub-tasks here..."
             value={taskDescription}
-            onChange={e => onDescriptionChange(e.target.value)}
+            onChange={e => {
+              onDescriptionChange(e.target.value);
+              setDescriptionManuallyEdited(true);
+            }}
             disabled={loading}
             aria-label="Task description"
           ></textarea>
+          {generatingDescription && (
+            <div className="flex items-center text-sm text-gray-500 mt-2">
+              <FaSpinner className="animate-spin mr-2" /> Generating description...
+            </div>
+          )}
         </div>
         <div className="mb-8">
           <label htmlFor="assignedTo" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}>

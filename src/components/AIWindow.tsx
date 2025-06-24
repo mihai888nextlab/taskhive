@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 
 interface AIWindowProps {
   isOpen: boolean;
@@ -113,7 +114,10 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
     <div className="fixed bottom-16 right-8 w-[500px] h-[600px] z-50 bg-white shadow-2xl rounded-xl p-6 border border-gray-300 animate-slide-up flex flex-col">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-bold text-gray-800">AI Assistant</h3>
+        <div className="flex items-center gap-3">
+          <img src="/hive-icon.png" alt="Hive Logo" className="w-8 h-8" />
+          <h3 className="text-2xl font-bold text-gray-800">Hive Assistant</h3>
+        </div>
         <button
           onClick={onClose}
           className="text-gray-500 hover:text-red-500 transition-all text-2xl"
@@ -127,7 +131,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
       <div ref={chatHistoryRef} className="flex-1 overflow-y-auto pr-2 mb-4 custom-scrollbar">
         {chatHistory.length === 0 ? (
           <p className="text-gray-600 text-lg text-center mt-4">
-            Welcome to the AI Assistant! How can I help you today?
+            Welcome to the Hive Assistant! How can I help you today?
           </p>
         ) : (
           chatHistory.map((msg, index) => (

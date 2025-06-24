@@ -235,9 +235,16 @@ User request: "${prompt}"`;
 
       // Extract title, deadline, and description
       const title = extractedData.title.trim();
-      const description = (extractedData.description || "").trim();
+      let description = (extractedData.description || "").trim();
       const deadlineStr = extractedData.deadline.trim();
       let deadline: Date | null = null;
+
+      // If description is missing or empty, generate one using Gemini
+      if (!description) {
+        const descPrompt = `Generate a simple, one-sentence task description for a task titled "${title}". Do not use markdown, bullet points, asterisks, or any special formatting. Only return plain text.`;
+        const descResult = await model.generateContent(descPrompt);
+        description = (await descResult.response.text()).trim();
+      }
 
       // Parse the deadline string from AI (ISO format expected)
       if (deadlineStr && deadlineStr.toLowerCase() !== "none") {
