@@ -63,7 +63,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
   };
 
   const onDragEnd = useCallback(
-    (result: { destination: any; source: any; draggableId: any }) => {
+    (result: import("react-beautiful-dnd").DropResult) => {
       const { destination, source, draggableId } = result;
 
       if (!destination) {

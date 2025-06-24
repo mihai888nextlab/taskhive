@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { useAuth } from "../../pages/_app";
+import { useAuth } from "../../pages/_app"; // Adjust path
 import { NextPageWithLayout, TableColumn, TableDataItem } from "@/types";
 import Loading from "@/components/Loading";
 import Table from "@/components/dashboard/Table";
@@ -8,9 +8,7 @@ import AddUsersModal from "@/components/modals/AddUserModal";
 import AddRoleModal from "@/components/modals/AddRoleModal";
 import OrgChartModal from "@/components/modals/OrgChartModal";
 import UserProfileModal from "@/components/modals/UserProfileModal";
-import { useTheme } from '@/components/ThemeContext';
-import UserSearchBar from "@/components/users/UserSearchBar";
-import UserCard from "@/components/users/UserCard";
+import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
 
 interface Project extends TableDataItem {
   user_id: string;
@@ -22,15 +20,27 @@ interface Project extends TableDataItem {
   permissions: string[];
 }
 
-interface AuthUser {
-  role: string;
-}
-
 const DashboardOverviewPage: NextPageWithLayout = () => {
   const { user } = useAuth() as { user: AuthUser | null };
-  const { theme } = useTheme();
+  const { theme } = useTheme(); // Get the current theme
 
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<
+    {
+      _id: string;
+      userId: {
+        _id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        profileImage?: { data: string; contentType: string; uploadedAt: string; fileName?: string };
+        description?: string;
+        skills?: string[]; // <-- Add this line
+      };
+      companyId: string;
+      role: string;
+      permissions: string[];
+    }[]
+  >([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
 
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
@@ -147,8 +157,26 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       if (sortBy === "lastNameAsc") {
         return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
       }
-      if (sortBy === "roleAsc") {
-        return (a.role || "").localeCompare(b.role || "");
+      const orgChartData = await orgChartResponse.json();
+
+      // ✅ New code (works with departments/levels structure)
+      const departments = orgChartData.departments || [];
+      const availableDept = departments.find((d: any) => d.id === "available-roles");
+
+      if (availableDept) {
+        // Add to first level of Available Roles department
+        if (availableDept.levels.length > 0 && !availableDept.levels[0].roles.includes(roleName)) {
+          availableDept.levels[0].roles.push(roleName);
+        } else if (availableDept.levels.length === 0) {
+          availableDept.levels.push({ id: "available-roles-level", roles: [roleName] });
+        }
+      } else {
+        // If not found, create Available Roles department
+        departments.unshift({
+          id: "available-roles",
+          name: "Available Roles",
+          levels: [{ id: "available-roles-level", roles: [roleName] }],
+        });
       }
       return 0;
     });
@@ -218,7 +246,11 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       setMessage("Error adding role.");
       return "Error adding role.";
     }
-  };
+    window.addEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+    return () => {
+      window.removeEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+    };
+  }, [users]);
 
   if (!user) return <Loading />;
 
@@ -292,12 +324,69 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       />
       {/* Card view for mobile only */}
       <div className="flex flex-col gap-4 md:hidden">
-        {filteredUsers.map((user) => (
-          <UserCard key={user._id} user={user} theme={theme} onClick={handleUserClick} />
-        ))}
+        {[...filteredUsers]
+          .sort((a, b) => {
+            // Admins always on top
+            if (a.role === "admin" && b.role !== "admin") return -1;
+            if (a.role !== "admin" && b.role === "admin") return 1;
+            return 0;
+          })
+          .map((user) => (
+            <button
+              key={user._id}
+              className={`bg-${theme === 'dark' ? 'gray-800' : 'white'} rounded-xl shadow-md p-4 flex flex-col space-y-2 cursor-pointer text-left transition hover:ring-2 hover:ring-blue-400`}
+              onClick={() => handleUserClick(user.userId._id)}
+              type="button"
+            >
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-400 font-semibold">
+                  First Name
+                </span>
+                <span className="text-lg font-bold text-gray-100">
+                  {user.userId.firstName}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-400 font-semibold">
+                  Last Name
+                </span>
+                <span className="text-lg font-bold text-gray-100">
+                  {user.userId.lastName}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-400 font-semibold">
+                  Email
+                </span>
+                <span className="text-base text-gray-200 break-all">
+                  {user.userId.email}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-400 font-semibold">
+                  Role
+                </span>
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                    user.role === "admin"
+                      ? "bg-red-600 text-white"
+                      : user.role === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-600 text-white"
+                  }`}
+                >
+                  {user.role}
+                </span>
+              </div>
+            </button>
+          ))}
       </div>
       {/* Table view for desktop only */}
-      <div className={`bg-${theme === 'dark' ? 'gray-800' : 'white'} shadow-xl rounded-2xl overflow-x-auto hidden md:block`}>
+      <div
+        className={`bg-${
+          theme === "dark" ? "gray-800" : "white"
+        } shadow-xl rounded-2xl overflow-x-auto hidden md:block`}
+      >
         <Table<Project>
           title="Users List"
           data={filteredUsers.map((user) => ({

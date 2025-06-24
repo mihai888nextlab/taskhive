@@ -1,9 +1,8 @@
-import React from 'react';
+import React from "react";
 import ChatWindow from "@/components/chat/ChatWindow";
 import DashboardLayout from "@/components/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
-import { h1 } from "framer-motion/client";
-import { useAuth } from "../_app";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import ConversationList, {
   PopulatedConversation,
@@ -11,7 +10,6 @@ import ConversationList, {
 import Loading from "@/components/Loading";
 import NewDirectChatModal from "@/components/chat/NewDirectChatModel";
 import NewGroupChatModal from "@/components/chat/NewGroupChatModal";
-import { useTheme } from '@/components/ThemeContext';
 import { useRouter } from "next/router";
 
 const Communication: NextPageWithLayout = () => {
@@ -25,7 +23,6 @@ const Communication: NextPageWithLayout = () => {
   const [showNewGroupChatModal, setShowNewGroupChatModal] = useState(false);
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { theme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
@@ -58,8 +55,8 @@ const Communication: NextPageWithLayout = () => {
 
   useEffect(() => {
     if (router.query.userId && conversations.length > 0) {
-      const convo = conversations.find(c =>
-        c.participants.some(p => p._id === router.query.userId)
+      const convo = conversations.find((c) =>
+        c.participants.some((p) => p._id === router.query.userId)
       );
       if (convo) setSelectedConversation(convo);
       // Optionally, if no conversation exists, open a new chat modal
@@ -88,10 +85,10 @@ const Communication: NextPageWithLayout = () => {
     }
   };
 
-  const handleGroupChatCreated = (newConversationId: string) => {};
-
   return (
-    <div className={`relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}>
+    <div
+      className={`relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}
+    >
       {loadingUser && <Loading />}
       <div className="flex h-[calc(100vh-100px)]">
         {" "}

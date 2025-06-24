@@ -45,7 +45,7 @@ export default async function handler(
         .json({ message: "Email or password are incorect!" });
     }
 
-    let userCompany = await userCompanyModel.findOne({
+    const userCompany = await userCompanyModel.findOne({
       userId: existingUser._id,
     });
 
@@ -53,7 +53,7 @@ export default async function handler(
       return res.status(400).json({ message: "An error occured!" });
     }
 
-    let company = await companyModel.findById(userCompany.companyId);
+    const company = await companyModel.findById(userCompany.companyId);
 
     if (!company) {
       return res.status(400).json({ message: "An error occured!" });

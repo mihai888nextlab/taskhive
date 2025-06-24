@@ -1,7 +1,7 @@
 import { IUser } from "@/db/models/userModel";
-import { useAuth } from "@/pages/_app";
+import { useAuth } from "@/hooks/useAuth";
 import mongoose from "mongoose";
-import { useTheme } from '@/components/ThemeContext';
+import { useTheme } from "@/components/ThemeContext";
 
 export interface PopulatedConversation extends mongoose.Document {
   _id: string; // Assuming _id can be a string or number
@@ -48,9 +48,23 @@ const ConversationList: React.FC<ConversationListProps> = ({
   };
 
   return (
-    <div className={`flex flex-col h-full bg-${theme === 'light' ? 'white' : 'gray-800'} border-r border-gray-200 rounded-l-lg shadow-md`}>
-      <div className={`p-4 border-b bg-${theme === 'light' ? 'white' : 'gray-700'}`}>
-        <h2 className={`text-xl font-bold text-${theme === 'light' ? 'gray-800' : 'white'}`}>Conversații</h2>
+    <div
+      className={`flex flex-col h-full bg-${
+        theme === "light" ? "white" : "gray-800"
+      } border-r border-gray-200 rounded-l-lg shadow-md`}
+    >
+      <div
+        className={`p-4 border-b bg-${
+          theme === "light" ? "white" : "gray-700"
+        }`}
+      >
+        <h2
+          className={`text-xl font-bold text-${
+            theme === "light" ? "gray-800" : "white"
+          }`}
+        >
+          Conversații
+        </h2>
         <div className="mt-4 space-y-2">
           <button
             onClick={onNewChatClick}
@@ -87,7 +101,11 @@ const ConversationList: React.FC<ConversationListProps> = ({
         </div>
       </div>
 
-      <div className={`flex-1 overflow-y-auto custom-scrollbar p-2 bg-${theme === 'light' ? 'white' : 'gray-800'}`}>
+      <div
+        className={`flex-1 overflow-y-auto custom-scrollbar p-2 bg-${
+          theme === "light" ? "white" : "gray-800"
+        }`}
+      >
         {loadingConversations ? (
           <div className="text-center text-gray-500 mt-4">
             Se încarcă conversațiile...
@@ -105,14 +123,22 @@ const ConversationList: React.FC<ConversationListProps> = ({
                 selectedConversationId ===
                 (conversation._id as string).toString()
                   ? "bg-blue-800 border-l-4 border-blue-500"
-                  : `hover:bg-${theme === 'light' ? 'gray-100' : 'gray-600'}`
-              } text-${theme === 'light' ? 'gray-800' : 'white'}`}
+                  : `hover:bg-${theme === "light" ? "gray-100" : "gray-600"}`
+              } text-${theme === "light" ? "gray-800" : "white"}`}
             >
-              <h4 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              <h4
+                className={`font-semibold ${
+                  theme === "light" ? "text-gray-800" : "text-white"
+                }`}
+              >
                 {getConversationName(conversation)}
               </h4>
               {/* Optional: Display last message snippet */}
-              <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} truncate`}>
+              <p
+                className={`text-sm ${
+                  theme === "light" ? "text-gray-600" : "text-gray-300"
+                } truncate`}
+              >
                 {conversation.lastMessage || "No messages yet"}
               </p>
             </div>

@@ -1,13 +1,13 @@
 // components/ChatWindow.tsx
 import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
-import { useAuth } from "@/pages/_app";
+import { useAuth } from "@/hooks/useAuth"; // Custom hook to get current user
 import { IUser } from "@/db/models/userModel";
 import { PopulatedConversation } from "./ConversationList";
 import Loading from "@/components/Loading";
 import { BsPaperclip } from "react-icons/bs";
 import FileCard from "@/components/storage/StorageFileCard";
-import { useTheme } from '@/components/ThemeContext'; // Import the useTheme hook
+import { useTheme } from "@/components/ThemeContext"; // Import the useTheme hook
 
 // Ensure these types match your backend models and API responses
 interface ChatMessage {
@@ -158,10 +158,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data.files)) {
+            type UserFile = {
+              fileName: string;
+              fileLocation: string;
+              fileSize?: number;
+              uploadedBy: string;
+            };
             setUserFiles(
-              data.files
-                .filter((f: any) => f.uploadedBy === user._id)
-                .map((f: any) => ({
+              (data.files as UserFile[])
+                .filter((f) => f.uploadedBy === user._id)
+                .map((f) => ({
                   fileName: f.fileName,
                   fileLocation: f.fileLocation,
                   fileSize: f.fileSize || 0, // Ensure fileSize is always a number
@@ -192,7 +198,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
   if (!selectedConversation) {
     return (
-      <div className={`flex flex-col items-center justify-center h-full text-gray-600 bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-lg p-6 shadow-md`}>
+      <div
+        className={`flex flex-col items-center justify-center h-full text-gray-600 bg-${
+          theme === "light" ? "white" : "gray-800"
+        } rounded-lg p-6 shadow-md`}
+      >
         <p className="text-xl font-semibold text-white">
           Selectează o conversație sau începe una nouă
         </p>
@@ -224,18 +234,28 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
   return (
     // Containerul principal al ferestrei de chat.
-    <div className={`flex flex-col h-full bg-${theme === 'light' ? 'white' : 'gray-900'} rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} shadow-md`}>
+    <div
+      className={`flex flex-col h-full bg-${
+        theme === "light" ? "white" : "gray-900"
+      } rounded-lg text-${theme === "light" ? "gray-800" : "white"} shadow-md`}
+    >
       {/* Antetul Chatului - mai mult contrast și stilizare - cu efect de Glassmorphism */}
-      <div className={`p-4 border-b border-gray-300 bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-t-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10`}>
+      <div
+        className={`p-4 border-b border-gray-300 bg-${
+          theme === "light" ? "white" : "gray-800"
+        } rounded-t-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10`}
+      >
         {" "}
         {/* Fundal translucid, umbră personalizată, efect de blur */}
-        <h3 className="font-semibold text-lg text-white">
-          {currentChatName}
-        </h3>
+        <h3 className="font-semibold text-lg text-white">{currentChatName}</h3>
       </div>
 
       {/* Zona de Mesaje - acum cu umbră internă pentru mai multă profunzime și fundal subtil */}
-      <div className={`flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar shadow-inner bg-${theme === 'light' ? 'gray-50' : 'gray-800'}`}>
+      <div
+        className={`flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar shadow-inner bg-${
+          theme === "light" ? "gray-50" : "gray-800"
+        }`}
+      >
         {" "}
         {/* Fundal gri foarte subtil, umbră internă pentru efect de "adâncime" */}
         {loadingMessages ? (
@@ -333,7 +353,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       {/* Formular de Trimitere Mesaj - cu butonul de atașament în stânga inputului */}
       <form
         onSubmit={handleSendMessage}
-        className={`p-4 border-t border-gray-300 bg-${theme === 'light' ? 'white' : 'gray-800'} flex space-x-2 rounded-b-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10`}
+        className={`p-4 border-t border-gray-300 bg-${
+          theme === "light" ? "white" : "gray-800"
+        } flex space-x-2 rounded-b-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10`}
       >
         <button
           type="button"
@@ -373,7 +395,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
           value={newMessageContent}
           onChange={(e) => setNewMessageContent(e.target.value)}
           placeholder="Scrie un mesaj..."
-          className={`flex-1 p-2 border border-gray-400 bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-${theme === 'light' ? 'gray-800' : 'white'} placeholder-gray-500 transition-all duration-200 ease-in-out`}
+          className={`flex-1 p-2 border border-gray-400 bg-${
+            theme === "light" ? "white" : "gray-800"
+          } rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-${
+            theme === "light" ? "gray-800" : "white"
+          } placeholder-gray-500 transition-all duration-200 ease-in-out`}
           disabled={!user || loadingMessages}
         />
         <button

@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function Header() {
@@ -40,9 +42,18 @@ export default function Header() {
       <title>TaskHive</title>
       <nav className="w-[1200px] h-full py-4 px-5 rounded-xl border-2 border-accent flex items-center justify-between bg-background">
         <div className="h-full py-2">
-          <a href="/">
-            <img src="logo.png" alt="logo" className="h-full" />
-          </a>
+          <Link href="/">
+            <div className="relative h-full">
+              <Image
+                src="/logo.png"
+                alt="logo"
+                fill={true}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                // width={0}
+                // height={0}
+              />
+            </div>
+          </Link>
         </div>
         <div className="h-full flex">
           <ul className="flex">
@@ -58,10 +69,10 @@ export default function Header() {
             ))}
           </ul>
           <button className="h-full flex items-center px-4 py-2 border-[1.5px] border-white rounded-lg text-white font-semibold ml-4">
-            <a href="/login">Log in</a>
+            <Link href="/login">Log in</Link>
           </button>
           <button className="h-full flex items-center px-4 py-2 border-2 border-primary bg-primary rounded-lg font-semibold ml-3">
-            <a href="/register">Get started for free</a>
+            <Link href="/register">Get started for free</Link>
           </button>
         </div>
       </nav>
