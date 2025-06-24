@@ -12,6 +12,7 @@ interface UserProfileModalProps {
     profileImage?: { data: string };
     description?: string;
     role: string;
+    skills?: string[]; // Added skills field
   } | null;
 }
 
@@ -95,6 +96,23 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
             <p className="text-gray-600 dark:text-gray-300 mb-4 whitespace-pre-line">
               {user.description || "No description provided."}
             </p>
+            <div className="mt-2">
+              <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Skills</h4>
+              {user.skills && user.skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {user.skills.map((skill: string) => (
+                    <span
+                      key={skill}
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-gray-500 dark:text-gray-400 text-sm">No skills provided.</span>
+              )}
+            </div>
           </div>
         </div>
       </div>

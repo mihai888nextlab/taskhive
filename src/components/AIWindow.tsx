@@ -53,6 +53,16 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to process your request. Please try again.");
       setChatHistory((prev) => [...prev, { type: 'ai', text: data.response }]);
+
+      // Refresh if a resource was created
+      if (
+        response.status === 201 ||
+        (data.createdTask || data.createdAnnouncement || data.createdItem)
+      ) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200); // Give user time to see the AI response
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
       setChatHistory((prev) => [...prev, { type: 'ai', text: `Error: ${errorMessage}` }]);

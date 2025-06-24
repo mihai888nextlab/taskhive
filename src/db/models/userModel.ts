@@ -33,7 +33,8 @@ const userSchema = new Schema(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     profileImage: { type: profileImageSchema, default: null },
-    description: { type: String, default: "" }, // <-- Add this line
+    skills: { type: [String], default: [] }, // <-- Add this line
+    description: { type: String, default: "" },
   },
   { timestamps: true }
 );

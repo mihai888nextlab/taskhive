@@ -41,10 +41,12 @@ export default async function userHandler(
     }
 
     const users = await userCompanyModel
-      .find({
-        companyId: decodedToken.companyId,
+      .find({})
+      .populate({
+        path: "userId",
+        select: "-password", // This will include skills if present in the schema
       })
-      .populate("userId", "firstName lastName email profileImage description");
+      .lean();
 
     const mappedUsers = users.map((u) => ({
       _id: u._id,
@@ -55,6 +57,7 @@ export default async function userHandler(
         lastName: u.userId.lastName,
         profileImage: u.userId.profileImage || null,
         description: u.userId.description || "",
+        skills: u.userId.skills || [], // <-- ADD THIS LINE
       },
       companyId: u.companyId,
       role: u.role,
