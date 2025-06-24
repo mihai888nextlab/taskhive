@@ -35,14 +35,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { firstName, lastName, description } = req.body;
-    console.log("Updating user:", decoded.userId, firstName, lastName);
+    const { firstName, lastName, description, skills } = req.body;
+    console.log("Updating user:", decoded.userId, firstName, lastName, skills);
 
     // Build update object only with non-empty fields
     const updateFields: Record<string, any> = {};
     if (firstName && firstName.trim() !== "") updateFields.firstName = firstName;
     if (lastName && lastName.trim() !== "") updateFields.lastName = lastName;
     if (typeof description === "string") updateFields.description = description;
+    if (Array.isArray(skills)) updateFields.skills = skills; // <-- Add this line
 
     const updatedUser = await userModel
       .findByIdAndUpdate(

@@ -18,10 +18,22 @@ const tabs = [
 const SettingsPage: NextPageWithLayout = () => {
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("profile");
-  const [formData, setFormData] = useState({
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+  const [saveMessage, setSaveMessage] = useState<string>("");
+  type FormData = {
+    firstName: string;
+    lastName: string;
+    profilePhoto: string;
+    description: string;
+    skills: string[];
+  };
+
+  const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
+    profilePhoto: "",
     description: "",
+    skills: [],
   });
   const [accountDetails, setAccountDetails] = useState<{
     email: string;
@@ -36,23 +48,31 @@ const SettingsPage: NextPageWithLayout = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSkillsChange = (skills: string[]) => {
+    setFormData((prev) => ({ ...prev, skills }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaveStatus("idle");
+    setSaveMessage("");
     try {
-      const response = await fetch("/api/update-profile", {
+      const res = await fetch("/api/update-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
+        credentials: "include",
       });
-      if (response.ok) {
-        const data = await response.json();
-        alert("Profile updated successfully!");
+      if (res.ok) {
+        setSaveStatus("success");
+        setSaveMessage("Profile saved successfully!");
       } else {
-        const errorData = await response.json();
-        alert(errorData.error || "Failed to update profile. Please try again.");
+        setSaveStatus("error");
+        setSaveMessage("Failed to save profile.");
       }
-    } catch (error) {
-      alert("An error occurred. Please try again.");
+    } catch {
+      setSaveStatus("error");
+      setSaveMessage("Failed to save profile.");
     }
   };
 
@@ -60,13 +80,15 @@ const SettingsPage: NextPageWithLayout = () => {
     if (activeTab === "profile") {
       const fetchProfileData = async () => {
         try {
-          const res = await fetch("/api/profile");
+          const res = await fetch("/api/user"); // Use your /api/user endpoint
           if (res.ok) {
             const data = await res.json();
             setFormData({
-              firstName: data.firstName || "",
-              lastName: data.lastName || "",
-              description: data.description || "",
+              firstName: data.user.firstName || "",
+              lastName: data.user.lastName || "",
+              profilePhoto: data.user.profileImage?.data || "",
+              description: data.user.description || "",
+              skills: data.user.skills || [],
             });
           }
         } catch {}
@@ -101,12 +123,26 @@ const SettingsPage: NextPageWithLayout = () => {
       />
       <main className={`flex-1 p-2 sm:p-4 md:p-10 bg-${theme === 'light' ? 'white' : 'gray-800'} border-l border-gray-200 rounded-lg shadow-lg mx-0 md:mx-8 my-4 md:my-8`}>
         {activeTab === "profile" && (
-          <ProfileTab
-            formData={formData}
-            onInputChange={handleInputChange}
-            onSubmit={handleSubmit}
-            theme={theme}
-          />
+          <>
+            {saveStatus !== "idle" && (
+              <div
+                className={`mb-4 px-4 py-2 rounded ${
+                  saveStatus === "success"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {saveMessage}
+              </div>
+            )}
+            <ProfileTab
+              formData={formData}
+              onInputChange={handleInputChange}
+              onSkillsChange={handleSkillsChange}
+              onSubmit={handleSubmit}
+              theme={theme}
+            />
+          </>
         )}
         {activeTab === "security" && (
           <SecurityTab accountDetails={accountDetails} />

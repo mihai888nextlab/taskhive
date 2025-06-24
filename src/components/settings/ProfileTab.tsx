@@ -1,8 +1,16 @@
 import React, { useState } from "react";
+import { PREDEFINED_SKILLS } from "@/constants/skills";
 
 interface ProfileTabProps {
-  formData: { firstName: string; lastName: string; profilePhoto?: string; description?: string };
+  formData: {
+    firstName: string;
+    lastName: string;
+    profilePhoto?: string;
+    description?: string;
+    skills?: string[];
+  };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onSkillsChange: (skills: string[]) => void;
   onSubmit: (e: React.FormEvent) => void;
   theme: string;
 }
@@ -10,16 +18,14 @@ interface ProfileTabProps {
 const ProfileTab: React.FC<ProfileTabProps> = ({
   formData,
   onInputChange,
+  onSkillsChange,
   onSubmit,
   theme,
 }) => {
   const [photoPreview, setPhotoPreview] = useState<string>(formData.profilePhoto || "");
   const [uploading, setUploading] = useState(false);
-  const [formDataState, setFormData] = useState({
-    firstName: formData.firstName,
-    lastName: formData.lastName,
-    description: formData.description || "",
-  });
+  const [customSkill, setCustomSkill] = useState("");
+  const [skills, setSkills] = useState<string[]>(formData.skills || []);
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,17 +39,62 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
       body: formData,
     });
     const data = await res.json();
-    setPhotoPreview(data.profileImage?.data); // <-- update here
+    setPhotoPreview(data.profileImage?.data);
     setUploading(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleSkillSelect = (skill: string) => {
+    if (!skills.includes(skill)) {
+      const updated = [...skills, skill];
+      setSkills(updated);
+      onSkillsChange(updated);
+    }
+    setCustomSkill(""); // Clear search/add box after adding
   };
 
+  const handleSkillRemove = (skill: string) => {
+    const updated = skills.filter((s) => s !== skill);
+    setSkills(updated);
+    onSkillsChange(updated);
+  };
+
+  const handleCustomSkillAdd = () => {
+    const skill = customSkill.trim();
+    if (
+      skill &&
+      !skills.includes(skill) &&
+      !PREDEFINED_SKILLS.some(
+        (pre) => pre.toLowerCase() === skill.toLowerCase()
+      )
+    ) {
+      const updated = [...skills, skill];
+      setSkills(updated);
+      onSkillsChange(updated);
+      setCustomSkill("");
+    }
+  };
+
+  // Sync skills prop with local state if parent updates
+  React.useEffect(() => {
+    setSkills(formData.skills || []);
+  }, [formData.skills]);
+
+  // Filtered skills for search/add
+  const filteredSkills = PREDEFINED_SKILLS.filter(
+    (s) =>
+      !skills.includes(s) &&
+      s.toLowerCase().includes(customSkill.trim().toLowerCase())
+  );
+
+  const skillsToShow =
+    customSkill.trim() === ""
+      ? PREDEFINED_SKILLS.filter((s) => !skills.includes(s)).slice(0, 10)
+      : filteredSkills;
+
+  const uniqueSkillsToShow = Array.from(new Set(skillsToShow));
+
   return (
-    <div className={`text-${theme === 'light' ? 'gray-900' : 'white'} `}>
+    <div className={`text-${theme === "light" ? "gray-900" : "white"} `}>
       <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
         Personal Information
       </h2>
@@ -101,7 +152,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
           </div>
         </div>
         <div>
-          <label htmlFor="description" className="block text-gray-300 font-medium mb-2">
+          <label className="block text-gray-300 font-medium mb-2">
             About Me
           </label>
           <textarea
@@ -114,6 +165,65 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
             rows={4}
           />
         </div>
+        {/* Skills Section */}
+        <div>
+          <label className="block text-gray-300 font-medium mb-2">
+            Skills
+          </label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {skills.map((skill) => (
+              <span
+                key={skill}
+                className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center text-sm"
+              >
+                {skill}
+                <button
+                  type="button"
+                  className="ml-2 text-red-500 hover:text-red-700"
+                  onClick={() => handleSkillRemove(skill)}
+                  aria-label="Remove skill"
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {uniqueSkillsToShow.map((skill) => (
+              <button
+                key={skill}
+                type="button"
+                className="bg-gray-200 hover:bg-blue-200 text-gray-700 px-3 py-1 rounded-full text-sm"
+                onClick={() => handleSkillSelect(skill)}
+              >
+                {skill}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2 mt-2">
+            <input
+              type="text"
+              value={customSkill}
+              onChange={(e) => setCustomSkill(e.target.value)}
+              className="border border-gray-300 rounded-md px-2 py-1 text-gray-900"
+              placeholder="Add or search skill"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleCustomSkillAdd();
+                  e.preventDefault();
+                }
+              }}
+            />
+            <button
+              type="button"
+              className="bg-blue-500 text-white px-3 py-1 rounded"
+              onClick={handleCustomSkillAdd}
+            >
+              Add
+            </button>
+          </div>
+        </div>
+        {/* End Skills Section */}
         <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200 mt-6 sm:mt-8">
           <button
             type="button"
