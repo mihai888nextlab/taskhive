@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { NextPageWithLayout, TableColumn, TableDataItem } from "@/types";
 import Loading from "@/components/Loading";
@@ -263,27 +263,33 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     }
   };
 
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    try {
+      const response = await fetch("/api/update-user-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, role: newRole }),
+      });
+      if (!response.ok) throw new Error("Failed to update role");
+      await fetchUsers(); // Refresh users after update
+    } catch (error) {
+      console.error("Error updating user role:", error);
+    }
+  };
+
   const filteredUsers = users
-    .filter((user) => {
-      // Search by first name, last name, or email
+    .filter(u => u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined))
+    .filter(u => {
       const q = search.trim().toLowerCase();
       if (!q) return true;
       return (
-        user.userId.firstName.toLowerCase().includes(q) ||
-        user.userId.lastName.toLowerCase().includes(q) ||
-        user.userId.email.toLowerCase().includes(q)
+        u.userId.firstName.toLowerCase().includes(q) ||
+        u.userId.lastName.toLowerCase().includes(q) ||
+        u.userId.email.toLowerCase().includes(q)
       );
     })
-    .filter((user) => {
-      // Filter by role
-      if (filterRole === "all") return true;
-      return user.role === filterRole;
-    })
+    .filter(u => (filterRole === "all" ? true : u.role === filterRole))
     .sort((a, b) => {
-      // Admins always on top
-      // if (a.role === "admin" && b.role !== "admin") return -1;
-      // if (a.role !== "admin" && b.role === "admin") return 1;
-      // Then sort by selected field
       if (sortBy === "firstNameAsc") {
         return (a.userId.firstName || "").localeCompare(b.userId.firstName || "");
       }
@@ -295,6 +301,11 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       }
       return 0;
     });
+
+  // Only roles from users in your company
+  const companyRoles = Array.from(
+    new Set(users.filter(u => u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined)).map(u => u.role))
+  );
 
   useEffect(() => {
     fetchUsers();
@@ -434,7 +445,13 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
               className="ml-2 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
             >
               <option value="all">All</option>
-              {[...new Set(users.map(u => u.role))].map(role => (
+              {Array.from(
+                new Set(
+                  users.filter(u =>
+                    u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined)
+                  ).map(u => u.role)
+                )
+              ).map(role => (
                 <option key={role} value={role}>{role}</option>
               ))}
             </select>

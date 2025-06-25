@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { MdAddTask } from "react-icons/md";
 import { FaSpinner } from "react-icons/fa";
@@ -26,7 +26,7 @@ interface Task {
 }
 
 async function fetchCurrentUser() {
-  const res = await fetch("/api/current-user", { method: "GET" });
+  const res = await fetch("/api/user", { method: "GET" });
   if (!res.ok) throw new Error("Failed to fetch current user");
   return await res.json();
 }

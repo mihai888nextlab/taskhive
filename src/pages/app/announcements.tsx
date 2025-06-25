@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { FaBullhorn } from "react-icons/fa";
 import { useTheme } from '@/components/ThemeContext';
@@ -52,9 +52,11 @@ const AnnouncementsPage: NextPageWithLayout = () => {
         setFormError("Failed to load announcements: " + err.message);
       })
       .finally(() => setLoading(false));
-    fetch("/api/current-user")
+    fetch("/api/user")
       .then((res) => res.json())
-      .then(setCurrentUser);
+      .then((data) => {
+        setCurrentUser(data.user);
+      });
   }, []);
 
   const isAdmin = currentUser?.role === "admin";

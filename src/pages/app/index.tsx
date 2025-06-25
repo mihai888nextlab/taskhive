@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
+import DashboardLayout from '@/components/sidebar/DashboardLayout';
 import { NextPageWithLayout } from '@/types';
 import Statistics from '@/components/dashboard/Statistics';
 import { useTheme } from '@/components/ThemeContext';

@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import FileUploadModal from "@/components/storage/StorageFileUploadModal";
 import StorageHeader from "@/components/storage/StorageHeader";
 import StorageSearchSort from "@/components/storage/StorageSearchSort";

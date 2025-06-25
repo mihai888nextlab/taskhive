@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
+import DashboardLayout from '@/components/sidebar/DashboardLayout';
 import Loading from "@/components/Loading";
 import TimeStatistics from '@/components/TimeStatistics';
 import { useTheme } from '@/components/ThemeContext';

@@ -4,10 +4,10 @@ import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@/types";
 import userModel from "@/db/models/userModel";
-import userCompanyModel from "@/db/models/userCompanyModel"; // Import userCompanyModel
-import dbConnect from "@/db/dbConfig"; // or "@/db/connect" if that's your file
+import userCompanyModel from "@/db/models/userCompanyModel";
+import dbConnect from "@/db/dbConfig";
 
-export default async function userHandler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -24,40 +24,26 @@ export default async function userHandler(
     return res.status(401).json({ message: "No token provided" });
   }
 
-  const decodedToken: JWTPayload | null = jwt.verify(
-    token,
-    process.env.JWT_SECRET || ""
-  ) as JWTPayload;
-
-  if (!decodedToken) {
-    res.setHeader(
-      "Set-Cookie",
-      cookie.serialize("auth_token", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: -1,
-        path: "/",
-      })
-    );
-    return res.status(402).json({ message: "Invalid or expired token" });
+  let decodedToken: JWTPayload;
+  try {
+    decodedToken = jwt.verify(
+      token,
+      process.env.JWT_SECRET || ""
+    ) as JWTPayload;
+  } catch {
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 
   try {
-    // Fetch user from userModel
     const user = await userModel
-      .findOne({
-        _id: decodedToken.userId,
-        email: decodedToken.email,
-      })
+      .findById(decodedToken.userId)
       .select("-password")
-      .lean(); // Use lean() for better performance
+      .lean();
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Fetch user's role from userCompanyModel
     const userCompany = await userCompanyModel.findOne({
       userId: decodedToken.userId,
     });
@@ -66,16 +52,14 @@ export default async function userHandler(
       return res.status(404).json({ message: "UserCompany not found" });
     }
 
-    // Combine user data and role
-    const userWithRole = {
-      ...user,
-      role: userCompany.role,
-      companyId: userCompany.companyId, // <-- Add this line
-    };
-
-    return res.status(200).json({ user: userWithRole });
+    return res.status(200).json({
+      user: {
+        ...user,
+        role: userCompany.role,
+        companyId: userCompany.companyId,
+      },
+    });
   } catch (error) {
-    console.error("Error fetching user data:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 }

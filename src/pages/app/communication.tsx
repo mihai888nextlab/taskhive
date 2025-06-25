@@ -1,6 +1,6 @@
 import React from "react";
 import ChatWindow from "@/components/chat/ChatWindow";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";

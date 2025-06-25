@@ -1,5 +1,5 @@
 import React from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
+import DashboardLayout from '@/components/sidebar/DashboardLayout';
 import FinanceStatistics from '@/components/FinanceStatistics';
 import { useTheme } from '@/components/ThemeContext';
 import ExpenseForm from '@/components/finance/ExpenseForm';

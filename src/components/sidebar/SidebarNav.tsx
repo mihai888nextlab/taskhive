@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import UniversalSearchBar from "./UniversalSearchBar";
+import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
 
 type MenuItem = {
   name: string;
@@ -50,10 +50,17 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   });
 
   return (
-    <aside className="hidden md:flex w-[300px] bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 py-6 flex-col shadow-lg">
+    <aside className="hidden md:flex w-[300px] bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 flex-col shadow-lg">
       <Link href="/app">
-        <div className="relative w-[150px] h-full mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300">
-          <Image src="/logo.png" alt="Logo" fill={true} />
+        <div className="relative w-48 h-20 mx-auto">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            fill
+            className="object-contain"
+            priority
+            sizes="240px"
+          />
         </div>
       </Link>
       {/* Search Bar */}

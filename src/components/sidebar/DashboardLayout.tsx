@@ -1,11 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/router";
 import { ReactNode, useState, useEffect } from "react";
-import SidebarNav from "@/components/SidebarNav";
-import MobileSidebar from "@/components/MobileSidebar";
-import DashboardSearch from "@/components/DashboardSearch";
+import SidebarNav from "@/components/sidebar/SidebarNav";
+import MobileSidebar from "@/components/sidebar/MobileSidebar";
 import UserProfileModal from "@/components/modals/UserProfileModal";
-import AIWindow from "./AIWindow";
+import AIWindow from "../AIWindow";
 import { FaBars } from "react-icons/fa";
 import { menu } from "@/components/menuConfig"; // Your menu config
 
