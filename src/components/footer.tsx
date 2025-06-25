@@ -3,84 +3,83 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer>
-      <div className="w-screen h-fit border-t-2 border-accent relative">
-        <div className="m-[30px] p-10 w-fit h-[250px] absolute left-0 top-0">
-          <Link href="/">
+    <footer className="w-full bg-background border-t border-accent mt-24">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between py-12 px-6 gap-10">
+        {/* Logo and tagline */}
+        <div className="flex flex-col items-center md:items-start">
+          <Link href="/" className="mb-3">
             <Image
               src="/logo.png"
-              alt="logo"
-              width={120}
-              height={40}
-              className="h-[40px]"
-            />
-            {/* Removed duplicate <img> tag and replaced with optimized <Image> */}
-            <Image
-              src="/logo.png"
-              alt="logo"
-              width={120}
-              height={40}
-              className="h-[40px]"
+              alt="TaskHive Logo"
+              width={140}
+              height={48}
+              className="object-contain drop-shadow-lg"
             />
           </Link>
-
-          <p className="px-2 pt-5 text-xl text-white">
+          <p className="text-gray-400 text-base mt-1 italic tracking-wide">
             Organize. Achieve. Thrive.
           </p>
-
-          <p className="px-2 pt-3 text-xl">
-            Made by{" "}
-            <a
-              target="_blank"
-              href="https://github.com/mihai888nextlab"
-              className="text-primary"
-            >
-              Mihai Gorunescu
-            </a>{" "}
-            and{" "}
-            <Link
-              target="_blank"
-              href="https://github.com/crististg"
-              className="text-primary"
-            >
-              Cristi Stiegelbauer
-            </Link>
-          </p>
         </div>
-
-        <div className="text-white p-10 w-fit h-[200px] absolute right-0 text-right text-xl px-[30px] mt-[35px]">
-          ©2025 TaskHive
-          <div className="mt-7">
-            <Link
-              href="https://github.com/mihai888nextlab/taskhive"
-              className="hover:text-primary transition-colors duration-300 text-lg"
+        {/* Navigation links */}
+        <nav className="flex flex-col md:flex-row items-center gap-6 text-gray-300 text-base font-medium">
+          <Link href="/contact" className="hover:text-primary transition-colors duration-200">
+            Contact
+          </Link>
+          <a
+            href="https://drive.google.com/file/d/12ue5y65thsPObFLDn4PQFR94dA3rxMyf/view?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary transition-colors duration-200"
+          >
+            Documentation
+          </a>
+          <Link href="/help" className="hover:text-primary transition-colors duration-200">
+            Help
+          </Link>
+          <a
+            href="https://github.com/mihai888nextlab/taskhive"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary transition-colors duration-200"
+          >
+            GitHub
+          </a>
+        </nav>
+        {/* Credits and copyright */}
+        <div className="flex flex-col items-center md:items-end text-gray-500 text-sm">
+          <div className="flex items-center gap-1">
+            <span>Made by</span>
+            <a
+              href="https://github.com/mihai888nextlab"
               target="_blank"
               rel="noopener noreferrer"
+              className="text-primary font-semibold hover:underline"
             >
-              View TaskHive on GitHub
-            </Link>
-          </div>
-          <nav className="mt-3 text-white">
-            <Link
-              href="/contact"
-              className="m-3 hover:text-primary transition-colors duration-300"
-            >
-              Contact
-            </Link>
-            <a
-              target="_blank"
-              href="https://drive.google.com/file/d/12ue5y65thsPObFLDn4PQFR94dA3rxMyf/view?usp=sharing"
-              className="m-3 hover:text-primary transition-colors duration-300"
-            >
-              Documentation
+              Mihai Gorunescu
             </a>
-            <Link
-              href="/help"
-              className="m-3 hover:text-primary transition-colors duration-300"
+            <span>&</span>
+            <a
+              href="https://github.com/crististg"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary font-semibold hover:underline"
             >
-              Help
-            </Link>
-          </nav>
+              Cristi Stiegelbauer
+            </a>
+          </div>
+          <div className="mt-2 text-xs text-gray-600 tracking-wide">
+            ©2025 TaskHive. All rights reserved.
+          </div>
+        </div>
+      </div>
+      <div className="w-full">
+        <div className="max-w-6xl mx-auto py-4 px-6 flex flex-col md:flex-row items-center justify-between text-xs text-gray-600">
+          <span>
+            Privacy Policy · Terms of Service
+          </span>
+          <span className="mt-2 md:mt-0">
+            Built with <span className="text-primary font-bold">♥</span> for teams.
+          </span>
         </div>
       </div>
     </footer>

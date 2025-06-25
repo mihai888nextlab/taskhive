@@ -1,0 +1,33 @@
+.markdown {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: inherit;
+  word-break: break-word;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  font-weight: bold;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+}
+.markdown ul,
+.markdown ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+.markdown li {
+  margin-bottom: 0.3em;
+}
+.markdown a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+.markdown pre,
+.markdown code {
+  background: #23272e;
+  color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.95em;
+}

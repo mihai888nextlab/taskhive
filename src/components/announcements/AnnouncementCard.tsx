@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBullhorn, FaThumbtack, FaRegCommentDots, FaTrash } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import styles from "@/styles/markdown.module.css";
 
 interface Announcement {
   _id: string;
@@ -90,8 +91,12 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
         <h3 className={`text-2xl md:text-3xl font-extrabold leading-tight mb-2 text-${theme === 'light' ? 'gray-900' : 'white'} tracking-tight group-hover:text-primary-dark transition-colors`}>
           {announcement.title}
         </h3>
-        <div className={`mb-4 text-base md:text-lg text-${theme === 'light' ? 'gray-700' : 'gray-300'} whitespace-pre-line prose max-w-none`}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{announcement.content}</ReactMarkdown>
+        <div className={`mb-4 text-base md:text-lg text-${theme === 'light' ? 'gray-700' : 'gray-300'}`}>
+          <div className={styles.markdown}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {announcement.content}
+            </ReactMarkdown>
+          </div>
         </div>
         <div className={`flex flex-wrap items-center text-xs text-${theme === 'light' ? 'gray-500' : 'gray-400'} mt-2`}>
           <span className="mr-2">Posted by:</span>

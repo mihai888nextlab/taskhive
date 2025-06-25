@@ -41,18 +41,16 @@ export default function Header() {
     >
       <title>TaskHive</title>
       <nav className="w-[1200px] h-full py-4 px-5 rounded-xl border-2 border-accent flex items-center justify-between bg-background">
-        <div className="h-full py-2">
+        <div className="h-full py-2 flex items-center">
           <Link href="/">
-            <div className="relative h-full">
-              <Image
-                src="/logo.png"
-                alt="logo"
-                fill={true}
-                sizes="(max-width: 768px) 100vw, 50vw"
-                // width={0}
-                // height={0}
-              />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="logo"
+              width={200}
+              height={100}
+              className="object-contain"
+              priority
+            />
           </Link>
         </div>
         <div className="h-full flex">
