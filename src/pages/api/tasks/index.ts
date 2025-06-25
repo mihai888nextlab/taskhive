@@ -33,12 +33,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // --- End Authentication Middleware ---
 
   if (req.method === "GET") {
+    console.log("Current userId:", userId); // <-- Add here
     try {
       // Only return tasks assigned to the authenticated user, and populate createdBy and userId
-      const tasks = await Task.find({ userId })
+      const tasks = await Task.find({
+        userId: userId
+      })
         .sort({ createdAt: -1 })
         .populate('createdBy', 'firstName lastName email')
         .populate('userId', 'firstName lastName email');
+      console.log("Fetched tasks:", tasks.length); // <-- And here
       res.status(200).json(tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);

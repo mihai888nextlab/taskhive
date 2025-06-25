@@ -8,13 +8,18 @@ import TaskForm from "@/components/tasks/TaskForm";
 import TaskList from "@/components/tasks/TaskList";
 import AssignedTasksList from "@/components/tasks/AssignedTasksList";
 
+interface TaskUser {
+  _id: string;
+  email: string;
+}
+
 interface Task {
   _id: string;
   title: string;
   description?: string;
   deadline: string;
   completed: boolean;
-  userId: string;
+  userId: string | TaskUser | null;
   createdAt: string;
   updatedAt: string;
   createdBy: {
@@ -45,7 +50,8 @@ const TasksPage: NextPageWithLayout = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [assignedTasks, setAssignedTasks] = useState<Task[]>([]);
   const [usersBelowMe, setUsersBelowMe] = useState<any[]>([]);
-  const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
+  const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -73,24 +79,36 @@ const TasksPage: NextPageWithLayout = () => {
       });
       if (!response.ok) throw new Error("Failed to fetch tasks.");
       const data: Task[] = await response.json();
-      let sortedData = [...data];
+
+      // Only tasks assigned to me
+      const myTasks = data.filter((task) => {
+        // Assigned to me (by id or by email)
+        if (!task.userId) return false;
+        // userId is string
+        if (typeof task.userId === "string") {
+          return task.userId === currentUserId;
+        }
+        // userId is object
+        if (typeof task.userId === "object") {
+          // Try _id first (robust for ObjectId)
+          if (task.userId._id && String(task.userId._id) === String(currentUserId)) return true;
+          // Fallback to email if available
+          if (task.userId.email && task.userId.email.trim().toLowerCase() === currentUserEmail) return true;
+        }
+        return false;
+      });
+
+      let sortedData = [...myTasks];
       sortedData.sort((a, b) => {
         const isAOverdue = isTaskOverdue(a);
         const isBOverdue = isTaskOverdue(b);
 
-        // 1. Overdue tasks (not completed) first
         if (isAOverdue && !a.completed && (!isBOverdue || b.completed)) return -1;
         if (isBOverdue && !b.completed && (!isAOverdue || a.completed)) return 1;
-
-        // 2. Important tasks (not completed, not overdue) next
         if (a.important && !a.completed && !isAOverdue && (!b.important || b.completed || isBOverdue)) return -1;
         if (b.important && !b.completed && !isBOverdue && (!a.important || a.completed || isAOverdue)) return 1;
-
-        // 3. Then by completion
         if (a.completed && !b.completed) return 1;
         if (!a.completed && b.completed) return -1;
-
-        // 4. Then by deadline
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
       });
       setTasks(sortedData);
@@ -128,15 +146,25 @@ const TasksPage: NextPageWithLayout = () => {
 
   // Fetch current user
   useEffect(() => {
-    fetchCurrentUser()
-      .then((user) => setCurrentUserEmail(user.email.trim().toLowerCase()))
-      .catch(() => setCurrentUserEmail(""));
+    fetch("/api/user")
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => {
+        if (data?.user?.email) setCurrentUserEmail(data.user.email.trim().toLowerCase());
+        if (data?.user?._id) setCurrentUserId(data.user._id);
+      })
+      .catch(() => {
+        setCurrentUserEmail("");
+        setCurrentUserId("");
+      });
   }, []);
 
   // Fetch tasks on mount and when sortBy changes
   useEffect(() => {
-    fetchTasks();
-  }, [sortBy]);
+    if (currentUserId) {
+      fetchTasks();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUserId, sortBy]);
 
   useEffect(() => {
     fetchAssignedTasks();

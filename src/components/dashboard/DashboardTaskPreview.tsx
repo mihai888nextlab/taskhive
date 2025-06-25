@@ -19,9 +19,21 @@ interface Task {
   userId: string;
   createdAt: string;
   updatedAt: string;
+  createdBy?: {
+    email?: string;
+    // Add other fields if needed
+  };
 }
 
-const DashboardTaskPreview: React.FC = () => {
+interface DashboardTaskPreviewProps {
+  userId?: string;
+  userEmail?: string;
+}
+
+const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
+  userId,
+  userEmail,
+}) => {
   const { theme } = useTheme();
   // const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -48,8 +60,15 @@ const DashboardTaskPreview: React.FC = () => {
         throw new Error(errorData.message || "Failed to fetch tasks preview.");
       }
       const data: Task[] = await response.json();
-      // Filter out completed tasks and sort by deadline (overdue tasks come first)
-      const relevantTasks = data.filter((task) => !task.completed);
+      // Only tasks assigned to me or created by me
+      const relevantTasks = data.filter(
+        (task) =>
+          !task.completed && (
+            String(task.userId) === String(userId) ||
+            task.createdBy?.email?.toLowerCase() === userEmail?.toLowerCase()
+          )
+      );
+      // Sort by deadline (overdue tasks come first)
       relevantTasks.sort((a, b) => {
         const aOverdue = isTaskOverdue(a);
         const bOverdue = isTaskOverdue(b);
@@ -65,7 +84,7 @@ const DashboardTaskPreview: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [isTaskOverdue]);
+  }, [userId, userEmail, isTaskOverdue]);
 
   useEffect(() => {
     fetchTasks();
@@ -201,7 +220,10 @@ const DashboardTaskPreview: React.FC = () => {
             return (
               <li
                 key={task._id}
-                className={`relative flex items-start justify-between p-5 rounded-xl shadow-md border ${cardBgClass} hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group`}
+                className={`relative flex items-start justify-between p-5 rounded-xl shadow-md border ${cardBgClass} hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group cursor-pointer`}
+                onClick={() => !isOverdue && updatingTaskId !== task._id && handleToggleComplete(task)}
+                title={isOverdue ? "Task is overdue" : "Click to mark as complete"}
+                style={{ opacity: isOverdue ? 0.7 : 1 }}
               >
                 <div className="flex-1 pr-4">
                   <span
@@ -232,19 +254,7 @@ const DashboardTaskPreview: React.FC = () => {
                   {updatingTaskId === task._id ? (
                     <FaSpinner className="animate-spin text-3xl text-primary" />
                   ) : (
-                    <button
-                      onClick={() => handleToggleComplete(task)}
-                      className={`focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-full p-1 ${
-                        isOverdue
-                          ? "cursor-not-allowed opacity-70"
-                          : "focus:ring-primary-light"
-                      }`}
-                      title={tooltipText}
-                      aria-label={tooltipText}
-                      disabled={isOverdue}
-                    >
-                      {icon}
-                    </button>
+                    icon
                   )}
                 </div>
               </li>

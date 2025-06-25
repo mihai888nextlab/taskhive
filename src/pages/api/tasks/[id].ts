@@ -47,9 +47,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       // Find the task by ID and userId to ensure ownership
       const updatedTask = await Task.findOneAndUpdate(
-        { _id: taskId, userId: userId }, // Find by task ID AND user ID
-        { title, description, deadline: deadline ? new Date(deadline) : undefined, completed, important }, // Update fields
-        { new: true, runValidators: true } // Return updated document, run schema validators
+        { 
+          _id: taskId, 
+          $or: [
+            { userId: userId }, 
+            { createdBy: userId }
+          ]
+        },
+        { 
+          ...(title !== undefined && { title }),
+          ...(description !== undefined && { description }),
+          ...(deadline !== undefined && { deadline: deadline ? new Date(deadline) : undefined }),
+          ...(completed !== undefined && { completed }),
+          ...(important !== undefined && { important }),
+        },
+        { new: true, runValidators: true }
       );
 
       if (!updatedTask) {

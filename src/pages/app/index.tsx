@@ -50,6 +50,8 @@ const DashboardPage: NextPageWithLayout = () => {
   const [totalIncomes, setTotalIncomes] = useState(0);
   const [profit, setProfit] = useState(0);
 
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -61,24 +63,7 @@ const DashboardPage: NextPageWithLayout = () => {
       setLoadingUsers(false);
     };
 
-    const fetchFinanceData = async () => {
-      try {
-        const response = await fetch("/api/expenses");
-        if (!response.ok) throw new Error("Failed to fetch finance data");
-        const data = await response.json();
-        const expenses = data.filter((item: any) => item.type === 'expense');
-        const incomes = data.filter((item: any) => item.type === 'income');
-        setTotalExpenses(expenses.reduce((total: number, expense: any) => total + expense.amount, 0));
-        setTotalIncomes(incomes.reduce((total: number, income: any) => total + income.amount, 0));
-        setProfit(
-          incomes.reduce((total: number, income: any) => total + income.amount, 0) -
-          expenses.reduce((total: number, expense: any) => total + expense.amount, 0)
-        );
-      } catch {}
-    };
-
     fetchUsers();
-    fetchFinanceData();
   }, []);
 
   useEffect(() => {
@@ -94,6 +79,38 @@ const DashboardPage: NextPageWithLayout = () => {
     };
     fetchStats();
   }, []);
+
+  useEffect(() => {
+    fetch("/api/user")
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => setCurrentUser(data.user))
+      .catch(() => setCurrentUser(null));
+  }, []);
+
+  useEffect(() => {
+    const fetchFinanceData = async () => {
+      try {
+        const response = await fetch("/api/expenses");
+        if (!response.ok) throw new Error("Failed to fetch finance data");
+        const data = await response.json();
+        // Only company finances
+        const companyData = data.filter((item: any) => item.companyId === currentUser?.companyId);
+        const expenses = companyData.filter((item: any) => item.type === 'expense');
+        const incomes = companyData.filter((item: any) => item.type === 'income');
+        setTotalExpenses(expenses.reduce((total: number, expense: any) => total + expense.amount, 0));
+        setTotalIncomes(incomes.reduce((total: number, income: any) => total + income.amount, 0));
+        setProfit(
+          incomes.reduce((total: number, income: any) => total + income.amount, 0) -
+          expenses.reduce((total: number, expense: any) => total + expense.amount, 0)
+        );
+      } catch {}
+    };
+    if (currentUser?.companyId) fetchFinanceData();
+  }, [currentUser]);
+
+  if (!currentUser) {
+    return <p className="text-center text-gray-600 mb-8">Loading your dashboard...</p>;
+  }
 
   return (
     <div className="p-8 min-h-full rounded-lg bg-transparent text-gray-900">
@@ -137,12 +154,16 @@ const DashboardPage: NextPageWithLayout = () => {
             ) : users.length > 0 ? (
               <>
                 <Table
-                  data={users.slice(0, 5).map((user) => ({
-                    id: user._id,
-                    firstName: user.userId.firstName,
-                    lastName: user.userId.lastName,
-                    email: user.userId.email,
-                  }))}
+                  data={users
+                    .filter(u => u.companyId === currentUser?.companyId)
+                    .slice(0, 5)
+                    .map((user) => ({
+                      id: user._id,
+                      firstName: user.userId.firstName,
+                      lastName: user.userId.lastName,
+                      email: user.userId.email,
+                    }))
+                  }
                   columns={[
                     { key: "firstName", header: "First Name" },
                     { key: "lastName", header: "Last Name" },
@@ -174,7 +195,7 @@ const DashboardPage: NextPageWithLayout = () => {
           title="Tasks"
           description="Organize and track your team's assignments and progress."
         >
-          <DashboardTaskPreview />
+          <DashboardTaskPreview userId={currentUser?._id} userEmail={currentUser?.email} />
         </DashboardCard>
 
         {/* Calendar Card */}
@@ -183,7 +204,7 @@ const DashboardPage: NextPageWithLayout = () => {
           title="Calendar"
           description="View deadlines, scheduled meetings, and project milestones."
         >
-          <DashboardCalendarPreview />
+          <DashboardCalendarPreview userId={currentUser?._id} userEmail={currentUser?.email} />
         </DashboardCard>
 
         {/* Settings Card */}

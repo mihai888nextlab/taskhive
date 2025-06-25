@@ -77,19 +77,36 @@ export default async function handler(
   const regex = new RegExp(searchTerm, "i");
   const results: any = {};
 
+  const companyUserRecords = await userCompanyModel.find({ companyId }).lean();
+  const companyUserIds = companyUserRecords.map((u) => u.userId?.toString());
+
   const searchPromises: Promise<any>[] = [
-    // Tasks
+    // Tasks: assigned to or created by company users
     Task.find({
-      companyId,
-      $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }],
+      $or: [
+        { 
+          $and: [
+            { userId: { $in: companyUserIds } },
+            { $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }] }
+          ]
+        },
+        { 
+          $and: [
+            { createdBy: { $in: companyUserIds } },
+            { $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }] }
+          ]
+        }
+      ],
     })
       .limit(5)
+      .populate('userId', 'firstName lastName email')
+      .populate('createdBy', 'firstName lastName email')
       .lean()
       .then((tasks) => {
         results.tasks = tasks.map((t) => ({ ...t, type: "task" }));
       }),
 
-    // Users (via userCompanyModel, populate userId)
+    // Users (already correct)
     userCompanyModel
       .find({ companyId })
       .populate("userId", "firstName lastName email profileImage description")
@@ -116,12 +133,13 @@ export default async function handler(
           }));
       }),
 
-    // Announcements
+    // Announcements: created by company users
     AnnouncementModel.find({
-      companyId,
+      createdBy: { $in: companyUserIds },
       $or: [{ title: { $regex: regex } }, { content: { $regex: regex } }],
     })
       .limit(5)
+      .populate('createdBy', 'firstName lastName email')
       .lean()
       .then((announcements) => {
         results.announcements = announcements.map((a) => ({
@@ -130,7 +148,7 @@ export default async function handler(
         }));
       }),
 
-    // Storage Files
+    // Storage Files (already correct)
     StorageFileModel.find({
       companyId,
       $or: [
@@ -148,7 +166,7 @@ export default async function handler(
         }));
       }),
 
-    // Expenses
+    // Expenses (already correct)
     ExpenseModel.find({
       companyId,
       type: "expense",
@@ -164,7 +182,7 @@ export default async function handler(
         results.expenses = expenses.map((e) => ({ ...e, type: "expense" }));
       }),
 
-    // Incomes
+    // Incomes (already correct)
     ExpenseModel.find({
       companyId,
       type: "income",
@@ -180,9 +198,9 @@ export default async function handler(
         results.incomes = incomes.map((i) => ({ ...i, type: "income" }));
       }),
 
-    // Time Sessions
+    // Time Sessions: only for company users
     TimeSessionModel.find({
-      companyId,
+      userId: { $in: companyUserIds },
       $or: [
         { name: { $regex: regex } },
         { description: { $regex: regex } },
@@ -190,15 +208,14 @@ export default async function handler(
       ],
     })
       .limit(5)
+      .populate('userId', 'firstName lastName email')
       .lean()
       .then((sessions) => {
         results.timeSessions = sessions.map((ts) => ({
           ...ts,
           type: "timesession",
         }));
-      }),
-
-    // TODO: Add more models here as needed (calendar events, finance records, etc.)
+      })
   ];
 
   try {

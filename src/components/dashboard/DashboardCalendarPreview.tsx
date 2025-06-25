@@ -8,9 +8,23 @@ interface Task {
   title: string;
   deadline: string;
   completed: boolean;
+  userId?: string;
+  createdBy?: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+  };
 }
 
-const DashboardCalendarPreview: React.FC = () => {
+interface DashboardCalendarPreviewProps {
+  userId?: string;
+  userEmail?: string;
+}
+
+const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = ({
+  userId,
+  userEmail,
+}) => {
   const { theme } = useTheme();
   const [deadlines, setDeadlines] = useState<Date[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -25,16 +39,28 @@ const DashboardCalendarPreview: React.FC = () => {
           throw new Error("Failed to fetch tasks");
         }
         const data: Task[] = await response.json();
-        // Extract deadlines from tasks
-        const deadlinesArr = data
-          .filter((task) => task.deadline)
-          .map((task) => new Date(task.deadline));
-        // Remove duplicate dates using toDateString as a key
-        const uniqueDeadlines = Array.from(
-          new Map(deadlinesArr.map((date) => [date.toDateString(), date])).values()
+        // Only deadlines for my tasks
+        const relevantTasks = data.filter(
+          (task) =>
+            (task.userId?.toString() === userId?.toString() ||
+              task.createdBy?.email?.toLowerCase() === userEmail?.toLowerCase()) &&
+            !task.completed &&
+            task.deadline
         );
-        // Sort dates in ascending order
-        uniqueDeadlines.sort((a, b) => a.getTime() - b.getTime());
+
+        // Map: date string -> array of incomplete tasks for that date
+        const tasksByDate = relevantTasks.reduce((acc, task) => {
+          const dateStr = new Date(task.deadline).toDateString();
+          if (!acc[dateStr]) acc[dateStr] = [];
+          acc[dateStr].push(task);
+          return acc;
+        }, {} as Record<string, Task[]>);
+
+        // Only include dates that have at least one incomplete task
+        const uniqueDeadlines = Object.keys(tasksByDate)
+          .map((dateStr) => new Date(dateStr))
+          .sort((a, b) => a.getTime() - b.getTime());
+
         setDeadlines(uniqueDeadlines);
       } catch (err) {
         setError((err as Error).message);
@@ -44,7 +70,7 @@ const DashboardCalendarPreview: React.FC = () => {
     };
 
     fetchDeadlines();
-  }, []);
+  }, [userId, userEmail]);
 
   // Container and heading classes based on theme
   const containerClass =

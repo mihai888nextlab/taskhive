@@ -63,13 +63,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
     statusTooltip = "Task is Overdue (Cannot complete directly)";
   }
 
-  const assignerEmail = task.createdBy?.email?.trim().toLowerCase() || "";
-  const userEmail = currentUserEmail.trim().toLowerCase();
+  const assignerEmail = (task.createdBy?.email || "").trim().toLowerCase();
+  const userEmail = (currentUserEmail || "").trim().toLowerCase();
   const canEditOrDelete = forceAllowEditDelete || assignerEmail === userEmail;
 
-  // Normalize emails for comparison
   const taskAssigneeEmail = typeof task.userId === 'object' && task.userId?.email ? task.userId.email.trim().toLowerCase() : '';
-  const taskCreatorEmail = task.createdBy?.email ? task.createdBy.email.trim().toLowerCase() : '';
+
+  const isCreator = assignerEmail === userEmail;
 
   // Logic for showing "Assigned by"
   // We want to show "Assigned by" ONLY if:
@@ -82,7 +82,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     typeof task.createdBy === "object" &&
     task.createdBy.email &&
     taskAssigneeEmail === userEmail && // The task is assigned to the current user
-    taskCreatorEmail !== userEmail; // The current user is NOT the one who created it
+    assignerEmail !== userEmail; // The current user is NOT the one who created it
 
   return (
     <div
