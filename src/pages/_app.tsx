@@ -6,6 +6,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "@/components/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth";
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const router = useRouter();
   const isDashboardRoute = router.pathname.startsWith("/app");
@@ -57,6 +59,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         </Head>
 
         {content}
+        <SpeedInsights />
       </AuthProvider>
     </ThemeProvider>
   );
