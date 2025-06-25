@@ -59,7 +59,7 @@ const FinancePage = () => {
           )}
         </div>
       </div>
-
+{/* 
       <CategoryPieChart
         data={logic.pieChartData}
         options={logic.pieChartOptions}
@@ -75,7 +75,7 @@ const FinancePage = () => {
           incomesData={logic.incomesData}
           labels={logic.chartLabels}
         />
-      </div>
+      </div> */}
 
       <UndoSnackbar
         show={logic.showUndo}
