@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import * as cookie from "cookie";
-import { redirect } from "next/navigation";
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,7 +21,7 @@ export default async function handler(
 
       // Respond with success
       res.status(200).json({ message: "Logout successful" });
-      redirect("/login"); // Redirect to login page after logout
+      // redirect("/login"); // Redirect to login page after logout
     } catch (error) {
       console.error("Error during logout:", error);
       res.status(500).json({ message: "Internal server error" });

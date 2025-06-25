@@ -15,6 +15,14 @@ interface AuthContextType {
   isAuthenticated: boolean; // O nouă proprietate utilă
   refetchUser: () => Promise<void>; // Funcție pentru a re-fetch-ui manual
   login: (email: string, password: string) => Promise<boolean>; // Adaugă funcție de login
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    companyName: string,
+    vatNumber?: string
+  ) => Promise<boolean>; // Adaugă funcție de register
   logout: () => void; // Adaugă funcție de logout
 }
 
@@ -65,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (response.ok) {
           await fetchUserData();
-          router.push("/dashboard");
+          router.push("/app");
           return true;
         } else {
           const errData = await response.json();
@@ -81,6 +89,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           typeof err === "object" && err !== null && "message" in err
             ? String((err as { message?: string }).message)
             : "An unexpected error occurred during login."
+        );
+        setUser(null);
+        return false;
+      } finally {
+        setLoadingUser(false);
+      }
+    },
+    [fetchUserData, router]
+  );
+
+  const register = useCallback(
+    async (
+      email: string,
+      password: string,
+      firstName: string,
+      lastName: string,
+      companyName: string,
+      vatNumber?: string
+    ): Promise<boolean> => {
+      setLoadingUser(true);
+      setError(null);
+      try {
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password,
+            firstName,
+            lastName,
+            companyName,
+            companyRegistrationNumber: vatNumber,
+          }),
+        });
+
+        if (response.ok) {
+          await fetchUserData();
+          router.push("/app");
+          return true;
+        } else {
+          const errData = await response.json();
+          setError(
+            errData.message || "Registration failed. Please try again later."
+          );
+          setUser(null);
+          return false;
+        }
+      } catch (err: unknown) {
+        console.error("Error during registration:", err);
+        setError(
+          typeof err === "object" && err !== null && "message" in err
+            ? String((err as { message?: string }).message)
+            : "An unexpected error occurred during registration."
         );
         setUser(null);
         return false;
@@ -120,6 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         isAuthenticated,
         refetchUser: fetchUserData,
         login,
+        register,
         logout,
       }}
     >

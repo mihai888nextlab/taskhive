@@ -1,12 +1,14 @@
 import FloatingLabelInput from "@/components/FloatingLabelInput";
 import Header from "@/components/header";
 import Loading from "@/components/Loading";
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
 
 export default function Register() {
   const router = useRouter();
+  const auth = useAuth();
 
   const [values, setValues] = useState({
     firstName: "",
@@ -45,28 +47,41 @@ export default function Register() {
     }
 
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: values.userEmail,
-          password: values.userPassword,
-          firstName: values.firstName,
-          lastName: values.lastName,
-          companyName: values.companyName,
-          companyRegistrationNumber: values.vatNumber,
-        }),
-      });
+      // const response = await fetch("/api/auth/register", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     email: values.userEmail,
+      //     password: values.userPassword,
+      //     firstName: values.firstName,
+      //     lastName: values.lastName,
+      //     companyName: values.companyName,
+      //     companyRegistrationNumber: values.vatNumber,
+      //   }),
+      // });
 
-      const data = await response.json();
+      // const data = await response.json();
 
-      if (response.ok) {
-        // Redirect to login or a success page
-        router.push("/app");
-      } else {
-        setError(data.message || "Registration failed.");
+      // if (response.ok) {
+      //   // Redirect to login or a success page
+      //   router.push("/app");
+      // } else {
+      //   setError(data.message || "Registration failed.");
+      // }
+
+      const res = await auth.register(
+        values.userEmail,
+        values.userPassword,
+        values.firstName,
+        values.lastName,
+        values.companyName,
+        values.vatNumber
+      );
+
+      if (!res) {
+        throw new Error("Registration failed. Please check your details.");
       }
     } catch (err) {
       if (err instanceof Error) {

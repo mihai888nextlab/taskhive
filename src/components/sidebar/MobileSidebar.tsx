@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FaTimes, FaSignOutAlt } from "react-icons/fa";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
 
 type MenuItem = {
   name: string;
@@ -22,7 +23,6 @@ type MobileSidebarProps = {
   menu: MenuItem[];
   user: User;
   router: { pathname: string };
-  handleLogout: () => void;
   searchInput?: React.ReactNode;
   searchDropdown?: React.ReactNode;
 };
@@ -33,10 +33,11 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
   menu,
   user,
   router,
-  handleLogout,
   searchInput,
   searchDropdown,
 }) => {
+  const auth = useAuth(); // Assuming you have a useAuth hook to get user data
+
   if (!sidebarOpen) return null;
   return (
     <div className="fixed inset-0 z-40 flex md:hidden">
@@ -130,7 +131,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
         <button
           onClick={() => {
             setSidebarOpen(false);
-            handleLogout();
+            auth.logout(); // Assuming logout is an async function
           }}
           className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg"
         >

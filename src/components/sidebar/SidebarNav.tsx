@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
+import { useAuth } from "@/hooks/useAuth";
 
 type MenuItem = {
   name: string;
@@ -20,7 +21,6 @@ type SidebarNavProps = {
   menu: MenuItem[];
   user: User;
   router: { pathname: string };
-  handleLogout: () => void;
   // Add notification props here:
   tasksCount?: number;
   unreadAnnouncements?: number;
@@ -31,11 +31,12 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   menu,
   user,
   router,
-  handleLogout,
   tasksCount = 0,
   unreadAnnouncements = 0,
   unreadMessages = 0,
 }) => {
+  const auth = useAuth(); // Assuming you have a useAuth hook to get user data
+
   const menuWithNotifications = menu.map((item) => {
     if (item.name === "Tasks" && tasksCount > 0) {
       return { ...item, notification: tasksCount };
@@ -137,7 +138,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
         </div>
       </Link>
       <button
-        onClick={handleLogout}
+        onClick={auth.logout}
         className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center"
       >
         <span className="text-center">Logout</span>

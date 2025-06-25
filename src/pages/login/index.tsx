@@ -1,11 +1,13 @@
 import FloatingLabelInput from "@/components/FloatingLabelInput";
 import Header from "@/components/header";
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
 
 export default function Login() {
   const router = useRouter();
+  const auth = useAuth();
 
   const [values, setValues] = useState({
     userEmail: "",
@@ -27,24 +29,29 @@ export default function Login() {
     }
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: values.userEmail,
-          password: values.userPassword,
-        }),
-      });
+      // const response = await fetch("/api/auth/login", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     email: values.userEmail,
+      //     password: values.userPassword,
+      //   }),
+      // });
 
-      const data = await response.json();
+      // const data = await response.json();
 
-      if (response.ok) {
-        // Redirect to dashboard or home page
-        router.push("/app");
-      } else {
-        setError(data.message || "Login failed.");
+      // if (response.ok) {
+      //   // Redirect to dashboard or home page
+      //   router.push("/app");
+      // } else {
+      //   setError(data.message || "Login failed.");
+      // }
+
+      const res = await auth.login(values.userEmail, values.userPassword);
+      if (!res) {
+        throw new Error("Login failed. Please check your credentials.");
       }
     } catch (err) {
       if (err instanceof Error) {
