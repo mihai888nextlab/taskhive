@@ -304,7 +304,7 @@ const TimeTrackingPage = () => {
           onDelete={handleDeleteSession}
           theme={theme}
         />
-        <StatisticsCard title="Time Statistics (Last 7 Days)" theme={theme}>
+        {/* <StatisticsCard title="Time Statistics (Last 7 Days)" theme={theme}>
           <TimeStatistics last7DaysHours={last7DaysHours} />
         </StatisticsCard>
         <StatisticsCard title="Time by Tag (Last 7 Days)" theme={theme}>
@@ -313,7 +313,7 @@ const TimeTrackingPage = () => {
               <Pie data={pieData} width={520} height={520} />
             </div>
           </div>
-        </StatisticsCard>
+        </StatisticsCard> */}
       </div>
     </DashboardLayout>
   );

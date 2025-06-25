@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaSpinner } from "react-icons/fa";
+import { FaSpinner, FaMagic } from "react-icons/fa";
 
 interface TaskFormProps {
   show: boolean;
@@ -57,39 +57,33 @@ const TaskForm: React.FC<TaskFormProps> = ({
     onImportantChange(checked);
   };
 
-  // Auto-generate description when title changes and description is empty
-  useEffect(() => {
-    let ignore = false;
-    const shouldGenerate =
-      !!taskTitle && !descriptionManuallyEdited && taskDescription === "";
+  const handleGenerateDescription = async () => {
+    if (!taskTitle) return;
+    setGeneratingDescription(true);
+    try {
+      const prompt = `
+You are an expert project manager. Write a single, clear, and concise task description for the following task title: "${taskTitle}".
 
-    if (!shouldGenerate) {
-      setGeneratingDescription(false);
-      return;
-    }
-
-    const generateDescription = async () => {
-      setGeneratingDescription(true);
-      try {
-        const res = await fetch("/api/gemini-generate-description", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: taskTitle }),
-        });
-        const data = await res.json();
-        if (!ignore && data.description) {
-          onDescriptionChange(data.description);
-        }
-      } finally {
-        if (!ignore) setGeneratingDescription(false);
+- The description should be 1-3 sentences.
+- Do not provide multiple options, explanations, or recommendations.
+- Do not include headings, labels, or formatting—just the plain description.
+- Focus on what needs to be done, the goal, and any relevant context.
+- Do not mention that you are an AI or assistant.
+- Output only the description, nothing else.
+`;
+      const res = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (data.response) {
+        onDescriptionChange(data.response);
       }
-    };
-    generateDescription();
-    return () => {
-      ignore = true;
-    };
-    // eslint-disable-next-line
-  }, [taskTitle, descriptionManuallyEdited, taskDescription]);
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
 
   useEffect(() => {
     if (taskDescription === "") {
@@ -157,24 +151,28 @@ const TaskForm: React.FC<TaskFormProps> = ({
           <label htmlFor="taskDescription" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}>
             Description (Optional):
           </label>
-          <textarea
-            id="taskDescription"
-            rows={4}
-            className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base`}
-            placeholder="Add more details or sub-tasks here..."
-            value={taskDescription}
-            onChange={e => {
-              onDescriptionChange(e.target.value);
-              setDescriptionManuallyEdited(true);
-            }}
-            disabled={loading}
-            aria-label="Task description"
-          ></textarea>
-          {generatingDescription && (
-            <div className="flex items-center text-sm text-gray-500 mt-2">
-              <FaSpinner className="animate-spin mr-2" /> Generating description...
-            </div>
-          )}
+          <div className="flex items-center">
+            <textarea
+              id="taskDescription"
+              rows={4}
+              className={`flex-1 py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base`}
+              placeholder="Add more details or sub-tasks here..."
+              value={taskDescription}
+              onChange={e => onDescriptionChange(e.target.value)}
+              disabled={loading || generatingDescription}
+              aria-label="Task description"
+            />
+            <button
+              type="button"
+              className="ml-2 px-3 py-2 bg-primary text-white rounded-lg flex items-center font-semibold shadow hover:bg-primary-dark transition disabled:opacity-60"
+              onClick={handleGenerateDescription}
+              disabled={!taskTitle || generatingDescription}
+              title="Generate description from title"
+            >
+              {generatingDescription ? <FaSpinner className="animate-spin" /> : <FaMagic className="mr-1" />}
+              Generate
+            </button>
+          </div>
         </div>
         <div className="mb-8">
           <label htmlFor="assignedTo" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}>
