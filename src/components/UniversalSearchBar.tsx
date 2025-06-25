@@ -1,204 +1,361 @@
-import React, { useState } from "react";
-import { useDebouncedSearch } from "@/hooks/useDebounceSearch"; // Importă hook-ul custom
-import { useRouter } from "next/router"; // Pentru navigare
-import Link from "next/link"; // Pentru link-uri către rezultate
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 
-// Asigură-te că `SearchResultItem` este exportat din hooks/useDebouncedSearch
-interface SearchResultItem {
-  _id: string;
-  type: string;
-  title?: string;
-  name?: string;
-  fullName?: string;
-  email?: string;
-  description?: string;
-  amount?: number;
-  // ... adaugă aici toate proprietățile posibile ale unui rezultat
-}
+const API_ENDPOINTS = {
+  users: "/api/users",
+  tasks: "/api/tasks",
+  announcements: "/api/announcements",
+  calendarEvents: "/api/calendar",
+  storageFiles: "/api/getFiles",
+  timeTracking: "/api/time-tracking",
+  financeRecords: "/api/finance",
+  expenses: "/api/expenses",
+  timeSessions: "/api/time-sessions",
+};
+
+const LABELS: Record<string, { label: string; color: string }> = {
+  user: { label: "User", color: "bg-secondary" },
+  task: { label: "Task", color: "bg-blue-500" },
+  announcement: { label: "Announcement", color: "bg-yellow-500" },
+  calendar: { label: "Calendar", color: "bg-green-500" },
+  storage: { label: "Storage", color: "bg-gray-500" },
+  timetracking: { label: "Time Tracking", color: "bg-purple-500" },
+  finance: { label: "Finance", color: "bg-pink-500" },
+  expense: { label: "Expense", color: "bg-red-500" },
+  income: { label: "Income", color: "bg-green-600" },
+  timesession: { label: "Time Session", color: "bg-indigo-500" },
+  page: { label: "Page", color: "bg-primary" },
+};
+
+const getResultUrl = (item: any) => {
+  switch (item.type) {
+    case "user":
+      return `/app/users/${item._id}`;
+    case "task":
+      return `/app/tasks#${item._id}`;
+    case "announcement":
+      return `/app/announcements#${item._id}`;
+    case "calendar":
+      return `/app/calendar#${item._id}`;
+    case "storage":
+      return `/app/storage#${item._id}`;
+    case "timetracking":
+      return `/app/time-tracking#${item._id}`;
+    case "finance":
+      return `/app/finance#${item._id}`;
+    case "expense":
+      return `/app/finance#${item._id}`;
+    case "income":
+      return `/app/finance#${item._id}`;
+    case "timesession":
+      return `/app/time-tracking#${item._id}`;
+    case "page":
+      return item.path || "#";
+    default:
+      return "#";
+  }
+};
+
+const getItemTitle = (item: any) =>
+  item.title ||
+  item.name ||
+  item.fullName ||
+  item.email ||
+  (item.description ? item.description.substring(0, 50) + "..." : "N/A");
+
+const safeArray = (arr: any) => (Array.isArray(arr) ? arr : []);
 
 const UniversalSearchBar: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  // Utilizează hook-ul de căutare cu debounce
-  const { results, loading, error } = useDebouncedSearch(searchTerm, 300); // 300ms delay
-  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Verifică dacă există rezultate în oricare categorie
-  const hasResults = Object.keys(results).some(
-    (key) => (results as any)[key].length > 0
-  );
+  // All data states
+  const [data, setData] = useState({
+    users: [],
+    tasks: [],
+    announcements: [],
+    calendarEvents: [],
+    storageFiles: [],
+    timeTracking: [],
+    financeRecords: [],
+    expenses: [],
+    timeSessions: [],
+  });
 
-  // Funcție pentru a genera URL-ul corect bazat pe tipul de entitate
-  const getResultUrl = (item: SearchResultItem): string => {
-    switch (item.type) {
-      case "task":
-        return `/dashboard/tasks/${item._id}`;
-      case "user":
-        return `/dashboard/users/${item._id}`;
-      case "expense":
-        return `/dashboard/finance/expenses/${item._id}`;
-      case "income":
-        return `/dashboard/finance/incomes/${item._id}`;
-      // TODO: Adaugă aici rutele pentru celelalte tipuri de date
-      // case 'page':
-      //   return `/dashboard/pages/${item._id}`;
-      // case 'project':
-      //   return `/dashboard/projects/${item._id}`;
-      default:
-        return "#"; // Fallback dacă tipul nu este recunoscut
+  // Fetch all data on mount
+  useEffect(() => {
+    const fetchAll = async () => {
+      setLoading(true);
+      try {
+        const [
+          usersRes,
+          tasksRes,
+          announcementsRes,
+          calendarRes,
+          storageRes,
+          timeTrackingRes,
+          financeRes,
+          expensesRes,
+          timeSessionsRes,
+        ] = await Promise.all([
+          fetch(API_ENDPOINTS.users).then((r) => r.json()),
+          fetch(API_ENDPOINTS.tasks).then((r) => r.json()),
+          fetch(API_ENDPOINTS.announcements).then((r) => r.json()),
+          fetch(API_ENDPOINTS.calendarEvents).then((r) => r.json()).catch(() => ({ events: [] })),
+          fetch(API_ENDPOINTS.storageFiles).then((r) => r.json()),
+          fetch(API_ENDPOINTS.timeTracking).then((r) => r.json()).catch(() => ({ timeTracking: [] })),
+          fetch(API_ENDPOINTS.financeRecords).then((r) => r.json()).catch(() => ({ financeRecords: [] })),
+          fetch(API_ENDPOINTS.expenses).then((r) => r.json()),
+          fetch(API_ENDPOINTS.timeSessions).then((r) => r.json()),
+        ]);
+        setData({
+          users: usersRes.users || usersRes,
+          tasks: tasksRes.tasks || tasksRes,
+          announcements: announcementsRes.announcements || announcementsRes,
+          calendarEvents: calendarRes.events || calendarRes,
+          storageFiles: storageRes.files || storageRes,
+          timeTracking: timeTrackingRes.timeTracking || timeTrackingRes,
+          financeRecords: financeRes.financeRecords || financeRes,
+          expenses: expensesRes.expenses || expensesRes,
+          timeSessions: timeSessionsRes.timeSessions || timeSessionsRes,
+        });
+      } catch (err) {
+        // Optionally handle error
+      }
+      setLoading(false);
+    };
+    fetchAll();
+  }, []);
+
+  // Debounce search
+  useEffect(() => {
+    if (!search.trim()) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
     }
-  };
+    setLoading(true);
+    const timeout = setTimeout(() => {
+      const lower = search.toLowerCase();
 
-  // Funcție pentru a obține titlul afișabil al unui element
-  const getItemTitle = (item: SearchResultItem): string => {
-    return (
-      item.title ||
-      item.fullName ||
-      item.name ||
-      item.email ||
-      (item.description ? item.description.substring(0, 50) + "..." : "N/A")
-    );
-  };
+      // Users
+      const userResults = safeArray(data.users).filter(
+        (u: any) =>
+          (u.firstName && u.firstName.toLowerCase().includes(lower)) ||
+          (u.lastName && u.lastName.toLowerCase().includes(lower)) ||
+          (u.email && u.email.toLowerCase().includes(lower))
+      ).map((u: any) => ({
+        type: "user",
+        name: `${u.firstName || ""} ${u.lastName || ""}`.trim() || "Unknown User",
+        email: u.email,
+        _id: u._id,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        profileImage: u.profileImage,
+        description: u.description,
+        role: u.role,
+      }));
 
-  // Funcție pentru a obține o pictogramă relevantă
-  const getItemIcon = (type: string): string => {
-    switch (type) {
-      case "task":
-        return "📝";
-      case "user":
-        return "👤";
-      case "expense":
-        return "💸";
-      case "income":
-        return "💰";
-      // TODO: Adaugă pictograme pentru alte tipuri
-      // case 'page': return '📄';
-      // case 'project': return '🏗️';
-      default:
-        return "🔍";
-    }
-  };
+      // Tasks
+      const taskResults = safeArray(data.tasks)
+        .filter(
+          (t: any) =>
+            (t.title && t.title.toLowerCase().includes(lower)) ||
+            (t.description && t.description.toLowerCase().includes(lower))
+        )
+        .map((t: any) => ({
+          type: "task",
+          name: t.title,
+          _id: t._id,
+        }));
+
+      // Announcements
+      const announcementResults = safeArray(data.announcements).filter(
+        (a: any) =>
+          (a.title && a.title.toLowerCase().includes(lower)) ||
+          (a.content && a.content.toLowerCase().includes(lower))
+      ).map((a: any) => ({
+        type: "announcement",
+        name: a.title,
+        _id: a._id,
+      }));
+
+      // Calendar Events
+      const calendarResults = safeArray(data.calendarEvents).filter(
+        (e: any) =>
+          (e.title && e.title.toLowerCase().includes(lower)) ||
+          (e.description && e.description.toLowerCase().includes(lower))
+      ).map((e: any) => ({
+        type: "calendar",
+        name: e.title,
+        _id: e._id,
+      }));
+
+      // Storage Files
+      const storageResults = safeArray(data.storageFiles).filter(
+        (f: any) =>
+          (f.fileName && f.fileName.toLowerCase().includes(lower)) ||
+          (f.name && f.name.toLowerCase().includes(lower)) ||
+          (f.description && f.description.toLowerCase().includes(lower))
+      ).map((f: any) => ({
+        type: "storage",
+        name: f.fileName || f.name,
+        _id: f._id,
+      }));
+
+      // Time Tracking
+      const timeTrackingResults = safeArray(data.timeTracking).filter(
+        (tt: any) =>
+          (tt.task && tt.task.toLowerCase().includes(lower)) ||
+          (tt.notes && tt.notes.toLowerCase().includes(lower))
+      ).map((tt: any) => ({
+        type: "timetracking",
+        name: tt.task,
+        _id: tt._id,
+      }));
+
+      // Finance
+      const financeResults = safeArray(data.financeRecords).filter(
+        (fr: any) =>
+          (fr.title && fr.title.toLowerCase().includes(lower)) ||
+          (fr.description && fr.description.toLowerCase().includes(lower))
+      ).map((fr: any) => ({
+        type: "finance",
+        name: fr.title,
+        _id: fr._id,
+      }));
+
+      // Expenses
+      const expenseResults = safeArray(data.expenses)
+        .filter(
+          (e: any) =>
+            e.type === "expense" &&
+            (
+              (e.title && e.title.toLowerCase().includes(lower)) ||
+              (e.description && e.description.toLowerCase().includes(lower))
+            )
+        )
+        .map((e: any) => ({
+          type: "expense",
+          name: e.title,
+          _id: e._id,
+          amount: e.amount,
+        }));
+
+      // Incomes (from expenses with type === "income")
+      const incomeResults = safeArray(data.expenses)
+        .filter(
+          (i: any) =>
+            i.type === "income" &&
+            (
+              (i.title && i.title.toLowerCase().includes(lower)) ||
+              (i.description && i.description.toLowerCase().includes(lower))
+            )
+        )
+        .map((i: any) => ({
+          type: "income",
+          name: i.title,
+          _id: i._id,
+          amount: i.amount,
+        }));
+
+      // Time Sessions
+      const timeSessionResults = safeArray(data.timeSessions).filter(
+        (ts: any) =>
+          (ts.name && ts.name.toLowerCase().includes(lower)) ||
+          (ts.description && ts.description.toLowerCase().includes(lower)) ||
+          (ts.tag && ts.tag.toLowerCase().includes(lower))
+      ).map((ts: any) => ({
+        type: "timesession",
+        name: ts.name,
+        description: ts.description,
+        tag: ts.tag,
+        _id: ts._id,
+      }));
+
+      setSearchResults([
+        ...userResults,
+        ...taskResults,
+        ...announcementResults,
+        ...calendarResults,
+        ...storageResults,
+        ...timeTrackingResults,
+        ...financeResults,
+        ...expenseResults,
+        ...incomeResults,
+        ...timeSessionResults,
+      ]);
+      setShowDropdown(true);
+      setLoading(false);
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [search, data]);
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto">
+    <div className="mb-6 relative">
       <input
         type="text"
-        placeholder="Search tasks, users, expenses, pages..."
-        className="w-full p-3 pl-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        onFocus={() => search && setShowDropdown(true)}
+        onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+        placeholder="Search tasks, users, files, etc..."
+        className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary shadow"
       />
+      {showDropdown && searchResults.length > 0 && (
+        <div className="absolute left-0 right-0 mt-2 bg-white text-gray-900 rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto border border-primary/30">
+          {searchResults.map((result, idx) => {
+            const tag = LABELS[result.type] || LABELS.page;
+            let href = getResultUrl(result);
 
-      {/* Iconiță de căutare */}
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <svg
-          className="h-5 w-5 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          ></path>
-        </svg>
-      </div>
-
-      {/* Indicator de Loading */}
-      {loading && (
-        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-          <svg
-            className="animate-spin h-5 w-5 text-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-        </div>
-      )}
-
-      {/* Container pentru rezultate */}
-      {searchTerm && !loading && !error && (
-        <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-2 max-h-96 overflow-y-auto transform transition-all duration-200 ease-out">
-          {hasResults ? (
-            Object.entries(results).map(
-              ([category, items]) =>
-                (items as SearchResultItem[]).length > 0 && (
-                  <div key={category} className="mb-2 last:mb-0">
-                    <h3 className="text-xs font-semibold uppercase text-gray-500 px-4 pt-3 pb-1 border-b border-gray-100 sticky top-0 bg-white z-10">
-                      {category.replace(/s$/, "") + "s"}{" "}
-                      {/* Ex: 'tasks' -> 'Tasks', 'users' -> 'Users' */}
-                    </h3>
-                    <ul>
-                      {(items as SearchResultItem[]).map((item) => (
-                        <li
-                          key={item._id}
-                          className="p-3 hover:bg-blue-50 cursor-pointer transition-colors duration-150"
-                        >
-                          <Link
-                            href={getResultUrl(item)}
-                            onClick={() => setSearchTerm("")}
-                            className="flex items-center space-x-3"
-                          >
-                            <span className="text-lg">
-                              {getItemIcon(item.type)}
-                            </span>
-                            <div>
-                              <p className="font-medium text-gray-800">
-                                {getItemTitle(item)}
-                              </p>
-                              {/* Afișează o descriere secundară dacă există */}
-                              {item.description &&
-                                item.description.length > 50 && (
-                                  <p className="text-sm text-gray-500 line-clamp-1">
-                                    {item.description}
-                                  </p>
-                                )}
-                              {item.email && item.type === "user" && (
-                                <p className="text-sm text-gray-500">
-                                  {item.email}
-                                </p>
-                              )}
-                              {item.amount &&
-                                (item.type === "expense" ||
-                                  item.type === "income") && (
-                                  <p className="text-sm text-gray-500">
-                                    Amount: ${item.amount}
-                                  </p>
-                                )}
-                            </div>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
+            if (result.type === "user") {
+              return (
+                <button
+                  key={result._id ? result._id + idx : result.name + idx}
+                  type="button"
+                  className="block w-full text-left px-5 py-4 mb-2 rounded-lg shadow hover:shadow-lg transition-all border border-gray-200 hover:bg-primary/10 cursor-pointer"
+                  onClick={() => {
+                    setSearch("");
+                    setShowDropdown(false);
+                  }}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-base">{result.name}</span>
+                    <div className="flex items-center mt-1">
+                      <span className="text-xs text-gray-500">{result.email}</span>
+                      <span className={`ml-3 text-xs ${tag.color} text-white px-3 py-1 rounded-full`}>
+                        {tag.label}
+                      </span>
+                    </div>
                   </div>
-                )
-            )
-          ) : (
-            <p className="p-4 text-center text-gray-500">No results found.</p>
-          )}
-        </div>
-      )}
+                </button>
+              );
+            }
 
-      {/* Mesaj de eroare */}
-      {error && searchTerm && !loading && (
-        <div className="absolute z-50 w-full bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg mt-2 shadow-lg">
-          {error}
+            return (
+              <Link
+                key={result._id ? result._id + idx : result.name + idx}
+                href={href}
+                className="block px-5 py-4 mb-2 rounded-lg shadow hover:shadow-lg transition-all border border-gray-200 hover:bg-primary/10 flex items-center"
+                onClick={() => {
+                  setSearch("");
+                  setShowDropdown(false);
+                }}
+              >
+                <div className="flex-1">
+                  <span className="font-semibold text-base">{result.name}</span>
+                  {result.description && !["task", "expense", "income"].includes(result.type) && (
+                    <span className="block text-xs text-gray-500 mt-1">{result.description}</span>
+                  )}
+                </div>
+                <span className={`ml-4 text-xs ${tag.color} text-white px-3 py-1 rounded-full`}>
+                  {tag.label}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

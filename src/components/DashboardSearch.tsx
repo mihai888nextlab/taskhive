@@ -1,34 +1,33 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useDebouncedSearch } from "@/hooks/useDebounceSearch";
 
 interface DashboardSearchProps {
   menu: any[];
-  users: any[];
-  tasks: any[];
-  announcements: any[];
-  calendarEvents: any[];
-  storageFiles: any[];
-  timeTracking: any[];
-  financeRecords: any[];
-  expenses: any[];
-  incomes: any[];
-  timeSessions: any[];
+  users?: any[];
+  tasks?: any[];
+  announcements?: any[];
+  calendarEvents?: any[];
+  storageFiles?: any[];
+  timeTracking?: any[];
+  financeRecords?: any[];
+  expenses?: any[];
+  incomes?: any[];
+  timeSessions?: any[];
   onUserCardClick: (user: any) => void;
 }
 
 const DashboardSearch: React.FC<DashboardSearchProps> = ({
   menu,
-  users,
-  tasks,
-  announcements,
-  calendarEvents,
-  storageFiles,
-  timeTracking,
-  financeRecords,
-  expenses,
-  incomes,
-  timeSessions,
+  users = [],
+  tasks = [],
+  announcements = [],
+  calendarEvents = [],
+  storageFiles = [],
+  timeTracking = [],
+  financeRecords = [],
+  expenses = [],
+  incomes = [],
+  timeSessions = [],
   onUserCardClick,
 }) => {
   const [search, setSearch] = useState("");
@@ -45,157 +44,157 @@ const DashboardSearch: React.FC<DashboardSearchProps> = ({
     const lower = search.toLowerCase();
 
     // Menu pages
-    const pageResults = menu.filter((m) =>
-      m.name.toLowerCase().includes(lower)
-    );
+    const pageResults = Array.isArray(menu) ? menu.filter((m) =>
+      m.name?.toLowerCase().includes(lower)
+    ) : [];
 
-    // // Users
-    // const userResults = users.filter(
-    //   (u) =>
-    //     (u.userId.firstName &&
-    //       u.userId.firstName.toLowerCase().includes(lower)) ||
-    //     (u.userId.lastName &&
-    //       u.userId.lastName.toLowerCase().includes(lower)) ||
-    //     (u.userId.email && u.userId.email.toLowerCase().includes(lower))
-    // ).map((u) => ({
-    //   type: "user",
-    //   name: `${u.userId.firstName || ""} ${u.userId.lastName || ""}`.trim() || "Unknown User",
-    //   email: u.userId.email,
-    //   _id: u.userId._id,
-    //   firstName: u.userId.firstName,
-    //   lastName: u.userId.lastName,
-    //   profileImage: u.userId.profileImage,
-    //   description: u.userId.description,
-    //   role: u.role,
-    // }));
+    // Users
+    const userResults = Array.isArray(users) ? users.filter(
+      (u) =>
+        (u.userId?.firstName &&
+          u.userId.firstName.toLowerCase().includes(lower)) ||
+        (u.userId?.lastName &&
+          u.userId.lastName.toLowerCase().includes(lower)) ||
+        (u.userId?.email && u.userId.email.toLowerCase().includes(lower))
+    ).map((u) => ({
+      type: "user",
+      name: `${u.userId?.firstName || ""} ${u.userId?.lastName || ""}`.trim() || "Unknown User",
+      email: u.userId?.email,
+      _id: u.userId?._id,
+      firstName: u.userId?.firstName,
+      lastName: u.userId?.lastName,
+      profileImage: u.userId?.profileImage,
+      description: u.userId?.description,
+      role: u.role,
+    })) : [];
 
-    // // Tasks
-    // const taskResults = tasks
-    //   .filter(
-    //     (t) =>
-    //       (t.title && t.title.toLowerCase().includes(lower)) ||
-    //       (t.description && t.description.toLowerCase().includes(lower))
-    //   )
-    //   .map((t) => ({
-    //     type: "task",
-    //     name: t.title,
-    //     _id: t._id,
-    //   }));
+    // Tasks
+    const taskResults = Array.isArray(tasks) ? tasks
+      .filter(
+        (t) =>
+          (t.title && t.title.toLowerCase().includes(lower)) ||
+          (t.description && t.description.toLowerCase().includes(lower))
+      )
+      .map((t) => ({
+        type: "task",
+        name: t.title,
+        _id: t._id,
+      })) : [];
 
-    // // Announcements
-    // const announcementResults = announcements.filter(
-    //   (a) =>
-    //     (a.title && a.title.toLowerCase().includes(lower)) ||
-    //     (a.content && a.content.toLowerCase().includes(lower))
-    // ).map((a) => ({
-    //   type: "announcement",
-    //   name: a.title,
-    //   _id: a._id,
-    // }));
+    // Announcements
+    const announcementResults = Array.isArray(announcements) ? announcements.filter(
+      (a) =>
+        (a.title && a.title.toLowerCase().includes(lower)) ||
+        (a.content && a.content.toLowerCase().includes(lower))
+    ).map((a) => ({
+      type: "announcement",
+      name: a.title,
+      _id: a._id,
+    })) : [];
 
-    // // Calendar Events
-    // const calendarResults = calendarEvents.filter(
-    //   (e) =>
-    //     (e.title && e.title.toLowerCase().includes(lower)) ||
-    //     (e.description && e.description.toLowerCase().includes(lower))
-    // ).map((e) => ({
-    //   type: "calendar",
-    //   name: e.title,
-    //   _id: e._id,
-    // }));
+    // Calendar Events
+    const calendarResults = Array.isArray(calendarEvents) ? calendarEvents.filter(
+      (e) =>
+        (e.title && e.title.toLowerCase().includes(lower)) ||
+        (e.description && e.description.toLowerCase().includes(lower))
+    ).map((e) => ({
+      type: "calendar",
+      name: e.title,
+      _id: e._id,
+    })) : [];
 
-    // // Storage Files
-    // const storageResults = storageFiles.filter(
-    //   (f) =>
-    //     (f.name && f.name.toLowerCase().includes(lower)) ||
-    //     (f.description && f.description.toLowerCase().includes(lower))
-    // ).map((f) => ({
-    //   type: "storage",
-    //   name: f.name,
-    //   _id: f._id,
-    // }));
+    // Storage Files
+    const storageResults = Array.isArray(storageFiles) ? storageFiles.filter(
+      (f) =>
+        (f.name && f.name.toLowerCase().includes(lower)) ||
+        (f.description && f.description.toLowerCase().includes(lower))
+    ).map((f) => ({
+      type: "storage",
+      name: f.name,
+      _id: f._id,
+    })) : [];
 
-    // // Time Tracking
-    // const timeTrackingResults = timeTracking.filter(
-    //   (tt) =>
-    //     (tt.task && tt.task.toLowerCase().includes(lower)) ||
-    //     (tt.notes && tt.notes.toLowerCase().includes(lower))
-    // ).map((tt) => ({
-    //   type: "timetracking",
-    //   name: tt.task,
-    //   _id: tt._id,
-    // }));
+    // Time Tracking
+    const timeTrackingResults = Array.isArray(timeTracking) ? timeTracking.filter(
+      (tt) =>
+        (tt.task && tt.task.toLowerCase().includes(lower)) ||
+        (tt.notes && tt.notes.toLowerCase().includes(lower))
+    ).map((tt) => ({
+      type: "timetracking",
+      name: tt.task,
+      _id: tt._id,
+    })) : [];
 
-    // // Finance
-    // const financeResults = financeRecords.filter(
-    //   (fr) =>
-    //     (fr.title && fr.title.toLowerCase().includes(lower)) ||
-    //     (fr.description && fr.description.toLowerCase().includes(lower))
-    // ).map((fr) => ({
-    //   type: "finance",
-    //   name: fr.title,
-    //   _id: fr._id,
-    // }));
+    // Finance
+    const financeResults = Array.isArray(financeRecords) ? financeRecords.filter(
+      (fr) =>
+        (fr.title && fr.title.toLowerCase().includes(lower)) ||
+        (fr.description && fr.description.toLowerCase().includes(lower))
+    ).map((fr) => ({
+      type: "finance",
+      name: fr.title,
+      _id: fr._id,
+    })) : [];
 
-    // // Expenses
-    // const expenseResults = expenses
-    //   .filter(
-    //     (e) =>
-    //       e.type === "expense" &&
-    //       (
-    //         (e.title && e.title.toLowerCase().includes(lower)) ||
-    //         (e.description && e.description.toLowerCase().includes(lower))
-    //       )
-    //   )
-    //   .map((e) => ({
-    //     type: "expense",
-    //     name: e.title,
-    //     _id: e._id,
-    //   }));
+    // Expenses
+    const expenseResults = Array.isArray(expenses) ? expenses
+      .filter(
+        (e) =>
+          e.type === "expense" &&
+          (
+            (e.title && e.title.toLowerCase().includes(lower)) ||
+            (e.description && e.description.toLowerCase().includes(lower))
+          )
+      )
+      .map((e) => ({
+        type: "expense",
+        name: e.title,
+        _id: e._id,
+      })) : [];
 
-    // // Incomes
-    // const incomeResults = expenses
-    //   .filter(
-    //     (i) =>
-    //       i.type === "income" &&
-    //       (
-    //         (i.title && i.title.toLowerCase().includes(lower)) ||
-    //         (i.description && i.description.toLowerCase().includes(lower))
-    //       )
-    //   )
-    //   .map((i) => ({
-    //     type: "income",
-    //     name: i.title,
-    //     _id: i._id,
-    //   }));
+    // Incomes
+    const incomeResults = Array.isArray(expenses) ? expenses
+      .filter(
+        (i) =>
+          i.type === "income" &&
+          (
+            (i.title && i.title.toLowerCase().includes(lower)) ||
+            (i.description && i.description.toLowerCase().includes(lower))
+          )
+      )
+      .map((i) => ({
+        type: "income",
+        name: i.title,
+        _id: i._id,
+      })) : [];
 
-    // // Time Sessions
-    // const timeSessionResults = timeSessions.filter(
-    //   (ts) =>
-    //     (ts.name && ts.name.toLowerCase().includes(lower)) ||
-    //     (ts.description && ts.description.toLowerCase().includes(lower)) ||
-    //     (ts.tag && ts.tag.toLowerCase().includes(lower))
-    // ).map((ts) => ({
-    //   type: "timesession",
-    //   name: ts.name,
-    //   description: ts.description,
-    //   tag: ts.tag,
-    //   _id: ts._id,
-    // }));
+    // Time Sessions
+    const timeSessionResults = Array.isArray(timeSessions) ? timeSessions.filter(
+      (ts) =>
+        (ts.name && ts.name.toLowerCase().includes(lower)) ||
+        (ts.description && ts.description.toLowerCase().includes(lower)) ||
+        (ts.tag && ts.tag.toLowerCase().includes(lower))
+    ).map((ts) => ({
+      type: "timesession",
+      name: ts.name,
+      description: ts.description,
+      tag: ts.tag,
+      _id: ts._id,
+    })) : [];
 
-    // setSearchResults([
-    //   ...pageResults.map((r) => ({ type: "page", ...r })),
-    //   ...userResults,
-    //   ...taskResults,
-    //   ...announcementResults,
-    //   ...calendarResults,
-    //   ...storageResults,
-    //   ...timeTrackingResults,
-    //   ...financeResults,
-    //   ...expenseResults,
-    //   ...incomeResults,
-    //   ...timeSessionResults,
-    // ]);
+    setSearchResults([
+      ...pageResults.map((r) => ({ type: "page", ...r })),
+      ...userResults,
+      ...taskResults,
+      ...announcementResults,
+      ...calendarResults,
+      ...storageResults,
+      ...timeTrackingResults,
+      ...financeResults,
+      ...expenseResults,
+      ...incomeResults,
+      ...timeSessionResults,
+    ]);
     setShowDropdown(true);
   }, [
     search,
@@ -220,7 +219,7 @@ const DashboardSearch: React.FC<DashboardSearchProps> = ({
         onChange={(e) => setSearch(e.target.value)}
         onFocus={() => search && setShowDropdown(true)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-        placeholder="Search pages or users..."
+        placeholder="Search tasks, users, files, etc..."
         className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary shadow"
       />
       {showDropdown && searchResults.length > 0 && (
@@ -263,7 +262,7 @@ const DashboardSearch: React.FC<DashboardSearchProps> = ({
                 break;
               case "income":
                 color = "bg-green-600";
-                label = "Income"; // <-- Corrected here
+                label = "Income";
                 break;
               case "timesession":
                 color = "bg-indigo-500";
@@ -333,13 +332,9 @@ const DashboardSearch: React.FC<DashboardSearchProps> = ({
                   }}
                 >
                   <div className="flex flex-col">
-                    <span className="font-semibold text-base">
-                      {result.name}
-                    </span>
+                    <span className="font-semibold text-base">{result.name}</span>
                     <div className="flex items-center mt-1">
-                      <span className="text-xs text-gray-500">
-                        {result.email}
-                      </span>
+                      <span className="text-xs text-gray-500">{result.email}</span>
                       <span className="ml-3 text-xs bg-secondary text-white px-3 py-1 rounded-full">
                         User
                       </span>
@@ -362,17 +357,11 @@ const DashboardSearch: React.FC<DashboardSearchProps> = ({
               >
                 <div className="flex-1">
                   <span className="font-semibold text-base">{result.name}</span>
-                  {/* Only render description for types you want, not for tasks, expenses, incomes */}
-                  {result.description &&
-                    !["task", "expense", "income"].includes(result.type) && (
-                      <span className="block text-xs text-gray-500 mt-1">
-                        {result.description}
-                      </span>
-                    )}
+                  {result.description && !["task", "expense", "income"].includes(result.type) && (
+                    <span className="block text-xs text-gray-500 mt-1">{result.description}</span>
+                  )}
                 </div>
-                <span
-                  className={`ml-4 text-xs ${color} text-white px-3 py-1 rounded-full`}
-                >
+                <span className={`ml-4 text-xs ${color} text-white px-3 py-1 rounded-full`}>
                   {label}
                 </span>
               </Link>
