@@ -100,12 +100,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <FaBars className="text-2xl" />
       </button>
       {/* Sidebar for desktop */}
-      <SidebarNav
-        menu={menuWithNotifications}
-        user={user}
-        router={router}
-        handleLogout={handleLogout}
-      />
+      <SidebarNav menu={menuWithNotifications} user={user} router={router} />
       {/* Sidebar drawer for mobile */}
       <MobileSidebar
         sidebarOpen={sidebarOpen}
@@ -113,7 +108,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         menu={menu}
         user={user}
         router={router}
-        handleLogout={handleLogout}
       />
       {/* Main Content */}
       <main className="flex-1 p-8 bg-gray-100 rounded-tl-lg shadow-lg min-h-screen">
