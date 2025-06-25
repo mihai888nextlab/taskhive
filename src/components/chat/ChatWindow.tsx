@@ -322,6 +322,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                           fileName={fileData.fileName}
                           fileSize={fileData.fileSize || 0}
                           downloadUrl={fileData.fileUrl}
+                          theme="light" // iara trebe schimbat aici
                         />
                       ) : (
                         <span className="text-red-500 text-xs">

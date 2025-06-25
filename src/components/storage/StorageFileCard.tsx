@@ -6,7 +6,7 @@ export interface FileCardProps {
   fileSize: number;
   downloadUrl?: string;
   theme: string;
-  fileIcon: React.ReactNode;
+  fileIcon?: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -23,14 +23,23 @@ const FileCard: React.FC<FileCardProps> = ({
   fileSize,
   downloadUrl,
   theme,
-  fileIcon,
   children,
 }) => (
-  <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} shadow-md`}>
+  <div
+    className={`p-4 rounded-lg ${
+      theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+    } shadow-md`}
+  >
     <div className="flex items-center gap-3">
       <IoIosDocument className="text-3xl text-primary" />
       <div>
-        <div className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{fileName}</div>
+        <div
+          className={`font-semibold ${
+            theme === "dark" ? "text-white" : "text-gray-900"
+          }`}
+        >
+          {fileName}
+        </div>
         <div className="text-xs text-gray-500">{formatBytes(fileSize)}</div>
       </div>
     </div>
