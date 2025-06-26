@@ -28,26 +28,26 @@ export default function Help() {
         />
       </div>
       <Header />
-      <main className="w-full flex flex-col items-center mt-32 mb-20 px-4 sm:px-6 relative z-10">
+      <main className="w-full flex flex-col items-center mt-20 sm:mt-32 mb-10 sm:mb-20 px-2 sm:px-6 relative z-10">
         <div className="w-full max-w-5xl flex flex-col items-center justify-center">
           {/* Premium accent bar */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-8 w-24 h-2 rounded-full bg-gradient-to-r from-primary/80 via-primary/60 to-primary/80 blur-sm opacity-80" />
           <h1
             className={
               kanit.className +
-              " text-[48px] md:text-[60px] leading-[1.1] text-white text-center mb-14 border-b-4 border-accent pb-5 animate-fade-in font-bold tracking-tight"
+              " text-[2.2rem] xs:text-[2.7rem] sm:text-[2.9rem] md:text-[60px] leading-[1.1] text-white text-center mb-10 sm:mb-14 border-b-4 border-accent pb-3 sm:pb-5 animate-fade-in font-bold tracking-tight"
             }
           >
             How TaskHive Works
           </h1>
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full">
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 w-full">
             {/* Section 1 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
+            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
               <FaUserShield className="text-4xl text-primary mb-5 drop-shadow" />
               <h2
                 className={
                   kanit.className +
-                  " text-2xl font-bold mb-3 text-white tracking-tight"
+                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
                 }
               >
                 1. Admin Account
@@ -59,12 +59,12 @@ export default function Help() {
               </p>
             </div>
             {/* Section 2 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
+            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
               <FaUsers className="text-4xl text-primary mb-5 drop-shadow" />
               <h2
                 className={
                   kanit.className +
-                  " text-2xl font-bold mb-3 text-white tracking-tight"
+                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
                 }
               >
                 2. Adding Collaborators
@@ -76,12 +76,12 @@ export default function Help() {
               </p>
             </div>
             {/* Section 3 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
+            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
               <FaTasks className="text-4xl text-primary mb-5 drop-shadow" />
               <h2
                 className={
                   kanit.className +
-                  " text-2xl font-bold mb-3 text-white tracking-tight"
+                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
                 }
               >
                 3. Task Assignment
@@ -93,12 +93,12 @@ export default function Help() {
               </p>
             </div>
             {/* Section 4 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
+            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
               <FaCalendarAlt className="text-4xl text-primary mb-5 drop-shadow" />
               <h2
                 className={
                   kanit.className +
-                  " text-2xl font-bold mb-3 text-white tracking-tight"
+                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
                 }
               >
                 4. Calendar Integration
@@ -109,12 +109,12 @@ export default function Help() {
               </p>
             </div>
             {/* Section 5 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
+            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
               <FaComments className="text-4xl text-primary mb-5 drop-shadow" />
               <h2
                 className={
                   kanit.className +
-                  " text-2xl font-bold mb-3 text-white tracking-tight"
+                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
                 }
               >
                 5. Communication Channels

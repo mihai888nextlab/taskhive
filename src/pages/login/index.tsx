@@ -65,20 +65,20 @@ export default function Login() {
         />
       </div>
       <Header />
-      <main className="w-full min-h-[80vh] flex flex-col items-center justify-center px-2 sm:px-4 py-8 relative z-10 mt-16">
-        <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/30 rounded-2xl p-10 flex flex-col items-center shadow-2xl relative overflow-hidden">
+      <main className="w-full min-h-[80vh] flex flex-col items-center justify-center px-2 sm:px-4 py-4 sm:py-8 relative z-10 mt-6 sm:mt-16">
+        <div className="w-full max-w-xs sm:max-w-sm mx-auto bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/30 rounded-2xl p-4 sm:p-10 flex flex-col items-center shadow-2xl relative overflow-hidden">
           {/* Premium accent bar */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-5 w-20 h-2 rounded-full bg-gradient-to-r from-primary/80 via-primary/60 to-primary/80 blur-sm opacity-80" />
           <h1
             className={
               kanit.className +
-              " text-3xl text-white font-bold mb-2 mt-2 text-center tracking-tight"
+              " text-2xl sm:text-3xl text-white font-bold mb-2 mt-2 text-center tracking-tight"
             }
           >
             Log in
           </h1>
-          <div className="w-10 border-t border-accent/30 mb-8 mt-2" />
-          <form className="space-y-6 w-full" onSubmit={handleLogin}>
+          <div className="w-10 border-t border-accent/30 mb-4 sm:mb-8 mt-2" />
+          <form className="space-y-4 sm:space-y-6 w-full" onSubmit={handleLogin}>
             <FloatingLabelInput
               id="email"
               label="Email Address"

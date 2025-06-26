@@ -140,7 +140,7 @@ export default function Home() {
       <Header />
       <main className="w-full flex flex-col items-center justify-center">
         {/* Hero Section */}
-        <section className="w-full flex flex-col items-center justify-center text-center pt-62 pb-45 bg-background relative overflow-hidden">
+        <section className="w-full flex flex-col items-center justify-center text-center pt-32 md:pt-67 pb-24 md:pb-40 bg-background relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
             <Image
               src="/hive-icon.png"
@@ -149,14 +149,14 @@ export default function Home() {
               style={{ objectFit: "cover" }}
             />
           </div>
-          <div className="relative z-10 flex flex-col items-center">
-            <span className="uppercase tracking-widest text-primary text-lg md:text-xl font-extrabold mb-6 px-4 py-2 rounded-lg shadow-md border border-primary/30 animate-pulse">
+          <div className="relative z-10 flex flex-col items-center w-full px-4 sm:px-0">
+            <span className="uppercase tracking-widest text-primary text-base sm:text-lg md:text-xl font-extrabold mb-4 sm:mb-6 px-3 sm:px-4 py-2 rounded-lg shadow-md border border-primary/30 animate-pulse">
               The first all-in-one business management tool
             </span>
             <h1
               className={
                 kanit.className +
-                " text-[60px] md:text-[72px] font-bold leading-tight text-white max-w-4xl mb-6 tracking-tight drop-shadow-2xl"
+                " text-[2.2rem] xs:text-[2.7rem] sm:text-[2.9rem] md:text-[60px] lg:text-[72px] font-bold leading-tight text-white max-w-2xl sm:max-w-3xl md:max-w-4xl mb-4 sm:mb-6 tracking-tight drop-shadow-2xl"
               }
             >
               Empower Modern Teams
@@ -164,17 +164,19 @@ export default function Home() {
               with{" "}
               <span className="text-primary">Minimal</span> Collaboration
             </h1>
-            <p className="text-primary/80 text-lg md:text-xl font-medium mb-10">Powered by advanced AI for smarter, faster teamwork.</p>
-            <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-8">
+            <p className="text-primary/80 text-base sm:text-lg md:text-xl font-medium mb-7 sm:mb-10 max-w-xl mx-auto">
+              Powered by advanced AI for smarter, faster teamwork.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8 w-full max-w-xs sm:max-w-none mx-auto">
               <Link
                 href="/register"
-                className="bg-primary text-white py-3 px-10 rounded-full text-lg font-semibold shadow-xl hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="bg-primary text-white py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold shadow-xl hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto"
               >
                 Get Started
               </Link>
               <Link
                 href="/features"
-                className="border border-primary text-primary py-3 px-10 rounded-full text-lg font-semibold hover:bg-primary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="border border-primary text-primary py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold hover:bg-primary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto"
               >
                 Learn More
               </Link>
