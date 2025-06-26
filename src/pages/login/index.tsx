@@ -1,9 +1,17 @@
 import FloatingLabelInput from "@/components/FloatingLabelInput";
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
+import Image from "next/image";
+import { Kanit } from "next/font/google";
+
+const kanit = Kanit({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 export default function Login() {
   const router = useRouter();
@@ -29,26 +37,6 @@ export default function Login() {
     }
 
     try {
-      // const response = await fetch("/api/auth/login", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     email: values.userEmail,
-      //     password: values.userPassword,
-      //   }),
-      // });
-
-      // const data = await response.json();
-
-      // if (response.ok) {
-      //   // Redirect to dashboard or home page
-      //   router.push("/app");
-      // } else {
-      //   setError(data.message || "Login failed.");
-      // }
-
       const res = await auth.login(values.userEmail, values.userPassword);
       if (!res) {
         throw new Error("Login failed. Please check your credentials.");
@@ -66,14 +54,31 @@ export default function Login() {
   };
 
   return (
-    <div className="min-w-full min-h-screen flex flex-col items-center">
+    <div className="min-w-full min-h-screen flex flex-col items-center bg-background relative overflow-hidden">
+      {/* Subtle background pattern/image for theme */}
+      <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
+        <Image
+          src="/hive-icon.png"
+          alt="TaskHive"
+          fill
+          style={{ objectFit: "cover" }}
+        />
+      </div>
       <Header />
-      <main className="w-full min-h-[80vh] flex flex-col items-center justify-center px-2 sm:px-4 py-8">
-        <div className="w-full max-w-md">
-          <h1 className="text-2xl sm:text-3xl text-white font-bold mb-6 text-center">
-            Login
+      <main className="w-full min-h-[80vh] flex flex-col items-center justify-center px-2 sm:px-4 py-8 relative z-10 mt-16">
+        <div className="w-full max-w-sm mx-auto bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/30 rounded-2xl p-10 flex flex-col items-center shadow-2xl relative overflow-hidden">
+          {/* Premium accent bar */}
+          <div className="absolute left-1/2 -translate-x-1/2 -top-5 w-20 h-2 rounded-full bg-gradient-to-r from-primary/80 via-primary/60 to-primary/80 blur-sm opacity-80" />
+          <h1
+            className={
+              kanit.className +
+              " text-3xl text-white font-bold mb-2 mt-2 text-center tracking-tight"
+            }
+          >
+            Log in
           </h1>
-          <form className="space-y-6" onSubmit={handleLogin}>
+          <div className="w-10 border-t border-accent/30 mb-8 mt-2" />
+          <form className="space-y-6 w-full" onSubmit={handleLogin}>
             <FloatingLabelInput
               id="email"
               label="Email Address"
@@ -99,24 +104,30 @@ export default function Login() {
               value={values.userPassword}
             />
             {error && (
-              <p className="text-red-500 text-sm text-center">{error}</p>
+              <p className="text-red-500 text-xs text-center bg-transparent py-1">
+                {error}
+              </p>
             )}
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 text-base sm:text-lg"
+              className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors duration-150 text-base shadow-md"
               disabled={loading}
             >
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
-          <p className="text-center text-xs sm:text-sm text-gray-400 mt-4">
+          <p className="text-center text-xs text-gray-400 mt-8">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-blue-500 hover:underline">
-              Register here
+            <Link
+              href="/register"
+              className="text-primary font-medium hover:underline"
+            >
+              Register
             </Link>
           </p>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

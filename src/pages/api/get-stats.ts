@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/db/dbConfig";
 import userModel from "@/db/models/userModel";
-import taskModel from "@/db/models/taskModel"; // Assuming you have a task model
+import taskModel from "@/db/models/taskModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
 import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
@@ -21,92 +21,93 @@ export default async function handler(
     return res.status(401).json({ message: "No token provided" });
   }
 
-  const decodedToken: JWTPayload | null = jwt.verify(
-    token,
-    process.env.JWT_SECRET || ""
-  ) as JWTPayload;
+  let decodedToken: JWTPayload;
+  try {
+    decodedToken = jwt.verify(
+      token,
+      process.env.JWT_SECRET || ""
+    ) as JWTPayload;
+  } catch {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
 
   try {
-    // Get total users
-    const totalUsers = await userCompanyModel
-      .find({ companyId: decodedToken.companyId })
-      .countDocuments();
-
-    // Get users created in the last 7 days
-    const last7Days = new Date();
-    last7Days.setDate(last7Days.getDate() - 7);
-    const newUsers = await userCompanyModel
-      .find({ companyId: decodedToken.companyId })
-      .countDocuments({
-        createdAt: { $gte: last7Days },
-      });
-
-    // Get total tasks
+    // Get all userCompany records for this company
     const companyUserRecords = await userCompanyModel
       .find({ companyId: decodedToken.companyId })
-      .select("userId") // Select only the userId field
-      .lean(); // Return plain JavaScript objects for efficiency
+      .select("userId createdAt")
+      .lean();
 
-    // Extract just the user IDs as an array of Mongoose ObjectIds
     const companyUserIds = companyUserRecords.map(
       (record) => new Types.ObjectId(record.userId)
     );
 
-    const totalTasks = await taskModel
-      .find({
-        $or: [
-          { userId: { $in: companyUserIds } }, // Task assigned to a user in the company
-          { createdBy: { $in: companyUserIds } }, // Task created by a user in the company
-        ],
-      })
-      .countDocuments();
+    // Total users in company
+    const totalUsers = companyUserRecords.length;
 
-    // Get completed tasks in the last 7 days
+    // New users in last 7 days (based on userCompany createdAt)
+    const last7Days = new Date();
+    last7Days.setDate(last7Days.getDate() - 7);
+    const newUsers = companyUserRecords.filter(
+      (u) => u.createdAt && new Date(u.createdAt) >= last7Days
+    ).length;
+
+    // Total tasks assigned to or created by users in this company
+    const totalTasks = await taskModel.countDocuments({
+      $or: [
+        { userId: { $in: companyUserIds } },
+        { createdBy: { $in: companyUserIds } },
+      ],
+    });
+
+    // Completed tasks in last 7 days for this company
     const completedTasks = await taskModel.countDocuments({
+      $or: [
+        { userId: { $in: companyUserIds } },
+        { createdBy: { $in: companyUserIds } },
+      ],
       completed: true,
       updatedAt: { $gte: last7Days },
     });
 
-    // Fetch new users data for the last 7 days
-    const newUsersData = await userModel.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: last7Days },
-        },
-      },
-      {
-        $group: {
-          _id: { $dayOfYear: "$createdAt" },
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-
-    // Fetch completed tasks data for the last 7 days
-    const completedTasksData = await taskModel.aggregate([
-      {
-        $match: {
-          completed: true,
-          updatedAt: { $gte: last7Days },
-        },
-      },
-      {
-        $group: {
-          _id: { $dayOfYear: "$updatedAt" },
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-
-    // Format the data to match the last 7 days
-    const formattedNewUsersData = Array(7).fill(0);
-    newUsersData.forEach((day) => {
-      formattedNewUsersData[day._id - 1] = day.count; // Adjust index based on your aggregation
+    // New users per day for last 7 days (array)
+    const newUsersData = Array(7).fill(0);
+    companyUserRecords.forEach((u) => {
+      if (u.createdAt) {
+        const daysAgo = Math.floor(
+          (new Date().getTime() - new Date(u.createdAt).getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+        if (daysAgo < 7) {
+          newUsersData[daysAgo]++;
+        }
+      }
     });
 
-    const formattedCompletedTasksData = Array(7).fill(0);
-    completedTasksData.forEach((day) => {
-      formattedCompletedTasksData[day._id - 1] = day.count; // Adjust index based on your aggregation
+    // Completed tasks per day for last 7 days (array)
+    const companyTasks = await taskModel
+      .find({
+        $or: [
+          { userId: { $in: companyUserIds } },
+          { createdBy: { $in: companyUserIds } },
+        ],
+        completed: true,
+        updatedAt: { $gte: last7Days },
+      })
+      .select("updatedAt")
+      .lean();
+
+    const completedTasksData = Array(7).fill(0);
+    companyTasks.forEach((t) => {
+      if (t.updatedAt) {
+        const daysAgo = Math.floor(
+          (new Date().getTime() - new Date(t.updatedAt).getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+        if (daysAgo < 7) {
+          completedTasksData[daysAgo]++;
+        }
+      }
     });
 
     res.status(200).json({
@@ -114,8 +115,8 @@ export default async function handler(
       newUsers,
       totalTasks,
       completedTasks,
-      newUsersData: formattedNewUsersData,
-      completedTasksData: formattedCompletedTasksData,
+      newUsersData,
+      completedTasksData,
     });
   } catch (error) {
     console.error("Error fetching statistics:", error);

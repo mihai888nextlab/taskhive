@@ -1,10 +1,18 @@
 import FloatingLabelInput from "@/components/FloatingLabelInput";
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
+import Image from "next/image";
+import { Kanit } from "next/font/google";
+
+const kanit = Kanit({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 export default function Register() {
   const router = useRouter();
@@ -47,30 +55,6 @@ export default function Register() {
     }
 
     try {
-      // const response = await fetch("/api/auth/register", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     email: values.userEmail,
-      //     password: values.userPassword,
-      //     firstName: values.firstName,
-      //     lastName: values.lastName,
-      //     companyName: values.companyName,
-      //     companyRegistrationNumber: values.vatNumber,
-      //   }),
-      // });
-
-      // const data = await response.json();
-
-      // if (response.ok) {
-      //   // Redirect to login or a success page
-      //   router.push("/app");
-      // } else {
-      //   setError(data.message || "Registration failed.");
-      // }
-
       const res = await auth.register(
         values.userEmail,
         values.userPassword,
@@ -96,17 +80,33 @@ export default function Register() {
   };
 
   return (
-    <div className="min-w-full min-h-screen bg-background text-white flex flex-col items-center">
+    <div className="min-w-full min-h-screen bg-background text-white flex flex-col items-center relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
+        <Image
+          src="/hive-icon.png"
+          alt="TaskHive"
+          fill
+          style={{ objectFit: "cover" }}
+        />
+      </div>
       <Header />
 
       {loading && <Loading />}
 
-      <main className="w-[1200px] h-screen flex items-center justify-center">
-        <div className="w-full max-w-md">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
+      <main className="w-full min-h-[80vh] flex flex-col items-center justify-center px-2 sm:px-4 py-8 relative z-10 mt-16">
+        <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/30 rounded-2xl p-10 flex flex-col items-center shadow-2xl relative overflow-hidden">
+          {/* Premium accent bar */}
+          <div className="absolute left-1/2 -translate-x-1/2 -top-5 w-20 h-2 rounded-full bg-gradient-to-r from-primary/80 via-primary/60 to-primary/80 blur-sm opacity-80" />
+          <h1
+            className={
+              kanit.className +
+              " text-3xl text-white font-bold mb-2 mt-2 text-center tracking-tight"
+            }
+          >
             Register
           </h1>
-          <form className="space-y-6" onSubmit={handleRegister}>
+          <div className="w-10 border-t border-accent/30 mb-8 mt-2" />
+          <form className="space-y-5 w-full" onSubmit={handleRegister}>
             <div className="flex space-x-4">
               <FloatingLabelInput
                 id="firstName"
@@ -166,7 +166,6 @@ export default function Register() {
               }
               value={values.confirmPassword}
             />
-
             <FloatingLabelInput
               id="companyName"
               label="Company Name"
@@ -191,26 +190,31 @@ export default function Register() {
             />
 
             {error && (
-              <div className="text-red-500 text-sm text-center mt-4">
+              <div className="text-red-500 text-xs text-center bg-transparent py-1">
                 {error}
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+              className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors duration-150 text-base shadow-md"
+              disabled={loading}
             >
               Register
             </button>
           </form>
-          <p className="text-center text-sm text-gray-400 mt-4">
+          <p className="text-center text-xs text-gray-400 mt-8">
             Do you have an account?{" "}
-            <Link href="/login" className="text-blue-500 hover:underline">
-              Login here
+            <Link
+              href="/login"
+              className="text-primary font-medium hover:underline"
+            >
+              Login
             </Link>
           </p>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
