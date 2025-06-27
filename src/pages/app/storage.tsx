@@ -148,13 +148,13 @@ const Storage = () => {
 
   return (
     <div
-      className={`relative p-8 bg-gray-100 min-h-screen rounded-lg ${dragActive ? "ring-4 ring-blue-400" : ""}`}
+      className={`relative p-2 sm:p-8 bg-gray-100 min-h-screen max-w-full sm:max-w-none mx-auto ${dragActive ? "ring-4 ring-blue-400" : ""}`}
       onDragEnter={handleDrag}
       onDragOver={handleDrag}
       onDragLeave={handleDrag}
       onDrop={handleDrop}
     >
-      <h1 className="text-4xl font-extrabold mb-10 text-center tracking-tight">
+      <h1 className="text-xl sm:text-4xl font-extrabold mb-4 sm:mb-10 text-center tracking-tight">
         Storage Management
       </h1>
       <StorageHeader

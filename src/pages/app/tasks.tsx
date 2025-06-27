@@ -7,6 +7,7 @@ import { useTheme } from "@/components/ThemeContext";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskList from "@/components/tasks/TaskList";
 import AssignedTasksList from "@/components/tasks/AssignedTasksList";
+import TaskCard from "@/components/tasks/TaskCard";
 
 interface TaskUser {
   _id: string;
@@ -281,15 +282,15 @@ const TasksPage: NextPageWithLayout = () => {
   return (
     <div className="relative min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
       {/* Decorative background */}
-      <div className="absolute top-10 left-1/4 w-48 h-48 bg-primary-light rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-      <div className="absolute bottom-10 right-1/4 w-64 h-64 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-      <div className="absolute top-1/2 left-1/2 w-56 h-56 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+      <div className="absolute top-10 left-1/4 w-32 h-32 sm:w-48 sm:h-48 bg-primary-light rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+      <div className="absolute bottom-10 right-1/4 w-40 h-40 sm:w-64 sm:h-64 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+      <div className="absolute top-1/2 left-1/2 w-36 h-36 sm:w-56 sm:h-56 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
 
-      <main className={`relative z-10 w-full max-w-6xl mx-auto bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-3xl shadow-2xl p-2 sm:p-4 md:p-8 md:p-12`}>
-        <h1 className={`text-5xl font-extrabold text-${theme === 'light' ? 'gray-900' : 'white'} mb-6 text-center tracking-tighter leading-tight`}>
+      <main className={`relative z-10 w-full max-w-6xl mx-auto bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-2xl sm:rounded-3xl shadow-2xl p-2 sm:p-4 md:p-8 md:p-12`}> 
+        <h1 className={`text-3xl sm:text-5xl font-extrabold text-${theme === 'light' ? 'gray-900' : 'white'} mb-4 sm:mb-6 text-center tracking-tighter leading-tight`}>
           Your Personal Task Manager
         </h1>
-        <p className={`text-center text-lg text-${theme === 'light' ? 'gray-600' : 'gray-400'} mb-10 max-w-2xl mx-auto`}>
+        <p className={`text-center text-base sm:text-lg text-${theme === 'light' ? 'gray-600' : 'gray-400'} mb-6 sm:mb-10 max-w-2xl mx-auto`}>
           Organize your day, prioritize your goals, and track your progress with ease.
         </p>
 
@@ -333,7 +334,7 @@ const TasksPage: NextPageWithLayout = () => {
           }}
         />
 
-        <h2 className={`text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-8 mt-12 pb-4 border-b-4 border-primary-dark text-center`}>
+        <h2 className={`text-2xl sm:text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-6 sm:mb-8 mt-8 sm:mt-12 pb-2 sm:pb-4 border-b-2 sm:border-b-4 border-primary-dark text-center`}>
           My Task List
         </h2>
 
@@ -381,7 +382,7 @@ const TasksPage: NextPageWithLayout = () => {
         )}
 
         {/* Tasks I Assigned to Others */}
-        <h2 className={`text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-8 mt-16 pb-4 border-b-4 border-secondary text-center`}>
+        <h2 className={`text-2xl sm:text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-6 sm:mb-8 mt-12 sm:mt-16 pb-2 sm:pb-4 border-b-2 sm:border-b-4 border-secondary text-center`}>
           Tasks I Assigned to Others
         </h2>
         {assignedTasks.length === 0 ? (

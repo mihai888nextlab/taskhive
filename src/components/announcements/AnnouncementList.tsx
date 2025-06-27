@@ -46,7 +46,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
             isAdmin={isAdmin}
             onPinToggle={onPinToggle}
             onComment={onComment}
-            onDelete={onDelete} // <-- pass down
+            onDelete={onDelete}
           />
         </motion.div>
       ))}

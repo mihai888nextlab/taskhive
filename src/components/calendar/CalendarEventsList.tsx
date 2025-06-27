@@ -33,27 +33,27 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
   }
 
   return (
-    <div className="mt-8">
-      <h3 className="text-lg sm:text-xl font-semibold mb-4 border-b border-white border-opacity-30 pb-2">
+    <div className="mt-6 sm:mt-8">
+      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 border-b border-white border-opacity-30 pb-1 sm:pb-2">
         Upcoming Events
       </h3>
-      <ul className="space-y-3">
+      <ul className="space-y-2 sm:space-y-3">
         {loading ? (
-          <li className="text-gray-400">Loading events...</li>
+          <li className="text-gray-400 text-sm sm:text-base">Loading events...</li>
         ) : listError ? (
-          <li className="text-red-500">{listError}</li>
+          <li className="text-red-500 text-sm sm:text-base">{listError}</li>
         ) : selectedDate ? (
           eventsForDate.length === 0 ? (
-            <li className="text-gray-400">No upcoming events.</li>
+            <li className="text-gray-400 text-sm sm:text-base">No upcoming events.</li>
           ) : (
             eventsForDate.map((task) => (
               <Link key={task._id} href={`/app/tasks/`} legacyBehavior>
                 <li
-                  className={`p-3 rounded-lg ${
+                  className={`p-2 sm:p-3 rounded-lg ${
                     task.completed
                       ? "bg-gray-700 opacity-70"
                       : "bg-gray-800 hover:bg-gray-700"
-                  } transition-colors cursor-move`}
+                  } transition-colors cursor-move flex flex-col gap-1`}
                   draggable={enableDragAndDrop}
                   onDragStart={(e) => {
                     if (enableDragAndDrop) {
@@ -61,13 +61,13 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
                     }
                   }}
                 >
-                  <h4 className="font-semibold text-lg">
+                  <h4 className="font-semibold text-base sm:text-lg">
                     {task.title}{" "}
                     {task.completed && (
-                      <span className="text-green-400">(Completed)</span>
+                      <span className="text-green-400 text-xs sm:text-sm">(Completed)</span>
                     )}
                   </h4>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-xs sm:text-sm text-gray-300">
                     {new Date(task.deadline).toLocaleDateString()}
                   </p>
                 </li>
@@ -75,7 +75,7 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
             ))
           )
         ) : (
-          <li className="text-gray-400">No upcoming events.</li>
+          <li className="text-gray-400 text-sm sm:text-base">No upcoming events.</li>
         )}
       </ul>
     </div>

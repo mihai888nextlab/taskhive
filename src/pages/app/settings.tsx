@@ -114,6 +114,7 @@ const SettingsPage: NextPageWithLayout = () => {
   }, [activeTab]);
 
   return (
+    <>
     <div className={`flex flex-col md:flex-row min-h-screen bg-gray-100 text-${theme === 'light' ? 'gray-900' : 'white'}`}>
       <SettingsSidebar
         tabs={tabs}
@@ -121,7 +122,7 @@ const SettingsPage: NextPageWithLayout = () => {
         setActiveTab={setActiveTab}
         theme={theme}
       />
-      <main className={`flex-1 p-2 sm:p-4 md:p-10 bg-${theme === 'light' ? 'white' : 'gray-800'} border-l border-gray-200 rounded-lg shadow-lg mx-0 md:mx-8 my-4 md:my-8`}>
+      <main className={`flex-1 w-full p-2 sm:p-4 md:p-10 bg-${theme === 'light' ? 'white' : 'gray-800'} border-l border-gray-200 md:rounded-lg md:shadow-lg mx-0 md:mx-8 my-2 md:my-8 min-h-[60vh]`}>
         {activeTab === "profile" && (
           <>
             {saveStatus !== "idle" && (
@@ -155,6 +156,38 @@ const SettingsPage: NextPageWithLayout = () => {
         )}
       </main>
     </div>
+    <style jsx global>{`
+      @media (max-width: 768px) {
+        .settings-sidebar-mobile {
+          position: sticky;
+          top: 0;
+          z-index: 10;
+          background: inherit;
+          border-bottom: 1px solid #e5e7eb;
+          box-shadow: none;
+          display: flex;
+          flex-direction: row;
+          overflow-x: auto;
+          width: 100vw;
+          max-width: 100vw;
+          padding: 0.5rem 0.5rem 0 0.5rem;
+        }
+        .settings-sidebar-mobile ul {
+          display: flex;
+          flex-direction: row;
+          gap: 0.5rem;
+          width: 100%;
+        }
+        .settings-sidebar-mobile li {
+          min-width: 110px;
+          text-align: center;
+          border-radius: 0.75rem;
+          font-size: 1rem;
+          padding: 0.5rem 0.75rem;
+        }
+      }
+    `}</style>
+    </>
   );
 };
 

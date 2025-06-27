@@ -71,29 +71,29 @@ Write a clear, engaging, and informative announcement for all employees, based o
   return (
     <form
       onSubmit={onSubmit}
-      className={`bg-${theme === 'light' ? 'gradient-to-br from-gray-50 to-gray-100' : 'bg-gray-700'} p-8 rounded-2xl shadow-xl border border-gray-200 mb-8 animate-fadeIn`}
+      className={`bg-${theme === 'light' ? 'gradient-to-br from-gray-50 to-gray-100' : 'bg-gray-700'} p-4 sm:p-8 rounded-2xl shadow-xl border border-gray-200 mb-8 animate-fadeIn w-full`}
     >
-      <h2 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'} mb-6 text-center`}>
+      <h2 className={`text-2xl sm:text-3xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'} mb-4 sm:mb-6 text-center`}>
         Create Announcement
       </h2>
       {formError && (
-        <div className="bg-red-100 text-red-700 p-4 mb-6 rounded-lg font-semibold text-center">
+        <div className="bg-red-100 text-red-700 p-3 sm:p-4 mb-4 sm:mb-6 rounded-lg font-semibold text-center">
           {formError}
         </div>
       )}
       <input
         type="text"
         placeholder="Title"
-        className={`w-full mb-4 p-3 border border-primary/40 rounded-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-lg font-semibold shadow-sm`}
+        className={`w-full mb-3 sm:mb-4 p-2 sm:p-3 border border-primary/40 rounded-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-base sm:text-lg font-semibold shadow-sm`}
         value={title}
         onChange={(e) => onTitleChange(e.target.value)}
         required
         disabled={loading}
       />
-      <div className="flex items-center mb-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center mb-2 gap-2 sm:gap-0">
         <textarea
           placeholder="Content (Markdown supported!)"
-          className={`flex-1 p-3 border border-primary/40 rounded-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base shadow-sm`}
+          className={`flex-1 p-2 sm:p-3 border border-primary/40 rounded-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base shadow-sm`}
           value={content}
           onChange={e => onContentChange(e.target.value)}
           required
@@ -102,7 +102,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
         />
         <button
           type="button"
-          className="ml-2 px-3 py-2 bg-primary text-white rounded-lg flex items-center font-semibold shadow hover:bg-primary-dark transition disabled:opacity-60"
+          className="mt-2 sm:mt-0 sm:ml-2 px-3 py-2 bg-primary text-white rounded-lg flex items-center font-semibold shadow hover:bg-primary-dark transition disabled:opacity-60 w-full sm:w-auto justify-center"
           onClick={handleGenerateContent}
           disabled={!title || generatingContent}
           title="Generate content from title"
@@ -116,8 +116,8 @@ Write a clear, engaging, and informative announcement for all employees, based o
           <FaSpinner className="animate-spin mr-2" /> Generating content...
         </div>
       )}
-      <div className="text-xs text-gray-400 mb-4">You can use <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer" className="underline">Markdown</a> for formatting.</div>
-      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+      <div className="text-xs text-gray-400 mb-3 sm:mb-4">You can use <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer" className="underline">Markdown</a> for formatting.</div>
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-3 sm:mb-4">
         {/* Category Selector */}
         <div className="flex-1 flex flex-col">
           <label
@@ -130,7 +130,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
             id="category"
             value={category}
             onChange={e => onCategoryChange(e.target.value)}
-            className={`px-4 py-2 rounded-lg border ${theme === 'light' ? 'text-black' : 'text-gray-200'}`}
+            className={`px-3 py-2 rounded-lg border ${theme === 'light' ? 'text-black' : 'text-gray-200'} text-base`}
             aria-label="Category"
           >
             <option value="" disabled>
@@ -144,7 +144,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
           </select>
         </div>
         {/* Pin to Top Checkbox */}
-        <div className="flex flex-col justify-center items-center sm:w-32">
+        <div className="flex flex-row sm:flex-col justify-center items-center sm:w-32 mt-2 sm:mt-0">
           <label className="inline-flex items-center cursor-pointer select-none">
             <input
               type="checkbox"
@@ -159,7 +159,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
           </label>
         </div>
         {/* Date Selector */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col mt-2 sm:mt-0">
           <label
             className={`mb-1 font-semibold ${theme === 'light' ? 'text-black' : 'text-gray-200'}`}
             htmlFor="expiresAt"
@@ -171,7 +171,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
             type="date"
             value={expiresAt}
             onChange={e => onExpiresAtChange(e.target.value)}
-            className={`px-4 py-2 rounded-lg border ${theme === 'light' ? 'text-black' : 'text-gray-200'}`}
+            className={`px-3 py-2 rounded-lg border ${theme === 'light' ? 'text-black' : 'text-gray-200'} text-base`}
             aria-label="Expiry date"
             min={new Date().toISOString().split("T")[0]}
           />
@@ -182,7 +182,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
       </div>
       <button
         type="submit"
-        className={`w-full py-3 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 text-lg`}
+        className={`w-full py-2 sm:py-3 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300 text-base sm:text-lg`}
       >
         Post Announcement
       </button>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import UserProfileModal from "../modals/UserProfileModal";
 
 const LABELS: Record<string, { label: string; color: string }> = {
   user: { label: "User", color: "bg-secondary" },
@@ -30,7 +31,7 @@ const getResultUrl = (item: any) => {
     case "expense":
       return `/app/finance`;
     case "income":
-      return `/app/finance}`;
+      return `/app/finance`;
     case "timesession":
       return `/app/time-tracking`;
     case "page":
@@ -56,6 +57,8 @@ const UniversalSearchBar: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   useEffect(() => {
     if (!search.trim()) {
@@ -113,7 +116,8 @@ const UniversalSearchBar: React.FC = () => {
                   type="button"
                   className="block w-full text-left px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-700/30 hover:bg-primary/10 cursor-pointer"
                   onClick={() => {
-                    setSearch("");
+                    setSelectedUser(result);
+                    setUserProfileModalOpen(true);
                     setShowDropdown(false);
                   }}
                 >
@@ -177,6 +181,11 @@ const UniversalSearchBar: React.FC = () => {
           })}
         </div>
       )}
+      <UserProfileModal
+        open={userProfileModalOpen}
+        onClose={() => setUserProfileModalOpen(false)}
+        user={selectedUser}
+      />
     </div>
   );
 };

@@ -115,15 +115,15 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
 
   return (
     <div
-      className={`group flex flex-col md:flex-row items-start md:items-center p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-primary/20 border-l-8 border-primary bg-${theme === 'light' ? 'white' : 'gray-800'} relative`}
+      className={`group flex flex-col md:flex-row items-start md:items-center p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ring-1 ring-primary/20 border-l-8 border-primary bg-${theme === 'light' ? 'white' : 'gray-800'} relative`}
       tabIndex={0}
       aria-label={`Announcement: ${announcement.title}`}
     >
-      <div className="flex-shrink-0 mr-4 mb-4 md:mb-0">
-        <FaBullhorn className="text-4xl text-primary drop-shadow-md" />
+      <div className="flex-shrink-0 mr-0 mb-4 md:mb-0 md:mr-4 flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16">
+        <FaBullhorn className="text-3xl sm:text-4xl text-primary drop-shadow-md" />
       </div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-2">
+      <div className="flex-1 w-full">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
           <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white ${categoryColors[announcement.category] || "bg-gray-400"}`}>
             {announcement.category}
           </span>
@@ -138,10 +138,10 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
             </span>
           )}
         </div>
-        <h3 className={`text-2xl md:text-3xl font-extrabold leading-tight mb-2 text-${theme === 'light' ? 'gray-900' : 'white'} tracking-tight group-hover:text-primary-dark transition-colors`}>
+        <h3 className={`text-lg sm:text-2xl md:text-3xl font-extrabold leading-tight mb-2 text-${theme === 'light' ? 'gray-900' : 'white'} tracking-tight group-hover:text-primary-dark transition-colors`}> 
           {announcement.title}
         </h3>
-        <div className={`mb-4 text-base md:text-lg text-${theme === 'light' ? 'gray-700' : 'gray-300'}`}>
+        <div className={`mb-4 text-base sm:text-lg text-${theme === 'light' ? 'gray-700' : 'gray-300'}`}> 
           <div className={styles.markdown}>
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {announcement.content}
@@ -233,7 +233,7 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
       </div>
       {/* Admin actions */}
       {isAdmin && (
-        <div className="absolute top-4 right-4 flex gap-2">
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex gap-2">
           {onPinToggle && (
             <button
               className="text-yellow-500 hover:text-white rounded-full p-2 bg-transparent hover:bg-yellow-100 dark:hover:bg-yellow-500 transition-colors"

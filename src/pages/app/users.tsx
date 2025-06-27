@@ -9,6 +9,7 @@ import AddRoleModal from "@/components/modals/AddRoleModal"; // Import AddRoleMo
 import OrgChartModal from "@/components/modals/OrgChartModal"; // Import OrgChartModal
 import UserProfileModal from "@/components/modals/UserProfileModal";
 import { useTheme } from "@/components/ThemeContext"; // Import the useTheme hook
+import UserCard from "@/components/users/UserCard";
 
 interface Project extends TableDataItem {
   user_id: string;
@@ -394,10 +395,10 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           user={selectedUser}
         />
       )}
-      <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-8 text-center tracking-tight leading-tight drop-shadow-xl z-10 relative">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 sm:mb-8 text-center tracking-tight leading-tight drop-shadow-xl z-10 relative px-2 sm:px-0">
         Manage Users
       </h1>
-      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-8 justify-center items-center z-10 relative">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-6 sm:mb-8 justify-center items-center z-10 relative w-full px-2 sm:px-0">
         {user && user.role === "admin" && (
           <>
             <button
@@ -423,55 +424,58 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           </button>
         )}
       </div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 p-6 rounded-2xl shadow-xl bg-white/80 border border-gray-200/60 backdrop-blur-lg z-10 relative">
-        <div className="flex-1 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-          <label className="font-semibold text-sm text-black flex-shrink-0">
-            Search:
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="ml-2 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary bg-inherit text-black"
-            />
-          </label>
-        </div>
-        <div className="flex flex-wrap gap-2 items-center justify-end">
-          <label className="font-semibold text-sm text-black">
-            Role:
-            <select
-              value={filterRole}
-              onChange={e => setFilterRole(e.target.value)}
-              className="ml-2 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
-            >
-              <option value="all">All</option>
-              {Array.from(
-                new Set(
-                  users.filter(u =>
-                    u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined)
-                  ).map(u => u.role)
-                )
-              ).map(role => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
-          </label>
-          <label className="font-semibold text-sm text-black">
-            Sort by:
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as any)}
-              className="ml-2 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
-            >
-              <option value="firstNameAsc">First Name (A-Z)</option>
-              <option value="lastNameAsc">Last Name (A-Z)</option>
-              <option value="roleAsc">Role (A-Z)</option>
-            </select>
-          </label>
+      <div className="w-full mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-6 rounded-2xl shadow-xl bg-white/80 border border-gray-200/60 backdrop-blur-lg z-10 relative">
+          {/* Search left, Role/Sort right on desktop; stacked on mobile */}
+          <div className="flex flex-col w-full sm:w-auto">
+            <label className="font-semibold text-sm text-black flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
+              <span className="mb-1 sm:mb-0 sm:mr-2">Search:</span>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary bg-inherit text-black"
+              />
+            </label>
+          </div>
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-center justify-end w-full sm:w-auto mt-2 sm:mt-0">
+            <label className="font-semibold text-sm text-black flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
+              <span className="mb-1 sm:mb-0 sm:mr-2">Role:</span>
+              <select
+                value={filterRole}
+                onChange={e => setFilterRole(e.target.value)}
+                className="w-full sm:w-40 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
+              >
+                <option value="all">All</option>
+                {Array.from(
+                  new Set(
+                    users.filter(u =>
+                      u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined)
+                    ).map(u => u.role)
+                  )
+                ).map(role => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
+            </label>
+            <label className="font-semibold text-sm text-black flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
+              <span className="mb-1 sm:mb-0 sm:mr-2">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as any)}
+                className="w-full sm:w-48 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
+              >
+                <option value="firstNameAsc">First Name (A-Z)</option>
+                <option value="lastNameAsc">Last Name (A-Z)</option>
+                <option value="roleAsc">Role (A-Z)</option>
+              </select>
+            </label>
+          </div>
         </div>
       </div>
       {/* Card view for mobile only */}
-      <div className="flex flex-col gap-6 md:hidden z-10 relative">
+      <div className="flex flex-col gap-4 sm:gap-6 md:hidden z-10 relative w-full px-1">
         {[...filteredUsers]
           .sort((a, b) => {
             // Admins always on top
@@ -480,55 +484,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             return 0;
           })
           .map((user) => (
-            <button
-              key={user._id}
-              className={`bg-${
-                theme === "dark" ? "gray-800" : "white"
-              } rounded-xl shadow-md p-4 flex flex-col space-y-2 cursor-pointer text-left transition hover:ring-2 hover:ring-blue-400`}
-              onClick={() => handleUserClick(user.userId._id)}
-              type="button"
-            >
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-semibold">
-                  First Name
-                </span>
-                <span className="text-lg font-bold text-gray-100">
-                  {user.userId.firstName}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-semibold">
-                  Last Name
-                </span>
-                <span className="text-lg font-bold text-gray-100">
-                  {user.userId.lastName}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-semibold">
-                  Email
-                </span>
-                <span className="text-base text-gray-200 break-all">
-                  {user.userId.email}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-semibold">
-                  Role
-                </span>
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                    user.role === "admin"
-                      ? "bg-red-600 text-white"
-                      : user.role === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-600 text-white"
-                  }`}
-                >
-                  {user.role}
-                </span>
-              </div>
-            </button>
+            <UserCard key={user._id} user={user} theme={theme} onClick={handleUserClick} />
           ))}
       </div>
       {/* Table view for desktop only */}

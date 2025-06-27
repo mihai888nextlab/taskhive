@@ -26,15 +26,15 @@ const FileCard: React.FC<FileCardProps> = ({
   children,
 }) => (
   <div
-    className={`p-4 rounded-lg ${
-      theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-    } shadow-md`}
+    className={`p-3 sm:p-4 rounded-xl sm:rounded-lg ${
+      theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
+    } shadow-none sm:shadow-md border border-gray-200 sm:border-0`}
   >
-    <div className="flex items-center gap-3">
-      <IoIosDocument className="text-3xl text-primary" />
+    <div className="flex items-center gap-2 sm:gap-3">
+      <IoIosDocument className="text-2xl sm:text-3xl text-primary" />
       <div>
         <div
-          className={`font-semibold ${
+          className={`font-semibold text-sm sm:text-base ${
             theme === "dark" ? "text-white" : "text-gray-900"
           }`}
         >
@@ -43,13 +43,13 @@ const FileCard: React.FC<FileCardProps> = ({
         <div className="text-xs text-gray-500">{formatBytes(fileSize)}</div>
       </div>
     </div>
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 mt-2">
       {downloadUrl && (
         <a
           href={downloadUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-500 hover:underline"
+          className="text-blue-500 hover:underline text-xs sm:text-base"
         >
           Download
         </a>

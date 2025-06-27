@@ -115,7 +115,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed z-50 animate-slide-up flex flex-col transition-all bg-gradient-to-br from-white via-blue-50 to-gray-100 shadow-2xl border border-gray-100"
+      className="fixed z-50 animate-slide-up flex flex-col transition-all bg-gradient-to-br from-white via-blue-50 to-gray-100 aiwindow-mobile"
       style={{
         left: 'auto',
         right: '2rem',
@@ -130,20 +130,28 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
       <style>{`
         @media (max-width: 640px) {
           .aiwindow-mobile {
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100vw !important;
-            height: 95vh !important;
-            border-radius: 1.5rem 1.5rem 0 0 !important;
-            max-width: 100vw !important;
-            max-height: 100vh !important;
-            box-shadow: 0 -8px 32px 0 rgba(0,0,0,0.10), 0 1.5px 0 0 #e0e7ef;
+            left: 50% !important;
+            right: auto !important;
+            top: auto !important;
+            bottom: 1.5rem !important;
+            transform: translateX(-50%) !important;
+            width: 98vw !important;
+            height: 80vh !important;
+            border-radius: 1.5rem !important;
+            max-width: 420px !important;
+            max-height: 90vh !important;
+            box-shadow: 0 4px 32px 0 rgba(0,0,0,0.12);
             border: none !important;
+            padding: 0 !important;
           }
+          .aiwindow-mobile .px-5 { padding-left: 1rem !important; padding-right: 1rem !important; }
+          .aiwindow-mobile .pt-5 { padding-top: 0.75rem !important; }
+          .aiwindow-mobile .pb-3 { padding-bottom: 0.5rem !important; }
+          .aiwindow-mobile .text-2xl { font-size: 1.25rem !important; }
+          .aiwindow-mobile textarea { font-size: 1rem !important; }
         }
       `}</style>
-      <div className="aiwindow-mobile flex flex-col h-full">
+      <div className="flex flex-col h-full">
         {/* Header */}
         <div className="flex justify-between items-center px-5 pt-5 pb-3 border-b border-gray-100 bg-white/90 rounded-t-3xl shadow-sm">
           <div className="flex items-center gap-3">

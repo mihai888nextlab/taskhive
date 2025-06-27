@@ -107,25 +107,25 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
       <div
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 p-4 rounded-xl shadow bg-white border border-gray-200"
       >
-        <div className="flex-1 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-          <label className={labelClass + " flex-shrink-0"}>
+        <div className="flex-1 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full">
+          <label className={labelClass + " flex-shrink-0 w-full sm:w-auto"}>
             Search:
             <input
               type="text"
               placeholder="Search tasks..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className={inputClass}
+              className={inputClass + " w-full sm:w-auto"}
             />
           </label>
         </div>
-        <div className="flex flex-wrap gap-2 items-center justify-end">
-          <label className={labelClass}>
+        <div className="flex flex-col gap-2 w-full mt-2 sm:mt-0 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:w-auto">
+          <label className={labelClass + " w-full sm:w-auto"}>
             Status:
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value as any)}
-              className={selectClass}
+              className={selectClass + " w-full sm:w-auto"}
             >
               <option value="all">All</option>
               <option value="completed">Completed</option>
@@ -133,24 +133,24 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
               <option value="overdue">Overdue</option>
             </select>
           </label>
-          <label className={labelClass}>
+          <label className={labelClass + " w-full sm:w-auto"}>
             Important:
             <select
               value={filterImportant}
               onChange={e => setFilterImportant(e.target.value as any)}
-              className={selectClass}
+              className={selectClass + " w-full sm:w-auto"}
             >
               <option value="all">All</option>
               <option value="important">Important</option>
               <option value="not-important">Not Important</option>
             </select>
           </label>
-          <label className={labelClass}>
+          <label className={labelClass + " w-full sm:w-auto"}>
             Sort by:
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as any)}
-              className={selectClass}
+              className={selectClass + " w-full sm:w-auto"}
             >
               <option value="createdAtDesc">Created Date (Newest First)</option>
               <option value="deadlineAsc">Deadline (Earliest First)</option>
@@ -180,7 +180,7 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
               onDelete={onDelete}
               onToggleComplete={() => {}}
               isTaskOverdue={isTaskOverdue}
-              forceAllowEditDelete={true} // <-- This is correct!
+              forceAllowEditDelete={true}
             />
           ))}
         </div>

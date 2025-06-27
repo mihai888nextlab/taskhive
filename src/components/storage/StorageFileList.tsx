@@ -37,11 +37,11 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
   handleRename,
   getFileIcon,
 }) => (
-  <div className="mt-10 max-w-2xl mx-auto space-y-4">
+  <div className="mt-6 sm:mt-10 max-w-lg sm:max-w-2xl mx-auto space-y-3 sm:space-y-4">
     {loading ? (
-      <div className="text-center text-gray-500">Loading files...</div>
+      <div className="text-center text-gray-500 text-base sm:text-lg">Loading files...</div>
     ) : files.length === 0 ? (
-      <div className="text-center text-gray-400">No files uploaded yet.</div>
+      <div className="text-center text-gray-400 text-base sm:text-lg">No files uploaded yet.</div>
     ) : (
       files.map((file) => (
         <FileCard
@@ -61,7 +61,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
           {renamingId === file._id ? (
             <>
               <input
-                className="ml-2 px-1 py-0.5 border rounded text-sm"
+                className="ml-2 px-1 py-0.5 border rounded text-xs sm:text-sm"
                 value={renameValue}
                 onChange={e => setRenameValue(e.target.value)}
                 autoFocus

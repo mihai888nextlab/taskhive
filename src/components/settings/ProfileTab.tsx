@@ -136,19 +136,21 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
           <label className="block text-gray-300 font-medium mb-2">
             Profile Photo
           </label>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col md:flex-row md:items-center items-center gap-3 sm:gap-4 justify-center md:justify-start md:items-start">
             <img
               src={photoPreview || "/hive-icon.png"}
               alt="Profile"
               className="w-16 h-16 rounded-full object-cover"
             />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-            />
-            {uploading && <span className="text-gray-400">Uploading...</span>}
+            <div className="w-full md:w-auto flex flex-col gap-2 items-center md:items-start">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 w-32 sm:w-40 md:w-auto"
+              />
+              {uploading && <span className="text-gray-400">Uploading...</span>}
+            </div>
           </div>
         </div>
         <div>
@@ -200,7 +202,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
               </button>
             ))}
           </div>
-          <div className="flex gap-2 mt-2">
+          <div className="flex flex-col xs:flex-row gap-2 mt-2">
             <input
               type="text"
               value={customSkill}

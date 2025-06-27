@@ -48,7 +48,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
         aria-label="Close sidebar overlay"
       ></div>
       {/* Drawer */}
-      <aside className="relative w-64 max-w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 py-6 flex flex-col shadow-lg animate-slideInLeft">
+      <aside className="relative w-full max-w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 py-6 flex flex-col shadow-lg animate-slideInLeft overflow-y-auto">
         <button
           className="absolute top-4 right-4 text-white text-2xl focus:outline-none"
           onClick={() => setSidebarOpen(false)}
@@ -57,12 +57,14 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
           <FaTimes />
         </button>
         <Link href="/app">
-          <div className="w-[120px] h-full mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300">
+          <div className="w-full max-w-[180px] h-[72px] mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300 relative">
             <Image
               src="/logo.png"
               alt="Logo"
-              fill={true}
-              onClick={() => setSidebarOpen(false)}
+              fill
+              style={{ objectFit: 'contain' }}
+              sizes="180px"
+              priority
             />
           </div>
         </Link>
@@ -78,7 +80,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
             {menu.map((item) => (
               <li
                 key={item.name}
-                className={`p-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md ${
+                className={`py-4 px-4 rounded-xl text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-md ${
                   router.pathname === item.path
                     ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-md"
                     : "hover:bg-gray-700 hover:text-white text-gray-300"
@@ -133,10 +135,10 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
             setSidebarOpen(false);
             auth.logout(); // Assuming logout is an async function
           }}
-          className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg"
+          className="mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-red-500 hover:bg-red-600 text-white text-lg font-bold shadow-xl transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300"
         >
-          <FaSignOutAlt className="mr-2" />
-          <span className="text-center">Logout</span>
+          <FaSignOutAlt className="text-xl" />
+          <span>Logout</span>
         </button>
       </aside>
     </div>

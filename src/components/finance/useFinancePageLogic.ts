@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { useTheme } from '@/components/ThemeContext';
 
 const categories = [
@@ -311,44 +312,62 @@ export default function useFinancePageLogic() {
     window.URL.revokeObjectURL(url);
   };
 
-  // PDF Export (scaffold, requires jsPDF)
+  // PDF Export (with cool template using jsPDF-AutoTable)
   const exportPDF = (type: 'expenses' | 'incomes') => {
     const items = type === 'expenses' ? filteredExpenses : filteredIncomes;
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text(
-      `${type.charAt(0).toUpperCase() + type.slice(1)} Report`,
-      14,
-      18
-    );
+    // Header
+    doc.setFillColor(17, 24, 39); // dark blue (matches Tailwind 'gray-900')
+    doc.rect(0, 0, 210, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text(`${type.charAt(0).toUpperCase() + type.slice(1)} Report`, 14, 20);
     doc.setFontSize(12);
-
-    // Table headers
-    const headers = [["Title", "Amount", "Description", "Date", "Category"]];
-    // Table rows
-    const rows = items.map((item) => [
-      item.title,
-      item.amount.toFixed(2),
-      item.description,
-      item.date ? new Date(item.date).toLocaleDateString() : "",
-      item.category || "",
-    ]);
-
-    // Simple table rendering
-    let y = 28;
-    headers.concat(rows).forEach((row, i) => {
-      let x = 14;
-      row.forEach((cell, j) => {
-        doc.text(String(cell), x, y);
-        x += [40, 25, 50, 25, 25][j];
-      });
-      y += 8;
-      if (y > 270) {
-        doc.addPage();
-        y = 18;
-      }
+    doc.setTextColor(34, 34, 34);
+    // Summary
+    const total = items.reduce((sum, i) => sum + Number(i.amount), 0).toFixed(2);
+    doc.setFontSize(14);
+    doc.text(`Total ${type}: $${total}`, 14, 38);
+    // Table
+    autoTable(doc, {
+      startY: 45,
+      head: [["Title", "Amount", "Description", "Date", "Category"]],
+      body: items.map((item) => [
+        item.title,
+        `$${Number(item.amount).toFixed(2)}`,
+        item.description,
+        item.date ? new Date(item.date).toLocaleDateString() : "",
+        item.category || "",
+      ]),
+      headStyles: {
+        fillColor: [17, 24, 39], // dark blue
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 12,
+      },
+      bodyStyles: {
+        fontSize: 11,
+        textColor: 34,
+      },
+      alternateRowStyles: {
+        fillColor: [30, 41, 59], // slightly lighter dark blue
+        textColor: 255,
+      },
+      margin: { left: 14, right: 14 },
+      styles: {
+        cellPadding: 3,
+        overflow: 'linebreak',
+        halign: 'left',
+        valign: 'middle',
+      },
+      didDrawPage: (_data: any) => {
+        // Footer
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(`Page ${(doc as any).internal.getCurrentPageInfo().pageNumber} of ${pageCount}`, 200, 290, { align: 'right' });
+      },
     });
-
     doc.save(`${type}.pdf`);
   };
 
