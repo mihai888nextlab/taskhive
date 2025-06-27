@@ -66,6 +66,27 @@ const CalendarPage: NextPageWithLayout = () => {
     fetchTasks();
   }, []);
 
+  const handleTaskDrop = async (taskId: string, date: Date) => {
+    setLoading(true);
+    setListError(null);
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deadline: date }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update task deadline.");
+      }
+      await fetchTasks();
+    } catch (err) {
+      setListError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deadlines = tasks.map(task => new Date(task.deadline).toDateString());
 
   return (
@@ -117,6 +138,7 @@ const CalendarPage: NextPageWithLayout = () => {
               onDateChange={handleDateChange}
               deadlines={deadlines}
               theme={theme}
+              onTaskDrop={handleTaskDrop}
             />
           </div>
         </main>

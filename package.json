@@ -32,6 +32,7 @@
     "mongoose": "^8.15.0",
     "multer": "^2.0.1",
     "next": "15.2.4",
+    "next-auth": "^4.24.11",
     "next-connect": "^1.0.0",
     "nookies": "^2.5.2",
     "primeicons": "^7.0.0",

@@ -99,9 +99,9 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
       </div>
 
       {/* View All Financials Button */}
-      <div className="text-center mt-6">
-        <Link href="/app/finance" className={buttonClass}>
-          <span className="mr-2">View All Financials</span>
+      <div className="text-center mt-8">
+        <Link href="/app/tasks" className={buttonClass}>
+          <span className="mr-3">View All Finances</span>
           <FaArrowRight className="text-xl transition-transform duration-300 group-hover:translate-x-1" />
         </Link>
       </div>

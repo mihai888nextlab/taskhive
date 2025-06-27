@@ -14,6 +14,7 @@ interface CalendarEventsListProps {
   selectedDate: Date | null;
   loading: boolean;
   listError: string | null;
+  enableDragAndDrop?: boolean; // Optional, default true
 }
 
 const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
@@ -21,6 +22,7 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
   selectedDate,
   loading,
   listError,
+  enableDragAndDrop = true,
 }) => {
   let eventsForDate: Task[] = [];
   if (selectedDate) {
@@ -45,13 +47,19 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
             <li className="text-gray-400">No upcoming events.</li>
           ) : (
             eventsForDate.map((task) => (
-              <Link key={task._id} href={`/app/tasks/`}>
+              <Link key={task._id} href={`/app/tasks/`} legacyBehavior>
                 <li
                   className={`p-3 rounded-lg ${
                     task.completed
                       ? "bg-gray-700 opacity-70"
                       : "bg-gray-800 hover:bg-gray-700"
-                  } transition-colors`}
+                  } transition-colors cursor-move`}
+                  draggable={enableDragAndDrop}
+                  onDragStart={(e) => {
+                    if (enableDragAndDrop) {
+                      e.dataTransfer.setData("text/plain", task._id);
+                    }
+                  }}
                 >
                   <h4 className="font-semibold text-lg">
                     {task.title}{" "}

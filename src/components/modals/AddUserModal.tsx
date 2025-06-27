@@ -82,16 +82,16 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl shadow-xl border border-gray-200 w-96">
+    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50">
+      <div className="bg-white p-10 rounded-3xl shadow-2xl border border-gray-200/60 w-96 max-w-full relative">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-3xl font-bold text-gray-800 text-center">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-800 text-center w-full">
             Add User
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-red-500 transition-all text-2xl"
+            className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-all text-2xl"
           >
             <FaTimes />
           </button>
@@ -120,7 +120,7 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({
             </div>
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
               htmlFor="email"
@@ -214,7 +214,7 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({
           <div className="flex justify-end space-x-4">
             <button
               type="submit"
-              className="inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300"
+              className="inline-flex items-center justify-center bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-300"
               disabled={loading}
             >
               {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}

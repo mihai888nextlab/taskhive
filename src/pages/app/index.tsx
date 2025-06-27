@@ -8,8 +8,10 @@ import DashboardTaskPreview from '@/components/dashboard/DashboardTaskPreview';
 import DashboardCalendarPreview from '@/components/dashboard/DashboardCalendarPreview';
 import Table from '@/components/dashboard/Table';
 import Link from 'next/link';
-import { FaUserClock, FaTasks, FaCalendarAlt, FaArrowRight, FaMoneyBillWave } from 'react-icons/fa';
+import { FaUserClock, FaTasks, FaCalendarAlt, FaArrowRight, FaMoneyBillWave, FaBullhorn } from 'react-icons/fa';
 import { MdSettings } from 'react-icons/md';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Generic card wrapper for consistent UI
 const DashboardCard: React.FC<{
@@ -51,6 +53,9 @@ const DashboardPage: NextPageWithLayout = () => {
   const [profit, setProfit] = useState(0);
 
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [announcementPreview, setAnnouncementPreview] = useState<any>(null);
+  const [loadingAnnouncement, setLoadingAnnouncement] = useState(true);
+  const [announcementError, setAnnouncementError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -108,6 +113,26 @@ const DashboardPage: NextPageWithLayout = () => {
     if (currentUser?.companyId) fetchFinanceData();
   }, [currentUser]);
 
+  useEffect(() => {
+    const fetchAnnouncement = async () => {
+      setLoadingAnnouncement(true);
+      setAnnouncementError(null);
+      try {
+        const res = await fetch('/api/announcements');
+        if (!res.ok) throw new Error('Failed to fetch announcements');
+        const data = await res.json();
+        // Sort: pinned first, then by createdAt desc
+        const sorted = [...data].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setAnnouncementPreview(sorted[0] || null);
+      } catch (e: any) {
+        setAnnouncementError(e.message || 'Error loading announcement');
+      } finally {
+        setLoadingAnnouncement(false);
+      }
+    };
+    fetchAnnouncement();
+  }, []);
+
   if (!currentUser) {
     return <p className="text-center text-gray-600 mb-8">Loading your dashboard...</p>;
   }
@@ -118,7 +143,7 @@ const DashboardPage: NextPageWithLayout = () => {
         Welcome to Your Dashboard!
       </h1>
 
-      {loadingStats ? (
+      {/* {loadingStats ? (
         <p className="text-center text-gray-600 mb-8">Loading statistics...</p>
       ) : (
         stats && (
@@ -126,7 +151,7 @@ const DashboardPage: NextPageWithLayout = () => {
             <Statistics {...stats} />
           </div>
         )
-      )}
+      )} */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-8">
         {/* Finance Card */}
@@ -196,6 +221,79 @@ const DashboardPage: NextPageWithLayout = () => {
           description="Organize and track your team's assignments and progress."
         >
           <DashboardTaskPreview userId={currentUser?._id} userEmail={currentUser?.email} />
+        </DashboardCard>
+
+        {/* Announcements Card */}
+        <DashboardCard
+          icon={<FaBullhorn className="text-primary text-3xl" />}
+          title="Announcement"
+          description="Stay up to date with the latest company news and updates."
+        >
+          <div className={
+            theme === "dark"
+              ? "mt-6 p-5 bg-gray-800 rounded-xl shadow-lg border border-gray-700 transform transition-transform duration-300 hover:scale-[1.01]"
+              : "mt-6 p-5 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-100 transform transition-transform duration-300 hover:scale-[1.01]"
+          }>
+            <h3 className={
+              theme === "dark"
+                ? "text-2xl font-extrabold text-gray-100 mb-5 pb-3 border-b-2 border-gray-600 leading-tight"
+                : "text-2xl font-extrabold text-gray-900 mb-5 pb-3 border-b-2 border-primary leading-tight"
+            }>Announcement</h3>
+            {loadingAnnouncement ? (
+              <div className="flex flex-col justify-center items-center h-32 bg-primary-light/10 rounded-lg animate-pulse">
+                <FaBullhorn className="animate-bounce text-primary text-4xl mb-3" />
+                <span className="text-sm font-medium">Loading announcement...</span>
+              </div>
+            ) : announcementError ? (
+              <div className="bg-red-50 border-l-4 border-red-400 text-red-400 p-4 rounded-md shadow-sm text-center font-medium">
+                <p className="mb-1">Failed to load announcement:</p>
+                <p className="text-sm italic">{announcementError}</p>
+              </div>
+            ) : !announcementPreview ? (
+              <div className="text-center p-5 bg-blue-50/20 rounded-md border border-blue-200 shadow-inner">
+                <p className="font-bold text-lg mb-2">No announcements yet.</p>
+                <p className="text-sm leading-relaxed">
+                  Stay tuned for important company updates!
+                </p>
+              </div>
+            ) : (
+              <div className={`relative flex items-start justify-between p-5 rounded-xl shadow-md border ${announcementPreview.pinned ? (theme === 'dark' ? 'bg-yellow-900 border-yellow-700' : 'bg-gradient-to-r from-yellow-50 to-white border-yellow-200') : (theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gradient-to-r from-blue-50 to-white border-primary-light/50')} hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group`}
+                style={{ opacity: announcementPreview.pinned ? 1 : 0.95 }}
+              >
+                <div className="flex-1 pr-4">
+                  <span className={`block font-bold text-xl leading-tight ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{announcementPreview.title}</span>
+                  <div className={`mt-2 line-clamp-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{announcementPreview.content}</ReactMarkdown>
+                  </div>
+                  <div className="mt-3 text-sm font-semibold flex items-center gap-2">
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold text-white ${announcementPreview.pinned ? 'bg-yellow-500' : 'bg-blue-500'}`}>{announcementPreview.category}</span>
+                    {announcementPreview.pinned && (
+                      <span className="ml-2 px-2.5 py-1 bg-yellow-400 text-white text-xs rounded-full font-bold flex items-center gap-1"><FaBullhorn />Pinned</span>
+                    )}
+                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                      By {announcementPreview.createdBy?.firstName} {announcementPreview.createdBy?.lastName}
+                    </span>
+                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                      • {new Date(announcementPreview.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="self-center pl-3">
+                  <FaBullhorn className={`text-4xl ${announcementPreview.pinned ? 'text-yellow-400' : 'text-primary'}`} />
+                </div>
+              </div>
+            )}
+            <div className="text-center mt-8">
+              <Link href="/app/announcements" className={
+                theme === "dark"
+                  ? "inline-flex items-center justify-center text-gray-100 hover:bg-gray-600 font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-gray-700 shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
+                  : "inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
+              }>
+                <span className="mr-3">View All Announcements</span>
+                <FaArrowRight className="text-xl transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </div>
         </DashboardCard>
 
         {/* Calendar Card */}

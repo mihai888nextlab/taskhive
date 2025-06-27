@@ -394,10 +394,10 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           user={selectedUser}
         />
       )}
-      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight">
+      <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-8 text-center tracking-tight leading-tight drop-shadow-xl z-10 relative">
         Manage Users
       </h1>
-      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-8 justify-center items-center">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-8 justify-center items-center z-10 relative">
         {user && user.role === "admin" && (
           <>
             <button
@@ -423,7 +423,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           </button>
         )}
       </div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 p-4 rounded-xl shadow bg-white border border-gray-200">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 p-6 rounded-2xl shadow-xl bg-white/80 border border-gray-200/60 backdrop-blur-lg z-10 relative">
         <div className="flex-1 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
           <label className="font-semibold text-sm text-black flex-shrink-0">
             Search:
@@ -471,7 +471,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         </div>
       </div>
       {/* Card view for mobile only */}
-      <div className="flex flex-col gap-4 md:hidden">
+      <div className="flex flex-col gap-6 md:hidden z-10 relative">
         {[...filteredUsers]
           .sort((a, b) => {
             // Admins always on top
@@ -532,11 +532,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           ))}
       </div>
       {/* Table view for desktop only */}
-      <div
-        className={`bg-${
-          theme === "dark" ? "gray-800" : "white"
-        } shadow-xl rounded-2xl overflow-x-auto hidden md:block`}
-      >
+      <div className={`bg-white/90 shadow-2xl rounded-2xl overflow-x-auto hidden md:block border border-gray-200/60 backdrop-blur-lg z-10 relative`}>
         <Table<Project>
           title="Users List"
           data={filteredUsers.map((user) => ({

@@ -7,6 +7,7 @@ interface CalendarPanelProps {
   onDateChange: (date: Date | null) => void;
   deadlines: string[];
   theme: string;
+  onTaskDrop?: (taskId: string, date: Date) => void; // New prop
 }
 
 const CalendarPanel: React.FC<CalendarPanelProps> = ({
@@ -14,6 +15,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({
   onDateChange,
   deadlines,
   theme,
+  onTaskDrop,
 }) => (
   <div className="w-full flex justify-center items-center">
     <Calendar
@@ -27,20 +29,38 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({
         return null;
       }}
       tileContent={({ date, view }) => {
-        if (view === 'month' && deadlines.includes(date.toDateString())) {
-          return (
+        // Keep your highlight logic
+        const highlight = view === 'month' && deadlines.includes(date.toDateString());
+        return (
+          <>
+            {highlight && (
+              <div
+                className="highlight-circle-content"
+                style={{
+                  backgroundColor: '#4A90E2',
+                  color: 'white',
+                }}
+              >
+                {date.getDate()}
+              </div>
+            )}
+            {/* Invisible overlay for drag-and-drop */}
             <div
-              className="highlight-circle-content"
-              style={{
-                backgroundColor: '#4A90E2',
-                color: 'white',
+              style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', background: 'transparent' }}
+              onDragOver={e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
               }}
-            >
-              {date.getDate()}
-            </div>
-          );
-        }
-        return null;
+              onDrop={e => {
+                e.preventDefault();
+                const taskId = e.dataTransfer.getData('text/plain');
+                if (onTaskDrop && taskId) {
+                  onTaskDrop(taskId, date);
+                }
+              }}
+            />
+          </>
+        );
       }}
       navigationLabel={({ date, label }) => (
         <span className="font-bold text-blue-600 text-lg sm:text-xl">{label}</span>
