@@ -9,8 +9,8 @@ export default function FinanceTabs({ activeTab, setActiveTab, loading }: Props)
     <div className="flex justify-center mb-6" role="tablist" aria-label="Finance Tabs">
       <button
         className={`px-6 py-2 rounded-t-lg font-semibold transition-all duration-200 ${activeTab === 'expenses'
-          ? 'bg-blue-600 text-white shadow'
-          : 'bg-gray-200 text-gray-700 hover:bg-blue-100'
+          ? 'bg-red-600 text-white shadow'
+          : 'bg-gray-200 text-gray-700 hover:bg-red-100'
           }`}
         onClick={() => setActiveTab('expenses')}
         disabled={loading}

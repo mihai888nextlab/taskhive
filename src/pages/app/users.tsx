@@ -395,9 +395,6 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
           user={selectedUser}
         />
       )}
-      <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 sm:mb-8 text-center tracking-tight leading-tight drop-shadow-xl z-10 relative px-2 sm:px-0">
-        Manage Users
-      </h1>
       <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-6 sm:mb-8 justify-center items-center z-10 relative w-full px-2 sm:px-0">
         {user && user.role === "admin" && (
           <>

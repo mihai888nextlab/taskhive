@@ -7,6 +7,9 @@ import UserProfileModal from "@/components/modals/UserProfileModal";
 import AIWindow from "../AIWindow";
 import { FaBars } from "react-icons/fa";
 import { menu } from "@/components/menuConfig"; // Your menu config
+import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
+import TimerAndFormPanel from "@/components/time-tracking/TimerAndFormPanel";
+import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -15,33 +18,23 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, loadingUser, isAuthenticated, logout } = useAuth();
   const router = useRouter();
+  const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } = useTimeTracking();
+  const showPersistent =
+    (isRunning || pomodoroRunning) &&
+    router.pathname !== "/app/time-tracking";
 
   // State to toggle AI window
   const [isAIWindowOpen, setIsAIWindowOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // const [search, setSearch] = useState("");
-  // type PageResult = {
-  //   type: "page";
-  //   name: string;
-  //   path: string;
-  //   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  //   notification?: number | null;
-  // };
-  // type UserResult = { type: "user"; name: string; email: string; _id: string };
-  // type SearchResult = PageResult | UserResult;
-  // const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  interface UserId {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    _id?: string;
-  }
+  const [isDesktop, setIsDesktop] = useState(false);
 
-  interface User {
-    userId: UserId;
-    _id: string;
-    [key: string]: unknown; // Use unknown instead of any for additional properties
-  }
+  useEffect(() => {
+    // Responsive check for desktop
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   const [tasks, setTasks] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -80,7 +73,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return null; // Or a spinner
   }
 
-  const incompleteTasksCount = tasks.filter((t) => !t.completed).length;
+  const incompleteTasks = tasks.filter((t) => !t.completed);
+  const incompleteTasksCount = incompleteTasks.length;
 
   const menuWithNotifications = menu.map((item) => {
     if (item.name === "Tasks" && incompleteTasksCount > 0) {
@@ -112,11 +106,54 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         router={router}
       />
       {/* Main Content */}
-      <main className="flex-1 p-8 bg-gray-100 rounded-tl-lg shadow-lg min-h-screen">
-        {children}
-      </main>
-      {/* AI Button */}
-      {!(sidebarOpen && typeof window !== 'undefined' && window.innerWidth < 768) && (
+      <div
+        className="flex-1 flex flex-col bg-gray-100"
+        style={isAIWindowOpen && isDesktop ? { marginRight: 420, transition: 'margin 0.3s' } : {}}
+      >
+        {/* Universal Search Bar at the top, centered between sidebar and right edge */}
+        <div className="w-full flex justify-center items-center mt-7">
+          <div className="w-full max-w-3xl px-2 pointer-events-auto">
+            <UniversalSearchBar />
+          </div>
+        </div>
+        <main className="flex-1 bg-gray-100 rounded-tl-lg shadow-lg min-h-screen">
+          {children}
+        </main>
+        {showPersistent && (
+          <div 
+            className={`fixed top-6 z-[100] max-w-full transition-all duration-300 ${isAIWindowOpen && isDesktop ? 'w-64' : 'w-96'}`}
+            style={{
+              right: isAIWindowOpen && isDesktop ? '440px' : '24px'
+            }}
+          >
+            <TimerAndFormPanel
+              {...timerContext}
+              isRunning={pomodoroMode ? pomodoroRunning : isRunning}
+              onStart={timerContext.startTimer}
+              onStop={timerContext.stopTimer}
+              onReset={timerContext.resetTimer}
+              theme="light"
+              sessionName={timerContext.sessionName}
+              sessionDescription={timerContext.sessionDescription}
+              sessionTag={timerContext.sessionTag}
+              setSessionTag={timerContext.setSessionTag}
+              onNameChange={timerContext.setSessionName}
+              onDescriptionChange={timerContext.setSessionDescription}
+              onSave={timerContext.saveSession}
+              pomodoroMode={pomodoroMode}
+              pomodoroPhase={timerContext.pomodoroPhase}
+              pomodoroTime={timerContext.pomodoroTime}
+              pomodoroCycles={timerContext.pomodoroCycles}
+              workDuration={timerContext.WORK_DURATION}
+              breakDuration={timerContext.BREAK_DURATION}
+              persistent
+              isAIWindowOpen={isAIWindowOpen && isDesktop}
+            />
+          </div>
+        )}
+      </div>
+      {/* AI Button (hide on desktop if open) */}
+      {!(sidebarOpen && typeof window !== 'undefined' && window.innerWidth < 768) && (!isDesktop || !isAIWindowOpen) && (
         <button
           onClick={() => setIsAIWindowOpen(!isAIWindowOpen)}
           className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95 z-50"
@@ -140,9 +177,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </svg>
         </button>
       )}
+      {/* AI Window: right panel on desktop, modal on mobile */}
       <AIWindow
         isOpen={isAIWindowOpen}
         onClose={() => setIsAIWindowOpen(false)}
+        isDesktop={isDesktop}
       />
       <UserProfileModal
         open={profileModalOpen}

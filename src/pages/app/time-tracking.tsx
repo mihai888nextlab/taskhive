@@ -2,48 +2,24 @@ import React, { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/sidebar/DashboardLayout';
 import Loading from "@/components/Loading";
 import TimeStatistics from '@/components/TimeStatistics';
-import { useTheme } from '@/components/ThemeContext';
-import TimerPanel from '@/components/time-tracking/TimerPanel';
-import SessionForm from '@/components/time-tracking/SessionForm';
+import TimerAndFormPanel from '@/components/time-tracking/TimerAndFormPanel';
 import SessionList from '@/components/time-tracking/SessionList';
 import TimeTrackingHeader from '@/components/time-tracking/TimeTrackingHeader';
 import PomodoroSavePanel from '@/components/time-tracking/PomodoroSavePanel';
 import StatisticsCard from '@/components/time-tracking/StatisticsCard';
 import { Pie } from 'react-chartjs-2';
 import { saveAs } from "file-saver";
-
-const WORK_DURATION = 25 * 60;
-const BREAK_DURATION = 5 * 60;
+import { useTimeTracking } from '@/components/time-tracking/TimeTrackingContext';
 
 const TimeTrackingPage = () => {
-  const { theme } = useTheme();
-  const [sessionName, setSessionName] = useState('');
-  const [sessionDescription, setSessionDescription] = useState('');
-  const [sessionTag, setSessionTag] = useState('');
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const { sessionName, setSessionName, sessionDescription, setSessionDescription, sessionTag, setSessionTag, elapsedTime, isRunning, pomodoroMode, pomodoroPhase, pomodoroTime, pomodoroCycles, pomodoroRunning, WORK_DURATION, BREAK_DURATION, startTimer, stopTimer, resetTimer, resetAll, saveSession, user } = useTimeTracking();
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [last7DaysHours, setLast7DaysHours] = useState<number[]>(Array(7).fill(0));
-  const [pomodoroMode, setPomodoroMode] = useState(false);
-  const [pomodoroPhase, setPomodoroPhase] = useState<'work' | 'break'>('work');
-  const [pomodoroTime, setPomodoroTime] = useState(WORK_DURATION);
-  const [pomodoroCycles, setPomodoroCycles] = useState(0);
-  const [pomodoroRunning, setPomodoroRunning] = useState(false);
-  const [pomodoroMessage, setPomodoroMessage] = useState('');
-
-  // Fetch user
-  useEffect(() => {
-    const fetchUser = async () => {
-      const userResponse = await fetch('/api/user');
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        setUser(userData.user);
-      }
-    };
-    fetchUser();
-  }, []);
+  const [sessionSearch, setSessionSearch] = useState("");
+  const [sessionTagFilter, setSessionTagFilter] = useState("all");
+  const [sessionSort, setSessionSort] = useState("dateDesc");
+  const { theme } = { theme: 'light' };
 
   // Fetch sessions
   const fetchSessions = useCallback(async () => {
@@ -63,47 +39,6 @@ const TimeTrackingPage = () => {
   useEffect(() => {
     if (user?._id) fetchSessions();
   }, [user, fetchSessions]);
-
-  // Timer logic
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRunning) {
-      interval = setInterval(() => setElapsedTime((prev) => prev + 1), 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRunning]);
-
-  // Pomodoro logic
-  useEffect(() => {
-    if (!pomodoroMode || !pomodoroRunning) return;
-    if (pomodoroTime === 0) {
-      if (pomodoroPhase === 'work') {
-        setPomodoroPhase('break');
-        setPomodoroTime(BREAK_DURATION);
-        setPomodoroCycles(c => c + 1);
-      } else {
-        setPomodoroPhase('work');
-        setPomodoroTime(WORK_DURATION);
-      }
-      return;
-    }
-    const interval = setInterval(() => setPomodoroTime(t => t > 0 ? t - 1 : 0), 1000);
-    return () => clearInterval(interval);
-  }, [pomodoroMode, pomodoroRunning, pomodoroTime, pomodoroPhase]);
-
-  useEffect(() => {
-    if (
-      pomodoroMode &&
-      pomodoroPhase === 'work' &&
-      pomodoroTime === 0
-    ) {
-      setSessionName('Pomodoro Session');
-      setSessionDescription('Completed a Pomodoro work session');
-      setSessionTag('Pomodoro');
-      setElapsedTime(WORK_DURATION);
-      setPomodoroRunning(false);
-    }
-  }, [pomodoroMode, pomodoroPhase, pomodoroTime]);
 
   // Statistics
   useEffect(() => {
@@ -168,32 +103,33 @@ const TimeTrackingPage = () => {
     saveAs(blob, "time_sessions.csv");
   };
 
-  const handleSaveSession = async () => {
-    if (!sessionName.trim() || !sessionDescription.trim() || !user || !user._id) return;
-    await fetch('/api/time-sessions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: sessionName,
-        description: sessionDescription,
-        duration: elapsedTime,
-        tag: sessionTag,
-        userId: user._id,
-      }),
-    });
-    setSessionName('');
-    setSessionDescription('');
-    setSessionTag('');
-    setElapsedTime(0);
-    setIsRunning(false);
-    fetchSessions();
-  };
-
   const handleDeleteSession = async (sessionId: string) => {
     if (!user?._id) return;
     await fetch(`/api/time-sessions?id=${sessionId}&userId=${user._id}`, { method: 'DELETE' });
     fetchSessions();
   };
+
+  // Filtered and sorted sessions
+  const filteredSessions = sessions.filter(s => {
+    const matchesSearch =
+      sessionSearch.trim() === "" ||
+      s.name?.toLowerCase().includes(sessionSearch.toLowerCase()) ||
+      s.description?.toLowerCase().includes(sessionSearch.toLowerCase());
+    const matchesTag =
+      sessionTagFilter === "all" || (s.tag || "General") === sessionTagFilter;
+    return matchesSearch && matchesTag;
+  }).sort((a, b) => {
+    if (sessionSort === "dateDesc") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else if (sessionSort === "dateAsc") {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    } else if (sessionSort === "durationDesc") {
+      return b.duration - a.duration;
+    } else if (sessionSort === "durationAsc") {
+      return a.duration - b.duration;
+    }
+    return 0;
+  });
 
   if (loading) {
     return <Loading />;
@@ -201,37 +137,38 @@ const TimeTrackingPage = () => {
 
   return (
     <DashboardLayout>
-      <div className={`relative min-h-screen p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}>
-        <h1 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 text-center tracking-tighter leading-tight`}>
-          Time Tracking
-        </h1>
-        <TimeTrackingHeader
-          theme={theme}
-          streak={streak}
-          pomodoroMode={pomodoroMode}
-          onExport={handleExportCSV}
-          onPomodoroToggle={() => {
-            setPomodoroMode(m => !m);
-            setPomodoroPhase('work');
-            setPomodoroTime(WORK_DURATION);
-            setPomodoroRunning(false);
-            setPomodoroCycles(0);
-          }}
-        />
-        {pomodoroMode ? (
-          <>
-            <TimerPanel
-              elapsedTime={pomodoroTime}
-              isRunning={pomodoroRunning}
-              onStart={() => setPomodoroRunning(true)}
-              onStop={() => setPomodoroRunning(false)}
-              onReset={() => {
-                setPomodoroRunning(false);
-                setPomodoroPhase('work');
-                setPomodoroTime(WORK_DURATION);
-                setPomodoroCycles(0);
-              }}
+      <div className="relative min-h-screen p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-8 w-full">
+          {/* Left: Session List */}
+          <div className="w-full lg:w-2/3">
+            <SessionList
+              sessions={sessions}
+              onDelete={handleDeleteSession}
               theme={theme}
+              sessionSearch={sessionSearch}
+              setSessionSearch={setSessionSearch}
+              sessionTagFilter={sessionTagFilter}
+              setSessionTagFilter={setSessionTagFilter}
+              sessionSort={sessionSort}
+              setSessionSort={setSessionSort}
+            />
+          </div>
+          {/* Right: Timer + Form (now combined) + Header below */}
+          <div className="w-full lg:w-1/3 flex flex-col gap-6">
+            <TimerAndFormPanel
+              elapsedTime={elapsedTime}
+              isRunning={pomodoroMode ? pomodoroRunning : isRunning}
+              onStart={startTimer}
+              onStop={stopTimer}
+              onReset={resetTimer}
+              theme={theme}
+              sessionName={sessionName}
+              sessionDescription={sessionDescription}
+              sessionTag={sessionTag}
+              setSessionTag={setSessionTag}
+              onNameChange={setSessionName}
+              onDescriptionChange={setSessionDescription}
+              onSave={saveSession}
               pomodoroMode={pomodoroMode}
               pomodoroPhase={pomodoroPhase}
               pomodoroTime={pomodoroTime}
@@ -239,81 +176,18 @@ const TimeTrackingPage = () => {
               workDuration={WORK_DURATION}
               breakDuration={BREAK_DURATION}
             />
-            <PomodoroSavePanel
-              onSave={async () => {
-                const justFinishedWork = pomodoroPhase === 'break';
-                if (!justFinishedWork) {
-                  setPomodoroMessage("⏳ You can only save a Pomodoro session immediately after completing a work interval.");
-                  return;
-                }
-                if (!user || !user._id) {
-                  setPomodoroMessage("User not loaded. Please refresh the page.");
-                  return;
-                }
-                setPomodoroMessage('');
-                await fetch('/api/time-sessions', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    name: 'Pomodoro Session',
-                    description: 'Completed a Pomodoro work session',
-                    duration: WORK_DURATION,
-                    tag: 'Pomodoro',
-                    cycles: pomodoroCycles,
-                    userId: user._id,
-                  }),
-                });
-                setElapsedTime(0);
-                setPomodoroPhase('work');
-                setPomodoroTime(WORK_DURATION);
-                setPomodoroRunning(false);
-                setPomodoroCycles(0);
-                fetchSessions();
-              }}
-              message={pomodoroMessage}
-            />
-          </>
-        ) : (
-          <>
-            <TimerPanel
-              elapsedTime={elapsedTime}
-              isRunning={isRunning}
-              onStart={() => setIsRunning(true)}
-              onStop={() => setIsRunning(false)}
-              onReset={() => {
-                setElapsedTime(0);
-                setIsRunning(false);
-              }}
+            <TimeTrackingHeader
               theme={theme}
-              pomodoroMode={false}
+              streak={streak}
+              pomodoroMode={pomodoroMode}
+              onExport={handleExportCSV}
+              onPomodoroToggle={() => {
+                resetTimer();
+                resetAll();
+              }}
             />
-            <SessionForm
-              sessionName={sessionName}
-              sessionDescription={sessionDescription}
-              sessionTag={sessionTag}
-              setSessionTag={setSessionTag}
-              onNameChange={setSessionName}
-              onDescriptionChange={setSessionDescription}
-              onSave={handleSaveSession}
-              theme={theme}
-            />
-          </>
-        )}
-        <SessionList
-          sessions={sessions}
-          onDelete={handleDeleteSession}
-          theme={theme}
-        />
-        {/* <StatisticsCard title="Time Statistics (Last 7 Days)" theme={theme}>
-          <TimeStatistics last7DaysHours={last7DaysHours} />
-        </StatisticsCard>
-        <StatisticsCard title="Time by Tag (Last 7 Days)" theme={theme}>
-          <div className="flex justify-center items-center" style={{ minHeight: 520 }}>
-            <div style={{ maxWidth: 540, maxHeight: 540, width: 540, height: 540 }}>
-              <Pie data={pieData} width={520} height={520} />
-            </div>
           </div>
-        </StatisticsCard> */}
+        </div>
       </div>
     </DashboardLayout>
   );

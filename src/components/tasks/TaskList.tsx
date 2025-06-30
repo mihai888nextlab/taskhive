@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import TaskCard from "./TaskCard";
+import TaskDetailsModal from "./TaskDetailsModal";
 
 interface Task {
   _id: string;
@@ -23,6 +24,17 @@ interface TaskListProps {
   onToggleComplete: (task: Task) => void;
   isTaskOverdue: (task: Task) => boolean;
   theme?: string;
+  controlsOnly?: boolean;
+  cardsOnly?: boolean;
+  // Controlled state props
+  search?: string;
+  onSearchChange?: (v: string) => void;
+  filterStatus?: "all" | "completed" | "pending" | "overdue";
+  onFilterStatusChange?: (v: "all" | "completed" | "pending" | "overdue") => void;
+  filterImportant?: "all" | "important" | "not-important";
+  onFilterImportantChange?: (v: "all" | "important" | "not-important") => void;
+  sortBy?: "createdAtDesc" | "deadlineAsc";
+  onSortByChange?: (v: "createdAtDesc" | "deadlineAsc") => void;
 }
 
 const TaskList: React.FC<TaskListProps> = ({
@@ -34,20 +46,46 @@ const TaskList: React.FC<TaskListProps> = ({
   onToggleComplete,
   isTaskOverdue,
   theme = "light",
+  controlsOnly = false,
+  cardsOnly = false,
+  search: controlledSearch,
+  onSearchChange,
+  filterStatus: controlledFilterStatus,
+  onFilterStatusChange,
+  filterImportant: controlledFilterImportant,
+  onFilterImportantChange,
+  sortBy: controlledSortBy,
+  onSortByChange,
 }) => {
-  // Search, filter, sort state
+  // Controlled or local state
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
   const [filterImportant, setFilterImportant] = useState<"all" | "important" | "not-important">("all");
-  const [sortBy, setSortBy] = useState<"createdAtDesc" | "deadlineAsc">("createdAtDesc");
+  const [sortBy, setSortBy] = useState<"createdAtDesc" | "deadlineAsc">("deadlineAsc");
+  const [detailsTask, setDetailsTask] = useState<Task | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const searchValue = controlledSearch !== undefined ? controlledSearch : search;
+  const filterStatusValue = controlledFilterStatus !== undefined ? controlledFilterStatus : filterStatus;
+  const filterImportantValue = controlledFilterImportant !== undefined ? controlledFilterImportant : filterImportant;
+  const sortByValue = controlledSortBy !== undefined ? controlledSortBy : sortBy;
+
+  const handleShowDetails = (task: Task) => {
+    setDetailsTask(task);
+    setModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setDetailsTask(null);
+  };
 
   // Filtering, searching, sorting logic
   const filteredTasks = useMemo(() => {
     let result = [...tasks];
 
     // Search
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (searchValue.trim()) {
+      const q = searchValue.trim().toLowerCase();
       result = result.filter(
         t =>
           t.title.toLowerCase().includes(q) ||
@@ -57,16 +95,18 @@ const TaskList: React.FC<TaskListProps> = ({
 
     // Filter by status
     result = result.filter(task => {
-      if (filterStatus === "completed") return task.completed;
-      if (filterStatus === "pending") return !task.completed && !isTaskOverdue(task);
-      if (filterStatus === "overdue") return isTaskOverdue(task) && !task.completed;
+      if (filterStatusValue === "completed") return task.completed;
+      if (filterStatusValue === "pending") return !task.completed && !isTaskOverdue(task);
+      if (filterStatusValue === "overdue") return isTaskOverdue(task) && !task.completed;
+      // For 'all', only show overdue and pending (not completed)
+      if (filterStatusValue === "all") return !task.completed;
       return true;
     });
 
     // Filter by importance
     result = result.filter(task => {
-      if (filterImportant === "important") return !!task.important;
-      if (filterImportant === "not-important") return !task.important;
+      if (filterImportantValue === "important") return !!task.important;
+      if (filterImportantValue === "not-important") return !task.important;
       return true;
     });
 
@@ -88,7 +128,7 @@ const TaskList: React.FC<TaskListProps> = ({
       if (!a.completed && b.completed) return -1;
 
       // 4. Then by sortBy
-      if (sortBy === "deadlineAsc") {
+      if (sortByValue === "deadlineAsc") {
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
       }
       // Default: newest first
@@ -96,86 +136,72 @@ const TaskList: React.FC<TaskListProps> = ({
     });
 
     return result;
-  }, [tasks, search, filterStatus, filterImportant, sortBy, isTaskOverdue]);
+  }, [tasks, searchValue, filterStatusValue, filterImportantValue, sortByValue, isTaskOverdue]);
 
   // All labels and inputs/selects use black text
   const labelClass = "font-semibold text-sm text-black";
   const inputClass = "ml-2 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary bg-inherit text-black";
   const selectClass = "ml-2 rounded px-2 py-1 border border-gray-300 bg-inherit text-black";
 
-  return (
-    <div>
-      {/* Controls */}
+  if (controlsOnly) {
+    return (
       <div
-        className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 p-4 rounded-xl shadow ${
-          theme === "dark"
-            ? "bg-gray-800 border border-gray-700"
-            : "bg-white border border-gray-200"
-        }`}
+        className="w-full flex flex-col md:flex-row md:items-center md:justify-between flex-wrap gap-4 mb-0 p-4 rounded-2xl shadow-sm bg-gray-50/80 border border-gray-100 box-border"
+        style={{ maxWidth: '100%' }}
       >
-        <div className="flex-1 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full">
-          <label className={labelClass + " flex-shrink-0 w-full sm:w-auto"}>
-            Search:
-            <input
-              type="text"
-              placeholder="Search tasks..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className={inputClass + " w-full sm:w-auto"}
-            />
-          </label>
-        </div>
-        <div className="flex flex-col gap-2 w-full mt-2 sm:mt-0 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:w-auto">
-          <label className={labelClass + " w-full sm:w-auto"}>
-            Status:
-            <select
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value as any)}
-              className={selectClass + " w-full sm:w-auto"}
-            >
-              <option value="all">All</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="overdue">Overdue</option>
-            </select>
-          </label>
-          <label className={labelClass + " w-full sm:w-auto"}>
-            Important:
-            <select
-              value={filterImportant}
-              onChange={e => setFilterImportant(e.target.value as any)}
-              className={selectClass + " w-full sm:w-auto"}
-            >
-              <option value="all">All</option>
-              <option value="important">Important</option>
-              <option value="not-important">Not Important</option>
-            </select>
-          </label>
-          <label className={labelClass + " w-full sm:w-auto"}>
-            Sort by:
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as any)}
-              className={selectClass + " w-full sm:w-auto"}
-            >
-              <option value="createdAtDesc">Created Date (Newest First)</option>
-              <option value="deadlineAsc">Deadline (Earliest First)</option>
-            </select>
-          </label>
-        </div>
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={searchValue}
+          onChange={e => {
+            if (onSearchChange) onSearchChange(e.target.value);
+            else setSearch(e.target.value);
+          }}
+          className="flex-1 min-w-[120px] max-w-xs px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base placeholder-gray-400 outline-none"
+        />
+        <select
+          value={filterStatusValue}
+          onChange={e => {
+            if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
+            else setFilterStatus(e.target.value as any);
+          }}
+          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+        >
+          <option value="all">Status: All</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="overdue">Overdue</option>
+        </select>
+        <select
+          value={filterImportantValue}
+          onChange={e => {
+            if (onFilterImportantChange) onFilterImportantChange(e.target.value as any);
+            else setFilterImportant(e.target.value as any);
+          }}
+          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+        >
+          <option value="all">Important: All</option>
+          <option value="important">Important</option>
+          <option value="not-important">Not Important</option>
+        </select>
+        <select
+          value={sortByValue}
+          onChange={e => {
+            if (onSortByChange) onSortByChange(e.target.value as any);
+            else setSortBy(e.target.value as any);
+          }}
+          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+        >
+          <option value="createdAtDesc">Sort: Newest First</option>
+          <option value="deadlineAsc">Sort: Deadline</option>
+        </select>
       </div>
-
-      {/* Task List */}
-      {loading ? (
-        <div className="w-full flex justify-center items-center py-12">
-          <span className="text-lg text-gray-500">Loading tasks...</span>
-        </div>
-      ) : !filteredTasks.length ? (
-        <div className="w-full flex justify-center items-center py-12">
-          <span className="text-lg text-gray-400">No tasks found.</span>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+    );
+  }
+  if (cardsOnly) {
+    return (
+      <>
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
           {filteredTasks.map(task => (
             <TaskCard
               key={task._id}
@@ -186,11 +212,111 @@ const TaskList: React.FC<TaskListProps> = ({
               onDelete={onDelete}
               onToggleComplete={onToggleComplete}
               isTaskOverdue={isTaskOverdue}
+              onShowDetails={handleShowDetails}
+            />
+          ))}
+        </div>
+        <TaskDetailsModal
+          open={modalOpen}
+          task={detailsTask}
+          onClose={handleCloseModal}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onToggleComplete={onToggleComplete}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      {/* Minimalist Controls - always fit in parent */}
+      <div
+        className="w-full flex flex-col md:flex-row md:items-center md:justify-between flex-wrap gap-4 mb-8 p-4 rounded-2xl shadow-sm bg-gray-50/80 border border-gray-100 box-border"
+        style={{maxWidth: '100%'}}
+      >
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={searchValue}
+          onChange={e => {
+            if (onSearchChange) onSearchChange(e.target.value);
+            else setSearch(e.target.value);
+          }}
+          className="flex-1 min-w-[120px] max-w-xs px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base placeholder-gray-400 outline-none"
+        />
+        <select
+          value={filterStatusValue}
+          onChange={e => {
+            if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
+            else setFilterStatus(e.target.value as any);
+          }}
+          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+        >
+          <option value="all">Status: All</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="overdue">Overdue</option>
+        </select>
+        <select
+          value={filterImportantValue}
+          onChange={e => {
+            if (onFilterImportantChange) onFilterImportantChange(e.target.value as any);
+            else setFilterImportant(e.target.value as any);
+          }}
+          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+        >
+          <option value="all">Important: All</option>
+          <option value="important">Important</option>
+          <option value="not-important">Not Important</option>
+        </select>
+        <select
+          value={sortByValue}
+          onChange={e => {
+            if (onSortByChange) onSortByChange(e.target.value as any);
+            else setSortBy(e.target.value as any);
+          }}
+          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+        >
+          <option value="createdAtDesc">Sort: Newest First</option>
+          <option value="deadlineAsc">Sort: Deadline</option>
+        </select>
+      </div>
+      {/* Task List */}
+      {loading ? (
+        <div className="w-full flex justify-center items-center py-12">
+          <span className="text-lg text-gray-500">Loading tasks...</span>
+        </div>
+      ) : !filteredTasks.length ? (
+        <div className="w-full flex justify-center items-center py-12">
+          <span className="text-lg text-gray-400">No tasks found.</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
+          {filteredTasks.map(task => (
+            <TaskCard
+              key={task._id}
+              task={task}
+              currentUserEmail={currentUserEmail}
+              loading={loading}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onToggleComplete={onToggleComplete}
+              isTaskOverdue={isTaskOverdue}
+              onShowDetails={handleShowDetails}
             />
           ))}
         </div>
       )}
-    </div>
+      <TaskDetailsModal
+        open={modalOpen}
+        task={detailsTask}
+        onClose={handleCloseModal}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onToggleComplete={onToggleComplete}
+      />
+    </>
   );
 };
 

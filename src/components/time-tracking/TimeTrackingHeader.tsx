@@ -15,18 +15,18 @@ const TimeTrackingHeader: React.FC<Props> = ({
   onExport,
   onPomodoroToggle,
 }) => (
-  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-    <div className="flex flex-wrap gap-3 items-center">
+  <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-row gap-3 w-full">
       <button
-        className="px-4 py-2 rounded-full bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all"
+        className="flex-1 px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all text-base min-w-[120px]"
         onClick={onExport}
       >
         Export Sessions as CSV
       </button>
       <button
-        className={`px-4 py-2 rounded-full font-semibold shadow transition-all duration-200 ${
+        className={`flex-1 px-4 py-2 rounded-xl font-semibold shadow transition-all duration-200 min-w-[120px] text-base ${
           pomodoroMode
-            ? "bg-red-600 text-white"
+            ? "bg-red-600 text-white hover:bg-red-700"
             : "bg-gray-200 text-gray-800 hover:bg-red-100"
         }`}
         onClick={onPomodoroToggle}
@@ -34,8 +34,8 @@ const TimeTrackingHeader: React.FC<Props> = ({
         {pomodoroMode ? "Exit Pomodoro Mode" : "Pomodoro Mode"}
       </button>
     </div>
-    <div className="flex justify-center md:justify-end">
-      <span className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full font-bold text-lg shadow">
+    <div className="flex w-full justify-center">
+      <span className="inline-block bg-green-100 text-green-700 px-5 py-2 rounded-xl font-bold text-base shadow text-center w-full">
         🔥 Productivity Streak: {streak} day{streak !== 1 ? "s" : ""}
       </span>
     </div>

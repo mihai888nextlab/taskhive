@@ -1,19 +1,19 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { useTheme } from '@/components/ThemeContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface FinanceStatisticsProps {
-  expensesData: number[]; // Array of expenses for the last 7 days
-  incomesData: number[]; // Array of incomes for the last 7 days
-  labels: string[]; // Array of labels for the x-axis
+  expensesData: number[];
+  incomesData: number[];
+  labels: string[];
+  hideHeader?: boolean;
+  hideSummary?: boolean;
+  className?: string;
 }
 
-const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, incomesData, labels }) => {
-  const { theme } = useTheme();
-  
+const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, incomesData, labels, hideHeader, hideSummary, className }) => {
   const data = {
     labels,
     datasets: [
@@ -21,32 +21,30 @@ const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, inc
         label: 'Expenses',
         data: expensesData,
         backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        borderRadius: 8,
+        barPercentage: 0.7,
+        categoryPercentage: 0.7,
       },
       {
         label: 'Incomes',
         data: incomesData,
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderRadius: 8,
+        barPercentage: 0.7,
+        categoryPercentage: 0.7,
       },
     ],
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: 'Finance Overview Over the Last 7 Days',
-      },
-    },
-  };
-
   return (
-    <div className={`rounded-lg shadow-lg transition-transform transform hover:scale-101 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'} p-6`}>
-      <h2 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'} mb-4`}>Finance Overview</h2>
-      <Bar data={data} options={options} />
+    <div className={className ? className : ''}>
+      {!hideHeader && <h2 className="font-semibold mb-2">Finance Overview</h2>}
+      {!hideSummary && (
+        <div className="mb-2 text-sm">Total Expenses: <b>{expensesData.reduce((a,b)=>a+b,0)}</b> | Total Incomes: <b>{incomesData.reduce((a,b)=>a+b,0)}</b></div>
+      )}
+      <div className="h-[320px]">
+        <Bar data={data} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, title: { display: false } }, maintainAspectRatio: false }} />
+      </div>
     </div>
   );
 };

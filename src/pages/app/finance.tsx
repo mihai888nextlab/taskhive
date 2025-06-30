@@ -19,13 +19,10 @@ const FinancePage = () => {
 
   return (
     <DashboardLayout>
-      <div className={`rounded-lg shadow-xl p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
-        <h1 className={`text-4xl font-extrabold text-center mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          Your Financial Overview
-        </h1>
-
-        <StatsRangeButtons statsRange={logic.statsRange} setStatsRange={logic.setStatsRange} />
-
+      <div className='px-10'>
+      <StatsRangeButtons statsRange={logic.statsRange} setStatsRange={logic.setStatsRange} />
+      {/* Summary Cards with Trend Arrows */}
+      <div className="mb-6">
         <FinanceSummaryCards
           totalExpenses={logic.totalExpenses}
           totalIncomes={logic.totalIncomes}
@@ -34,29 +31,38 @@ const FinancePage = () => {
           incomeTrend={logic.incomeTrend}
           profitTrend={logic.profitTrend}
         />
+      </div>
 
-        <FinanceTabs
-          activeTab={logic.activeTab}
-          setActiveTab={logic.setActiveTab}
-          loading={logic.loading}
-        />
+      {/* Tabs */}
+      <FinanceTabs
+        activeTab={logic.activeTab}
+        setActiveTab={logic.setActiveTab}
+        loading={logic.loading}
+      />
 
-        <div className="rounded-b-lg shadow-inner p-6 bg-gray-50">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Form Column */}
+        <div className="lg:col-span-1">
           {logic.activeTab === 'expenses' ? (
-            <div id="expenses-panel" role="tabpanel">
-              <h2 className={`text-2xl font-semibold mb-5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Add New Expense:</h2>
-              <ExpenseForm {...logic.expenseFormProps} />
-              <h2 className={`text-2xl font-semibold mt-8 mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Your Expenses:</h2>
-              <ExpenseList {...logic.expenseListProps} />
-            </div>
+            <ExpenseForm {...logic.expenseFormProps} />
           ) : (
-            <div id="incomes-panel" role="tabpanel">
-              <h2 className={`text-2xl font-semibold mb-5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Add New Income:</h2>
-              <IncomeForm {...logic.incomeFormProps} />
-              <h2 className={`text-2xl font-semibold mt-8 mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Your Incomes:</h2>
-              <IncomeList {...logic.incomeListProps} />
-            </div>
+            <IncomeForm {...logic.incomeFormProps} />
           )}
+        </div>
+
+        {/* List Column */}
+        <div className="lg:col-span-2">
+          <div className={`rounded-xl p-6 shadow-sm border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Recent {logic.activeTab === 'expenses' ? 'Expenses' : 'Income'}
+            </h3>
+            {logic.activeTab === 'expenses' ? (
+              <ExpenseList {...logic.expenseListProps} />
+            ) : (
+              <IncomeList {...logic.incomeListProps} />
+            )}
+          </div>
         </div>
       </div>
 {/* 
@@ -82,6 +88,7 @@ const FinancePage = () => {
         onUndo={logic.handleUndo}
         deletedItem={logic.deletedItem}
       />
+      </div>
     </DashboardLayout>
   );
 };

@@ -67,7 +67,18 @@ const TasksPage: NextPageWithLayout = () => {
   // UI state
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<string>("createdAtDesc");
+
+  // --- Controlled state for My Task List ---
+  const [mySearch, setMySearch] = useState("");
+  const [myFilterStatus, setMyFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
+  const [myFilterImportant, setMyFilterImportant] = useState<"all" | "important" | "not-important">("all");
+  const [mySortBy, setMySortBy] = useState<"createdAtDesc" | "deadlineAsc">("deadlineAsc");
+
+  // --- Controlled state for Assigned Tasks List ---
+  const [assignedSearch, setAssignedSearch] = useState("");
+  const [assignedFilterStatus, setAssignedFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
+  const [assignedFilterImportant, setAssignedFilterImportant] = useState<"all" | "important" | "not-important">("all");
+  const [assignedSortBy, setAssignedSortBy] = useState<"createdAtDesc" | "deadlineAsc">("deadlineAsc");
 
   // Fetch tasks
   const fetchTasks = async () => {
@@ -165,7 +176,7 @@ const TasksPage: NextPageWithLayout = () => {
       fetchTasks();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUserId, sortBy]);
+  }, [currentUserId, mySortBy]);
 
   useEffect(() => {
     fetchAssignedTasks();
@@ -280,129 +291,166 @@ const TasksPage: NextPageWithLayout = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
+    <div className="relative min-h-screen bg-gray-100 px-2 font-sans overflow-hidden">
       {/* Decorative background */}
-      <div className="absolute top-10 left-1/4 w-32 h-32 sm:w-48 sm:h-48 bg-primary-light rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-      <div className="absolute bottom-10 right-1/4 w-40 h-40 sm:w-64 sm:h-64 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-      <div className="absolute top-1/2 left-1/2 w-36 h-36 sm:w-56 sm:h-56 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+      <div className="absolute top-10 left-1/4 w-32 h-32 sm:w-48 sm:h-48 bg-primary-light rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+      <div className="absolute bottom-10 right-1/4 w-40 h-40 sm:w-64 sm:h-64 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div className="absolute top-1/2 left-1/2 w-36 h-36 sm:w-56 sm:h-56 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
 
-      <main className={`relative z-10 w-full max-w-6xl mx-auto bg-${theme === 'light' ? 'white' : 'gray-800'} rounded-2xl sm:rounded-3xl shadow-2xl p-2 sm:p-4 md:p-8 md:p-12`}> 
-        <h1 className={`text-3xl sm:text-5xl font-extrabold text-${theme === 'light' ? 'gray-900' : 'white'} mb-4 sm:mb-6 text-center tracking-tighter leading-tight`}>
-          Your Personal Task Manager
-        </h1>
-        <p className={`text-center text-base sm:text-lg text-${theme === 'light' ? 'gray-600' : 'gray-400'} mb-6 sm:mb-10 max-w-2xl mx-auto`}>
-          Organize your day, prioritize your goals, and track your progress with ease.
-        </p>
+      <main className="relative z-10 w-full mx-auto px-0 sm:px-2 md:px-4 py-8" style={{maxWidth: '100vw'}}>
+        {/* Heading and description
+        <div className="mb-8 text-center max-w-2xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">
+            Your Personal Task Manager
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-500 mb-2">
+            Organize your day, prioritize your goals, and track your progress with ease.
+          </p>
+        </div> */}
 
-        {/* Add Task Button */}
-        <button
-          onClick={() => {
-            if (!showForm) resetForm();
-            setShowForm((prev) => !prev);
-          }}
-          className="mb-8 w-full py-4 px-6 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 text-lg"
-          disabled={loading}
-          aria-expanded={showForm}
-          aria-controls="task-form"
-        >
-          <MdAddTask className="text-2xl" />
-          <span>{showForm ? "Hide Task Form" : "Add New Task"}</span>
-        </button>
-
-        {/* Task Form */}
-        <TaskForm
-          show={showForm}
-          loading={loading}
-          editingTaskId={editingTaskId}
-          taskTitle={taskTitle}
-          taskDescription={taskDescription}
-          taskDeadline={taskDeadline}
-          assignedTo={assignedTo}
-          usersBelowMe={usersBelowMe}
-          formError={formError}
-          theme={theme}
-          important={important}
-          onTitleChange={setTaskTitle}
-          onDescriptionChange={setTaskDescription}
-          onDeadlineChange={setTaskDeadline}
-          onAssignedToChange={setAssignedTo}
-          onImportantChange={setImportant}
-          onSubmit={handleAddTask}
-          onCancel={() => {
-            resetForm();
-            setShowForm(false);
-          }}
-        />
-
-        <h2 className={`text-2xl sm:text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-6 sm:mb-8 mt-8 sm:mt-12 pb-2 sm:pb-4 border-b-2 sm:border-b-4 border-primary-dark text-center`}>
-          My Task List
-        </h2>
-
-        {/* Task List */}
-        {loading && tasks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 bg-primary-light/10 rounded-lg shadow-inner animate-pulse">
-            <FaSpinner className="animate-spin text-primary text-5xl mb-4" />
-            <p className={`text-xl text-${theme === 'light' ? 'gray-700' : 'gray-300'} font-semibold`}>
-              Loading your tasks...
-            </p>
-          </div>
-        ) : listError ? (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-5 rounded-lg shadow-sm text-center mt-8" role="alert">
-            <div className="flex flex-col items-center">
-              <FaSpinner className={`mr-2 ${loading ? "animate-spin" : ""}`} />
-              <p className="font-bold text-lg mb-2">Failed to Load Tasks</p>
-              <p className="text-base">{listError}</p>
+        {/* Two-column layout for tasks */}
+        <div className="flex flex-col md:flex-row gap-10 items-start w-full">
+          {/* Left: My Tasks */}
+          <section className="bg-white/90 rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100 flex flex-col w-full md:flex-1 md:max-w-none min-h-[700px] max-h-[850px]">
+            <div className="flex items-center justify-between mb-6 mt-2 pb-2 border-b-2 border-primary-dark">
+              <h2 className="text-2xl font-bold text-gray-900 text-left">
+                My Task List
+              </h2>
               <button
-                onClick={fetchTasks}
-                className="mt-4 inline-flex items-center text-primary-dark hover:text-primary font-semibold underline transition-colors"
+                onClick={() => {
+                  resetForm();
+                  setShowForm(true);
+                }}
+                className="py-2 px-4 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center space-x-2 text-base"
+                disabled={loading}
+                aria-expanded={showForm}
+                aria-controls="task-form"
               >
-                Try again
+                <MdAddTask className="text-xl" />
+                <span>Add New Task</span>
               </button>
             </div>
-          </div>
-        ) : tasks.length === 0 ? (
-          <div className="text-center text-gray-600 text-xl mt-8 p-6 bg-primary-light/10 rounded-lg border border-primary-light/30 shadow-md">
-            <p className="font-semibold mb-3">
-              No tasks added yet. Time to get productive!
-            </p>
-            <p className="text-lg">
-              Click the &quot;Add New Task&quot; button above to start organizing your life.
-            </p>
-          </div>
-        ) : (
-          <TaskList
-            tasks={tasks}
-            currentUserEmail={currentUserEmail}
-            loading={loading}
-            onEdit={handleEditTask}
-            onDelete={handleDeleteTask}
-            onToggleComplete={handleToggleComplete}
-            isTaskOverdue={isTaskOverdue}
-          />
-        )}
+            {/* Controls always visible on top, sticky */}
+            <div className="sticky top-0 z-20 bg-white/90 pb-4" style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.01)' }}>
+              <TaskList
+                tasks={tasks}
+                currentUserEmail={currentUserEmail}
+                loading={loading}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                onToggleComplete={handleToggleComplete}
+                isTaskOverdue={isTaskOverdue}
+                theme={theme}
+                controlsOnly
+                search={mySearch}
+                onSearchChange={setMySearch}
+                filterStatus={myFilterStatus}
+                onFilterStatusChange={setMyFilterStatus}
+                filterImportant={myFilterImportant}
+                onFilterImportantChange={setMyFilterImportant}
+                sortBy={mySortBy}
+                onSortByChange={setMySortBy}
+              />
+            </div>
+            {/* Scrollable task cards only */}
+            <div className="flex-1 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100" style={{ minHeight: '400px', maxHeight: '700px' }}>
+              <TaskList
+                tasks={tasks}
+                currentUserEmail={currentUserEmail}
+                loading={loading}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                onToggleComplete={handleToggleComplete}
+                isTaskOverdue={isTaskOverdue}
+                theme={theme}
+                cardsOnly
+                search={mySearch}
+                filterStatus={myFilterStatus}
+                filterImportant={myFilterImportant}
+                sortBy={mySortBy}
+              />
+            </div>
+          </section>
 
-        {/* Tasks I Assigned to Others */}
-        <h2 className={`text-2xl sm:text-4xl font-bold text-${theme === 'light' ? 'gray-900' : 'white'} mb-6 sm:mb-8 mt-12 sm:mt-16 pb-2 sm:pb-4 border-b-2 sm:border-b-4 border-secondary text-center`}>
-          Tasks I Assigned to Others
-        </h2>
-        {assignedTasks.length === 0 ? (
-          <div className="text-center text-gray-600 text-xl mt-8 p-6 bg-secondary/10 rounded-lg border border-secondary/30 shadow-md">
-            <p className="font-semibold mb-3">
-              You haven&apos;t assigned any tasks to others yet.
-            </p>
-            <p className="text-lg">
-              Assign tasks to your team and track their progress here.
-            </p>
+          {/* Right: Assigned Tasks */}
+          <section className="bg-white/90 rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100 flex flex-col w-full md:flex-1 md:max-w-none min-h-[700px] max-h-[850px]">
+            <div className="flex items-center justify-between mb-6 mt-4 pb-2 border-b-2 border-primary-dark">
+              <h2 className="text-2xl font-bold text-gray-900 text-left">
+                Tasks Assigned By Me
+              </h2>
+            </div>
+            {/* Controls always visible on top, sticky */}
+            <div className="sticky top-0 z-20 bg-white/90 pb-4" style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.01)' }}>
+              <AssignedTasksList
+                tasks={assignedTasks}
+                loading={loading}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                isTaskOverdue={isTaskOverdue}
+                currentUserEmail={currentUserEmail}
+                controlsOnly
+                search={assignedSearch}
+                onSearchChange={setAssignedSearch}
+                filterStatus={assignedFilterStatus}
+                onFilterStatusChange={setAssignedFilterStatus}
+                filterImportant={assignedFilterImportant}
+                onFilterImportantChange={setAssignedFilterImportant}
+                sortBy={assignedSortBy}
+                onSortByChange={setAssignedSortBy}
+              />
+            </div>
+            {/* Scrollable task cards only */}
+            <div className="flex-1 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100" style={{ minHeight: '400px', maxHeight: '700px' }}>
+              <AssignedTasksList
+                tasks={assignedTasks}
+                loading={loading}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                isTaskOverdue={isTaskOverdue}
+                currentUserEmail={currentUserEmail}
+                cardsOnly
+                search={assignedSearch}
+                filterStatus={assignedFilterStatus}
+                filterImportant={assignedFilterImportant}
+                sortBy={assignedSortBy}
+              />
+            </div>
+          </section>
+        </div>
+
+        {/* Task Form Modal Overlay */}
+        {showForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl shadow-2xl p-0 sm:p-0 max-w-lg w-full relative animate-fadeIn">
+              <button
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+                onClick={() => { resetForm(); setShowForm(false); }}
+                aria-label="Close form"
+              >
+                ×
+              </button>
+              <TaskForm
+                show={true}
+                loading={loading}
+                editingTaskId={editingTaskId}
+                taskTitle={taskTitle}
+                taskDescription={taskDescription}
+                taskDeadline={taskDeadline}
+                assignedTo={assignedTo}
+                usersBelowMe={usersBelowMe}
+                formError={formError}
+                theme={theme}
+                important={important}
+                onTitleChange={setTaskTitle}
+                onDescriptionChange={setTaskDescription}
+                onDeadlineChange={setTaskDeadline}
+                onAssignedToChange={setAssignedTo}
+                onImportantChange={setImportant}
+                onSubmit={handleAddTask}
+                onCancel={() => { resetForm(); setShowForm(false); }}
+              />
+            </div>
           </div>
-        ) : (
-          <AssignedTasksList
-            assignedTasks={assignedTasks}
-            loading={loading}
-            onEdit={handleEditTask}
-            onDelete={handleDeleteTask}
-            isTaskOverdue={isTaskOverdue}
-            currentUserEmail={currentUserEmail}
-          />
         )}
       </main>
     </div>

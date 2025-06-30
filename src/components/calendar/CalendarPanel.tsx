@@ -2,12 +2,21 @@ import React from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
+interface Task {
+  _id: string;
+  title: string;
+  description?: string;
+  deadline: string;
+  completed: boolean;
+}
+
 interface CalendarPanelProps {
   selectedDate: Date | null;
   onDateChange: (date: Date | null) => void;
   deadlines: string[];
   theme: string;
-  onTaskDrop?: (taskId: string, date: Date) => void; // New prop
+  tasks: Task[]; // Add tasks prop for completion status
+  onTaskDrop?: (taskId: string, date: Date) => void;
 }
 
 const CalendarPanel: React.FC<CalendarPanelProps> = ({
@@ -15,8 +24,33 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({
   onDateChange,
   deadlines,
   theme,
+  tasks,
   onTaskDrop,
 }) => {
+  // Function to get the circle color for a date
+  const getCircleColor = (date: Date) => {
+    const dateString = date.toDateString();
+    const tasksForDate = tasks.filter(task => 
+      new Date(task.deadline).toDateString() === dateString
+    );
+    
+    if (tasksForDate.length === 0) return null;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const taskDate = new Date(date);
+    taskDate.setHours(0, 0, 0, 0);
+    
+    // Check if all tasks are completed
+    const allCompleted = tasksForDate.every(task => task.completed);
+    if (allCompleted) return '#22C55E'; // Green for all completed
+    
+    // Check if date is overdue (past today) and has incomplete tasks
+    const hasIncompleteTask = tasksForDate.some(task => !task.completed);
+    if (taskDate < today && hasIncompleteTask) return '#EF4444'; // Red for overdue
+    
+    return '#4A90E2'; // Default blue for upcoming tasks
+  };
   return (
     <div className="w-full flex justify-center items-center overflow-x-auto">
       <Calendar
@@ -32,13 +66,15 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({
         tileContent={({ date, view }) => {
           // Keep your highlight logic
           const highlight = view === 'month' && deadlines.includes(date.toDateString());
+          const circleColor = getCircleColor(date);
+          
           return (
             <>
-              {highlight && (
+              {highlight && circleColor && (
                 <div
                   className="highlight-circle-content"
                   style={{
-                    backgroundColor: '#4A90E2',
+                    backgroundColor: circleColor,
                     color: 'white',
                   }}
                 >
@@ -161,7 +197,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({
         }
         .react-calendar-light-theme .react-calendar__tile.highlight-deadline:enabled:hover .highlight-circle-content,
         .react-calendar-light-theme .react-calendar__tile.highlight-deadline:enabled:focus .highlight-circle-content {
-          background-color: #3a7bd5 !important;
+          opacity: 0.8 !important;
         }
         @media (max-width: 640px) {
           .react-calendar-light-theme {

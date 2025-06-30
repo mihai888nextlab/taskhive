@@ -1,17 +1,65 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
+// Define the type for handler parameters
+export type CommandHandlerParams = {
+  input: string;
+  setChatHistory: React.Dispatch<React.SetStateAction<{ type: 'user' | 'ai'; text: string }[]>>;
+  setInputPrompt: React.Dispatch<React.SetStateAction<string>>;
+};
+
+// Use the type in your commands array
+type Command = {
+  command: string;
+  label: string;
+  handler: (params: CommandHandlerParams) => Promise<void>;
+};
+
+// --- Command definitions with handlers ---
+const commands: Command[] = [
+  {
+    command: '/help',
+    label: 'Show help',
+    handler: async ({ input, setChatHistory, setInputPrompt }: CommandHandlerParams) => {
+      setChatHistory((prev) => [
+        ...prev,
+        { type: 'user', text: input },
+        { type: 'ai', text: `**Hive Assistant Help**\n\nYou can use Hive Assistant to:\n\n- Create, edit, and manage tasks (e.g., \"Create a task to call John tomorrow\")\n- Add announcements (admins only)\n- Record expenses or incomes (e.g., \"Add an expense for lunch, 20 dollars, today\")\n- Get productivity and time tracking insights\n- Ask for best practices in business, organization, and team management\n- Request templates, guides, or step-by-step instructions\n- Use natural language for all requests\n\n**Commands:**\n- /help — Show this help message\n- /addtask — Start guided task creation\n\nJust type your request or question!` }
+      ]);
+      setInputPrompt("");
+    }
+  },
+  {
+    command: '/addtask',
+    label: 'Guided task creation',
+    handler: async ({ input, setChatHistory, setInputPrompt }: CommandHandlerParams) => {
+      setChatHistory((prev) => [
+        ...prev,
+        { type: 'user', text: input },
+        { type: 'ai', text:
+`You can create a task by simply describing it in your own words!\n\n**Example prompt:**\ncreate task *Title* with deadline 29 July for *the person assigned (can be yourself)*\n\nAny sentence or phrase that includes a task title and a deadline, and refers to creating a task, will be understood.\n\nJust type your request, and Hive Assistant will handle the rest!` }
+      ]);
+      setInputPrompt("");
+    }
+  },
+  // Add more commands here as needed
+];
+
 interface AIWindowProps {
   isOpen: boolean;
   onClose: () => void;
+  isDesktop?: boolean; // New prop to control desktop mode
 }
 
-const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
+const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false }) => {
   const [inputPrompt, setInputPrompt] = useState("");
   const [chatHistory, setChatHistory] = useState<{ type: 'user' | 'ai'; text: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string | null>(null);
+  const [showCommandList, setShowCommandList] = useState(false);
+  const [filteredCommands, setFilteredCommands] = useState(commands);
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const chatHistoryRef = useRef<HTMLDivElement>(null);
   const submitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -36,11 +84,67 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
     // eslint-disable-next-line
   }, [pendingTranscript, isRecording]);
 
+  useEffect(() => {
+    if (inputPrompt.startsWith('/')) {
+      setShowCommandList(true);
+      const filter = inputPrompt.slice(1).toLowerCase();
+      const filtered = commands.filter(c => c.command.slice(1).startsWith(filter));
+      setFilteredCommands(filtered);
+      setSelectedCommandIndex(0); // Reset selection on new filter
+    } else {
+      setShowCommandList(false);
+    }
+  }, [inputPrompt]);
+
   if (!isOpen) return null;
 
+  // Responsive style: right panel on desktop, modal on mobile
+  const panelStyle: React.CSSProperties = isDesktop
+    ? {
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: '420px',
+        maxWidth: '32vw',
+        minWidth: '340px',
+        height: '100vh',
+        borderRadius: '0',
+        boxShadow: '0 0 32px 0 rgba(0,0,0,0.10)',
+        zIndex: 50,
+        background: 'linear-gradient(135deg, #fff 60%, #e0e7ef 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'right 0.3s',
+      }
+    : {
+        left: 'auto',
+        right: '2rem',
+        bottom: '4rem',
+        width: '500px',
+        height: '600px',
+        borderRadius: '1.25rem',
+        maxWidth: '95vw',
+        maxHeight: '95vh',
+      };
+
+  // --- Unified command processing ---
   const handleSubmit = async (promptOverride?: string) => {
     const promptToSend = typeof promptOverride === "string" ? promptOverride : inputPrompt;
     if (!promptToSend.trim()) return;
+
+    // Try to match a command (ignore leading/trailing spaces and allow for extra spaces after slash)
+    const normalizedPrompt = promptToSend.trim().replace(/^\/(\s+)/, '/').replace(/\s+/g, ' ');
+    const matched = commands.find(cmd => normalizedPrompt.toLowerCase() === cmd.command.toLowerCase());
+    if (matched) {
+      await matched.handler({
+        input: promptToSend,
+        setChatHistory,
+        setInputPrompt,
+      });
+      return;
+    }
+
     setChatHistory((prev) => [...prev, { type: 'user', text: promptToSend }]);
     setInputPrompt("");
     setIsLoading(true);
@@ -113,19 +217,40 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
   // Add a state to determine if the textarea is empty
   const isInputEmpty = inputPrompt.trim().length === 0;
 
+  // Insert command from quick button or dropdown
+  const handleInsertCommand = (cmd: string, autoSubmit = false) => {
+    setInputPrompt(cmd);
+    setShowCommandList(false);
+    if (autoSubmit) {
+      setTimeout(() => handleSubmit(cmd), 0);
+    }
+  };
+
+  // Keyboard navigation for command list
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (showCommandList && filteredCommands.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedCommandIndex((prev) => (prev + 1) % filteredCommands.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedCommandIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+      } else if (e.key === 'Tab' || e.key === 'Enter') {
+        e.preventDefault();
+        handleInsertCommand(filteredCommands[selectedCommandIndex].command);
+      }
+    }
+    // Existing Enter-to-submit logic
+    if (e.key === 'Enter' && !e.shiftKey && !(showCommandList && filteredCommands.length > 0)) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
     <div
-      className="fixed z-50 animate-slide-up flex flex-col transition-all bg-gradient-to-br from-white via-blue-50 to-gray-100 aiwindow-mobile"
-      style={{
-        left: 'auto',
-        right: '2rem',
-        bottom: '4rem',
-        width: '500px',
-        height: '600px',
-        borderRadius: '1.25rem',
-        maxWidth: '95vw',
-        maxHeight: '95vh',
-      }}
+      className={`fixed z-50 animate-slide-up flex flex-col transition-all aiwindow-mobile ${isDesktop ? 'aiwindow-desktop' : ''}`}
+      style={panelStyle}
     >
       <style>{`
         @media (max-width: 640px) {
@@ -144,11 +269,23 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
             border: none !important;
             padding: 0 !important;
           }
-          .aiwindow-mobile .px-5 { padding-left: 1rem !important; padding-right: 1rem !important; }
-          .aiwindow-mobile .pt-5 { padding-top: 0.75rem !important; }
-          .aiwindow-mobile .pb-3 { padding-bottom: 0.5rem !important; }
-          .aiwindow-mobile .text-2xl { font-size: 1.25rem !important; }
-          .aiwindow-mobile textarea { font-size: 1rem !important; }
+        }
+        @media (min-width: 641px) {
+          .aiwindow-desktop {
+            left: auto !important;
+            right: 0 !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            width: 420px !important;
+            min-width: 340px !important;
+            max-width: 32vw !important;
+            height: 100vh !important;
+            border-radius: 0 !important;
+            box-shadow: 0 0 32px 0 rgba(0,0,0,0.10);
+            border-left: 1px solid #e5e7eb;
+            padding: 0 !important;
+            transform: none !important;
+          }
         }
       `}</style>
       <div className="flex flex-col h-full">
@@ -193,8 +330,38 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
           )}
         </div>
 
+        {/* Quick command buttons */}
+        <div className="flex gap-2 mb-1 px-3 pt-2">
+          {commands.map((c) => (
+            <button
+              key={c.command}
+              type="button"
+              className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full border border-blue-200 transition-all"
+              onClick={() => handleInsertCommand(c.command, true)}
+              disabled={isLoading}
+              tabIndex={-1}
+            >
+              {c.command}
+            </button>
+          ))}
+        </div>
+
         {/* Input Area */}
-        <div className="mb-2 flex flex-col gap-2 items-stretch w-full px-3 pb-3 bg-transparent">
+        <div className="mb-2 flex flex-col gap-2 items-stretch w-full px-3 pb-3 bg-transparent relative">
+          {/* Command completions dropdown */}
+          {showCommandList && filteredCommands.length > 0 && (
+            <div className="absolute left-0 top-[-2.5rem] z-50 bg-white border border-gray-200 rounded-xl shadow-lg px-2 py-1 min-w-[120px] max-w-[220px] text-sm animate-fadeIn">
+              {filteredCommands.map((c, idx) => (
+                <div
+                  key={c.command}
+                  className={`px-2 py-1 hover:bg-blue-50 rounded cursor-pointer ${idx === selectedCommandIndex ? 'bg-blue-100 text-blue-900 font-semibold' : ''}`}
+                  onClick={() => handleInsertCommand(c.command)}
+                >
+                  <span className="font-mono text-blue-700">{c.command}</span> <span className="text-gray-500">{c.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="flex flex-row items-center gap-2 w-full bg-white/95 rounded-full shadow-inner border border-gray-200 focus-within:border-blue-400 transition-all px-3 py-2">
             <div className="flex-1 flex items-center order-1">
               <textarea
@@ -203,7 +370,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose }) => {
                 placeholder={isLoading ? "Waiting for response..." : "Type your message..."}
                 value={inputPrompt}
                 onChange={(e) => setInputPrompt(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleInputKeyDown}
                 disabled={isLoading}
                 rows={1}
               ></textarea>

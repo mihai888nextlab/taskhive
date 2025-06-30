@@ -54,182 +54,185 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   onExportPDF,
 }) => (
   <div>
-    {/* Unified Menu */}
-    <div className={`flex flex-wrap gap-4 mb-6 px-4 py-4 rounded-2xl shadow-md border items-center transition-all duration-200
-      ${theme === "dark"
-        ? "bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700"
-        : "bg-gradient-to-br from-blue-50 to-white border-blue-100"
-      }`}
-    >
-      {/* Search */}
-      <div className="flex-1 flex items-center gap-2 min-w-[180px]">
-        <input
-          type="text"
-          placeholder="🔍 Search expenses..."
-          value={search}
-          onChange={e => onSearchChange(e.target.value)}
-          className={`w-full px-5 py-2 rounded-full border focus:outline-none focus:ring-2 text-base shadow-sm transition-all duration-200
-            ${theme === "dark"
-              ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-400"
-              : "bg-white text-gray-900 border-blue-200 focus:ring-blue-400"
+    {/* Responsive Search and Filters */}
+    <div className={`space-y-3 mb-4 p-3 rounded-lg border ${
+      theme === "dark"
+        ? "bg-gray-900 border-gray-700"
+        : "bg-gray-50 border-gray-200"
+    }`}>
+      {/* First Row: Search and Quick Actions */}
+      <div className="flex gap-2">
+        {/* Search */}
+        <div className="flex-1 min-w-0">
+          <input
+            type="text"
+            placeholder="Search expenses..."
+            value={search}
+            onChange={e => onSearchChange(e.target.value)}
+            className={`w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              theme === "dark"
+                ? "bg-gray-800 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
             }`}
-          disabled={loading}
-          aria-label="Search"
-        />
+            disabled={loading}
+          />
+        </div>
+        
+        {/* Export Actions */}
+        <div className="flex gap-1">
+          <button
+            onClick={onExportCSV}
+            className={`p-2 rounded-md border text-sm hover:bg-opacity-80 transition-colors ${
+              theme === "dark"
+                ? "bg-blue-600 text-white border-blue-500 hover:bg-blue-700"
+                : "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+            }`}
+            disabled={loading}
+            title="Export CSV"
+          >
+            <FaFileCsv />
+          </button>
+          <button
+            onClick={onExportPDF}
+            className={`p-2 rounded-md border text-sm hover:bg-opacity-80 transition-colors ${
+              theme === "dark"
+                ? "bg-red-600 text-white border-red-500 hover:bg-red-700"
+                : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+            }`}
+            disabled={loading}
+            title="Export PDF"
+          >
+            <FaFilePdf />
+          </button>
+        </div>
       </div>
-      {/* Category */}
-      <div className="flex items-center gap-2 min-w-[160px]">
-        <span className="text-sm font-medium text-gray-500 dark:text-gray-300">Category:</span>
+
+      {/* Second Row: Filters and Sort - Responsive Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2">
+        {/* Category Filter */}
         <select
           value={categoryFilter}
           onChange={e => onCategoryFilterChange(e.target.value)}
-          className={`px-4 py-2 rounded-full border focus:outline-none focus:ring-2 text-base shadow-sm transition-all duration-200
-            ${theme === "dark"
-              ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-400"
-              : "bg-white text-gray-900 border-blue-200 focus:ring-blue-400"
-            }`}
+          className={`px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            theme === "dark"
+              ? "bg-gray-800 text-white border-gray-600"
+              : "bg-white text-gray-900 border-gray-300"
+          }`}
           disabled={loading}
-          aria-label="Category Filter"
         >
-          <option value="All">All</option>
-          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          <option value="">All Categories</option>
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
         </select>
-      </div>
-      {/* Date Range */}
-      <div className="flex items-center gap-2 min-w-[220px]">
-        <span className="text-sm font-medium text-gray-500 dark:text-gray-300">Date:</span>
+
+        {/* Sort */}
+        <select
+          value={`${sortBy}-${sortOrder}`}
+          onChange={e => {
+            const [newSortBy, newSortOrder] = e.target.value.split('-');
+            onSortByChange(newSortBy);
+            onSortOrderChange(newSortOrder);
+          }}
+          className={`px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            theme === "dark"
+              ? "bg-gray-800 text-white border-gray-600"
+              : "bg-white text-gray-900 border-gray-300"
+          }`}
+          disabled={loading}
+        >
+          <option value="date-desc">Newest</option>
+          <option value="date-asc">Oldest</option>
+          <option value="amount-desc">Highest</option>
+          <option value="amount-asc">Lowest</option>
+        </select>
+
+        {/* Start Date */}
         <DatePicker
           selected={dateRange[0]}
           onChange={date => onDateRangeChange([date, dateRange[1]])}
           selectsStart
           startDate={dateRange[0]}
           endDate={dateRange[1]}
-          placeholderText="Start"
-          className={`px-3 py-2 rounded-full border focus:outline-none focus:ring-2 text-base shadow-sm transition-all duration-200
-            ${theme === "dark"
-              ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-400"
-              : "bg-white text-gray-900 border-blue-200 focus:ring-blue-400"
-            }`}
+          placeholderText="Start Date"
+          className={`w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            theme === "dark"
+              ? "bg-gray-800 text-white border-gray-600"
+              : "bg-white text-gray-900 border-gray-300"
+          }`}
           disabled={loading}
         />
-        <span className="text-gray-400">–</span>
+
+        {/* End Date */}
         <DatePicker
           selected={dateRange[1]}
           onChange={date => onDateRangeChange([dateRange[0], date])}
           selectsEnd
           startDate={dateRange[0]}
           endDate={dateRange[1]}
-          placeholderText="End"
-          className={`px-3 py-2 rounded-full border focus:outline-none focus:ring-2 text-base shadow-sm transition-all duration-200
-            ${theme === "dark"
-              ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-400"
-              : "bg-white text-gray-900 border-blue-200 focus:ring-blue-400"
-            }`}
+          placeholderText="End Date"
+          className={`w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            theme === "dark"
+              ? "bg-gray-800 text-white border-gray-600"
+              : "bg-white text-gray-900 border-gray-300"
+          }`}
           disabled={loading}
         />
       </div>
-      {/* Sort By */}
-      <div className="flex items-center gap-2 min-w-[160px]">
-        <span className="text-sm font-medium text-gray-500 dark:text-gray-300">Sort by:</span>
-        <select
-          value={sortBy}
-          onChange={e => onSortByChange(e.target.value)}
-          className={`px-4 py-2 rounded-full border focus:outline-none focus:ring-2 text-base shadow-sm transition-all duration-200
-            ${theme === "dark"
-              ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-400"
-              : "bg-white text-gray-900 border-blue-200 focus:ring-blue-400"
-            }`}
-          disabled={loading}
-        >
-          <option value="date">Date</option>
-          <option value="amount">Amount</option>
-        </select>
-      </div>
-      {/* Sort Order */}
-      <div className="flex items-center gap-2 min-w-[160px]">
-        <span className="text-sm font-medium text-gray-500 dark:text-gray-300">Order:</span>
-        <select
-          value={sortOrder}
-          onChange={e => onSortOrderChange(e.target.value)}
-          className={`px-4 py-2 rounded-full border focus:outline-none focus:ring-2 text-base shadow-sm transition-all duration-200
-            ${theme === "dark"
-              ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-400"
-              : "bg-white text-gray-900 border-blue-200 focus:ring-blue-400"
-            }`}
-          disabled={loading}
-        >
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
-        </select>
-      </div>
-      {/* Export Buttons */}
-      <div className="flex items-center gap-2 min-w-[160px]">
-        <button
-          onClick={onExportCSV}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold shadow transition-all duration-200
-            ${theme === "dark"
-              ? "bg-blue-700 text-white hover:bg-blue-800"
-              : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
-          disabled={loading}
-          aria-label="Export CSV"
-        >
-          <FaFileCsv /> CSV
-        </button>
-        <button
-          onClick={onExportPDF}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold shadow transition-all duration-200
-            ${theme === "dark"
-              ? "bg-green-700 text-white hover:bg-green-800"
-              : "bg-green-500 text-white hover:bg-green-600"
-            }`}
-          disabled={loading}
-          aria-label="Export PDF"
-        >
-          <FaFilePdf /> PDF
-        </button>
-      </div>
     </div>
+
     {/* List */}
-    <div className="space-y-4">
+    <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
       {loading ? (
-        <div className="text-center py-4">
-          <span>Loading...</span>
-          <p className="text-gray-400 mt-2">Loading expenses...</p>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+          <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading expenses...</p>
         </div>
       ) : expenses.length === 0 ? (
-        <p className="text-gray-400 text-center py-4">No expenses recorded yet.</p>
+        <p className={`text-center py-8 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+          No expenses found. Add your first expense using the form.
+        </p>
       ) : (
         expenses.map(expense => (
           <div
             key={expense._id}
-            className={`flex items-center justify-between rounded-xl shadow-md p-5 transition-transform duration-200 hover:scale-101 ${
+            className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
               theme === "dark"
-                ? "bg-gradient-to-br from-red-900 to-gray-900 border border-red-900"
-                : "bg-gradient-to-br from-red-100 to-white border border-red-200"
+                ? "bg-red-900/10 border-gray-700 hover:bg-red-900/20"
+                : "bg-red-50/50 border-red-100 hover:bg-red-50"
             }`}
           >
-            <div>
-              <h3 className="font-bold text-lg text-red-700 dark:text-red-300">{expense.title}</h3>
-              <p className="text-gray-500 text-sm mt-1">{expense.description}</p>
-              <div className="flex flex-wrap gap-4 mt-2 text-sm">
-                <span className="font-semibold text-red-700 dark:text-red-300">
-                  Amount: ${expense.amount.toFixed(2)}
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h3 className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {expense.title}
+                </h3>
+                <span className="text-lg font-bold text-red-500">
+                  ${expense.amount.toFixed(2)}
                 </span>
-                <span className="text-gray-500">
-                  Date: {expense.date ? new Date(expense.date).toLocaleDateString() : "-"}
+              </div>
+              <p className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                {expense.description}
+              </p>
+              <div className="flex gap-4 text-xs">
+                <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                  {expense.date ? new Date(expense.date).toLocaleDateString() : "No date"}
                 </span>
-                <span className="text-gray-500">
-                  Category: {expense.category || "-"}
-                </span>
+                {expense.category && (
+                  <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                    {expense.category}
+                  </span>
+                )}
               </div>
             </div>
             <button
               onClick={() => onDelete(expense)}
-              className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-800 transition duration-200"
+              className={`p-2 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors ${
+                theme === 'dark' ? 'hover:text-red-400' : 'hover:text-red-600'
+              }`}
               title="Delete Expense"
             >
-              <FaTrash size={20} />
+              <FaTrash size={16} />
             </button>
           </div>
         ))

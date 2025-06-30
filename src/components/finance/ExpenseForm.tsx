@@ -77,6 +77,9 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           : "bg-gradient-to-br from-white to-red-50 border border-red-100"
       }`}
     >
+      <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+        Add Expense
+      </h3>
       <input
         type="text"
         value={title}

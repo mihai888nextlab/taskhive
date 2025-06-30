@@ -22,13 +22,13 @@ const DashboardCard: React.FC<{
   children?: React.ReactNode;
 }> = ({ icon, title, description, children }) => {
   const { theme } = useTheme();
-  const cardBackground = theme === 'light' ? 'bg-white' : 'bg-gray-800';
+  const cardBackground = 'bg-white';
   const cardTextColor = theme === 'light' ? 'text-gray-900' : 'text-white';
-  const borderColor = theme === 'light' ? 'border-gray-100' : 'border-gray-700';
+  const borderColor = 'border-gray-200';
 
   return (
     <div
-      className={`group relative ${cardBackground} p-8 rounded-2xl shadow-xl ${borderColor} transition-all duration-300 transform hover:-translate-y-2 flex flex-col overflow-hidden`}
+      className={`group relative ${cardBackground} p-8 rounded-2xl border ${borderColor} shadow-sm transition-all duration-300 flex flex-col overflow-hidden`}
     >
       <div className="flex items-center mb-4">
         <div className="p-3 bg-primary-light/10 rounded-full mr-4 flex-shrink-0">
@@ -57,6 +57,9 @@ const DashboardPage: NextPageWithLayout = () => {
   const [announcementPreview, setAnnouncementPreview] = useState<any>(null);
   const [loadingAnnouncement, setLoadingAnnouncement] = useState(true);
   const [announcementError, setAnnouncementError] = useState<string | null>(null);
+
+  // Add state for the Tasks card title
+  const [tasksCardTitle, setTasksCardTitle] = useState('Tasks');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -140,15 +143,12 @@ const DashboardPage: NextPageWithLayout = () => {
 
   return (
     <div
-      className="p-4 sm:p-8 min-h-screen rounded-lg bg-transparent text-gray-900"
+      className="sm:p-7 min-h-screen rounded-lg bg-transpare text-gray-900"
       style={{ maxWidth: '100vw', overflowX: 'hidden' }}
     >
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </Head>
-      <h1 className="text-2xl sm:text-4xl font-extrabold mb-6 sm:mb-10 text-center tracking-tight">
-        Welcome to Your Dashboard!
-      </h1>
 
       {/* {loadingStats ? (
         <p className="text-center text-gray-600 mb-8">Loading statistics...</p>
@@ -163,8 +163,94 @@ const DashboardPage: NextPageWithLayout = () => {
       <div
         className="w-full flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 md:gap-8"
       >
+        {/* Tasks Card */}
+        <div
+          className="w-full px-2 flex md:block md:px-0 group"
+          role="button"
+          tabIndex={0}
+          onClick={() => { window.location.href = '/app/tasks'; }}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/app/tasks'; }}
+          style={{ cursor: 'pointer' }}
+          aria-label="Go to tasks page"
+        >
+          <DashboardCard
+            icon={<FaTasks className="text-primary text-3xl" />}
+            title={tasksCardTitle}
+            description="Organize and track your team's assignments and progress."
+          >
+            <DashboardTaskPreview userId={currentUser?._id} userEmail={currentUser?.email} setTitle={setTasksCardTitle} />
+          </DashboardCard>
+        </div>
+        {/* Announcements Card */}
+        <div className="w-full px-2 flex md:block md:px-0"
+          role="button"
+          tabIndex={0}
+          onClick={() => { window.location.href = '/app/announcements'; }}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/app/announcements'; }}
+          style={{ cursor: 'pointer' }}
+          aria-label="Go to announcements page"
+        >
+          <DashboardCard
+            icon={<FaBullhorn className="text-primary text-3xl" />}
+            title="Announcement"
+            description="Stay up to date with the latest company news and updates."
+          >
+            {/* Only render the announcement content, no extra container or heading */}
+            {loadingAnnouncement ? (
+              <div className="flex flex-col justify-center items-center h-32 bg-primary-light/10 rounded-lg animate-pulse">
+                <FaBullhorn className="animate-bounce text-primary text-4xl mb-3" />
+                <span className="text-sm font-medium">Loading announcement...</span>
+              </div>
+            ) : announcementError ? (
+              <div className="bg-red-50 border-l-4 border-red-400 text-red-400 p-4 rounded-md shadow-sm text-center font-medium">
+                <p className="mb-1">Failed to load announcement:</p>
+                <p className="text-sm italic">{announcementError}</p>
+              </div>
+            ) : !announcementPreview ? (
+              <div className="text-center p-5 bg-blue-50/20 rounded-md border border-blue-200 shadow-inner">
+                <p className="font-bold text-lg mb-2">No announcements yet.</p>
+                <p className="text-sm leading-relaxed">
+                  Stay tuned for important company updates!
+                </p>
+              </div>
+            ) : (
+              <div className={`relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-5 rounded-xl shadow-md border ${announcementPreview.pinned ? (theme === 'dark' ? 'bg-yellow-900 border-yellow-700' : 'bg-gradient-to-r from-yellow-50 to-white border-yellow-200') : (theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gradient-to-r from-blue-50 to-white border-primary-light/50')} hover:scale-101 transition-all duration-300 group`}
+              style={{ opacity: announcementPreview.pinned ? 1 : 0.95 }}
+            >
+              <div className="flex-1 pr-0 sm:pr-4 w-full min-w-0">
+                <span className={`block font-bold text-lg sm:text-xl leading-tight break-words ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{announcementPreview.title}</span>
+                <div className={`mt-2 line-clamp-2 break-words ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}> 
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{announcementPreview.content}</ReactMarkdown>
+                </div>
+                <div className="mt-3 text-xs sm:text-sm font-semibold flex flex-wrap items-center gap-2">
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold text-white ${announcementPreview.pinned ? 'bg-yellow-500' : 'bg-blue-500'}`}>{announcementPreview.category}</span>
+                  {announcementPreview.pinned && (
+                    <span className="ml-2 px-2.5 py-1 bg-yellow-400 text-white text-xs rounded-full font-bold flex items-center gap-1"><FaBullhorn />Pinned</span>
+                  )}
+                  <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                    By {announcementPreview.createdBy?.firstName} {announcementPreview.createdBy?.lastName}
+                  </span>
+                  <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                    • {new Date(announcementPreview.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+              <div className="self-center pl-0 sm:pl-3 mt-3 sm:mt-0 hidden sm:block">
+                <FaBullhorn className={`text-3xl sm:text-4xl ${announcementPreview.pinned ? 'text-yellow-400' : 'text-primary'}`} />
+              </div>
+            </div>
+            )}
+          </DashboardCard>
+        </div>
         {/* Finance Card */}
-        <div className="w-full px-2 flex md:block md:px-0">
+        <div className="w-full px-2 flex md:block md:px-0"
+          role="button"
+          tabIndex={0}
+          onClick={() => { window.location.href = '/app/finance'; }}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/app/finance'; }}
+          style={{ cursor: 'pointer' }}
+          aria-label="Go to finance page"
+        >
           <DashboardCard
             icon={<FaMoneyBillWave className="text-primary text-3xl" />}
             title="Finance"
@@ -178,7 +264,14 @@ const DashboardPage: NextPageWithLayout = () => {
           </DashboardCard>
         </div>
         {/* Users Card */}
-        <div className="w-full px-2 flex md:block md:px-0">
+        <div className="w-full px-2 flex md:block md:px-0"
+          role="button"
+          tabIndex={0}
+          onClick={() => { window.location.href = '/app/users'; }}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/app/users'; }}
+          style={{ cursor: 'pointer' }}
+          aria-label="Go to users page"
+        >
           <DashboardCard
             icon={<FaUserClock className="text-primary text-3xl" />}
             title="Users"
@@ -207,105 +300,12 @@ const DashboardPage: NextPageWithLayout = () => {
                     ]}
                     emptyMessage="No users registered."
                   />
-                  <div className="text-center mt-8">
-                    <Link
-                      href="/app/users"
-                      className="inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
-                    >
-                      <span className="mr-3">View All Users</span>
-                      <FaArrowRight className="text-xl transform transition-transform duration-300 group-hover:translate-x-1" />
-                    </Link>
-                  </div>
                 </>
               ) : (
                 <p className="text-gray-600 text-center p-5 bg-white rounded-md border border-gray-200 shadow-inner">
                   No users registered yet.
                 </p>
               )}
-            </div>
-          </DashboardCard>
-        </div>
-        {/* Tasks Card */}
-        <div className="w-full px-2 flex md:block md:px-0">
-          <DashboardCard
-            icon={<FaTasks className="text-primary text-3xl" />}
-            title="Tasks"
-            description="Organize and track your team's assignments and progress."
-          >
-            <DashboardTaskPreview userId={currentUser?._id} userEmail={currentUser?.email} />
-          </DashboardCard>
-        </div>
-        {/* Announcements Card */}
-        <div className="w-full px-2 flex md:block md:px-0">
-          <DashboardCard
-            icon={<FaBullhorn className="text-primary text-3xl" />}
-            title="Announcement"
-            description="Stay up to date with the latest company news and updates."
-          >
-            <div className={
-              theme === "dark"
-                ? "mt-6 p-5 bg-gray-800 rounded-xl shadow-lg border border-gray-700 transform transition-transform duration-300 hover:scale-[1.01]"
-                : "mt-6 p-5 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-100 transform transition-transform duration-300 hover:scale-[1.01]"
-            }>
-              <h3 className={
-                theme === "dark"
-                  ? "text-2xl font-extrabold text-gray-100 mb-5 pb-3 border-b-2 border-gray-600 leading-tight"
-                  : "text-2xl font-extrabold text-gray-900 mb-5 pb-3 border-b-2 border-primary leading-tight"
-              }>Announcement</h3>
-              {loadingAnnouncement ? (
-                <div className="flex flex-col justify-center items-center h-32 bg-primary-light/10 rounded-lg animate-pulse">
-                  <FaBullhorn className="animate-bounce text-primary text-4xl mb-3" />
-                  <span className="text-sm font-medium">Loading announcement...</span>
-                </div>
-              ) : announcementError ? (
-                <div className="bg-red-50 border-l-4 border-red-400 text-red-400 p-4 rounded-md shadow-sm text-center font-medium">
-                  <p className="mb-1">Failed to load announcement:</p>
-                  <p className="text-sm italic">{announcementError}</p>
-                </div>
-              ) : !announcementPreview ? (
-                <div className="text-center p-5 bg-blue-50/20 rounded-md border border-blue-200 shadow-inner">
-                  <p className="font-bold text-lg mb-2">No announcements yet.</p>
-                  <p className="text-sm leading-relaxed">
-                    Stay tuned for important company updates!
-                  </p>
-                </div>
-              ) : (
-                <div className={`relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-5 rounded-xl shadow-md border ${announcementPreview.pinned ? (theme === 'dark' ? 'bg-yellow-900 border-yellow-700' : 'bg-gradient-to-r from-yellow-50 to-white border-yellow-200') : (theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gradient-to-r from-blue-50 to-white border-primary-light/50')} hover:shadow-lg transition-all duration-300 group`}
-                style={{ opacity: announcementPreview.pinned ? 1 : 0.95 }}
-              >
-                <div className="flex-1 pr-0 sm:pr-4 w-full min-w-0">
-                  <span className={`block font-bold text-lg sm:text-xl leading-tight break-words ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{announcementPreview.title}</span>
-                  <div className={`mt-2 line-clamp-2 break-words ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{announcementPreview.content}</ReactMarkdown>
-                  </div>
-                  <div className="mt-3 text-xs sm:text-sm font-semibold flex flex-wrap items-center gap-2">
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold text-white ${announcementPreview.pinned ? 'bg-yellow-500' : 'bg-blue-500'}`}>{announcementPreview.category}</span>
-                    {announcementPreview.pinned && (
-                      <span className="ml-2 px-2.5 py-1 bg-yellow-400 text-white text-xs rounded-full font-bold flex items-center gap-1"><FaBullhorn />Pinned</span>
-                    )}
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                      By {announcementPreview.createdBy?.firstName} {announcementPreview.createdBy?.lastName}
-                    </span>
-                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                      • {new Date(announcementPreview.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-                <div className="self-center pl-0 sm:pl-3 mt-3 sm:mt-0 hidden sm:block">
-                  <FaBullhorn className={`text-3xl sm:text-4xl ${announcementPreview.pinned ? 'text-yellow-400' : 'text-primary'}`} />
-                </div>
-              </div>
-            )}
-            </div>
-            <div className="text-center mt-8">
-              <Link href="/app/announcements" className={
-                theme === "dark"
-                  ? "inline-flex items-center justify-center text-gray-100 hover:bg-gray-600 font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-gray-700 shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
-                  : "inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
-              }>
-                <span className="mr-3">View All Announcements</span>
-                <FaArrowRight className="text-xl transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
             </div>
           </DashboardCard>
         </div>
@@ -317,17 +317,6 @@ const DashboardPage: NextPageWithLayout = () => {
             description="View deadlines, scheduled meetings, and project milestones."
           >
             <DashboardCalendarPreview userId={currentUser?._id} userEmail={currentUser?.email} />
-          </DashboardCard>
-        </div>
-        {/* Settings Card */}
-        <div className="w-full px-2 flex md:block md:px-0">
-          <DashboardCard
-            icon={<MdSettings className="text-primary text-3xl" />}
-            title="Settings"
-            description="Configure your application preferences, notifications, and integrations."
-          >
-            {/* Add settings preview or links here */}
-            <p>Configure your application preferences, notifications, and integrations.</p>
           </DashboardCard>
         </div>
       </div>

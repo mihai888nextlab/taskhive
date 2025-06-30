@@ -19,9 +19,9 @@ function Table<T extends TableDataItem>({
   rowOnClick,
 }: DataTableProps<T>) {
   return (
-    <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+    <div className="bg-white rounded-xl overflow-hidden">
       {title && (
-        <h2 className="text-2xl font-semibold text-gray-800 p-6 border-b border-gray-200">
+        <h2 className="text-2xl font-semibold text-gray-800 p-6 border-b border-gray-600">
           {title}
         </h2>
       )}

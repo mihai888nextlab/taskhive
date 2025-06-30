@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "@/components/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth";
+import { TimeTrackingProvider } from "@/components/time-tracking/TimeTrackingContext";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -29,7 +30,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   if (isDashboardRoute) {
     content = (
-      <AnimatePresence mode="wait" initial={false}>
+      // <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={router.pathname}
           variants={pageVariants}
@@ -37,29 +38,32 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
           animate="in"
           exit="out"
           transition={pageTransition}
+
           style={{ position: "relative" }}
         >
           {content}
         </motion.div>
-      </AnimatePresence>
+      // </AnimatePresence>
     );
   }
 
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Head>
-          <link rel="icon" href="favicon.ico" />
-          <title>Taskhive</title>
-          <meta
-            name="description"
-            content="A employee management application"
-          />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
+        <TimeTrackingProvider>
+          <Head>
+            <link rel="icon" href="favicon.ico" />
+            <title>Taskhive</title>
+            <meta
+              name="description"
+              content="A employee management application"
+            />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
 
-        {content}
-        <SpeedInsights />
+          {content}
+          <SpeedInsights />
+        </TimeTrackingProvider>
       </AuthProvider>
     </ThemeProvider>
   );

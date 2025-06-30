@@ -93,10 +93,10 @@ You are an expert project manager. Write a single, clear, and concise task descr
 
   if (!show) return null;
   return (
-    <div id="task-form" className="transition-all duration-500 ease-in-out py-6">
+    <div id="task-form" className="transition-all duration-500 ease-in-out">
       <form
         onSubmit={onSubmit}
-        className={`bg-${theme === 'light' ? 'gray-50' : 'gray-800'} p-4 sm:p-8 rounded-2xl shadow-xl border border-gray-200 animate-fadeIn`}
+        className={`bg-${theme === 'light' ? 'gray-50' : 'gray-800'} p-4 sm:p-8 rounded-2xl animate-fadeIn`}
       >
         <h2 className={`text-2xl sm:text-3xl font-bold text-${theme === 'light' ? 'gray-800' : 'white'} mb-4 sm:mb-6 text-center`}>
           {editingTaskId ? "Edit Task Details" : "Create New Task"}
@@ -206,7 +206,7 @@ You are an expert project manager. Write a single, clear, and concise task descr
             Mark as Important
           </label>
         </div>
-        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pb-2">
           <button
             type="submit"
             className="inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"

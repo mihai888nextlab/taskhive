@@ -32,6 +32,15 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
     );
   }
 
+  // Helper function to check if a task is overdue
+  const isOverdue = (task: Task) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const taskDate = new Date(task.deadline);
+    taskDate.setHours(0, 0, 0, 0);
+    return taskDate < today && !task.completed;
+  };
+
   return (
     <div className="mt-6 sm:mt-8">
       <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 border-b border-white border-opacity-30 pb-1 sm:pb-2">
@@ -51,8 +60,10 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
                 <li
                   className={`p-2 sm:p-3 rounded-lg ${
                     task.completed
-                      ? "bg-gray-700 opacity-70"
-                      : "bg-gray-800 hover:bg-gray-700"
+                      ? "bg-gray-700 opacity-70 hover:bg-gray-700 border-l-2 border-green-400"
+                      : isOverdue(task)
+                      ? "bg-gray-700 opacity-70 hover:bg-gray-700 border-l-2 border-red-400"
+                      : "bg-gray-800 hover:bg-gray-700 border-l-2 border-blue-400"
                   } transition-colors cursor-move flex flex-col gap-1`}
                   draggable={enableDragAndDrop}
                   onDragStart={(e) => {
@@ -61,13 +72,23 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
                     }
                   }}
                 >
-                  <h4 className="font-semibold text-base sm:text-lg">
+                  <h4 className={`font-semibold text-base sm:text-lg ${
+                    isOverdue(task) ? "text-red-300" : ""
+                  }`}>
+                    {isOverdue(task) && (
+                      <span className="text-red-400 text-xs sm:text-sm mr-1">●</span>
+                    )}
                     {task.title}{" "}
                     {task.completed && (
                       <span className="text-green-400 text-xs sm:text-sm">(Completed)</span>
                     )}
+                    {isOverdue(task) && (
+                      <span className="text-red-400 text-xs sm:text-sm ml-1">(Overdue)</span>
+                    )}
                   </h4>
-                  <p className="text-xs sm:text-sm text-gray-300">
+                  <p className={`text-xs sm:text-sm ${
+                    isOverdue(task) ? "text-red-200" : "text-gray-300"
+                  }`}>
                     {new Date(task.deadline).toLocaleDateString()}
                   </p>
                 </li>

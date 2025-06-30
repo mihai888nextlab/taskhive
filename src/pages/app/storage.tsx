@@ -154,9 +154,6 @@ const Storage = () => {
       onDragLeave={handleDrag}
       onDrop={handleDrop}
     >
-      <h1 className="text-xl sm:text-4xl font-extrabold mb-4 sm:mb-10 text-center tracking-tight">
-        Storage Management
-      </h1>
       <StorageHeader
         usedStorage={usedStorage}
         percentUsed={percentUsed}

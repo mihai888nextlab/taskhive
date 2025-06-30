@@ -16,8 +16,8 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
   // Total Income block conditional classes (even smaller version)
   const incomeBlockClass =
     theme === 'dark'
-      ? "bg-gradient-to-br from-green-800 to-green-700 p-3 rounded-lg shadow-lg border border-green-900 transform transition-all duration-300 hover:scale-102"
-      : "bg-gradient-to-br from-green-100 to-green-50 p-3 rounded-lg shadow-lg border border-green-200 transform transition-all duration-300 hover:scale-102";
+      ? "bg-gradient-to-br from-green-800 to-green-700 p-3 rounded-lg border border-green-900 transform transition-all duration-300 hover:scale-102"
+      : "bg-gradient-to-br from-green-100 to-green-50 p-3 rounded-lg border border-green-200 transform transition-all duration-300 hover:scale-102";
   const incomeTitleClass =
     theme === 'dark'
       ? "text-base font-bold text-gray-200 mb-1"
@@ -30,8 +30,8 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
   // Total Expenses block conditional classes (even smaller version)
   const expenseBlockClass =
     theme === 'dark'
-      ? "bg-gradient-to-br from-red-800 to-red-700 p-3 rounded-lg shadow-lg border border-red-900 transform transition-all duration-300 hover:scale-102"
-      : "bg-gradient-to-br from-red-100 to-red-50 p-3 rounded-lg shadow-lg border border-red-200 transform transition-all duration-300 hover:scale-102";
+      ? "bg-gradient-to-br from-red-800 to-red-700 p-3 rounded-lg border border-red-900 transform transition-all duration-300 hover:scale-102"
+      : "bg-gradient-to-br from-red-100 to-red-50 p-3 rounded-lg border border-red-200 transform transition-all duration-300 hover:scale-102";
   const expenseTitleClass =
     theme === 'dark'
       ? "text-base font-bold text-gray-200 mb-1"
@@ -45,15 +45,15 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
   const profitBlockClass =
     profit > 0 
       ? theme === 'dark'
-         ? "bg-gradient-to-br from-green-800 to-green-700 p-3 rounded-lg border border-green-900 shadow-lg transform transition-all duration-300 hover:scale-102"
-         : "bg-gradient-to-br from-green-100 to-green-50 p-3 rounded-lg border border-green-200 shadow-lg transform transition-all duration-300 hover:scale-102"
+         ? "bg-gradient-to-br from-green-800 to-green-700 p-3 rounded-lg border border-green-900 transform transition-all duration-300 hover:scale-102"
+         : "bg-gradient-to-br from-green-100 to-green-50 p-3 rounded-lg border border-green-200 transform transition-all duration-300 hover:scale-102"
       : profit === 0
          ? theme === 'dark'
-           ? "bg-gray-700 p-3 rounded-lg border border-gray-600 shadow-lg transform transition-all duration-300 hover:scale-102"
-           : "bg-white p-3 rounded-lg border border-gray-100 shadow-lg transform transition-all duration-300 hover:scale-102"
+           ? "bg-gray-700 p-3 rounded-lg border border-gray-600 transform transition-all duration-300 hover:scale-102"
+           : "bg-white p-3 rounded-lg border border-gray-100 transform transition-all duration-300 hover:scale-102"
          : theme === 'dark'
-         ? "bg-gradient-to-br from-red-900 to-red-800 p-3 rounded-lg border border-red-900 shadow-lg transform transition-all duration-300 hover:scale-102"
-         : "bg-gradient-to-br from-red-100 to-red-50 p-3 rounded-lg border border-red-200 shadow-lg transform transition-all duration-300 hover:scale-102";
+         ? "bg-gradient-to-br from-red-900 to-red-800 p-3 rounded-lg border border-red-900 transform transition-all duration-300 hover:scale-102"
+         : "bg-gradient-to-br from-red-100 to-red-50 p-3 rounded-lg border border-red-200 transform transition-all duration-300 hover:scale-102";
   const profitTitleClass =
     theme === 'dark'
       ? "text-base font-bold text-gray-200 mb-1"
@@ -91,20 +91,12 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
         <h4 className={expenseTitleClass}>Total Expenses</h4>
         <p className={expenseValueClass}>${totalExpenses.toFixed(2)}</p>
       </div>
-
       {/* Profit Block */}
       <div className={profitBlockClass}>
         <h4 className={profitTitleClass}>Net Profit / Loss</h4>
         <p className={profitValueClass}>${profit.toFixed(2)}</p>
       </div>
 
-      {/* View All Financials Button */}
-      <div className="text-center mt-8">
-        <Link href="/app/tasks" className={buttonClass}>
-          <span className="mr-3">View All Finances</span>
-          <FaArrowRight className="text-xl transition-transform duration-300 group-hover:translate-x-1" />
-        </Link>
-      </div>
     </div>
   );
 };

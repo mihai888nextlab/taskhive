@@ -85,9 +85,9 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = ({
 
   // List item classes for dark and light themes
   const listItemClassDark =
-    "relative flex items-center justify-center p-5 rounded-xl shadow-md border border-gray-600 transition-all duration-300 transform hover:shadow-lg hover:-translate-y-1 group";
+    "relative flex items-center justify-center p-5 rounded-xl shadow-md border border-gray-600 transition-all duration-300 transform hover:shadow-lg hover:scale-102 group";
   const listItemClassLight =
-    "relative flex items-center justify-center p-5 rounded-xl shadow-md border border-gray-200 transition-all duration-300 transform hover:shadow-lg hover:-translate-y-1 group";
+    "relative flex items-center justify-center p-5 rounded-xl shadow-md border border-gray-200 transition-all duration-300 transform hover:shadow-lg hover:scale-102 group";
 
   const textClassDark = "font-semibold text-gray-100 text-lg";
   const textClassLight = "font-semibold text-gray-800 text-lg";
@@ -95,12 +95,12 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = ({
   // Button classes exactly matching DashboardTaskPreview
   const buttonClass =
     theme === "dark"
-      ? "inline-flex items-center justify-center text-gray-100 hover:bg-gray-600 font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-gray-700 shadow-md hover:shadow-xl transform hover:-translate-y-1 group"
-      : "inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:-translate-y-1 group";
+      ? "inline-flex items-center justify-center text-gray-100 hover:bg-gray-600 font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-gray-700 shadow-md hover:shadow-xl transform hover:scale-102 group"
+      : "inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-lg transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-md hover:shadow-xl transform hover:scale-102 group";
 
+  // Remove the outer container and heading, render only the content
   return (
-    <div className={containerClass}>
-      <h3 className={headingClass}>Upcoming Deadlines</h3>
+    <>
       <div className="flex-grow">
         {loading ? (
           <p className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
@@ -132,13 +132,7 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = ({
           </ul>
         )}
       </div>
-      <div className="mt-8 text-center">
-        <Link href="/app/calendar" className={buttonClass}>
-          <span className="mr-3">View Calendar</span>
-          <FaArrowRight className="text-xl transition-transform duration-300 group-hover:translate-x-1" />
-        </Link>
-      </div>
-    </div>
+    </>
   );
 };
 

@@ -77,6 +77,9 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           : "bg-gradient-to-br from-white to-green-50 border border-green-100"
       }`}
     >
+      <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+        Add Income
+      </h3>
       <input
         type="text"
         value={title}
@@ -93,7 +96,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
         type="number"
         value={amount}
         onChange={(e) => onAmountChange(e.target.value)}
-        placeholder="Amount (e.g., 100.00)"
+        placeholder="Amount (e.g., 500.00)"
         className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-lg font-semibold shadow-sm transition-all duration-200 ${
           theme === "dark"
             ? "bg-gray-700 text-white border-gray-600 focus:ring-green-400"

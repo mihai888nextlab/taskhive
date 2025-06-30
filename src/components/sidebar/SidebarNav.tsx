@@ -79,12 +79,8 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
         timeSessions={timeSessions}
         onUserCardClick={onUserCardClick}
       /> */}
-      <UniversalSearchBar />
       {/* Navigation */}
       <nav>
-        <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">
-          MAIN MENU
-        </p>
         <ul className="mt-4 space-y-2">
           {menuWithNotifications.map((item) => (
             <li

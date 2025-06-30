@@ -85,7 +85,7 @@ const UniversalSearchBar: React.FC = () => {
   }, [search]);
 
   return (
-    <div className="mb-7 relative">
+    <div className="relative">
       <input
         type="text"
         value={search}
@@ -93,7 +93,7 @@ const UniversalSearchBar: React.FC = () => {
         onFocus={() => search && setShowDropdown(true)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
         placeholder="Search tasks, users, files, etc..."
-        className="w-full px-5 py-2.5 rounded-xl bg-gray-700/80 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/60 shadow-lg border border-gray-700/40 text-base font-medium transition-all backdrop-blur-md"
+        className="w-full px-5 py-2.5 rounded-3xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/60 shadow border border-gray-200 text-base font-medium transition-all"
         style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.10)' }}
       />
       {loading && (
@@ -105,7 +105,7 @@ const UniversalSearchBar: React.FC = () => {
         </div>
       )}
       {showDropdown && searchResults.length > 0 && (
-        <div className="absolute left-0 right-0 mt-2 bg-gray-800/90 text-white rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto border border-primary/20 backdrop-blur-xl" style={{boxShadow:'0 8px 32px 0 rgba(31,38,135,0.15)'}}>
+        <div className="absolute left-0 right-0 mt-2 bg-white text-gray-900 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto border border-primary/20 backdrop-blur-xl" style={{boxShadow:'0 8px 32px 0 rgba(31,38,135,0.15)'}}>
           {searchResults.map((result, idx) => {
             const tag = LABELS[result.type] || LABELS.page;
             let href = getResultUrl(result);
@@ -114,7 +114,7 @@ const UniversalSearchBar: React.FC = () => {
                 <button
                   key={result._id ? result._id + idx : result.name + idx}
                   type="button"
-                  className="block w-full text-left px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-700/30 hover:bg-primary/10 cursor-pointer"
+                  className="block w-full text-left px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-200 hover:bg-primary/10 cursor-pointer bg-white"
                   onClick={() => {
                     setSelectedUser(result);
                     setUserProfileModalOpen(true);
@@ -142,7 +142,7 @@ const UniversalSearchBar: React.FC = () => {
                 <Link
                   key={result._id ? result._id + idx : result.name + idx}
                   href={getResultUrl(result)}
-                  className="block px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-700/30 hover:bg-primary/10 flex items-center"
+                  className="block px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-200 hover:bg-primary/10 flex items-center bg-white"
                   onClick={() => {
                     setSearch("");
                     setShowDropdown(false);
@@ -161,7 +161,7 @@ const UniversalSearchBar: React.FC = () => {
               <Link
                 key={result._id ? result._id + idx : result.name + idx}
                 href={href}
-                className="block px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-700/30 hover:bg-primary/10 flex items-center"
+                className="block px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-200 hover:bg-primary/10 flex items-center bg-white"
                 onClick={() => {
                   setSearch("");
                   setShowDropdown(false);

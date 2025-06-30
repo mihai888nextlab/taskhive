@@ -7,36 +7,45 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 interface TimeStatisticsProps {
     last7DaysHours: number[]; // Array of hours worked for the last 7 days
+    hideHeader?: boolean;
+    hideSummary?: boolean;
+    className?: string;
 }
 
-const TimeStatistics: React.FC<TimeStatisticsProps> = ({ last7DaysHours }) => {
+const TimeStatistics: React.FC<TimeStatisticsProps> = ({ last7DaysHours, hideHeader, hideSummary, className }) => {
     const data = {
-        labels: ['Today', 'Yesterday', '2 Days Ago', '3 Days Ago', '4 Days Ago', '5 Days Ago', '6 Days Ago'],
+        labels: ['6d ago', '5d ago', '4d ago', '3d ago', '2d ago', 'Yesterday', 'Today'],
         datasets: [
             {
                 label: 'Hours Worked',
                 data: last7DaysHours,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderRadius: 8,
+                barPercentage: 0.7,
+                categoryPercentage: 0.7,
             },
         ],
     };
 
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top' as const,
-            },
-            title: {
-                display: true,
-                text: 'Hours Worked Over the Last 7 Days',
-            },
-        },
-    };
-
     return (
-        <div className="mt-6">
-            <Bar data={data} options={options} />
+        <div className={className ? className : ''}>
+            {!hideHeader && <h2 className="font-semibold mb-2">Hours Worked</h2>}
+            {!hideSummary && (
+                <div className="mb-2 text-sm">Total Hours: <b>{last7DaysHours.reduce((a,b)=>a+b,0).toFixed(1)}</b></div>
+            )}
+            <div className="h-[320px]">
+                <Bar 
+                    data={data} 
+                    options={{ 
+                        responsive: true, 
+                        plugins: { 
+                            legend: { display: false }, 
+                            title: { display: false } 
+                        }, 
+                        maintainAspectRatio: false 
+                    }} 
+                />
+            </div>
         </div>
     );
 };

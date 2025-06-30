@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
-import { FaBullhorn } from "react-icons/fa";
+import { FaPlus, FaDownload } from "react-icons/fa";
 import { useTheme } from '@/components/ThemeContext';
 import AnnouncementForm from "@/components/announcements/AnnouncementForm";
 import AnnouncementList from "@/components/announcements/AnnouncementList";
+import AnnouncementDetailsModal from "@/components/announcements/AnnouncementDetailsModal";
 import { saveAs } from "file-saver";
 
 interface Announcement {
@@ -22,7 +23,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState("Update"); // Use a valid default
+  const [category, setCategory] = useState("Update");
   const [pinned, setPinned] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -30,9 +31,10 @@ const AnnouncementsPage: NextPageWithLayout = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
-  const [showPinned, setShowPinned] = useState(true);
   const [expiresAt, setExpiresAt] = useState("");
-  const [pomodoroMessage, setPomodoroMessage] = useState('');
+
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   const categories = ["All", "Update", "Event", "Alert"];
 
@@ -79,7 +81,6 @@ const AnnouncementsPage: NextPageWithLayout = () => {
   // Comment handler (demo: local, could be API)
   const handleComment = (id: string, comment: string) => {
     // Optionally send to backend
-    // For demo, do nothing
   };
 
   // Export as CSV
@@ -130,7 +131,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
       setAnnouncements([newAnnouncement, ...announcements]);
       setTitle("");
       setContent("");
-      setCategory("Update"); // Reset to a valid category
+      setCategory("Update");
       setPinned(false);
       setExpiresAt("");
       setShowForm(false);
@@ -158,111 +159,125 @@ const AnnouncementsPage: NextPageWithLayout = () => {
     }
   };
 
-  const filteredAnnouncements = announcements
-    .filter(a =>
-      (categoryFilter === "All" || a.category === categoryFilter) &&
-      (a.title.toLowerCase().includes(search.toLowerCase()) ||
-       a.content.toLowerCase().includes(search.toLowerCase()))
-    )
-    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  // Filtered lists for each column, using global search/filter
+  const filteredAnnouncements = announcements.filter(a => {
+    const matchesCategory = categoryFilter === "All" || a.category === categoryFilter;
+    const matchesSearch =
+      a.title.toLowerCase().includes(search.toLowerCase()) ||
+      a.content.toLowerCase().includes(search.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
-  const pinnedAnnouncements = filteredAnnouncements.filter(a => a.pinned);
-  const otherAnnouncements = filteredAnnouncements.filter(a => !a.pinned);
+  const pinnedAnnouncements = filteredAnnouncements
+    .filter(a => a.pinned)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const otherAnnouncements = filteredAnnouncements
+    .filter(a => !a.pinned)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  // Handler to open details modal
+  const handleCardClick = (announcement: Announcement) => {
+    setSelectedAnnouncement(announcement);
+    setDetailsModalOpen(true);
+  };
+
+  // Handler to close details modal
+  const handleCloseModal = () => {
+    setDetailsModalOpen(false);
+    setSelectedAnnouncement(null);
+  };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
-      {/* Decorative blurred circles for premium look */}
-      <div className="absolute top-10 left-1/4 w-56 h-56 bg-primary-light rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob"></div>
-      <div className="absolute bottom-10 right-1/4 w-72 h-72 bg-secondary rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-primary rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-4000"></div>
-      <main className="relative z-10 w-full max-w-4xl mx-auto bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-2 sm:p-4 md:p-10 border border-gray-100">
-        <h1 className="text-5xl font-extrabold text-gray-900 mb-10 text-center tracking-tighter leading-tight drop-shadow-lg">
-          Announcements
-        </h1>
-        {isAdmin && (
-          <>
+    <div className="min-h-screen bg-gray-100 text-gray-900 font-sans mt-6 px-2 sm:px-6 flex flex-col items-center w-full">
+      {/* Header */}
+      {/* Controls bar: search, filter, add, export */}
+      <div className="w-full flex flex-col sm:flex-row items-center gap-2 mb-2 px-1 sticky top-0 z-10 bg-gray-100 backdrop-blur-md py-2 border-b border-gray-100" style={{maxWidth: '100%'}}>
+        <input
+          type="text"
+          placeholder="Search announcements..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-primary text-sm transition placeholder-gray-400 min-w-0 shadow-sm"
+          aria-label="Search announcements"
+        />
+        <select
+          value={categoryFilter}
+          onChange={e => setCategoryFilter(e.target.value)}
+          className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-primary text-sm w-40 shadow-sm"
+          aria-label="Filter by category"
+        >
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+        <div className="flex gap-2 items-center mt-2 sm:mt-0">
+          {isAdmin && (
             <button
-              onClick={() => setShowForm((v) => !v)}
-              className="mb-8 w-full py-4 px-6 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 text-lg active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-900 font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-expanded={showForm}
+              aria-controls="announcement-form"
             >
-              <FaBullhorn className="text-2xl mr-2" />
-              {showForm ? "Hide Announcement Form" : "Add New Announcement"}
+              <FaPlus className="text-base" />
+              <span>Add</span>
             </button>
-            {showForm && (
-              <AnnouncementForm
-                title={title}
-                content={content}
-                category={category}
-                pinned={pinned}
-                expiresAt={expiresAt}
-                loading={loading}
-                formError={formError}
-                theme={theme}
-                onTitleChange={setTitle}
-                onContentChange={setContent}
-                onCategoryChange={setCategory}
-                onPinnedChange={setPinned}
-                onExpiresAtChange={setExpiresAt}
-                onSubmit={handleAddAnnouncement}
-              />
-            )}
-          </>
-        )}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8 mt-2">
-          <input
-            type="text"
-            placeholder="🔍 Search announcements..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="px-5 py-2 rounded-full border border-gray-200 shadow-sm w-full sm:w-64 text-gray-800 bg-white focus:ring-2 focus:ring-primary focus:border-primary transition"
-            aria-label="Search announcements"
-          />
-          <select
-            value={categoryFilter}
-            onChange={e => setCategoryFilter(e.target.value)}
-            className="px-5 py-2 rounded-full border border-gray-200 shadow-sm text-gray-800 bg-white focus:ring-2 focus:ring-primary focus:border-primary transition"
-            aria-label="Filter by category"
-          >
-            <option key="All" value="All">All</option>
-            {categories.filter(cat => cat !== "All").map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+          )}
           <button
-            className="px-5 py-2 rounded-full bg-yellow-400 text-white font-semibold shadow hover:bg-yellow-500 transition"
-            onClick={() => setShowPinned(v => !v)}
-          >
-            {showPinned ? "Hide Pinned" : "Show Pinned"}
-          </button>
-          <button
-            className="px-5 py-2 rounded-full bg-green-500 text-white font-semibold shadow hover:from-green-500 hover:to-blue-500 transition"
             onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-900 font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary"
+            title="Export as CSV"
           >
-            Export CSV
+            <FaDownload className="text-base" />
+            <span>Export</span>
           </button>
         </div>
-        {loading ? (
-          <div className="flex flex-col items-center justify-center h-48 bg-primary-light/10 rounded-lg shadow-inner animate-pulse">
-            <FaBullhorn className="animate-bounce text-primary text-5xl mb-4" />
-            <p className="text-xl text-gray-700 font-semibold">
-              Loading announcements...
-            </p>
+      </div>
+      {/* Modal for Announcement Form */}
+      {isAdmin && showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="relative w-full max-w-md mx-auto">
+            <button
+              onClick={() => setShowForm(false)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-2xl font-bold rounded-full focus:outline-none"
+              aria-label="Close announcement form"
+            >
+              &times;
+            </button>
+            <AnnouncementForm
+              title={title}
+              content={content}
+              category={category}
+              pinned={pinned}
+              expiresAt={expiresAt}
+              loading={loading}
+              formError={formError}
+              theme={theme}
+              onTitleChange={setTitle}
+              onContentChange={setContent}
+              onCategoryChange={setCategory}
+              onPinnedChange={setPinned}
+              onExpiresAtChange={setExpiresAt}
+              onSubmit={handleAddAnnouncement}
+            />
           </div>
-        ) : announcements.length === 0 ? (
-          <div className="text-center text-gray-600 text-xl mt-8 p-6 bg-primary-light/10 rounded-lg border border-primary-light/30 shadow-md">
-            <FaBullhorn className="text-4xl text-primary mb-3 mx-auto" />
-            <p className="font-semibold mb-3">No announcements yet.</p>
-            <p className="text-lg">
-              Admins can post important updates here for everyone to see.
-            </p>
-          </div>
-        ) : (
-          <>
-            {showPinned && pinnedAnnouncements.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-lg font-bold text-yellow-600 mb-2 flex items-center gap-2">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full bg-yellow-400"></span>📌 Pinned
-                </h2>
+        </div>
+      )}
+      {/* Main content: Side-by-side sections */}
+      {filteredAnnouncements.length === 0 ? (
+        <div className="w-full max-w-2xl mx-auto text-center text-gray-400 text-lg py-24">
+          No announcements found.
+        </div>
+      ) : (
+        <div className="w-full max-w-[1800px] mx-auto flex flex-col lg:flex-row gap-8 pb-12">
+          {/* Pinned Announcements Section */}
+          <section className="w-full lg:w-[52%] bg-white rounded-3xl shadow-xl border border-gray-100 px-2 sm:px-12 py-12 min-w-[340px] flex flex-col">
+            <h2 className="text-xl font-bold mb-6 text-gray-900 tracking-tight flex items-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-yellow-400"></span>
+              Pinned
+            </h2>
+            <div className="flex flex-col items-center gap-8">
+              <div className="w-full max-w-5xl" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
                 <AnnouncementList
                   announcements={pinnedAnnouncements}
                   theme={theme}
@@ -270,20 +285,42 @@ const AnnouncementsPage: NextPageWithLayout = () => {
                   onPinToggle={handlePinToggle}
                   onComment={handleComment}
                   onDelete={handleDelete}
+                  onCardClick={handleCardClick}
                 />
               </div>
-            )}
-            <AnnouncementList
-              announcements={otherAnnouncements}
-              theme={theme}
-              isAdmin={isAdmin}
-              onPinToggle={handlePinToggle}
-              onComment={handleComment}
-              onDelete={handleDelete}
-            />
-          </>
-        )}
-      </main>
+            </div>
+          </section>
+          {/* All Announcements Section */}
+          <section className="w-full lg:w-[48%] bg-white rounded-3xl shadow-xl border border-gray-100 px-2 sm:px-12 py-12 min-w-[340px] flex flex-col">
+            <h2 className="text-xl font-bold mb-6 text-gray-900 tracking-tight flex items-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-primary"></span>
+              All Announcements
+            </h2>
+            <div className="flex flex-col items-center gap-8">
+              <div className="w-full max-w-5xl" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                <AnnouncementList
+                  announcements={otherAnnouncements}
+                  theme={theme}
+                  isAdmin={isAdmin}
+                  onPinToggle={handlePinToggle}
+                  onComment={handleComment}
+                  onDelete={handleDelete}
+                  onCardClick={handleCardClick}
+                />
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+      {/* Details Modal */}
+      <AnnouncementDetailsModal
+        open={detailsModalOpen}
+        announcement={selectedAnnouncement}
+        onClose={handleCloseModal}
+        onDelete={handleDelete}
+        onPinToggle={handlePinToggle}
+        isAdmin={isAdmin}
+      />
     </div>
   );
 };
