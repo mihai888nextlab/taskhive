@@ -16,6 +16,8 @@ export default function Footer() {
                 width={120}
                 height={40}
                 className="object-contain drop-shadow-xl"
+                priority
+                unoptimized
               />
             </Link>
             <p className="text-gray-400 text-sm mt-1 italic tracking-wide">

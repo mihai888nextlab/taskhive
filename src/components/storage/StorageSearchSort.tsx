@@ -1,4 +1,5 @@
 import React from "react";
+import { FaSearch, FaSortAlphaDown } from "react-icons/fa";
 
 interface StorageSearchSortProps {
   search: string;
@@ -13,25 +14,29 @@ const StorageSearchSort: React.FC<StorageSearchSortProps> = ({
   sortBy,
   setSortBy,
 }) => (
-  <>
-    <div className="max-w-lg sm:max-w-2xl mx-auto mt-6 sm:mt-8 mb-2 sm:mb-4 flex flex-col sm:flex-row gap-2 sm:gap-4">
+  <div className="flex flex-col sm:flex-row gap-4 items-center">
+    <div className="relative flex-1">
+      <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
       <input
         type="text"
         placeholder="Search files..."
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full px-3 sm:px-4 py-2 sm:py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+        className="w-full pl-12 pr-4 py-3 bg-white/80 backdrop-blur-md border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 shadow-sm"
       />
+    </div>
+    <div className="relative">
+      <FaSortAlphaDown className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
       <select
         value={sortBy}
         onChange={e => setSortBy(e.target.value as "name" | "size")}
-        className="px-3 sm:px-4 py-2 sm:py-2 rounded-xl border border-gray-300 text-sm sm:text-base"
+        className="pl-12 pr-8 py-3 bg-white/80 backdrop-blur-md border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 shadow-sm appearance-none cursor-pointer"
       >
         <option value="name">Sort by Name</option>
         <option value="size">Sort by Size</option>
       </select>
     </div>
-  </>
+  </div>
 );
 
 export default StorageSearchSort;

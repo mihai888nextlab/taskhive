@@ -4,9 +4,12 @@ import StorageHeader from "@/components/storage/StorageHeader";
 import StorageSearchSort from "@/components/storage/StorageSearchSort";
 import StorageFileList from "@/components/storage/StorageFileList";
 import StorageDragOverlay from "@/components/storage/StorageDragOverlay";
+import SignatureModal from "@/components/signature/SignatureModal";
+import FileSigningModal from "@/components/signature/FileSigningModal";
 import { useTheme } from '@/components/ThemeContext';
 import React, { useState, useEffect } from 'react';
-import { FaFilePdf, FaFileImage, FaFileAlt, FaFileArchive, FaFile } from "react-icons/fa";
+import { createPortal } from 'react-dom'; // Add this import
+import { FaFile, FaFileImage, FaFilePdf, FaFileArchive, FaFileAlt, FaSignature, FaCloudUploadAlt } from 'react-icons/fa';
 
 const MAX_STORAGE_BYTES = 1024 * 1024 * 1024; // 1 GB
 
@@ -15,6 +18,7 @@ type FileType = {
   fileName: string;
   fileSize: number;
   fileLocation?: string;
+  fileType?: string;
 };
 
 function getFileIcon(fileName: string) {
@@ -40,6 +44,9 @@ const Storage = () => {
   const [files, setFiles] = useState<FileType[]>([]);
   const [usedStorage, setUsedStorage] = useState<number>(0);
   const [uploadFileModal, setUploadFileModal] = useState<boolean>(false);
+  const [signatureModal, setSignatureModal] = useState<boolean>(false);
+  const [fileSigningModal, setFileSigningModal] = useState<boolean>(false);
+  const [selectedFileForSigning, setSelectedFileForSigning] = useState<FileType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [dragActive, setDragActive] = useState(false);
   const [search, setSearch] = useState("");
@@ -50,30 +57,32 @@ const Storage = () => {
 
   const percentUsed = Math.min((usedStorage / MAX_STORAGE_BYTES) * 100, 100);
 
-  useEffect(() => {
-    async function fetchFiles() {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/getFiles");
-        const data = await res.json();
-        if (res.ok && Array.isArray(data.files)) {
-          setFiles(data.files);
-          const total = data.files.reduce(
-            (sum: number, file: FileType) => sum + (file.fileSize || 0),
-            0
-          );
-          setUsedStorage(total);
-        } else {
-          setFiles([]);
-          setUsedStorage(0);
-        }
-      } catch (err) {
+  // Make fetchFiles accessible to other parts of the component
+  const fetchFiles = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/getFiles");
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.files)) {
+        setFiles(data.files);
+        const total = data.files.reduce(
+          (sum: number, file: FileType) => sum + (file.fileSize || 0),
+          0
+        );
+        setUsedStorage(total);
+      } else {
         setFiles([]);
         setUsedStorage(0);
-      } finally {
-        setLoading(false);
       }
+    } catch (err) {
+      setFiles([]);
+      setUsedStorage(0);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchFiles();
   }, [uploadFileModal]);
 
@@ -146,51 +155,191 @@ const Storage = () => {
     }
   }
 
+  const handleSignFile = (file: FileType) => {
+    setSelectedFileForSigning(file);
+    setFileSigningModal(true);
+  };
+
+  const handleSigningComplete = () => {
+    setFileSigningModal(false);
+    setSelectedFileForSigning(null);
+    fetchFiles(); // Refresh the file list
+  };
+
   return (
     <div
-      className={`relative p-2 sm:p-8 bg-gray-100 min-h-screen max-w-full sm:max-w-none mx-auto ${dragActive ? "ring-4 ring-blue-400" : ""}`}
+      className={`relative min-h-screen transition-all duration-300 ${
+        theme === 'dark' 
+          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
+      } ${dragActive ? "ring-4 ring-blue-400 ring-opacity-50" : ""}`}
       onDragEnter={handleDrag}
       onDragOver={handleDrag}
       onDragLeave={handleDrag}
       onDrop={handleDrop}
     >
-      <StorageHeader
-        usedStorage={usedStorage}
-        percentUsed={percentUsed}
-        onUploadClick={() => setUploadFileModal(true)}
-        formatBytes={formatBytes}
-      />
-      <StorageSearchSort
-        search={search}
-        setSearch={setSearch}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-      />
-      <StorageFileList
-        files={sortedFiles}
-        loading={loading}
-        theme={theme}
-        renamingId={renamingId}
-        renameValue={renameValue}
-        setRenamingId={setRenamingId}
-        setRenameValue={setRenameValue}
-        handleDelete={handleDelete}
-        handleRename={handleRename}
-        getFileIcon={getFileIcon}
-      />
-      <FileUploadModal
-        open={uploadFileModal}
-        onClose={() => {
-          setUploadFileModal(false);
-          setDroppedFiles(null);
-        }}
-        droppedFiles={droppedFiles}
-        onUploadSuccess={() => {
-          setUploadFileModal(false);
-          setDroppedFiles(null);
-        }}
-      />
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                File Storage
+              </h1>
+              <p className={`mt-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                Manage your documents and signatures
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSignatureModal(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+              >
+                <FaSignature className="text-lg" />
+                <span className="font-medium">Manage Signatures</span>
+              </button>
+              <button
+                onClick={() => setUploadFileModal(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+              >
+                <FaCloudUploadAlt className="text-lg" />
+                <span className="font-medium">Upload Files</span>
+              </button>
+            </div>
+          </div>
+
+          <StorageHeader
+            usedStorage={usedStorage}
+            percentUsed={percentUsed}
+            onUploadClick={() => setUploadFileModal(true)}
+            formatBytes={formatBytes}
+          />
+        </div>
+
+        {/* Search and Sort */}
+        <div className="mb-8">
+          <StorageSearchSort
+            search={search}
+            setSearch={setSearch}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+          />
+        </div>
+
+        {/* Files Grid */}
+        <div className={`rounded-2xl p-6 ${
+          theme === 'dark' 
+            ? 'bg-gray-800/50 backdrop-blur-sm border border-gray-700/50' 
+            : 'bg-white/70 backdrop-blur-sm border border-gray-200/50'
+        } shadow-xl`}>
+          <StorageFileList
+            files={sortedFiles}
+            loading={loading}
+            theme={theme}
+            renamingId={renamingId}
+            renameValue={renameValue}
+            setRenamingId={setRenamingId}
+            setRenameValue={setRenameValue}
+            handleDelete={handleDelete}
+            handleRename={handleRename}
+            getFileIcon={getFileIcon}
+            fetchFiles={fetchFiles}
+          />
+        </div>
+      </div>
+
       {dragActive && <StorageDragOverlay />}
+
+      {/* Render Modals using React Portal - UPDATED TO MATCH TASK FORM STYLE */}
+      {typeof window !== 'undefined' && (
+        <>
+          {uploadFileModal && createPortal(
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+                <button
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+                  onClick={() => {
+                    setUploadFileModal(false);
+                    setDroppedFiles(null);
+                  }}
+                  aria-label="Close upload modal"
+                >
+                  ×
+                </button>
+                <FileUploadModal
+                  open={uploadFileModal}
+                  onClose={() => {
+                    setUploadFileModal(false);
+                    setDroppedFiles(null);
+                  }}
+                  droppedFiles={droppedFiles}
+                  onUploadSuccess={() => {
+                    setUploadFileModal(false);
+                    setDroppedFiles(null);
+                  }}
+                />
+              </div>
+            </div>,
+            document.body
+          )}
+          
+          {signatureModal && createPortal(
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+                <button
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+                  onClick={() => setSignatureModal(false)}
+                  aria-label="Close signature modal"
+                >
+                  ×
+                </button>
+                <SignatureModal
+                  isOpen={signatureModal}
+                  onClose={() => setSignatureModal(false)}
+                  onSignatureSelect={() => {}}
+                />
+              </div>
+            </div>,
+            document.body
+          )}
+          
+          {fileSigningModal && createPortal(
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-7xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+                <button
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+                  onClick={() => {
+                    setFileSigningModal(false);
+                    setSelectedFileForSigning(null);
+                  }}
+                  aria-label="Close signing modal"
+                >
+                  ×
+                </button>
+                <FileSigningModal
+                  isOpen={fileSigningModal}
+                  onClose={() => {
+                    setFileSigningModal(false);
+                    setSelectedFileForSigning(null);
+                  }}
+                  file={
+                    selectedFileForSigning && selectedFileForSigning.fileLocation && selectedFileForSigning.fileType
+                      ? {
+                          _id: selectedFileForSigning._id,
+                          fileName: selectedFileForSigning.fileName,
+                          fileLocation: selectedFileForSigning.fileLocation,
+                          fileType: selectedFileForSigning.fileType,
+                        }
+                      : null
+                  }
+                  onSigningComplete={handleSigningComplete}
+                />
+              </div>
+            </div>,
+            document.body
+          )}
+        </>
+      )}
     </div>
   );
 };
