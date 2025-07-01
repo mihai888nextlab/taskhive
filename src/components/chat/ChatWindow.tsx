@@ -8,6 +8,7 @@ import Loading from "@/components/Loading";
 import { BsPaperclip } from "react-icons/bs";
 import FileCard from "@/components/storage/StorageFileCard";
 import { useTheme } from "@/components/ThemeContext"; // Import the useTheme hook
+import { useRouter } from "next/router";
 
 // Ensure these types match your backend models and API responses
 interface ChatMessage {
@@ -27,6 +28,7 @@ interface ChatWindowProps {
 let socket: ReturnType<typeof io>; // Declare socket outside to prevent re-initialization
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
+  const router = useRouter();
   const { user } = useAuth(); // Current logged-in user
   const { theme } = useTheme(); // Get the current theme
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -232,6 +234,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
     user?._id || ""
   );
 
+  const handleVideoCall = () => {
+    router.push(
+      `/app/video-call/${encodeURIComponent(selectedConversation._id)}`
+    );
+  };
+
   return (
     // Containerul principal al ferestrei de chat.
     <div
@@ -241,13 +249,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
     >
       {/* Antetul Chatului - mai mult contrast și stilizare - cu efect de Glassmorphism */}
       <div
-        className={`p-4 border-b border-gray-300 bg-${
+        className={`p-4 border-b flex justify-between border-gray-300 bg-${
           theme === "light" ? "white" : "gray-800"
         } rounded-t-lg shadow-[0_4px_15px_rgba(0,0,0,0.08)] backdrop-filter backdrop-blur-md z-10`}
       >
         {" "}
         {/* Fundal translucid, umbră personalizată, efect de blur */}
-        <h3 className="font-semibold text-lg text-white">{currentChatName}</h3>
+        <h3
+          className={`font-semibold text-lg ${
+            theme === "light" ? "text-gray-800" : "text-white"
+          }`}
+        >
+          {currentChatName}
+        </h3>
+        <div>
+          <button className="bg-blue-500 text-white" onClick={handleVideoCall}>
+            video call
+          </button>
+        </div>
       </div>
 
       {/* Zona de Mesaje - acum cu umbră internă pentru mai multă profunzime și fundal subtil */}
