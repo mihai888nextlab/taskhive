@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { useAIWindow } from "@/contexts/AIWindowContext";
 
 // Define the type for handler parameters
 export type CommandHandlerParams = {
@@ -24,7 +25,7 @@ const commands: Command[] = [
       setChatHistory((prev) => [
         ...prev,
         { type: 'user', text: input },
-        { type: 'ai', text: `**Hive Assistant Help**\n\nYou can use Hive Assistant to:\n\n- Create, edit, and manage tasks (e.g., \"Create a task to call John tomorrow\")\n- Add announcements (admins only)\n- Record expenses or incomes (e.g., \"Add an expense for lunch, 20 dollars, today\")\n- Get productivity and time tracking insights\n- Ask for best practices in business, organization, and team management\n- Request templates, guides, or step-by-step instructions\n- Use natural language for all requests\n\n**Commands:**\n- /help — Show this help message\n- /addtask — Start guided task creation\n\nJust type your request or question!` }
+        { type: 'ai', text: `**Hive Assistant Help**\n\nYou can use Hive Assistant to:\n\n- Create, edit, and manage tasks (e.g., \"Create a task to call John tomorrow\")\n- Add announcements (admins only)\n- Record expenses or incomes (e.g., \"Add an expense for lunch, 20 dollars, today\")\n- Get productivity and time tracking insights\n- Ask for best practices in business, organization, and team management\n- Request templates, guides, or step-by-step instructions\n- Use natural language for all requests\n\n**Commands:**\n- /help — Show this help message\n- /addtask — Start guided task creation\n- /addannouncement — Create announcement (admins)\n- /addexpense — Record an expense\n- /addincome — Record income\n- /productivity — Get productivity tips\n- /templates — Get business templates\n\nJust type your request or question!` }
       ]);
       setInputPrompt("");
     }
@@ -42,6 +43,71 @@ const commands: Command[] = [
       setInputPrompt("");
     }
   },
+  {
+    command: '/addannouncement',
+    label: 'Create announcement (admins)',
+    handler: async ({ input, setChatHistory, setInputPrompt }: CommandHandlerParams) => {
+      setChatHistory((prev) => [
+        ...prev,
+        { type: 'user', text: input },
+        { type: 'ai', text:
+`Create announcements for your organization!\n\n**Example prompts:**\n- "Create an announcement about the company meeting tomorrow"\n- "Add announcement: Holiday schedule for December"\n- "Make an announcement about new office hours, pinned, expires next Friday"\n\n**Features:**\n- Automatic categorization (Update, Meeting, Holiday, etc.)\n- Optional pinning for important announcements\n- Set expiration dates with natural language\n- Admin permissions required\n\nJust describe what announcement you want to create!` }
+      ]);
+      setInputPrompt("");
+    }
+  },
+  {
+    command: '/addexpense',
+    label: 'Record an expense',
+    handler: async ({ input, setChatHistory, setInputPrompt }: CommandHandlerParams) => {
+      setChatHistory((prev) => [
+        ...prev,
+        { type: 'user', text: input },
+        { type: 'ai', text:
+`Record business expenses quickly!\n\n**Example prompts:**\n- "Add expense: Office supplies, $45.99, yesterday"\n- "Record expense for client lunch, 120 dollars, Food category"\n- "Log expense: Travel to conference, $250, Transport"\n\n**Auto-categorization:**\n- Food, Transport, Utilities, Shopping, Health, General, Other\n- Amount can be in various formats ($50, 50 dollars, etc.)\n- Dates support natural language (today, yesterday, last Monday)\n\nJust describe your expense!` }
+      ]);
+      setInputPrompt("");
+    }
+  },
+  {
+    command: '/addincome',
+    label: 'Record income',
+    handler: async ({ input, setChatHistory, setInputPrompt }: CommandHandlerParams) => {
+      setChatHistory((prev) => [
+        ...prev,
+        { type: 'user', text: input },
+        { type: 'ai', text:
+`Track your income sources!\n\n**Example prompts:**\n- "Add income: Client payment, $2500, today"\n- "Record income from consulting, 1500 dollars, Salary category"\n- "Log income: Investment return, $300, Investment"\n\n**Categories available:**\n- Salary, Investment, General, Other\n- Multiple amount formats supported\n- Natural date parsing\n\nDescribe your income entry!` }
+      ]);
+      setInputPrompt("");
+    }
+  },
+  {
+    command: '/productivity',
+    label: 'Get productivity tips',
+    handler: async ({ input, setChatHistory, setInputPrompt }: CommandHandlerParams) => {
+      setChatHistory((prev) => [
+        ...prev,
+        { type: 'user', text: input },
+        { type: 'ai', text:
+`Get personalized productivity and organization advice!\n\n**Ask about:**\n- Time management strategies\n- Team collaboration best practices\n- Workflow optimization\n- Task prioritization methods\n- Meeting efficiency\n- Goal setting and tracking\n- Work-life balance\n\n**Example questions:**\n- "How to manage multiple projects effectively?"\n- "Best practices for team communication"\n- "Tips for reducing meeting fatigue"\n\nWhat productivity challenge can I help you with?` }
+      ]);
+      setInputPrompt("");
+    }
+  },
+  {
+    command: '/templates',
+    label: 'Get business templates',
+    handler: async ({ input, setChatHistory, setInputPrompt }: CommandHandlerParams) => {
+      setChatHistory((prev) => [
+        ...prev,
+        { type: 'user', text: input },
+        { type: 'ai', text:
+`Access business templates and guides!\n\n**Available templates:**\n- Meeting agendas and minutes\n- Project planning frameworks\n- Team role definitions\n- Communication protocols\n- Performance review templates\n- Process documentation\n- Risk assessment matrices\n\n**Example requests:**\n- "Give me a meeting agenda template"\n- "How to structure a project kickoff?"\n- "Template for quarterly team reviews"\n\nWhat type of template do you need?` }
+      ]);
+      setInputPrompt("");
+    }
+  },
   // Add more commands here as needed
 ];
 
@@ -53,7 +119,7 @@ interface AIWindowProps {
 
 const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false }) => {
   const [inputPrompt, setInputPrompt] = useState("");
-  const [chatHistory, setChatHistory] = useState<{ type: 'user' | 'ai'; text: string }[]>([]);
+  const { chatHistory, setChatHistory, clearChatHistory } = useAIWindow(); // Add clearChatHistory
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string | null>(null);
@@ -295,22 +361,49 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
             <img src="/hive-icon.png" alt="Hive Logo" className="w-8 h-8" />
             <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">Hive Assistant</h3>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-red-500 transition-all text-2xl font-bold"
-            aria-label="Close AI Assistant"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            {chatHistory.length > 0 && (
+              <button
+                onClick={clearChatHistory}
+                className="text-gray-400 hover:text-blue-500 transition-all text-sm font-medium px-2 py-1 rounded"
+                title="Clear chat history"
+              >
+                Clear
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-red-500 transition-all text-2xl font-bold"
+              aria-label="Close AI Assistant"
+            >
+              ✕
+            </button>
+          </div>
         </div>
+
 
         {/* Chat History */}
         <div ref={chatHistoryRef} className="flex-1 overflow-y-auto px-2 py-4 custom-scrollbar bg-transparent">
           {chatHistory.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex flex-col items-center justify-center h-full">
               <p className="text-gray-500 text-lg text-center font-medium opacity-80">
                 Welcome to the <span className='text-primary font-semibold'>Hive Assistant</span>!<br/>How can I help you today?
               </p>
+              {/* Quick command buttons - Only show if chat is empty */}
+              <div className="flex gap-2 mt-6 px-7 pt-2">
+                {[commands[0], commands[1], commands[3]].map((c) => (
+                  <button
+                    key={c.command}
+                    type="button"
+                    className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full border border-blue-200 transition-all"
+                    onClick={() => handleInsertCommand(c.command, true)}
+                    disabled={isLoading}
+                    tabIndex={-1}
+                  >
+                    {c.command}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             chatHistory.map((msg, index) => (
@@ -330,27 +423,11 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
           )}
         </div>
 
-        {/* Quick command buttons */}
-        <div className="flex gap-2 mb-1 px-3 pt-2">
-          {commands.map((c) => (
-            <button
-              key={c.command}
-              type="button"
-              className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full border border-blue-200 transition-all"
-              onClick={() => handleInsertCommand(c.command, true)}
-              disabled={isLoading}
-              tabIndex={-1}
-            >
-              {c.command}
-            </button>
-          ))}
-        </div>
-
         {/* Input Area */}
         <div className="mb-2 flex flex-col gap-2 items-stretch w-full px-3 pb-3 bg-transparent relative">
-          {/* Command completions dropdown */}
+          {/* Command completions dropdown - Above input */}
           {showCommandList && filteredCommands.length > 0 && (
-            <div className="absolute left-0 top-[-2.5rem] z-50 bg-white border border-gray-200 rounded-xl shadow-lg px-2 py-1 min-w-[120px] max-w-[220px] text-sm animate-fadeIn">
+            <div className="absolute left-3 bottom-full mb-2 z-50 bg-white border border-gray-200 rounded-xl shadow-lg px-2 py-1 min-w-[200px] max-w-[300px] text-sm animate-fadeIn">
               {filteredCommands.map((c, idx) => (
                 <div
                   key={c.command}

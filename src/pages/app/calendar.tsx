@@ -91,7 +91,7 @@ const CalendarPage: NextPageWithLayout = () => {
 
   return (
     <div className={`bg-${theme === 'light' ? 'white' : 'gray-900'} text-${theme === 'light' ? 'gray-900' : 'white'}`}>
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] bg-gray-100">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] bg-gray-100 px-4 sm:px-6 lg:px-12 xl:px-16">
         <main className="flex flex-col md:flex-row w-full max-w-[1400px] gap-2 sm:gap-4 md:gap-8 rounded-none sm:rounded-lg shadow-xl overflow-hidden min-h-[500px] md:min-h-[700px] bg-transparent">
           {/* Left Panel: Selected Date and Events */}
           <div className="flex flex-col justify-between p-3 sm:p-6 md:p-8 bg-gray-800 text-white rounded-t-xl md:rounded-l-xl md:rounded-tr-none flex-1 min-w-0 w-full min-h-[320px] sm:min-h-[400px]">

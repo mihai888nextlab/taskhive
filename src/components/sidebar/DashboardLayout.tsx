@@ -10,6 +10,7 @@ import { menu } from "@/components/menuConfig"; // Your menu config
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
 import TimerAndFormPanel from "@/components/time-tracking/TimerAndFormPanel";
 import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext";
+import { useAIWindow } from "@/contexts/AIWindowContext";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -19,12 +20,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, loadingUser, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } = useTimeTracking();
+  const { isAIWindowOpen, setIsAIWindowOpen, toggleAIWindow } = useAIWindow();
   const showPersistent =
     (isRunning || pomodoroRunning) &&
     router.pathname !== "/app/time-tracking";
 
-  // State to toggle AI window
-  const [isAIWindowOpen, setIsAIWindowOpen] = useState(false);
+  // State to toggle AI window - now managed by context
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -155,7 +156,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* AI Button (hide on desktop if open) */}
       {!(sidebarOpen && typeof window !== 'undefined' && window.innerWidth < 768) && (!isDesktop || !isAIWindowOpen) && (
         <button
-          onClick={() => setIsAIWindowOpen(!isAIWindowOpen)}
+          onClick={toggleAIWindow}
           className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95 z-50"
         >
           <span className="text-lg font-semibold">AI</span>

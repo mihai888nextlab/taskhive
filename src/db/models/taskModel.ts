@@ -12,7 +12,11 @@ export interface ITask extends Document {
   createdAt: Date;
   updatedAt: Date;
   createdBy: Types.ObjectId;
-  important: boolean; // <-- Add this
+  important: boolean;
+  // Subtask fields
+  parentTask?: Types.ObjectId; // Reference to parent task if this is a subtask
+  isSubtask: boolean; // Flag to identify subtasks
+  subtasks?: Types.ObjectId[]; // Array of subtask IDs
 }
 
 const TaskSchema: Schema = new Schema(
@@ -48,6 +52,22 @@ const TaskSchema: Schema = new Schema(
       type: Boolean,
       default: false,
     },
+    // Subtask fields
+    parentTask: {
+      type: Schema.Types.ObjectId,
+      ref: "Task",
+      default: null,
+    },
+    isSubtask: {
+      type: Boolean,
+      default: false,
+    },
+    subtasks: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically

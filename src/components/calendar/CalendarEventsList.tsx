@@ -63,7 +63,7 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = ({
                       ? "bg-gray-700 opacity-70 hover:bg-gray-700 border-l-2 border-green-400"
                       : isOverdue(task)
                       ? "bg-gray-700 opacity-70 hover:bg-gray-700 border-l-2 border-red-400"
-                      : "bg-gray-800 hover:bg-gray-700 border-l-2 border-blue-400"
+                      : "bg-gray-700 hover:bg-gray-600 border-l-2 border-blue-400"
                   } transition-colors cursor-move flex flex-col gap-1`}
                   draggable={enableDragAndDrop}
                   onDragStart={(e) => {

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "@/components/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TimeTrackingProvider } from "@/components/time-tracking/TimeTrackingContext";
+import { AIWindowProvider } from "@/contexts/AIWindowContext";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -51,18 +52,20 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
     <ThemeProvider>
       <AuthProvider>
         <TimeTrackingProvider>
-          <Head>
-            <link rel="icon" href="favicon.ico" />
-            <title>Taskhive</title>
-            <meta
-              name="description"
-              content="A employee management application"
-            />
-            <link rel="icon" href="/favicon.ico" />
-          </Head>
+          <AIWindowProvider>
+            <Head>
+              <link rel="icon" href="favicon.ico" />
+              <title>Taskhive</title>
+              <meta
+                name="description"
+                content="A employee management application"
+              />
+              <link rel="icon" href="/favicon.ico" />
+            </Head>
 
-          {content}
-          <SpeedInsights />
+            {content}
+            <SpeedInsights />
+          </AIWindowProvider>
         </TimeTrackingProvider>
       </AuthProvider>
     </ThemeProvider>

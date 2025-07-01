@@ -13,6 +13,10 @@ interface Task {
   createdAt: string;
   updatedAt: string;
   createdBy: { firstName: string; lastName: string; email: string };
+  // Add subtask fields
+  isSubtask?: boolean;
+  parentTask?: string;
+  subtasks?: Task[];
 }
 
 interface AssignedTasksListProps {

@@ -29,6 +29,9 @@ interface Task {
     email: string;
   };
   important?: boolean;
+  isSubtask?: boolean;
+  parentTask?: string;
+  subtasks?: Task[]; // Array of populated subtask objects
 }
 
 async function fetchCurrentUser() {
@@ -193,7 +196,7 @@ const TasksPage: NextPageWithLayout = () => {
     setImportant(false);
   };
 
-  const handleAddTask = async (e: React.FormEvent) => {
+  const handleAddTask = async (e: React.FormEvent, subtasks?: any[]) => {
     e.preventDefault();
     if (!taskTitle.trim() || !taskDeadline.trim()) {
       setFormError("Task title and deadline are required!");
@@ -201,13 +204,26 @@ const TasksPage: NextPageWithLayout = () => {
     }
     setLoading(true);
     setFormError(null);
+    
+    // Debug log
+    console.log("Creating task with data:", {
+      title: taskTitle.trim(),
+      description: taskDescription.trim(),
+      deadline: taskDeadline,
+      assignedTo: assignedTo || undefined, // <- Fix: Don't send empty string
+      important,
+      subtasks: subtasks || [],
+    });
+    
     const taskData = {
       title: taskTitle.trim(),
       description: taskDescription.trim(),
       deadline: taskDeadline,
-      assignedTo,
+      ...(assignedTo && { assignedTo }), // <- Only include if not empty
       important,
+      subtasks: subtasks || [],
     };
+    
     try {
       let response;
       if (editingTaskId) {
@@ -223,27 +239,78 @@ const TasksPage: NextPageWithLayout = () => {
           body: JSON.stringify(taskData),
         });
       }
-      if (!response.ok) throw new Error("Failed to save task.");
-      await fetchTasks();            // <-- Refresh your own tasks
-      await fetchAssignedTasks();    // <-- Refresh assigned-by-me tasks
+      
+      // Debug the response
+      const responseText = await response.text();
+      console.log("API Response:", responseText);
+      
+      if (!response.ok) {
+        let errorMessage = "Failed to save task.";
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // Response is not JSON
+        }
+        throw new Error(errorMessage);
+      }
+      
+      await fetchTasks();
+      await fetchAssignedTasks();
       resetForm();
       setShowForm(false);
     } catch (err) {
+      console.error("Error creating task:", err);
       setFormError((err as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditTask = (task: Task) => {
-    setTaskTitle(task.title);
-    setTaskDescription(task.description || "");
-    setTaskDeadline(new Date(task.deadline).toISOString().split("T")[0]);
-    setEditingTaskId(task._id);
-    setShowForm(true);
-    setFormError(null);
-    setAssignedTo(typeof task.userId === "string" ? task.userId : "");
-    setImportant(task.important || false);
+  const handleEditTask = async (e: React.FormEvent, subtasks?: any[]) => {
+    e.preventDefault();
+    if (loading || !editingTaskId) return;
+
+    setLoading(true);
+    try {
+      // Only include fields that are being edited
+      const updateData: any = {
+        title: taskTitle,
+        description: taskDescription,
+        deadline: taskDeadline,
+        important: important,
+      };
+
+      // Only include assignedTo if it's different
+      if (assignedTo) {
+        updateData.assignedTo = assignedTo;
+      }
+
+      // NOTE: We don't include subtasks in edit operations to preserve existing ones
+      // Subtasks should be managed separately through the subtask edit functionality
+
+      console.log("Updating task with data:", updateData);
+
+      const response = await fetch(`/api/tasks/${editingTaskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update task.");
+      }
+
+      await fetchTasks();
+      await fetchAssignedTasks();
+      resetForm();
+    } catch (err) {
+      console.error("Error updating task:", err);
+      setFormError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteTask = async (id: string) => {
@@ -263,31 +330,53 @@ const TasksPage: NextPageWithLayout = () => {
   };
 
   const handleToggleComplete = async (task: Task) => {
-    setTasks((currentTasks) =>
-      currentTasks.map((t) =>
-        t._id === task._id ? { ...t, completed: !t.completed } : t
-      )
-    );
+    if (loading) return;
+    
+    // Don't allow manual completion of tasks that have subtasks
+    if (task.subtasks && task.subtasks.length > 0 && !task.isSubtask) {
+      alert("This task has subtasks. Complete all subtasks to automatically complete this task.");
+      return;
+    }
+
     setLoading(true);
-    setListError(null);
     try {
       const response = await fetch(`/api/tasks/${task._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed: !task.completed }),
       });
-      if (!response.ok) throw new Error("Failed to update task.");
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update task.");
+      }
+
+      // Refresh both task lists to ensure parent tasks are updated correctly
       await fetchTasks();
+      await fetchAssignedTasks();
     } catch (err) {
-      setListError((err as Error).message);
-      setTasks((currentTasks) =>
-        currentTasks.map((t) =>
-          t._id === task._id ? { ...t, completed: task.completed } : t
-        )
-      );
+      console.error("Error toggling task completion:", err);
+      alert((err as Error).message);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Find the handleEditClick function and update it:
+  const handleEditClick = (task: Task) => {
+    setEditingTaskId(task._id);
+    setTaskTitle(task.title);
+    setTaskDescription(task.description || "");
+    
+    // Format the deadline properly for the date input
+    const deadlineDate = new Date(task.deadline);
+    const formattedDeadline = deadlineDate.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    setTaskDeadline(formattedDeadline);
+    
+    setAssignedTo(typeof task.userId === "object" && task.userId ? task.userId._id : (task.userId as string) || "");
+    setImportant(task.important || false);
+    setFormError(null);
+    setShowForm(true);
   };
 
   return (
@@ -336,7 +425,21 @@ const TasksPage: NextPageWithLayout = () => {
                 tasks={tasks}
                 currentUserEmail={currentUserEmail}
                 loading={loading}
-                onEdit={handleEditTask}
+                onEdit={(task: Task) => {
+                  setEditingTaskId(task._id);
+                  setTaskTitle(task.title);
+                  setTaskDescription(task.description || "");
+                  
+                  // Format the deadline properly for the date input
+                  const deadlineDate = new Date(task.deadline);
+                  const formattedDeadline = deadlineDate.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+                  setTaskDeadline(formattedDeadline);
+                  
+                  setAssignedTo(typeof task.userId === "object" && task.userId ? task.userId._id : (task.userId as string) || "");
+                  setImportant(task.important || false);
+                  setFormError(null);
+                  setShowForm(true);
+                }}
                 onDelete={handleDeleteTask}
                 onToggleComplete={handleToggleComplete}
                 isTaskOverdue={isTaskOverdue}
@@ -358,7 +461,21 @@ const TasksPage: NextPageWithLayout = () => {
                 tasks={tasks}
                 currentUserEmail={currentUserEmail}
                 loading={loading}
-                onEdit={handleEditTask}
+                onEdit={(task: Task) => {
+                  setEditingTaskId(task._id);
+                  setTaskTitle(task.title);
+                  setTaskDescription(task.description || "");
+                  
+                  // Format the deadline properly for the date input
+                  const deadlineDate = new Date(task.deadline);
+                  const formattedDeadline = deadlineDate.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+                  setTaskDeadline(formattedDeadline);
+                  
+                  setAssignedTo(typeof task.userId === "object" && task.userId ? task.userId._id : (task.userId as string) || "");
+                  setImportant(task.important || false);
+                  setFormError(null);
+                  setShowForm(true);
+                }}
                 onDelete={handleDeleteTask}
                 onToggleComplete={handleToggleComplete}
                 isTaskOverdue={isTaskOverdue}
@@ -384,7 +501,19 @@ const TasksPage: NextPageWithLayout = () => {
               <AssignedTasksList
                 tasks={assignedTasks}
                 loading={loading}
-                onEdit={handleEditTask}
+                onEdit={(task: Task) => {
+                  setEditingTaskId(task._id);
+                  setTaskTitle(task.title);
+                  setTaskDescription(task.description || "");
+                  setTaskDeadline(task.deadline);
+                  setAssignedTo(
+                    typeof task.userId === "string"
+                      ? task.userId
+                      : (task.userId && task.userId._id) || ""
+                  );
+                  setImportant(!!task.important);
+                  setShowForm(true);
+                }}
                 onDelete={handleDeleteTask}
                 isTaskOverdue={isTaskOverdue}
                 currentUserEmail={currentUserEmail}
@@ -404,7 +533,19 @@ const TasksPage: NextPageWithLayout = () => {
               <AssignedTasksList
                 tasks={assignedTasks}
                 loading={loading}
-                onEdit={handleEditTask}
+                onEdit={(task: Task) => {
+                  setEditingTaskId(task._id);
+                  setTaskTitle(task.title);
+                  setTaskDescription(task.description || "");
+                  setTaskDeadline(task.deadline);
+                  setAssignedTo(
+                    typeof task.userId === "string"
+                      ? task.userId
+                      : (task.userId && task.userId._id) || ""
+                  );
+                  setImportant(!!task.important);
+                  setShowForm(true);
+                }}
                 onDelete={handleDeleteTask}
                 isTaskOverdue={isTaskOverdue}
                 currentUserEmail={currentUserEmail}

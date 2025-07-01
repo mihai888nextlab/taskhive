@@ -450,6 +450,78 @@ User request: "${prompt}"`;
     return; // Prevent further processing
   }
 
+  // --- SUBTASK GENERATION LOGIC ---
+  // Check if this is a subtask generation request
+  const isSubtaskGeneration = prompt.includes("break it down into") || 
+                            prompt.includes("Generate subtasks") || 
+                            prompt.includes("actionable subtasks") ||
+                            prompt.includes("logical steps");
+
+  if (isSubtaskGeneration) {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+      const subtaskPrompt = `${prompt}
+
+Please return ONLY a valid JSON array of objects with "title" and "description" fields for each subtask.
+Each subtask title should be 3-8 words maximum.
+Generate 3-5 subtasks that are specific, actionable, and follow a logical sequence.
+
+Example format:
+[
+  {"title": "Research requirements", "description": "Gather all necessary information and requirements"},
+  {"title": "Create initial draft", "description": "Develop the first version of the deliverable"}
+]
+
+Return ONLY the JSON array, no explanations or additional text.`;
+
+      const result = await model.generateContent(subtaskPrompt);
+      const responseText = await result.response.text();
+      
+      // Clean the response
+      let cleanResponse = responseText.trim();
+      
+      // Remove code block markers if present
+      if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+      }
+
+      // Try to extract JSON array from the response
+      const jsonMatch = cleanResponse.match(/\[[\s\S]*\]/);
+      const jsonString = jsonMatch ? jsonMatch[0] : cleanResponse;
+
+      try {
+        const subtasks = JSON.parse(jsonString);
+        if (Array.isArray(subtasks)) {
+          // Return the response in the format expected by generate-subtasks.ts
+          return res.status(200).json({ response: JSON.stringify(subtasks) });
+        } else {
+          throw new Error("Response is not an array");
+        }
+      } catch (parseError) {
+        console.error("Failed to parse subtasks JSON:", parseError);
+        // Return fallback subtasks
+        const fallbackSubtasks = [
+          { title: "Plan and research", description: "Define requirements and gather necessary resources" },
+          { title: "Design approach", description: "Create a detailed plan and strategy" },
+          { title: "Execute main work", description: "Perform the core activities and implementation" },
+          { title: "Review and finalize", description: "Check quality and complete final steps" }
+        ];
+        return res.status(200).json({ response: JSON.stringify(fallbackSubtasks) });
+      }
+    } catch (error) {
+      console.error('Error generating subtasks:', error);
+      // Return fallback subtasks on error
+      const fallbackSubtasks = [
+        { title: "Plan approach", description: "Define the strategy and approach for the task" },
+        { title: "Gather resources", description: "Collect all necessary materials and information" },
+        { title: "Execute work", description: "Perform the core activities of the task" },
+        { title: "Review and finalize", description: "Check quality and complete final steps" }
+      ];
+      return res.status(200).json({ response: JSON.stringify(fallbackSubtasks) });
+    }
+  }
+
   // --- FALLBACK: GENERAL GEMINI CHAT ---
   else {
     try {

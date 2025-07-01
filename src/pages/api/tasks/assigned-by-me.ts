@@ -32,10 +32,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === "GET") {
     try {
       // Return all tasks where createdBy is the current user, populate userId (assignee), and exclude self-assigned tasks
-      const tasks = await Task.find({ createdBy: userId, $expr: { $ne: ["$userId", "$createdBy"] } })
+      const tasks = await Task.find({ 
+        createdBy: userId, 
+        $expr: { $ne: ["$userId", "$createdBy"] },
+        $or: [
+          { isSubtask: { $exists: false } },
+          { isSubtask: false }
+        ]
+      })
         .sort({ createdAt: -1 })
         .populate('userId', 'firstName lastName email')
-        .populate('createdBy', 'firstName lastName email'); // <-- Add this line!
+        .populate('createdBy', 'firstName lastName email')
+        .populate({
+          path: 'subtasks',
+          populate: [
+            { path: 'createdBy', select: 'firstName lastName email' },
+            { path: 'userId', select: 'firstName lastName email' }
+          ]
+        });
       res.status(200).json(tasks);
     } catch (error) {
       console.error("Error fetching assigned tasks:", error);

@@ -13,6 +13,10 @@ interface Task {
   createdAt: string;
   updatedAt: string;
   createdBy: { firstName: string; lastName: string; email: string };
+  // Add subtask fields
+  isSubtask?: boolean;
+  parentTask?: string;
+  subtasks?: Task[];
 }
 
 interface TaskListProps {
@@ -201,7 +205,7 @@ const TaskList: React.FC<TaskListProps> = ({
   if (cardsOnly) {
     return (
       <>
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
+        <div className="space-y-6"> {/* Changed from grid to space-y */}
           {filteredTasks.map(task => (
             <TaskCard
               key={task._id}
@@ -292,7 +296,7 @@ const TaskList: React.FC<TaskListProps> = ({
           <span className="text-lg text-gray-400">No tasks found.</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
+        <div className="space-y-6"> {/* Changed from grid to space-y for better subtask layout */}
           {filteredTasks.map(task => (
             <TaskCard
               key={task._id}
