@@ -11,9 +11,11 @@ import Loading from "@/components/Loading";
 import NewDirectChatModal from "@/components/chat/NewDirectChatModel";
 import NewGroupChatModal from "@/components/chat/NewGroupChatModal";
 import { useRouter } from "next/router";
+import { useTheme } from "@/components/ThemeContext";
 
 const Communication: NextPageWithLayout = () => {
   const { user, loadingUser } = useAuth();
+  const { theme } = useTheme();
   const [conversations, setConversations] = useState<PopulatedConversation[]>(
     []
   );
@@ -59,18 +61,15 @@ const Communication: NextPageWithLayout = () => {
         c.participants.some((p) => p._id === router.query.userId)
       );
       if (convo) setSelectedConversation(convo);
-      // Optionally, if no conversation exists, open a new chat modal
     }
   }, [router.query.userId, conversations]);
 
   const handleChatCreated = (newConversationId: string) => {
-    // Re-fetch conversations to get the new one and update the list
     if (user) {
       fetch(`/api/conversations?userId=${user._id}`)
-        .then((res) => res.json()) // !!! PROMISE
+        .then((res) => res.json())
         .then((data) => {
           setConversations(data.conversations as PopulatedConversation[]);
-          // Optionally, auto-select the newly created chat
           const newConvo = data.conversations.find(
             (c: PopulatedConversation) =>
               (c._id as string) === newConversationId
@@ -86,14 +85,13 @@ const Communication: NextPageWithLayout = () => {
   };
 
   return (
-    <div
-      className={`relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden`}
-    >
+    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} p-4 lg:p-8`}>
       {loadingUser && <Loading />}
-      <div className="flex h-[calc(100vh-100px)]">
-        {" "}
-        {/* Adjust height as needed */}
-        <div className="w-1/4 min-w-[280px] p-4">
+
+      {/* Main Communication Container */}
+      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] max-w-8xl mx-auto">
+        {/* Conversation List Panel */}
+        <div className="w-full lg:w-1/3 xl:w-1/4 min-w-0">
           <ConversationList
             conversations={conversations}
             onSelectConversation={setSelectedConversation}
@@ -105,20 +103,24 @@ const Communication: NextPageWithLayout = () => {
             loadingConversations={loadingConversations}
           />
         </div>
-        <div className="flex-1 p-4">
+
+        {/* Chat Window Panel */}
+        <div className="flex-1 min-w-0">
           <ChatWindow selectedConversation={selectedConversation} />
         </div>
-        <NewDirectChatModal
-          isOpen={showNewDirectChatModal}
-          onClose={() => setShowNewDirectChatModal(false)}
-          onChatCreated={handleChatCreated}
-        />
-        <NewGroupChatModal
-          isOpen={showNewGroupChatModal}
-          onClose={() => setShowNewGroupChatModal(false)}
-          onChatCreated={handleChatCreated}
-        />
       </div>
+
+      {/* Modals */}
+      <NewDirectChatModal
+        isOpen={showNewDirectChatModal}
+        onClose={() => setShowNewDirectChatModal(false)}
+        onChatCreated={handleChatCreated}
+      />
+      <NewGroupChatModal
+        isOpen={showNewGroupChatModal}
+        onClose={() => setShowNewGroupChatModal(false)}
+        onChatCreated={handleChatCreated}
+      />
     </div>
   );
 };

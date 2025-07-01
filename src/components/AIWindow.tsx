@@ -38,7 +38,7 @@ const commands: Command[] = [
         ...prev,
         { type: 'user', text: input },
         { type: 'ai', text:
-`You can create a task by simply describing it in your own words!\n\n**Example prompt:**\ncreate task *Title* with deadline 29 July for *the person assigned (can be yourself)*\n\nAny sentence or phrase that includes a task title and a deadline, and refers to creating a task, will be understood.\n\nJust type your request, and Hive Assistant will handle the rest!` }
+`**Basic Tasks:**\n• "create task Call John tomorrow"\n• "make task Review budget by Friday"\n\n**🎯 With Auto-Subtasks:**\n• "create task **Prepare presentation** for Monday"\n• "organize team meeting next week"\n• "**develop** marketing strategy"\n• "**launch** new website"\n\n**✨ Smart Detection:**\n• AI auto-detects complex tasks needing breakdown\n• Use: "**with subtasks**", "**break it down**", "**step by step**" or just describe naturally\n• Generates 3-5 logical, actionable steps\n• All inherit deadline and assignee\n\n**Assignment:**\n• Self: "for me" or omit\n• Others: "for John Smith"\n\nJust describe naturally!` }
       ]);
       setInputPrompt("");
     }

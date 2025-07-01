@@ -9,6 +9,7 @@ import { addYears } from 'date-fns'; // Ensure this is imported
 import userModel from "@/db/models/userModel"; // <-- Add this import
 import AnnouncementModel from '@/db/models/announcementModel';
 import ExpenseModel from '@/db/models/expensesModel';
+import dbConnect from '@/db/dbConfig'; // Add this import
 
 // IMPORTANT: Never expose your API key directly in client-side code.
 // Use environment variables for sensitive information.
@@ -25,6 +26,9 @@ if (!API_KEY) {
 const genAI = new GoogleGenerativeAI(API_KEY || ''); // Provide a default empty string if API_KEY is undefined
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Add this line at the beginning
+  await dbConnect();
+  
   // Ensure JSON response header is set
   res.setHeader('Content-Type', 'application/json');
 
@@ -87,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // --- ANNOUNCEMENT CREATION FIRST ---
-  const announcementCreationRegex = /^(create|add|make)( an)? (announcement|anunț|anunt|anunț|anunțare|anuntare)\b/i;
+  const announcementCreationRegex = /^(create|add|make)( an)? (announcement|anunț|anunt|anunț|anunțare|anuntare)\b/i;
 
   if (announcementCreationRegex.test(prompt.trim())) {
     // --- ADMIN CHECK ---
@@ -191,7 +195,7 @@ User request: "${prompt}"`;
     return; // Prevent further processing
   }
 
-  // --- TASK CREATION LOGIC FOLLOWS ---
+  // --- ENHANCED TASK CREATION LOGIC WITH SUBTASKS ---
   const taskCreationRegex = /^(create( a)? task|make( a)? task|add( a)? task)\b/i;
 
   if (taskCreationRegex.test(prompt.trim())) {
@@ -201,13 +205,23 @@ User request: "${prompt}"`;
       // Define today's date in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)
       const todayISO = new Date().toISOString();
 
-      // Instruct Gemini to extract title, deadline, assignee, and description in a structured JSON format
-      const extractionPrompt = `Extract the task title, deadline, assignee, and description from the following user request.
+      // Enhanced extraction prompt that also handles subtasks
+      const extractionPrompt = `Extract the task details from the following user request.
 If a deadline is not explicitly mentioned or is unclear, set 'deadline' to "none".
 If a deadline is relative (e.g., "next Monday", "tomorrow", "in 3 days"), convert it to an ISO 8601 string (YYYY-MM-DDTHH:mm:ss.sssZ) based on today's date (${todayISO}). If the year is not specified, assume the current year. If the parsed date is in the past, adjust it to the next occurrence of that specific date. Assume the time for the deadline is end-of-day (23:59:59.999Z).
 If the assignee is not specified or is "me", "myself", or similar, set 'assignee' to "self".
 If a description is not mentioned, set 'description' to an empty string.
-Return the output as a JSON object with 'title', 'deadline', 'assignee', and 'description' keys.
+
+SUBTASK DETECTION: Set 'generateSubtasks' to true if ANY of these conditions are met:
+- Keywords: "subtasks", "sub-tasks", "steps", "breakdown", "break down", "break it down", "phases", "stages", "tasks", "components", "parts", "divide", "split", "organize", "structure", "plan out", "outline", "step by step", "detailed", "comprehensive", "thorough"
+- Complex tasks that naturally need multiple steps (project planning, presentations, events, launches, implementations, research, training, etc.)
+- Tasks mentioning "prepare", "organize", "develop", "create", "build", "design", "implement", "launch", "setup", "establish"
+- Multi-part activities or anything that seems like it would benefit from being broken down
+- If the task title is longer than 6 words or seems complex in nature
+
+Otherwise, set 'generateSubtasks' to false for simple, single-action tasks.
+
+Return the output as a JSON object with 'title', 'deadline', 'assignee', 'description', and 'generateSubtasks' keys.
 User request: "${prompt}"`;
 
       const extractionResult = await model.generateContent(extractionPrompt);
@@ -219,7 +233,14 @@ User request: "${prompt}"`;
         trimmedExtractionResponseText = trimmedExtractionResponseText.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
       }
 
-      let extractedData: { title?: string; deadline?: string; assignee?: string; description?: string } | null = null;
+      let extractedData: { 
+        title?: string; 
+        deadline?: string; 
+        assignee?: string; 
+        description?: string; 
+        generateSubtasks?: boolean;
+      } | null = null;
+
       try {
         extractedData = JSON.parse(trimmedExtractionResponseText);
         if (!extractedData || typeof extractedData.title !== 'string' || !extractedData.deadline) {
@@ -237,6 +258,7 @@ User request: "${prompt}"`;
       const title = extractedData.title.trim();
       let description = (extractedData.description || "").trim();
       const deadlineStr = extractedData.deadline.trim();
+      const shouldGenerateSubtasks = extractedData.generateSubtasks || false;
       let deadline: Date | null = null;
 
       // If description is missing or empty, generate one using Gemini
@@ -259,7 +281,7 @@ User request: "${prompt}"`;
         deadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       }
 
-      // --- NEW: Determine assignee ---
+      // --- Determine assignee ---
       let assigneeUserId = decodedToken.userId; // default to self
       let assigneeName = extractedData.assignee?.trim().toLowerCase() || "self";
 
@@ -317,25 +339,155 @@ User request: "${prompt}"`;
           : userDoc._id?.toString?.() || "";
       }
 
-      // --- Create the task for the assignee ---
+      // --- Generate subtasks if requested ---
+      let subtasks: Array<{ title: string; description: string }> = [];
+      
+      if (shouldGenerateSubtasks) {
+        try {
+          const subtaskPrompt = `Analyze this task and break it down into 3-5 logical, actionable subtasks:
+
+**Main Task:** ${title}
+**Description:** ${description}
+**Context:** This is a ${title.split(' ').length > 4 ? 'complex' : 'standard'} task that needs to be broken into manageable steps.
+
+Create subtasks that:
+- Follow a logical sequence (planning → execution → completion)
+- Are specific and actionable (avoid vague terms)
+- Can be completed independently
+- Make sense for the task type and complexity
+- Are appropriately sized (not too granular, not too broad)
+
+Return ONLY a valid JSON array of objects with "title" and "description" fields.
+- Title: 3-6 words, action-oriented (Start with verbs like "Research", "Create", "Review", "Finalize")
+- Description: 1-2 sentences explaining the specific actions needed
+
+Example format:
+[
+  {"title": "Research requirements", "description": "Gather all necessary information, requirements, and resources needed for the task."},
+  {"title": "Create initial draft", "description": "Develop the first version or prototype of the deliverable."},
+  {"title": "Review and refine", "description": "Test, review, and make necessary improvements to ensure quality."},
+  {"title": "Finalize and deliver", "description": "Complete final checks and deliver the finished work."}
+]
+
+Return ONLY the JSON array, no explanations.`;
+
+          const subtaskResult = await model.generateContent(subtaskPrompt);
+          let subtaskResponseText = (await subtaskResult.response.text()).trim();
+
+          // Clean the response
+          if (subtaskResponseText.startsWith('```')) {
+            subtaskResponseText = subtaskResponseText.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+          }
+
+          // Try to extract JSON array from the response
+          const jsonMatch = subtaskResponseText.match(/\[[\s\S]*\]/);
+          const jsonString = jsonMatch ? jsonMatch[0] : subtaskResponseText;
+
+          try {
+            const parsedSubtasks = JSON.parse(jsonString);
+            if (Array.isArray(parsedSubtasks) && parsedSubtasks.length > 0) {
+              subtasks = parsedSubtasks.filter(st => st.title && st.description);
+            }
+          } catch (parseError) {
+            console.error("Failed to parse generated subtasks:", parseError);
+            // Continue without subtasks if parsing fails
+          }
+        } catch (subtaskError) {
+          console.error("Error generating subtasks:", subtaskError);
+          // Continue without subtasks if generation fails
+        }
+      }
+
+      // --- Create the main task ---
       try {
         const newTask = await Task.create({
           title,
-          description, // <-- Save the description
+          description,
           deadline,
           completed: false,
           userId: assigneeUserId,
           createdBy: decodedToken.userId,
         });
 
+        const mainTaskId = newTask._id.toString();
+        let createdSubtasks: any[] = [];
+
+        // Prepare response message before any usage
+        let responseMessage = `Task created with title "${title}" and deadline "${deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}" for ${assigneeName === "self" ? "yourself" : extractedData.assignee}`;
+
+        // --- Create subtasks if any were generated ---
+        if (subtasks.length > 0) {
+          try {
+            const createdSubtasks = [];
+            
+            for (const subtask of subtasks) {
+              const newSubtask = await Task.create({
+                title: subtask.title,
+                description: subtask.description,
+                deadline,
+                completed: false,
+                userId: assigneeUserId,
+                createdBy: decodedToken.userId,
+                parentTask: mainTaskId,
+                isSubtask: true, // Explicitly set this
+              });
+              createdSubtasks.push(newSubtask);
+            }
+
+            // Update parent task with subtask IDs for bidirectional reference
+            await Task.findByIdAndUpdate(mainTaskId, {
+              subtasks: createdSubtasks.map(st => st._id)
+            });
+
+            // Convert to plain objects for response
+            const subtaskObjects = createdSubtasks.map(st => {
+              const obj = st.toObject();
+              if (obj._id) obj._id = obj._id.toString();
+              if (obj.userId) obj.userId = obj.userId.toString();
+              if (obj.createdBy) obj.createdBy = obj.createdBy.toString();
+              if (obj.parentTask) obj.parentTask = obj.parentTask.toString();
+              return obj;
+            });
+
+            // Declare and assign createdTask before using it
+            const createdTask = newTask.toObject();
+            if (createdTask._id) createdTask._id = createdTask._id.toString();
+            if (createdTask.userId) createdTask.userId = createdTask.userId.toString();
+            if (createdTask.createdBy) createdTask.createdBy = createdTask.createdBy.toString();
+
+            return res.status(201).json({
+              response: `${responseMessage} with ${createdSubtasks.length} subtasks`,
+              createdTask: createdTask,
+              createdSubtasks: subtaskObjects
+            });
+          } catch (subtaskError) {
+            console.error("Error creating subtasks:", subtaskError);
+            // Declare and assign createdTask before using it in the error response
+            const createdTask = newTask.toObject();
+            if (createdTask._id) createdTask._id = createdTask._id.toString();
+            if (createdTask.userId) createdTask.userId = createdTask.userId.toString();
+            if (createdTask.createdBy) createdTask.createdBy = createdTask.createdBy.toString();
+            // Return the main task even if subtasks fail
+            return res.status(201).json({
+              response: responseMessage + " (subtasks failed to create)",
+              createdTask
+            });
+          }
+        }
+
         const createdTask = newTask.toObject();
         if (createdTask._id) createdTask._id = createdTask._id.toString();
         if (createdTask.userId) createdTask.userId = createdTask.userId.toString();
         if (createdTask.createdBy) createdTask.createdBy = createdTask.createdBy.toString();
 
+        if (createdSubtasks.length > 0) {
+          responseMessage += ` with ${createdSubtasks.length} subtasks`;
+        }
+
         return res.status(201).json({
-          response: `Task created with title "${title}" and deadline "${deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}" for ${assigneeName === "self" ? "yourself" : extractedData.assignee}`,
-          createdTask
+          response: responseMessage,
+          createdTask,
+          createdSubtasks: createdSubtasks.length > 0 ? createdSubtasks : undefined
         });
       } catch (dbError: any) {
         console.error('Database error creating task:', dbError);
@@ -539,6 +691,8 @@ Your main goals are to help users:
 6. Give clear, concise, and professional responses tailored to business and organizational contexts.
 7. When appropriate, provide examples, templates, or step-by-step guides.
 8. Always maintain a helpful, supportive, and proactive tone.
+
+IMPORTANT: Keep responses concise and focused. Aim for 3-6 sentences maximum unless the user specifically requests detailed explanations. Use bullet points for lists and be direct and actionable.
 
 User request: ${prompt}
       `.trim();
