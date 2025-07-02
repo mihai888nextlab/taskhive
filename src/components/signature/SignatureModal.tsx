@@ -93,11 +93,11 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="w-full h-full max-w-4xl mx-auto">
+    <div className="w-full h-full max-w-4xl mx-auto bg-white">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg">
+          <div className="p-2 bg-blue-600 rounded-lg">
             <FaSignature className="text-white text-lg" />
           </div>
           <div>
@@ -108,13 +108,13 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 bg-white">
         <button
           onClick={() => setActiveTab('select')}
           className={`flex-1 px-6 py-3 font-medium transition-all duration-200 ${
             activeTab === 'select' 
               ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-blue-50'
           }`}
         >
           <div className="flex items-center justify-center gap-2">
@@ -126,8 +126,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
           onClick={() => setActiveTab('create')}
           className={`flex-1 px-6 py-3 font-medium transition-all duration-200 ${
             activeTab === 'create' 
-              ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' 
+              : 'text-gray-600 hover:text-gray-900 hover:bg-blue-50'
           }`}
         >
           <div className="flex items-center justify-center gap-2">
@@ -138,7 +138,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
       </div>
 
       {/* Content */}
-      <div className="p-6 overflow-y-auto max-h-[60vh]">
+      <div className="p-6 overflow-y-auto max-h-[60vh] bg-white">
         {activeTab === 'select' && (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -150,14 +150,14 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
             
             {signatures.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <FaPencilAlt className="text-2xl text-gray-400" />
+                <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
+                  <FaPencilAlt className="text-2xl text-blue-600" />
                 </div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">No signatures found</h4>
                 <p className="text-gray-600 mb-6">Create your first signature to get started with document signing.</p>
                 <button
                   onClick={() => setActiveTab('create')}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-lg hover:from-purple-600 hover:to-blue-700 transition-all duration-200 font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800 transition-all duration-200 font-medium"
                 >
                   <FaPlus className="text-sm" />
                   Create Your First Signature
@@ -191,7 +191,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                         onSignatureSelect(signature.signatureUrl);
                         onClose();
                       }}
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 font-medium transition-all duration-200 text-sm"
+                      className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-800 font-medium transition-all duration-200 text-sm"
                     >
                       Use This Signature
                     </button>
@@ -203,63 +203,48 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
         )}
 
         {activeTab === 'create' && (
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Signature</h3>
-              <p className="text-gray-600">Draw your signature or type your name to create a digital signature</p>
-            </div>
+          <div className="max-w-3xl mx-auto">
             
-            <div className="space-y-6">
-              <div>
-                <label className="block text-gray-700 text-sm font-medium mb-2">
-                  Signature Name *
-                </label>
+            <div className="space-y-8">
+              <div className="bg-white border border-gray-200 rounded-xl p-6">
                 <input
                   type="text"
                   value={signatureName}
                   onChange={(e) => setSignatureName(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  className="w-full p-4 mb-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 text-lg"
                   placeholder="Enter a name for your signature (e.g., 'John Doe - Formal')"
                 />
+                <SignatureCanvas onSignatureChange={setNewSignature} />
               </div>
               
-              <div>
-                <label className="block text-gray-700 text-sm font-medium mb-2">
-                  Draw Your Signature *
-                </label>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <SignatureCanvas onSignatureChange={setNewSignature} />
-                </div>
-              </div>
-              
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-4 pt-6">
                 <button
                   onClick={() => {
                     setNewSignature('');
                     setSignatureName('');
                     setActiveTab('select');
                   }}
-                  className="flex-1 py-3 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200"
+                  className="flex-1 py-4 px-6 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-semibold transition-all duration-200 text-lg border-2 border-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveSignature}
                   disabled={loading || !newSignature || !signatureName.trim()}
-                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
+                  className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-200 text-lg border-2 ${
                     loading || !newSignature || !signatureName.trim()
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-purple-500 to-blue-600 text-white hover:from-purple-600 hover:to-blue-700'
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-200'
+                      : 'bg-blue-600 text-white hover:bg-blue-800 border-blue-600 hover:border-blue-800 shadow-lg hover:shadow-xl'
                   }`}
                 >
                   {loading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <FaSpinner className="animate-spin text-sm" />
-                      Saving...
+                    <div className="flex items-center justify-center gap-3">
+                      <FaSpinner className="animate-spin text-lg" />
+                      Saving Signature...
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center gap-2">
-                      <FaSignature className="text-sm" />
+                    <div className="flex items-center justify-center gap-3">
+                      <FaSignature className="text-lg" />
                       Save Signature
                     </div>
                   )}

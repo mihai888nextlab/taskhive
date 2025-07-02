@@ -177,40 +177,42 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
   return (
     <>
       {typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-[95vw] h-[95vh] relative animate-fadeIn overflow-hidden flex flex-col">
-            {/* Close Button */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] relative overflow-hidden flex flex-col">
+            {/* Minimal Close Button */}
             <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl z-10 p-1"
               onClick={onClose}
-              aria-label="Close file signing modal"
+              aria-label="Close"
             >
               <FaTimes />
             </button>
 
-            {/* Header */}
-            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0">
+            {/* Minimal Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                    <FaFileSignature className="text-xl text-white" />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <FaFileSignature className="text-sm text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Sign Document</h2>
-                    <p className="text-gray-600">{file.fileName}</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Sign Document</h2>
+                    <p className="text-sm text-gray-500">{file.fileName}</p>
                   </div>
                 </div>
                 
-                {/* Step Indicator */}
-                <div className="flex items-center gap-4">
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${currentStep === 'select' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}>
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${currentStep === 'select' ? 'bg-blue-500 text-white' : 'bg-gray-400 text-white'}`}>1</span>
-                    <span className="font-medium">Select Signature</span>
+                {/* Minimal Step Indicator */}
+                <div className="flex items-center gap-2">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                    currentStep === 'select' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    1
                   </div>
-                  <FaArrowRight className="text-gray-400" />
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${currentStep === 'place' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${currentStep === 'place' ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}`}>2</span>
-                    <span className="font-medium">Place Signature</span>
+                  <div className="w-8 h-px bg-gray-200"></div>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                    currentStep === 'place' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    2
                   </div>
                 </div>
               </div>
@@ -219,47 +221,42 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
             {/* Content Area */}
             <div className="flex-1 overflow-hidden">
               {currentStep === 'select' ? (
-                /* Step 1: Signature Selection */
-                <div className="h-full flex flex-col items-center justify-center p-8">
-                  <div className="max-w-2xl w-full space-y-8">
+                /* Step 1: Minimal Signature Selection */
+                <div className="h-full flex items-center justify-center p-8">
+                  <div className="max-w-lg w-full space-y-6">
                     <div className="text-center">
-                      <div className="p-4 bg-blue-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                        <FaPencilAlt className="text-3xl text-blue-600" />
-                      </div>
-                      <h3 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Signature</h3>
-                      <p className="text-gray-600 text-lg">Select or create a digital signature to sign your document</p>
+                      <h3 className="text-xl font-medium text-gray-900 mb-2">Choose Signature</h3>
+                      <p className="text-gray-500">Select a signature to sign your document</p>
                     </div>
 
-                    {/* Selected Signature Display */}
-                    <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-8 min-h-[200px] flex items-center justify-center">
+                    {/* Minimal Signature Display */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 min-h-[120px] flex items-center justify-center">
                       {selectedSignature ? (
                         <div className="text-center">
                           <img
                             src={selectedSignature}
                             alt="Selected signature"
-                            className="max-w-full max-h-[120px] object-contain mx-auto mb-4"
+                            className="max-w-full max-h-[80px] object-contain mx-auto mb-2"
                           />
-                          <p className="text-green-600 font-semibold">✓ Signature Selected</p>
+                          <p className="text-sm text-blue-600 font-medium">Signature selected</p>
                         </div>
                       ) : (
                         <div className="text-center">
-                          <FaPencilAlt className="text-6xl text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-500 font-medium text-lg">No signature selected</p>
-                          <p className="text-gray-400 text-sm">Click the button below to choose a signature</p>
+                          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <FaPencilAlt className="text-gray-400" />
+                          </div>
+                          <p className="text-gray-400">No signature selected</p>
                         </div>
                       )}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="space-y-4">
+                    {/* Minimal Action Buttons */}
+                    <div className="space-y-3">
                       <button
                         onClick={() => setShowSignatureModal(true)}
-                        className="w-full px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 font-bold transition-all duration-300 transform hover:scale-105 shadow-xl text-lg"
+                        className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                       >
-                        <div className="flex items-center justify-center gap-3">
-                          <FaPencilAlt />
-                          {selectedSignature ? 'Change Signature' : 'Select Signature'}
-                        </div>
+                        {selectedSignature ? 'Change Signature' : 'Select Signature'}
                       </button>
 
                       {selectedSignature && (
@@ -268,43 +265,38 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                             setCurrentStep('place');
                             setIsPlacingSignature(true);
                           }}
-                          className="w-full px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 font-bold transition-all duration-300 transform hover:scale-105 shadow-xl text-lg"
+                          className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                         >
-                          <div className="flex items-center justify-center gap-3">
-                            <FaArrowRight />
-                            Continue to Placement
-                          </div>
+                          Continue to Placement
                         </button>
                       )}
                     </div>
                   </div>
                 </div>
               ) : (
-                /* Step 2: Signature Placement */
+                /* Step 2: Minimal Signature Placement */
                 <div className="h-full flex">
-                  {/* File Preview - Full Width */}
+                  {/* File Preview */}
                   <div className="flex-1 flex flex-col">
-                    {/* Preview Header */}
-                    <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={goBackToSelection}
-                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
-                        >
-                          <FaArrowLeft />
-                          Back to Selection
-                        </button>
-                        <div className="flex items-center gap-2">
-                          <FaMousePointer className="text-blue-600" />
-                          <span className="font-semibold text-gray-900">
-                            {signaturePosition ? 'Click anywhere to reposition your signature' : 'Click on the document to place your signature'}
-                          </span>
-                        </div>
+                    {/* Minimal Preview Header */}
+                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                      <button
+                        onClick={goBackToSelection}
+                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2"
+                      >
+                        <FaArrowLeft className="text-xs" />
+                        Back
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                        <span className="text-sm text-gray-600">
+                          {signaturePosition ? 'Click to reposition' : 'Click to place signature'}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Full Document Preview */}
-                    <div className="flex-1 relative bg-gray-100">
+                    {/* Document Preview */}
+                    <div className="flex-1 relative bg-gray-50">
                       <div 
                         ref={previewRef}
                         className="w-full h-full relative overflow-auto cursor-crosshair"
@@ -327,45 +319,32 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                                 border: 'none',
                                 outline: 'none',
                                 backgroundColor: 'white',
-                                pointerEvents: 'none' // Always disable iframe interactions to allow our click handler
+                                pointerEvents: 'none'
                               }}
                               allow="fullscreen"
                             />
                             
-                            {/* Always show the click overlay for PDFs */}
                             <div 
-                              className="absolute inset-0"
-                              style={{
-                                cursor: 'crosshair',
-                                background: 'transparent',
-                                zIndex: 5
-                              }}
+                              className="absolute inset-0 bg-transparent"
                               onClick={handlePreviewClick}
                             >
-                              {/* Show helpful text only when no signature is placed */}
                               {!signaturePosition && (
-                                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full font-medium shadow-lg pointer-events-none">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                                    Click anywhere on the document to place your signature
-                                  </div>
+                                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-full text-sm pointer-events-none">
+                                  Click to place signature
                                 </div>
                               )}
                             </div>
                           </div>
                         ) : (
                           <div className="flex items-center justify-center h-full">
-                            <div className="text-center">
-                              <FaDownload className="text-6xl text-gray-400 mx-auto mb-4" />
-                              <p className="text-gray-600 text-lg">Preview not available for this file type</p>
-                            </div>
+                            <p className="text-gray-400">Preview not available</p>
                           </div>
                         )}
 
-                        {/* Signature Preview Overlay */}
+                        {/* Minimal Signature Preview */}
                         {selectedSignature && signaturePosition && displayPosition && (
                           <div
-                            className="absolute pointer-events-none border-2 border-blue-500 bg-blue-100/50 flex items-center justify-center shadow-lg rounded-lg"
+                            className="absolute pointer-events-none border border-blue-400 bg-blue-50/30 flex items-center justify-center rounded"
                             style={{
                               left: `${displayPosition.x - signatureSize.width / 2}px`,
                               top: `${displayPosition.y - signatureSize.height / 2}px`,
@@ -377,46 +356,38 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                             <img
                               src={selectedSignature}
                               alt="Signature preview"
-                              className="w-full h-full object-contain opacity-90 rounded-lg"
+                              className="w-full h-full object-contain opacity-90"
                             />
-                            <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap shadow-lg">
-                              Position: {(signaturePosition.x * 100).toFixed(1)}%, {(signaturePosition.y * 100).toFixed(1)}%
-                            </div>
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Signature Controls - Right Sidebar */}
-                  <div className="w-80 border-l border-gray-200 bg-gray-50 p-6 space-y-6 overflow-y-auto">
+                  {/* Minimal Controls Sidebar */}
+                  <div className="w-72 border-l border-gray-100 bg-white p-4 space-y-4 overflow-y-auto">
                     {/* Selected Signature */}
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <FaPencilAlt className="text-purple-600" />
-                        Selected Signature
-                      </h4>
-                      <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-center">
+                      <h4 className="text-sm font-medium text-gray-900 mb-2">Signature</h4>
+                      <div className="bg-gray-50 border border-gray-200 rounded p-3 flex items-center justify-center">
                         <img
                           src={selectedSignature ?? ''}
                           alt="Selected signature"
-                          className="max-w-full max-h-[80px] object-contain"
+                          className="max-w-full max-h-[60px] object-contain"
                         />
                       </div>
                     </div>
 
-                    {/* Signature Size Controls */}
-                    <div className="bg-white rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-bold mb-4 flex items-center gap-2 text-gray-900">
-                        <FaExpandArrowsAlt className="text-purple-600" />
-                        Signature Size
-                      </h4>
+                    {/* Minimal Size Controls */}
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">Size</h4>
                       
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         <div>
-                          <label className="block text-gray-700 text-sm font-semibold mb-2">
-                            Width: {signatureSize.width}px
-                          </label>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs text-gray-500">Width</span>
+                            <span className="text-xs text-gray-700">{signatureSize.width}px</span>
+                          </div>
                           <input
                             type="range"
                             min="100"
@@ -429,14 +400,15 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                                 height: Math.round(width * 0.5)
                               }));
                             }}
-                            className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                            className="w-full h-1 bg-gray-200 rounded-full appearance-none cursor-pointer"
                           />
                         </div>
                         
                         <div>
-                          <label className="block text-gray-700 text-sm font-semibold mb-2">
-                            Height: {signatureSize.height}px
-                          </label>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs text-gray-500">Height</span>
+                            <span className="text-xs text-gray-700">{signatureSize.height}px</span>
+                          </div>
                           <input
                             type="range"
                             min="50"
@@ -449,22 +421,22 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                                 height 
                               }));
                             }}
-                            className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                            className="w-full h-1 bg-gray-200 rounded-full appearance-none cursor-pointer"
                           />
                         </div>
 
-                        {/* Preset sizes */}
-                        <div className="grid grid-cols-2 gap-2">
+                        {/* Minimal Preset Sizes */}
+                        <div className="grid grid-cols-4 gap-1">
                           {[
-                            { name: "Small", width: 120, height: 60 },
-                            { name: "Medium", width: 200, height: 100 },
-                            { name: "Large", width: 300, height: 150 },
-                            { name: "X-Large", width: 400, height: 200 }
+                            { name: "S", width: 120, height: 60 },
+                            { name: "M", width: 200, height: 100 },
+                            { name: "L", width: 300, height: 150 },
+                            { name: "XL", width: 400, height: 200 }
                           ].map((preset) => (
                             <button
                               key={preset.name}
                               onClick={() => setSignatureSize({ width: preset.width, height: preset.height })}
-                              className="px-3 py-2 text-sm bg-gray-100 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                              className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors"
                             >
                               {preset.name}
                             </button>
@@ -473,68 +445,40 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Position Info */}
-                    {signaturePosition && contentDimensions && (
-                      <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                        <h4 className="font-bold text-green-800 mb-2">Signature Position</h4>
-                        <p className="text-green-700 text-sm">
-                          X: {(signaturePosition.x * 100).toFixed(1)}%
-                        </p>
-                        <p className="text-green-700 text-sm">
-                          Y: {(signaturePosition.y * 100).toFixed(1)}%
-                        </p>
-                        <p className="text-green-600 text-xs mt-2">
-                          Document: {contentDimensions.width} × {contentDimensions.height}px
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Status */}
-                    <div className="bg-white rounded-xl p-4 border border-gray-200">
-                      <h4 className="font-bold mb-3 text-gray-900">Status</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-green-600">
-                          <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs">✓</span>
-                          </div>
-                          <span className="text-sm font-medium">Signature selected</span>
-                        </div>
-                        <div className={`flex items-center gap-2 ${signaturePosition ? 'text-green-600' : 'text-gray-400'}`}>
-                          <div className={`w-4 h-4 rounded-full flex items-center justify-center ${signaturePosition ? 'bg-green-500' : 'bg-gray-300'}`}>
-                            <span className="text-white text-xs">{signaturePosition ? '✓' : '2'}</span>
-                          </div>
-                          <span className="text-sm font-medium">Position selected</span>
-                        </div>
+                    {/* Minimal Status */}
+                    <div className="pt-2 border-t border-gray-100">
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className={`w-2 h-2 rounded-full ${signaturePosition ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                        <span className="text-gray-600">
+                          {signaturePosition ? 'Ready to sign' : 'Position signature'}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="space-y-3">
+                    {/* Minimal Action Buttons */}
+                    <div className="space-y-2 pt-2">
                       <button
                         onClick={signFile}
                         disabled={!canSign || signing}
-                        className={`w-full px-6 py-4 rounded-xl font-bold transition-all duration-300 ${
+                        className={`w-full px-4 py-3 rounded-lg font-medium transition-colors ${
                           canSign && !signing
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-lg'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                       >
                         {signing ? (
                           <div className="flex items-center justify-center gap-2">
-                            <div className="w-5 h-5 border-2 border-gray-300 border-t-white rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border border-gray-300 border-t-white rounded-full animate-spin"></div>
                             Signing...
                           </div>
                         ) : (
-                          <div className="flex items-center justify-center gap-2">
-                            <FaFileSignature />
-                            Sign Document
-                          </div>
+                          'Sign Document'
                         )}
                       </button>
                       
                       <button
                         onClick={onClose}
-                        className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-semibold transition-colors"
+                        className="w-full px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors text-sm"
                       >
                         Cancel
                       </button>
@@ -548,16 +492,16 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
         document.body
       )}
 
-      {/* Signature Selection Modal */}
+      {/* Minimal Signature Selection Modal */}
       {showSignatureModal && typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-xl p-0 max-w-3xl w-full mx-4 max-h-[80vh] relative">
             <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl z-10 p-1"
               onClick={() => setShowSignatureModal(false)}
-              aria-label="Close signature selection"
+              aria-label="Close"
             >
-              ×
+              <FaTimes />
             </button>
             <SignatureModal
               isOpen={showSignatureModal}

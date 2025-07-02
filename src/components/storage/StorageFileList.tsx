@@ -112,7 +112,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => handleSignFile(file)}
-                  className="p-2 text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                  className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
                   title="Sign file"
                 >
                   <FaSignature size={14} />

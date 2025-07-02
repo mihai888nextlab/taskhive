@@ -193,14 +193,14 @@ const Storage = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setSignatureModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-700 transform hover:scale-102 transition-all duration-200 shadow-lg"
               >
                 <FaSignature className="text-lg" />
                 <span className="font-medium">Manage Signatures</span>
               </button>
               <button
                 onClick={() => setUploadFileModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transform hover:scale-102 transition-all duration-200 shadow-lg"
               >
                 <FaCloudUploadAlt className="text-lg" />
                 <span className="font-medium">Upload Files</span>
@@ -226,12 +226,6 @@ const Storage = () => {
           />
         </div>
 
-        {/* Files Grid */}
-        <div className={`rounded-2xl p-6 ${
-          theme === 'dark' 
-            ? 'bg-gray-800/50 backdrop-blur-sm border border-gray-700/50' 
-            : 'bg-white/70 backdrop-blur-sm border border-gray-200/50'
-        } shadow-xl`}>
           <StorageFileList
             files={sortedFiles}
             loading={loading}
@@ -245,7 +239,6 @@ const Storage = () => {
             getFileIcon={getFileIcon}
             fetchFiles={fetchFiles}
           />
-        </div>
       </div>
 
       {dragActive && <StorageDragOverlay />}
