@@ -1,7 +1,8 @@
 // components/chat/NewGroupChatModal.tsx
 import { useState, useEffect } from "react";
-import Modal from "./Modal";
-import { useAuth } from "@/hooks/useAuth"; // Custom hook to get current user
+import { FaTimes, FaUsers, FaPlus, FaSearch, FaSpinner } from "react-icons/fa";
+import { useAuth } from "@/hooks/useAuth";
+import { createPortal } from 'react-dom';
 
 interface NewGroupChatModalProps {
   isOpen: boolean;
@@ -55,7 +56,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
         setFilteredUsers(users);
       } catch (err) {
         console.error("Error fetching users:", err);
-        setError("Nu s-au putut încărca utilizatorii.");
+        setError("Could not load users.");
       } finally {
         setLoadingUsers(false);
       }
@@ -101,16 +102,15 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
 
   const handleCreateGroup = async () => {
     if (!user) {
-      setError("Utilizatorul nu este autentificat.");
+      setError("User not authenticated.");
       return;
     }
     if (selectedUsers.length < 1) {
-      // At least 2 participants besides self (so 1 selected user)
-      setError("Selectează cel puțin un utilizator pentru a crea un grup.");
+      setError("Select at least one user to create a group.");
       return;
     }
     if (!groupName.trim()) {
-      setError("Numele grupului nu poate fi gol.");
+      setError("Group name cannot be empty.");
       return;
     }
 
@@ -124,7 +124,6 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
       ];
 
       const res = await fetch("/api/conversations", {
-        // API to create group conversation
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -143,129 +142,269 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
 
       const data = await res.json();
       onChatCreated(data.conversationId);
-      onClose(); // Close modal
+      
+      // Reset form
+      setGroupName("");
+      setSelectedUsers([]);
+      setSearchTerm("");
+      onClose();
     } catch (err) {
       console.error("Error creating group chat:", err);
       setError(
         err && typeof err === "object" && "message" in err
-          ? (err as { message?: string }).message ||
-              "Eroare la crearea grupului."
-          : "Eroare la crearea grupului."
+          ? (err as { message?: string }).message || "Error creating group."
+          : "Error creating group."
       );
     } finally {
       setCreatingGroup(false);
     }
   };
 
+  const handleClose = () => {
+    setGroupName("");
+    setSelectedUsers([]);
+    setSearchTerm("");
+    setError(null);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Creează un Grup Nou">
-      <div className="p-4">
-        <div className="mb-4">
-          <label
-            htmlFor="groupName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Nume Grup
-          </label>
-          <input
-            type="text"
-            id="groupName"
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
-            placeholder="Introduceți numele grupului"
-            className="w-full p-2 border rounded-md mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+    <>
+      {typeof window !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-[90vw] max-w-6xl h-[85vh] relative animate-fadeIn overflow-hidden flex">
+            {/* Close Button */}
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+              onClick={handleClose}
+              aria-label="Close modal"
+            >
+              <FaTimes />
+            </button>
 
-        <input
-          type="text"
-          placeholder="Căută utilizatori de adăugat..."
-          className="w-full p-2 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-
-        <div className="mb-4">
-          <h4 className="font-semibold text-gray-700 mb-2">
-            Utilizatori selectați:
-          </h4>
-          {selectedUsers.length === 0 ? (
-            <p className="text-sm text-gray-500">Niciun utilizator selectat.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {selectedUsers.map((u) => (
-                <span
-                  key={u._id as string}
-                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center"
-                >
-                  {u.userId.firstName} {u.userId.lastName || u.userId.email}
-                  <button
-                    onClick={() => toggleUserSelection(u)}
-                    className="ml-2 text-blue-600 hover:text-blue-900"
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {loadingUsers ? (
-          <p className="text-gray-500 text-center">
-            Se încarcă utilizatorii...
-          </p>
-        ) : filteredUsers.length === 0 && searchTerm === "" ? (
-          <p className="text-gray-500 text-center">
-            Niciun utilizator de adăugat.
-          </p>
-        ) : filteredUsers.length === 0 && searchTerm !== "" ? (
-          <p className="text-gray-500 text-center">Niciun utilizator găsit.</p>
-        ) : (
-          <div className="max-h-60 overflow-y-auto custom-scrollbar">
-            {filteredUsers.map((u) => {
-              const isSelected = selectedUsers.some(
-                (su) => (su._id as string) === (u._id as string)
-              );
-              return (
-                <div
-                  key={u._id as string}
-                  className={`flex items-center justify-between p-2 my-1 rounded-md cursor-pointer transition-colors duration-150 ${
-                    isSelected ? "bg-blue-50" : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => toggleUserSelection(u)}
-                >
-                  <div>
-                    <p className="font-semibold">
-                      {u.userId.firstName} {u.userId.lastName}
-                    </p>
-                    <p className="text-sm text-gray-600">{u.userId.email}</p>
+            {/* Left Column - Group Details & Selected Users */}
+            <div className="w-2/5 bg-blue-50 border-r border-gray-200 flex flex-col">
+              {/* Header */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
+                    <FaUsers className="text-xl text-white" />
                   </div>
-                  {isSelected ? (
-                    <span className="text-green-500">Selectat</span>
-                  ) : (
-                    <button className="bg-gray-200 text-gray-800 px-3 py-1 rounded-md text-sm hover:bg-gray-300">
-                      Adaugă
-                    </button>
-                  )}
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Create New Group</h2>
+                    <p className="text-gray-600">Set up your team collaboration</p>
+                  </div>
                 </div>
-              );
-            })}
+              </div>
+
+              {/* Group Name Input */}
+              <div className="p-6 border-b border-gray-200">
+                <label htmlFor="groupName" className="block text-gray-900 text-lg font-semibold mb-3">
+                  Group Name *
+                </label>
+                <input
+                  type="text"
+                  id="groupName"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  placeholder="Enter group name (e.g., Marketing Team)"
+                  className="w-full p-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 text-lg"
+                  disabled={creatingGroup}
+                />
+              </div>
+
+              {/* Selected Users */}
+              <div className="flex-1 p-6 overflow-y-auto">
+                <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <FaUsers className="text-blue-600" />
+                  Selected Members ({selectedUsers.length})
+                </h4>
+                
+                {selectedUsers.length === 0 ? (
+                  <div className="p-6 bg-white border-2 border-dashed border-gray-300 rounded-xl text-center">
+                    <FaUsers className="text-4xl text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500 font-medium">No members selected</p>
+                    <p className="text-gray-400 text-sm">Choose team members from the right panel</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {selectedUsers.map((u) => (
+                      <div
+                        key={u._id as string}
+                        className="bg-white border border-blue-200 rounded-xl p-4 flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-medium">
+                              {u.userId.firstName?.[0]}{u.userId.lastName?.[0]}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">
+                              {u.userId.firstName} {u.userId.lastName}
+                            </p>
+                            <p className="text-sm text-gray-600">{u.userId.email}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => toggleUserSelection(u)}
+                          className="text-red-500 hover:text-red-700 text-xl font-bold p-1"
+                          disabled={creatingGroup}
+                          title="Remove from group"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="p-6 border-t border-gray-200">
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-red-700 font-medium">{error}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="p-6 border-t border-gray-200 bg-white">
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleClose}
+                    className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-200"
+                    disabled={creatingGroup}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateGroup}
+                    disabled={creatingGroup || selectedUsers.length < 1 || !groupName.trim()}
+                    className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
+                      creatingGroup || selectedUsers.length < 1 || !groupName.trim()
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-800 shadow-lg hover:shadow-xl'
+                    }`}
+                  >
+                    {creatingGroup ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <FaSpinner className="animate-spin" />
+                        Creating...
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <FaUsers />
+                        Create Group
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Search & User List */}
+            <div className="flex-1 flex flex-col bg-white">
+              {/* Search Header */}
+              <div className="p-6 border-b border-gray-200">
+                <label className="block text-gray-900 text-lg font-semibold mb-3">
+                  Add Team Members
+                </label>
+                <div className="relative">
+                  <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search users by name or email..."
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    disabled={creatingGroup}
+                  />
+                </div>
+              </div>
+
+              {/* Users List */}
+              <div className="flex-1 p-6 overflow-y-auto">
+                <h4 className="font-semibold text-gray-900 mb-4">Available Team Members</h4>
+                
+                {loadingUsers ? (
+                  <div className="text-center py-12">
+                    <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
+                    <p className="text-gray-500 text-lg">Loading team members...</p>
+                  </div>
+                ) : filteredUsers.length === 0 && searchTerm === "" ? (
+                  <div className="text-center py-12">
+                    <FaUsers className="text-6xl text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">No Team Members</h4>
+                    <p className="text-gray-500">No other users are available</p>
+                  </div>
+                ) : filteredUsers.length === 0 && searchTerm !== "" ? (
+                  <div className="text-center py-12">
+                    <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">No Results Found</h4>
+                    <p className="text-gray-500">Try searching with a different name or email</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredUsers.map((u) => {
+                      const isSelected = selectedUsers.some(
+                        (su) => (su._id as string) === (u._id as string)
+                      );
+                      return (
+                        <div
+                          key={u._id as string}
+                          className={`flex items-center justify-between p-4 rounded-xl transition-all duration-200 border-2 ${
+                            isSelected 
+                              ? "bg-blue-50 border-blue-200" 
+                              : "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                              <span className="text-gray-600 font-medium text-lg">
+                                {u.userId.firstName?.[0]}{u.userId.lastName?.[0]}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900 text-lg">
+                                {u.userId.firstName} {u.userId.lastName}
+                              </p>
+                              <p className="text-gray-600">{u.userId.email}</p>
+                            </div>
+                          </div>
+                          
+                          {isSelected ? (
+                            <div className="flex items-center gap-2 text-blue-600 font-medium">
+                              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                                <span className="text-white text-sm">✓</span>
+                              </div>
+                              Added
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => toggleUserSelection(u)}
+                              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 flex items-center gap-2"
+                              disabled={creatingGroup}
+                            >
+                              <FaPlus className="text-sm" />
+                              Add
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-        <button
-          onClick={handleCreateGroup}
-          className="w-full bg-green-500 text-white py-2 rounded-md mt-4 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={
-            creatingGroup || selectedUsers.length < 1 || !groupName.trim()
-          }
-        >
-          {creatingGroup ? "Se creează grupul..." : "Creează Grup"}
-        </button>
-      </div>
-    </Modal>
+        </div>,
+        document.body
+      )}
+    </>
   );
 };
 

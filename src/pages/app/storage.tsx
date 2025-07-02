@@ -170,8 +170,8 @@ const Storage = () => {
     <div
       className={`relative min-h-screen transition-all duration-300 ${
         theme === 'dark' 
-          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
-          : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'
+          ? 'bg-gray-100' 
+          : 'bg-gray-100'
       } ${dragActive ? "ring-4 ring-blue-400 ring-opacity-50" : ""}`}
       onDragEnter={handleDrag}
       onDragOver={handleDrag}
@@ -278,7 +278,7 @@ const Storage = () => {
           
           {signatureModal && createPortal(
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
                   onClick={() => setSignatureModal(false)}

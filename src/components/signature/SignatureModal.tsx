@@ -93,9 +93,9 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="w-full h-full max-w-4xl mx-auto bg-white">
+    <div className="w-full h-full max-w-4xl mx-auto bg-white rounded-3xl overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200 bg-white">
+      <div className="p-6 border-b border-gray-200 bg-white rounded-t-3xl">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-600 rounded-lg">
             <FaSignature className="text-white text-lg" />
@@ -138,7 +138,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
       </div>
 
       {/* Content */}
-      <div className="p-6 overflow-y-auto max-h-[60vh] bg-white">
+      <div className="p-6 overflow-y-auto max-h-[60vh] bg-white rounded-b-3xl">
         {activeTab === 'select' && (
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -157,7 +157,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                 <p className="text-gray-600 mb-6">Create your first signature to get started with document signing.</p>
                 <button
                   onClick={() => setActiveTab('create')}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800 transition-all duration-200 font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transition-all duration-200 font-medium"
                 >
                   <FaPlus className="text-sm" />
                   Create Your First Signature
@@ -166,7 +166,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {signatures.map((signature) => (
-                  <div key={signature._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 bg-white">
+                  <div key={signature._id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-white">
                     <div className="flex justify-between items-start mb-3">
                       <h4 className="font-medium text-gray-900 truncate text-sm">{signature.signatureName}</h4>
                       <button
@@ -178,7 +178,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                       </button>
                     </div>
                     
-                    <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg min-h-[80px] flex items-center justify-center">
+                    <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[80px] flex items-center justify-center">
                       <img
                         src={signature.signatureUrl}
                         alt={signature.signatureName}
@@ -191,7 +191,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                         onSignatureSelect(signature.signatureUrl);
                         onClose();
                       }}
-                      className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-800 font-medium transition-all duration-200 text-sm"
+                      className="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 text-sm"
                     >
                       Use This Signature
                     </button>
@@ -204,7 +204,6 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
 
         {activeTab === 'create' && (
           <div className="max-w-3xl mx-auto">
-            
             <div className="space-y-8">
               <div className="bg-white border border-gray-200 rounded-xl p-6">
                 <input

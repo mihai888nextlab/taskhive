@@ -28,7 +28,8 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [contentDimensions, setContentDimensions] = useState<{ width: number; height: number } | null>(null);
   const [isPlacingSignature, setIsPlacingSignature] = useState(false);
-  const [currentStep, setCurrentStep] = useState<'select' | 'place'>('select'); // New: step control
+  const [currentStep, setCurrentStep] = useState<'select' | 'place'>('select');
+  const [saveOption, setSaveOption] = useState<'new' | 'replace'>('new'); // New state for save option
   const previewRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -131,7 +132,8 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
         signatureSize: signatureSize,
         clickPosition: pixelPosition,
         previewDimensions: contentDimensions,
-        fileType: file.fileType
+        fileType: file.fileType,
+        saveOption: saveOption // Add save option to request
       };
       
       console.log('Sending signature request:', requestBody);
@@ -143,18 +145,25 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
       });
 
       if (res.ok) {
+        const result = await res.json();
         setSelectedSignature(null);
         setSignaturePosition(null);
         setSignatureSize({ width: 200, height: 100 });
         setContentDimensions(null);
         setCurrentStep('select');
+        setSaveOption('new');
         
         if (onSigningComplete) {
           onSigningComplete();
         }
         
         onClose();
-        alert('File signed successfully!');
+        
+        if (saveOption === 'new') {
+          alert('New signed copy created successfully!');
+        } else {
+          alert('File signed and updated successfully!');
+        }
       } else {
         const errorData = await res.json();
         alert(`Failed to sign file: ${errorData.message || 'Unknown error'}`);
@@ -178,8 +187,8 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
     <>
       {typeof window !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] relative overflow-hidden flex flex-col">
-            {/* Minimal Close Button */}
+          <div className="bg-white rounded-3xl shadow-xl w-[95vw] h-[95vh] relative overflow-hidden flex flex-col">
+            {/* Close Button and Header remain the same */}
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl z-10 p-1"
               onClick={onClose}
@@ -188,11 +197,10 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
               <FaTimes />
             </button>
 
-            {/* Minimal Header */}
-            <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0">
+            <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0 rounded-t-3xl bg-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
                     <FaFileSignature className="text-sm text-white" />
                   </div>
                   <div>
@@ -201,7 +209,6 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                   </div>
                 </div>
                 
-                {/* Minimal Step Indicator */}
                 <div className="flex items-center gap-2">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
                     currentStep === 'select' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
@@ -221,7 +228,7 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
             {/* Content Area */}
             <div className="flex-1 overflow-hidden">
               {currentStep === 'select' ? (
-                /* Step 1: Minimal Signature Selection */
+                /* Step 1: Signature Selection Only */
                 <div className="h-full flex items-center justify-center p-8">
                   <div className="max-w-lg w-full space-y-6">
                     <div className="text-center">
@@ -229,8 +236,8 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                       <p className="text-gray-500">Select a signature to sign your document</p>
                     </div>
 
-                    {/* Minimal Signature Display */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 min-h-[120px] flex items-center justify-center">
+                    {/* Signature Display */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 min-h-[120px] flex items-center justify-center">
                       {selectedSignature ? (
                         <div className="text-center">
                           <img
@@ -250,11 +257,11 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                       )}
                     </div>
 
-                    {/* Minimal Action Buttons */}
+                    {/* Action Buttons */}
                     <div className="space-y-3">
                       <button
                         onClick={() => setShowSignatureModal(true)}
-                        className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        className="w-full px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
                       >
                         {selectedSignature ? 'Change Signature' : 'Select Signature'}
                       </button>
@@ -265,7 +272,7 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                             setCurrentStep('place');
                             setIsPlacingSignature(true);
                           }}
-                          className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                          className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
                         >
                           Continue to Placement
                         </button>
@@ -274,15 +281,15 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                   </div>
                 </div>
               ) : (
-                /* Step 2: Minimal Signature Placement */
+                /* Step 2: Signature Placement with Save Options */
                 <div className="h-full flex">
                   {/* File Preview */}
                   <div className="flex-1 flex flex-col">
-                    {/* Minimal Preview Header */}
+                    {/* Preview Header */}
                     <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                       <button
                         onClick={goBackToSelection}
-                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2"
+                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2 rounded-lg hover:bg-gray-100"
                       >
                         <FaArrowLeft className="text-xs" />
                         Back
@@ -341,7 +348,7 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                           </div>
                         )}
 
-                        {/* Minimal Signature Preview */}
+                        {/* Signature Preview */}
                         {selectedSignature && signaturePosition && displayPosition && (
                           <div
                             className="absolute pointer-events-none border border-blue-400 bg-blue-50/30 flex items-center justify-center rounded"
@@ -364,12 +371,12 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Minimal Controls Sidebar */}
+                  {/* Controls Sidebar */}
                   <div className="w-72 border-l border-gray-100 bg-white p-4 space-y-4 overflow-y-auto">
                     {/* Selected Signature */}
                     <div>
                       <h4 className="text-sm font-medium text-gray-900 mb-2">Signature</h4>
-                      <div className="bg-gray-50 border border-gray-200 rounded p-3 flex items-center justify-center">
+                      <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 flex items-center justify-center">
                         <img
                           src={selectedSignature ?? ''}
                           alt="Selected signature"
@@ -378,7 +385,42 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Minimal Size Controls */}
+                    {/* Save Option Selection - MOVED HERE */}
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">Save Options</h4>
+                      <div className="space-y-2">
+                        <label className="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-blue-300 cursor-pointer transition-all duration-200">
+                          <input
+                            type="radio"
+                            name="saveOption"
+                            value="new"
+                            checked={saveOption === 'new'}
+                            onChange={(e) => setSaveOption(e.target.value as 'new' | 'replace')}
+                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mt-0.5"
+                          />
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-900">Create New Copy</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Keep original file and create a signed copy</p>
+                          </div>
+                        </label>
+                        <label className="flex items-start p-3 border-2 border-gray-200 rounded-xl hover:border-blue-300 cursor-pointer transition-all duration-200">
+                          <input
+                            type="radio"
+                            name="saveOption"
+                            value="replace"
+                            checked={saveOption === 'replace'}
+                            onChange={(e) => setSaveOption(e.target.value as 'new' | 'replace')}
+                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 mt-0.5"
+                          />
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-900">Replace Original</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Overwrite the existing file with signed version</p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Size Controls */}
                     <div>
                       <h4 className="text-sm font-medium text-gray-900 mb-3">Size</h4>
                       
@@ -425,7 +467,7 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                           />
                         </div>
 
-                        {/* Minimal Preset Sizes */}
+                        {/* Preset Sizes */}
                         <div className="grid grid-cols-4 gap-1">
                           {[
                             { name: "S", width: 120, height: 60 },
@@ -436,7 +478,7 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                             <button
                               key={preset.name}
                               onClick={() => setSignatureSize({ width: preset.width, height: preset.height })}
-                              className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors"
+                              className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
                             >
                               {preset.name}
                             </button>
@@ -445,7 +487,7 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Minimal Status */}
+                    {/* Status */}
                     <div className="pt-2 border-t border-gray-100">
                       <div className="flex items-center gap-2 text-sm">
                         <div className={`w-2 h-2 rounded-full ${signaturePosition ? 'bg-green-500' : 'bg-gray-300'}`}></div>
@@ -455,12 +497,12 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Minimal Action Buttons */}
+                    {/* Action Buttons */}
                     <div className="space-y-2 pt-2">
                       <button
                         onClick={signFile}
                         disabled={!canSign || signing}
-                        className={`w-full px-4 py-3 rounded-lg font-medium transition-colors ${
+                        className={`w-full px-4 py-3 rounded-xl font-medium transition-colors ${
                           canSign && !signing
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -472,13 +514,13 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
                             Signing...
                           </div>
                         ) : (
-                          'Sign Document'
+                          saveOption === 'new' ? 'Sign & Create Copy' : 'Sign & Replace File'
                         )}
                       </button>
                       
                       <button
                         onClick={onClose}
-                        className="w-full px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors text-sm"
+                        className="w-full px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors text-sm rounded-xl hover:bg-gray-50"
                       >
                         Cancel
                       </button>
@@ -492,10 +534,10 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
         document.body
       )}
 
-      {/* Minimal Signature Selection Modal */}
+      {/* Signature Selection Modal - unchanged */}
       {showSignatureModal && typeof window !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-xl p-0 max-w-3xl w-full mx-4 max-h-[80vh] relative">
+          <div className="bg-white rounded-3xl shadow-xl p-0 max-w-3xl w-full mx-4 max-h-[80vh] relative">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl z-10 p-1"
               onClick={() => setShowSignatureModal(false)}

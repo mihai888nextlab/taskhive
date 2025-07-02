@@ -44,7 +44,8 @@ export default async function handler(
       previewDimensions,
       normalizedPosition,
       contentDimensions,
-      fileType 
+      fileType,
+      saveOption = 'new' // Default to creating new copy
     } = req.body;
 
     const hasOldFormat = clickPosition && previewDimensions;
@@ -102,27 +103,49 @@ export default async function handler(
           PDFDocument
         );
 
-        const signedFileName = `signed_${Date.now()}_${originalFile.fileName}`;
-        const uploadedFile = await uploadToS3(signedPdfBuffer, signedFileName, "application/pdf");
+        if (saveOption === 'replace') {
+          // Replace the original file
+          const uploadedFile = await uploadToS3(signedPdfBuffer, originalFile.fileName, "application/pdf");
+          
+          // Update the existing file record
+          originalFile.fileLocation = uploadedFile.Location;
+          originalFile.fileSize = signedPdfBuffer.length;
+          await originalFile.save();
 
-        const signedFile = new filesModel({
-          fileName: signedFileName,
-          fileType: "application/pdf",
-          fileLocation: uploadedFile.Location,
-          fileSize: signedPdfBuffer.length,
-          uploadedBy: decoded.userId,
-        });
+          return res.status(200).json({
+            message: "File signed and updated successfully",
+            signedFile: {
+              _id: originalFile._id,
+              fileName: originalFile.fileName,
+              fileLocation: originalFile.fileLocation,
+            },
+            action: 'replaced'
+          });
+        } else {
+          // Create new copy (default behavior)
+          const signedFileName = `signed_${Date.now()}_${originalFile.fileName}`;
+          const uploadedFile = await uploadToS3(signedPdfBuffer, signedFileName, "application/pdf");
 
-        await signedFile.save();
+          const signedFile = new filesModel({
+            fileName: signedFileName,
+            fileType: "application/pdf",
+            fileLocation: uploadedFile.Location,
+            fileSize: signedPdfBuffer.length,
+            uploadedBy: decoded.userId,
+          });
 
-        return res.status(200).json({
-          message: "File signed successfully",
-          signedFile: {
-            _id: signedFile._id,
-            fileName: signedFile.fileName,
-            fileLocation: signedFile.fileLocation,
-          },
-        });
+          await signedFile.save();
+
+          return res.status(200).json({
+            message: "New signed copy created successfully",
+            signedFile: {
+              _id: signedFile._id,
+              fileName: signedFile.fileName,
+              fileLocation: signedFile.fileLocation,
+            },
+            action: 'new_copy'
+          });
+        }
 
       } catch (pdfError) {
         return res.status(500).json({ 
