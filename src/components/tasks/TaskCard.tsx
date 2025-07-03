@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FaEdit, FaTrash, FaCheckCircle, FaRegCircle, FaExclamationTriangle, FaSpinner, FaPlus, FaRobot } from "react-icons/fa";
+import { FaEdit, FaTrash, FaCheckCircle, FaRegCircle, FaExclamationTriangle, FaFlag, FaTasks } from "react-icons/fa";
+import { FiCalendar, FiUser, FiChevronDown, FiChevronRight } from "react-icons/fi";
 import TimeTrackingModal from "../time-tracking/TimeTrackingModal";
 
 interface Task {
@@ -8,16 +9,16 @@ interface Task {
   description?: string;
   deadline: string;
   completed: boolean;
-  important?: boolean;
+  priority: 'critical' | 'high' | 'medium' | 'low'; // Remove string and optional
   userId: any;
   createdAt: string;
   updatedAt: string;
   createdBy: { firstName: string; lastName: string; email: string };
   timeTracking?: { title: string; duration: number; description: string };
-  // Add subtask fields
   isSubtask?: boolean;
   parentTask?: string;
   subtasks?: Task[];
+  important?: boolean; // Keep for backward compatibility
 }
 
 interface TaskCardProps {
@@ -26,11 +27,13 @@ interface TaskCardProps {
   loading: boolean;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
-  onToggleComplete?: (task: Task) => void; // Made optional
+  onToggleComplete?: (task: Task) => void;
   isTaskOverdue: (task: Task) => boolean;
   forceAllowEditDelete?: boolean;
   onShowDetails?: (task: Task) => void;
+  theme?: string;
 }
+
 
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
@@ -42,6 +45,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   isTaskOverdue,
   forceAllowEditDelete,
   onShowDetails,
+  theme = "light",
 }) => {
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [pendingComplete, setPendingComplete] = useState<null | Task>(null);
@@ -54,71 +58,24 @@ const TaskCard: React.FC<TaskCardProps> = ({
   now.setHours(0, 0, 0, 0);
   deadlineDate.setHours(0, 0, 0, 0);
   const isToday = !isOverdue && deadlineDate.getTime() === now.getTime();
-  const showExclamation = !!task.important || isOverdue;
 
-  // Determine if current user is the creator
   const assignerEmail = (task.createdBy?.email || "").trim().toLowerCase();
   const userEmail = (currentUserEmail || "").trim().toLowerCase();
   const canEditOrDelete = assignerEmail === userEmail || forceAllowEditDelete;
 
-  // Card style like dashboard preview
-  let cardBgClass =
-    isCompleted
-      ? "opacity-80 bg-green-50 border-l-8 border-green-400"
-      : isOverdue
-        ? "bg-red-50 border border-red-500"
-        : isToday || !!task.important
-          ? "bg-yellow-50 border border-yellow-500"
-          : "bg-white border border-gray-200";
-  let titleClass =
-    isCompleted
-      ? "line-through text-gray-600"
-      : isOverdue
-        ? "text-lg font-extrabold text-red-700 flex items-center gap-2"
-        : showExclamation
-          ? "text-lg font-extrabold text-gray-900 flex items-center gap-2"
-          : "text-gray-900 font-bold";
-  let deadlineClass =
-    isCompleted
-      ? "text-gray-400"
-      : isOverdue
-        ? "text-red-600 font-bold"
-        : isToday
-          ? "text-yellow-700 font-bold"
-          : "text-gray-700";
-  let icon =
-    isCompleted
-      ? <FaCheckCircle className="text-green-500 text-2xl" />
-      : <FaRegCircle className={`transition-transform duration-300 text-2xl${isOverdue ? ' text-red-500' : ''}`} />;
-  let exclamation = null;
-  if (isOverdue) {
-    exclamation = (
-      <FaExclamationTriangle className="inline-block mr-1 text-red-500 text-lg align-middle" title="Overdue" />
-    );
-  } else if (showExclamation) {
-    exclamation = (
-      <FaExclamationTriangle className="inline-block mr-1 text-orange-500 text-lg align-middle" title="Important" />
-    );
-  }
-
-  // Determine if assigned to current user
   const taskAssigneeEmail = typeof task.userId === 'object' && task.userId?.email ? task.userId.email.trim().toLowerCase() : '';
   const isAssignedToMe = taskAssigneeEmail === userEmail || (typeof task.userId === 'string' && task.userId === userEmail);
   
-  // Calculate subtask completion
   const completedSubtasks = task.subtasks?.filter(subtask => subtask.completed).length || 0;
   const totalSubtasks = task.subtasks?.length || 0;
   const hasSubtasks = totalSubtasks > 0;
 
-  // Only allow completion if the task is assigned to me AND it doesn't have subtasks
-  // Tasks with subtasks should only be completed automatically when all subtasks are done
   const canComplete = isAssignedToMe && !hasSubtasks;
 
   const handleCompleteClick = (task: Task) => {
     if (!task.completed) {
       setPendingComplete(task);
       setShowTimeModal(true);
-      // Do NOT mark as complete yet
     } else if (onToggleComplete) {
       onToggleComplete(task);
     }
@@ -127,13 +84,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const handleTimeModalSubmit = async (data: { title: string; duration: number; description: string; tag: string }) => {
     setShowTimeModal(false);
     if (pendingComplete) {
-      // Save time session to database
       try {
         await fetch('/api/time-sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: pendingComplete.userId?._id || pendingComplete.userId, // handle both object and string
+            userId: pendingComplete.userId?._id || pendingComplete.userId,
             name: data.title,
             description: data.description,
             duration: data.duration,
@@ -144,7 +100,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         console.error('Failed to save time session', err);
       }
       if (onToggleComplete) {
-        onToggleComplete(pendingComplete); // Mark as complete after modal closes
+        onToggleComplete(pendingComplete);
       }
     }
     setPendingComplete(null);
@@ -153,9 +109,74 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const handleTimeModalClose = () => {
     setShowTimeModal(false);
     if (pendingComplete && onToggleComplete) {
-      onToggleComplete(pendingComplete); // Mark as complete even if modal is cancelled
+      onToggleComplete(pendingComplete);
     }
     setPendingComplete(null);
+  };
+
+  const getAssigneeAvatar = () => {
+    if (task.userId && typeof task.userId === 'object') {
+      const firstName = task.userId.firstName || '';
+      const lastName = task.userId.lastName || '';
+      const initials = (firstName[0] || '') + (lastName[0] || '');
+      return (
+        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
+          theme === 'dark' ? 'bg-blue-500 text-white' : 'bg-blue-500 text-white'
+        }`}>
+          {initials || 'U'}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const getPriorityIndicator = () => {
+    if (isOverdue) return 'border-l-red-500';
+    switch (task.priority) {
+      case 'critical': return 'border-l-red-500';
+      case 'high': return 'border-l-orange-500';
+      case 'medium': return 'border-l-yellow-500';
+      case 'low': return 'border-l-green-500';
+      default: return theme === 'dark' ? 'border-l-gray-700' : 'border-l-gray-200';
+    }
+  };
+
+  const getPriorityBadge = () => {
+    if (isOverdue) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
+          <FaExclamationTriangle className="w-3 h-3" />
+          Overdue
+        </span>
+      );
+    }
+
+    if (task.priority === 'critical') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
+          🔥 Critical
+        </span>
+      );
+    }
+
+    if (task.priority === 'high') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
+          ⚡ High Priority
+        </span>
+      );
+    }
+
+    if (isToday && (task.priority === 'medium' || task.priority === 'low')) { // Remove the single medium check
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full">
+          <FiCalendar className="w-3 h-3" />
+          Due Today
+        </span>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -163,227 +184,253 @@ const TaskCard: React.FC<TaskCardProps> = ({
       <div className="w-full">
         {/* Main Task Card */}
         <div
-          className={`relative flex flex-col p-5 rounded-xl shadow-sm group transition-all duration-200 w-full ${cardBgClass}`}
-          aria-label={`Task: ${task.title}, Status: ${task.completed ? "Completed" : "Pending"}${isOverdue && !isCompleted ? ", Overdue" : ""}`}
-          style={{ opacity: isOverdue ? 0.9 : 1 }}
+          className={`relative p-4 rounded-lg border-l-4 transition-all duration-200 hover:shadow-md group cursor-pointer ${
+            theme === 'dark' 
+              ? 'bg-gray-800 border-gray-700 hover:bg-gray-750' 
+              : 'bg-white border-gray-200 hover:bg-gray-50'
+          } ${getPriorityIndicator()} ${isCompleted ? 'opacity-60' : ''}`}
+          onClick={() => onShowDetails && onShowDetails(task)}
         >
-          {/* Main task content */}
-          <button
-            type="button"
-            className="flex items-start justify-between w-full text-left"
-            onClick={() => onShowDetails && onShowDetails(task)}
-          >
-            <div className="flex-1 pr-4">
-              <span
-                className={`block leading-tight font-bold flex items-center gap-2 ${titleClass}`}
-                style={{ fontSize: (isOverdue || showExclamation) ? '1.15rem' : undefined }}
+          <div className="flex items-start gap-3">
+            {/* Complete Button */}
+            {onToggleComplete && (
+              <button
+                type="button"
+                onClick={e => { 
+                  e.stopPropagation(); 
+                  if (hasSubtasks && !task.isSubtask) {
+                    alert("Complete all subtasks to automatically complete this task.");
+                    return;
+                  }
+                  handleCompleteClick(task); 
+                }}
+                className={`flex-shrink-0 mt-1 transition-all duration-200 ${
+                  hasSubtasks && !task.isSubtask ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'
+                }`}
+                disabled={loading || (hasSubtasks && !task.isSubtask && !canComplete)}
               >
-                {exclamation}
-                {task.title}
-              </span>
+                {isCompleted ? (
+                  <FaCheckCircle className="w-5 h-5 text-green-500" />
+                ) : (
+                  <FaRegCircle className={`w-5 h-5 transition-colors ${
+                    isOverdue ? 'text-red-500' : theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-400 hover:text-blue-500'
+                  }`} />
+                )}
+              </button>
+            )}
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              {/* Header Row */}
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className={`font-semibold text-base leading-tight ${
+                      isCompleted 
+                        ? 'line-through text-gray-500' 
+                        : theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {task.title}
+                    </h3>
+                    
+                    {/* Priority & Status Indicators */}
+                    {getPriorityBadge()}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); onEdit(task); }}
+                    className={`p-1.5 rounded-md transition-colors ${
+                      theme === 'dark' 
+                        ? 'hover:bg-gray-700 text-gray-400 hover:text-blue-400' 
+                        : 'hover:bg-gray-100 text-gray-500 hover:text-blue-600'
+                    }`}
+                    title="Edit Task"
+                    disabled={loading || !canEditOrDelete}
+                  >
+                    <FaEdit className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); onDelete(task._id); }}
+                    className={`p-1.5 rounded-md transition-colors ${
+                      theme === 'dark' 
+                        ? 'hover:bg-gray-700 text-gray-400 hover:text-red-400' 
+                        : 'hover:bg-gray-100 text-gray-500 hover:text-red-600'
+                    }`}
+                    title="Delete Task"
+                    disabled={loading || !canEditOrDelete}
+                  >
+                    <FaTrash className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Description */}
               {task.description && (
-                <p className={`mt-2 line-clamp-2 text-gray-700`}>
-                  {task.description.split(" ").slice(0, 5).join(" ")}
-                  {task.description.split(" ").length > 5 ? "..." : ""}
+                <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {task.description.length > 80 
+                    ? `${task.description.substring(0, 80)}...`
+                    : task.description
+                  }
                 </p>
               )}
-              
-              {/* Subtasks progress */}
+
+              {/* Subtasks Progress */}
               {hasSubtasks && (
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
-                    <span>Subtasks Progress</span>
-                    <span>{completedSubtasks}/{totalSubtasks}</span>
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Subtasks
+                    </span>
+                    <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {completedSubtasks}/{totalSubtasks}
+                    </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className={`w-full h-1.5 rounded-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
                     <div 
-                      className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                      className="h-1.5 rounded-full bg-green-500 transition-all duration-300" 
                       style={{ width: `${totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0}%` }}
-                    ></div>
+                    />
                   </div>
                 </div>
               )}
 
-              {hasSubtasks && isCompleted && (
-                <div className="mt-2 flex items-center gap-1 text-xs text-green-600">
-                  <FaCheckCircle className="text-sm" />
-                  <span>Auto-completed (all subtasks done)</span>
+              {/* Meta Information */}
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-3">
+                  {/* Deadline */}
+                  <div className="flex items-center gap-1">
+                    <FiCalendar className={`w-3.5 h-3.5 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
+                    <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {new Date(task.deadline).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </span>
+                  </div>
+
+                  {/* Assignee */}
+                  {task.userId && typeof task.userId === 'object' && !isAssignedToMe && (
+                    <div className="flex items-center gap-1.5">
+                      {getAssigneeAvatar()}
+                      <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {task.userId.firstName} {task.userId.lastName}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Assigned by info */}
+                  {!forceAllowEditDelete && task.createdBy && isAssignedToMe && task.createdBy.email !== currentUserEmail && (
+                    <div className="flex items-center gap-1">
+                      <FiUser className={`w-3.5 h-3.5 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
+                      <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        by {task.createdBy.firstName} {task.createdBy.lastName}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Show "Assigned to" if the task is assigned to someone else */}
-              {task.userId &&
-                typeof task.userId === "object" &&
-                task.userId.email &&
-                !isAssignedToMe && (
-                  <p className="text-xs text-gray-700 mt-2">
-                    <span className="font-semibold">Assigned to:</span>{" "}
-                    {task.userId.firstName} {task.userId.lastName} ({task.userId.email})
-                  </p>
-              )}
-              
-              <p className={`mt-3 text-xs flex items-center gap-2 ${deadlineClass}`}> 
-                Due: {new Date(task.deadline).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-                {isOverdue && (
-                  <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded font-extrabold tracking-wide shadow-sm border border-red-600">
-                    OVERDUE
-                  </span>
+                {/* Subtasks Toggle */}
+                {hasSubtasks && (
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); setShowSubtasks(!showSubtasks); }}
+                    className={`flex items-center gap-1 text-xs font-medium transition-colors ${
+                      theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'
+                    }`}
+                  >
+                    {showSubtasks ? (
+                      <FiChevronDown className="w-3 h-3" />
+                    ) : (
+                      <FiChevronRight className="w-3 h-3" />
+                    )}
+                    <span>Subtasks</span>
+                  </button>
                 )}
-                {isToday && !isOverdue && (
-                  <span className="ml-2 px-2 py-0.5 bg-yellow-500 text-white text-xs rounded font-extrabold tracking-wide shadow-sm border border-yellow-600">
-                    TODAY
-                  </span>
-                )}
-              </p>
-              
-              {/* Show "Assigned by" information */}
-              {!forceAllowEditDelete &&
-                task.createdBy &&
-                typeof task.createdBy === "object" &&
-                task.createdBy.email &&
-                task.userId &&
-                typeof task.userId === "object" &&
-                task.userId.email &&
-                isAssignedToMe &&
-                task.createdBy.email !== currentUserEmail && (
-                  <p className="text-xs text-gray-700 mt-2">
-                    <span className="font-semibold">Assigned by:</span>{" "}
-                    {task.createdBy.firstName} {task.createdBy.lastName} ({task.createdBy.email})
-                  </p>
-              )}
-            </div>
-            
-            <div className="self-center pl-3 flex flex-col items-end gap-2">
-              {onToggleComplete && (
-                <button
-                  type="button"
-                  onClick={e => { 
-                    e.stopPropagation(); 
-                    if (hasSubtasks && !task.isSubtask) {
-                      alert("Complete all subtasks to automatically complete this task.");
-                      return;
-                    }
-                    handleCompleteClick(task); 
-                  }}
-                  className={`flex items-center text-lg font-semibold p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group ${
-                    hasSubtasks && !task.isSubtask ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  title={
-                    hasSubtasks && !task.isSubtask 
-                      ? "Complete all subtasks to finish this task" 
-                      : isCompleted 
-                        ? "Mark as Incomplete" 
-                        : "Mark as Complete"
-                  }
-                  aria-label={
-                    hasSubtasks && !task.isSubtask 
-                      ? "Complete all subtasks to finish this task" 
-                      : isCompleted 
-                        ? "Mark as Incomplete" 
-                        : "Mark as Complete"
-                  }
-                  disabled={loading || (hasSubtasks && !task.isSubtask && !canComplete)}
-                >
-                  {icon}
-                </button>
-              )}
-              <div className="flex space-x-2">
-                <button
-                  type="button"
-                  onClick={e => { e.stopPropagation(); onEdit(task); }}
-                  className="text-primary hover:text-primary-dark p-2 rounded-full hover:bg-primary-light/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="Edit Task"
-                  disabled={loading || !canEditOrDelete}
-                >
-                  <FaEdit className="text-xl" />
-                </button>
-                <button
-                  type="button"
-                  onClick={e => { e.stopPropagation(); onDelete(task._id); }}
-                  className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Delete Task"
-                  disabled={loading || !canEditOrDelete}
-                >
-                  <FaTrash className="text-xl" />
-                </button>
               </div>
             </div>
-          </button>
-
-          {/* Subtasks toggle button - inside the main card */}
-          {hasSubtasks && (
-            <button
-              type="button"
-              onClick={e => { e.stopPropagation(); setShowSubtasks(!showSubtasks); }}
-              className="mt-4 pt-3 border-t border-gray-200 text-left text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2 transition-colors"
-            >
-              <span className="text-blue-500">{showSubtasks ? '▼' : '▶'}</span>
-              <span>{showSubtasks ? 'Hide' : 'Show'} Subtasks ({totalSubtasks})</span>
-              <div className="ml-auto text-xs text-gray-500">
-                {completedSubtasks}/{totalSubtasks} completed
-              </div>
-            </button>
-          )}
+          </div>
         </div>
 
-        {/* Subtasks list - rendered below the main task card */}
+        {/* Subtasks List */}
         {hasSubtasks && showSubtasks && (
-          <div className="mt-4 ml-6 space-y-3">
-            {task.subtasks?.map((subtask, index) => (
+          <div className="mt-2 ml-8 space-y-2">
+            {task.subtasks?.map((subtask) => (
               <div 
                 key={subtask._id} 
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative"
+                className={`relative p-3 rounded-md border transition-all duration-200 hover:shadow-sm ${
+                  theme === 'dark' 
+                    ? 'bg-gray-800 border-gray-700 hover:bg-gray-750' 
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                }`}
               >
-                {/* Connecting line */}
-                <div className="absolute -left-6 top-1/2 w-6 h-px bg-gray-300"></div>
-                <div className="absolute -left-6 top-1/2 w-2 h-2 bg-gray-300 rounded-full transform -translate-y-1/2"></div>
+                {/* Connecting Line */}
+                <div className={`absolute -left-8 top-1/2 w-6 h-px ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`} />
+                <div className={`absolute -left-8 top-1/2 w-1.5 h-1.5 rounded-full transform -translate-y-1/2 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`} />
                 
-                <div className="flex items-center gap-3 flex-1">
-                  <button
-                    type="button"
-                    onClick={() => onToggleComplete && onToggleComplete(subtask)}
-                    className="text-lg hover:scale-110 transition-transform"
-                    disabled={loading}
-                  >
-                    {subtask.completed ? 
-                      <FaCheckCircle className="text-green-500" /> : 
-                      <FaRegCircle className="text-gray-400" />
-                    }
-                  </button>
-                  <div className="flex-1">
-                    <p className={`text-sm font-medium ${subtask.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                      {subtask.title}
-                    </p>
-                    {subtask.description && (
-                      <p className="text-xs text-gray-600 mt-1">
-                        {subtask.description}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5 flex-1">
+                    <button
+                      type="button"
+                      onClick={() => onToggleComplete && onToggleComplete(subtask)}
+                      className="transition-transform hover:scale-110"
+                      disabled={loading}
+                    >
+                      {subtask.completed ? 
+                        <FaCheckCircle className="w-4 h-4 text-green-500" /> : 
+                        <FaRegCircle className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-400 hover:text-blue-500'}`} />
+                      }
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium ${
+                        subtask.completed 
+                          ? 'line-through text-gray-500' 
+                          : theme === 'dark' ? 'text-white' : 'text-gray-800'
+                      }`}>
+                        {subtask.title}
                       </p>
-                    )}
+                      {subtask.description && (
+                        <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
+                          {subtask.description.length > 60 
+                            ? `${subtask.description.substring(0, 60)}...`
+                            : subtask.description
+                          }
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => onEdit(subtask)}
-                    className="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                    disabled={loading || !canEditOrDelete}
-                    title="Edit subtask"
-                  >
-                    <FaEdit className="text-sm" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(subtask._id)}
-                    className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                    disabled={loading || !canEditOrDelete}
-                    title="Delete subtask"
-                  >
-                    <FaTrash className="text-sm" />
-                  </button>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(subtask)}
+                      className={`p-1 rounded transition-colors ${
+                        theme === 'dark' 
+                          ? 'hover:bg-gray-700 text-gray-500 hover:text-blue-400' 
+                          : 'hover:bg-gray-200 text-gray-500 hover:text-blue-600'
+                      }`}
+                      disabled={loading || !canEditOrDelete}
+                      title="Edit subtask"
+                    >
+                      <FaEdit className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(subtask._id)}
+                      className={`p-1 rounded transition-colors ${
+                        theme === 'dark' 
+                          ? 'hover:bg-gray-700 text-gray-500 hover:text-red-400' 
+                          : 'hover:bg-gray-200 text-gray-500 hover:text-red-600'
+                      }`}
+                      disabled={loading || !canEditOrDelete}
+                      title="Delete subtask"
+                    >
+                      <FaTrash className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

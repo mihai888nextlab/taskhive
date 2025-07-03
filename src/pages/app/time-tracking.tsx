@@ -1,25 +1,33 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/sidebar/DashboardLayout';
+import { NextPageWithLayout } from "@/types";
 import Loading from "@/components/Loading";
-import TimeStatistics from '@/components/TimeStatistics';
 import TimerAndFormPanel from '@/components/time-tracking/TimerAndFormPanel';
 import SessionList from '@/components/time-tracking/SessionList';
 import TimeTrackingHeader from '@/components/time-tracking/TimeTrackingHeader';
-import PomodoroSavePanel from '@/components/time-tracking/PomodoroSavePanel';
-import StatisticsCard from '@/components/time-tracking/StatisticsCard';
-import { Pie } from 'react-chartjs-2';
+import { FaClock, FaChartLine } from 'react-icons/fa';
 import { saveAs } from "file-saver";
 import { useTimeTracking } from '@/components/time-tracking/TimeTrackingContext';
+import { useTheme } from '@/components/ThemeContext';
 
-const TimeTrackingPage = () => {
-  const { sessionName, setSessionName, sessionDescription, setSessionDescription, sessionTag, setSessionTag, elapsedTime, isRunning, pomodoroMode, pomodoroPhase, pomodoroTime, pomodoroCycles, pomodoroRunning, WORK_DURATION, BREAK_DURATION, startTimer, stopTimer, resetTimer, resetAll, saveSession, user } = useTimeTracking();
+const TimeTrackingPage: NextPageWithLayout = () => {
+  const { theme } = useTheme();
+  const { 
+    sessionName, setSessionName, 
+    sessionDescription, setSessionDescription, 
+    sessionTag, setSessionTag, 
+    elapsedTime, isRunning, 
+    pomodoroMode, setPomodoroMode,
+    pomodoroPhase, pomodoroTime, pomodoroCycles, pomodoroRunning, 
+    WORK_DURATION, BREAK_DURATION, 
+    startTimer, stopTimer, resetTimer, resetAll, saveSession, user 
+  } = useTimeTracking();
+  
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [last7DaysHours, setLast7DaysHours] = useState<number[]>(Array(7).fill(0));
   const [sessionSearch, setSessionSearch] = useState("");
   const [sessionTagFilter, setSessionTagFilter] = useState("all");
   const [sessionSort, setSessionSort] = useState("dateDesc");
-  const { theme } = { theme: 'light' };
 
   // Fetch sessions
   const fetchSessions = useCallback(async () => {
@@ -40,24 +48,6 @@ const TimeTrackingPage = () => {
     if (user?._id) fetchSessions();
   }, [user, fetchSessions]);
 
-  // Statistics
-  useEffect(() => {
-    if (!sessions.length) return;
-    const last7DaysTotal = Array(7).fill(0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    sessions.forEach(session => {
-      const sessionDate = new Date(session.createdAt);
-      sessionDate.setHours(0, 0, 0, 0);
-      const timeDifference = today.getTime() - sessionDate.getTime();
-      const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
-      if (daysDifference >= 0 && daysDifference < 7) {
-        last7DaysTotal[daysDifference] += session.duration;
-      }
-    });
-    setLast7DaysHours(last7DaysTotal.map(hours => hours / 3600));
-  }, [sessions]);
-
   const calculateStreak = (sessions: any[]) => {
     const days = new Set(
       sessions.map(s => new Date(s.createdAt).toDateString())
@@ -72,20 +62,6 @@ const TimeTrackingPage = () => {
   };
   const streak = calculateStreak(sessions);
 
-  const tagTotals: Record<string, number> = {};
-  sessions.forEach(s => {
-    const tag = s.tag || "General";
-    tagTotals[tag] = (tagTotals[tag] || 0) + s.duration;
-  });
-  const pieData = {
-    labels: Object.keys(tagTotals),
-    datasets: [{
-      data: Object.values(tagTotals).map(d => d / 3600),
-      backgroundColor: ["#60a5fa", "#f87171", "#34d399", "#fbbf24", "#a78bfa", "#f472b6", "#38bdf8", "#facc15", "#818cf8"],
-    }]
-  };
-
-  // Handlers
   const handleExportCSV = () => {
     if (!sessions.length) return;
     const rows = [
@@ -109,88 +85,139 @@ const TimeTrackingPage = () => {
     fetchSessions();
   };
 
-  // Filtered and sorted sessions
-  const filteredSessions = sessions.filter(s => {
-    const matchesSearch =
-      sessionSearch.trim() === "" ||
-      s.name?.toLowerCase().includes(sessionSearch.toLowerCase()) ||
-      s.description?.toLowerCase().includes(sessionSearch.toLowerCase());
-    const matchesTag =
-      sessionTagFilter === "all" || (s.tag || "General") === sessionTagFilter;
-    return matchesSearch && matchesTag;
-  }).sort((a, b) => {
-    if (sessionSort === "dateDesc") {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    } else if (sessionSort === "dateAsc") {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    } else if (sessionSort === "durationDesc") {
-      return b.duration - a.duration;
-    } else if (sessionSort === "durationAsc") {
-      return a.duration - b.duration;
-    }
-    return 0;
-  });
+  const handleSaveSession = async () => {
+    await saveSession();
+    fetchSessions();
+  };
 
   if (loading) {
     return <Loading />;
   }
 
   return (
-    <DashboardLayout>
-      <div className="relative min-h-screen p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
-        <div className="flex flex-col lg:flex-row gap-8 w-full">
-          {/* Left: Session List */}
-          <div className="w-full lg:w-2/3">
-            <SessionList
-              sessions={sessions}
-              onDelete={handleDeleteSession}
-              theme={theme}
-              sessionSearch={sessionSearch}
-              setSessionSearch={setSessionSearch}
-              sessionTagFilter={sessionTagFilter}
-              setSessionTagFilter={setSessionTagFilter}
-              sessionSort={sessionSort}
-              setSessionSort={setSessionSort}
-            />
-          </div>
-          {/* Right: Timer + Form (now combined) + Header below */}
-          <div className="w-full lg:w-1/3 flex flex-col gap-6">
-            <TimerAndFormPanel
-              elapsedTime={elapsedTime}
-              isRunning={pomodoroMode ? pomodoroRunning : isRunning}
-              onStart={startTimer}
-              onStop={stopTimer}
-              onReset={resetTimer}
-              theme={theme}
-              sessionName={sessionName}
-              sessionDescription={sessionDescription}
-              sessionTag={sessionTag}
-              setSessionTag={setSessionTag}
-              onNameChange={setSessionName}
-              onDescriptionChange={setSessionDescription}
-              onSave={saveSession}
-              pomodoroMode={pomodoroMode}
-              pomodoroPhase={pomodoroPhase}
-              pomodoroTime={pomodoroTime}
-              pomodoroCycles={pomodoroCycles}
-              workDuration={WORK_DURATION}
-              breakDuration={BREAK_DURATION}
-            />
-            <TimeTrackingHeader
-              theme={theme}
-              streak={streak}
-              pomodoroMode={pomodoroMode}
-              onExport={handleExportCSV}
-              onPomodoroToggle={() => {
-                resetTimer();
-                resetAll();
-              }}
-            />
+    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+      {/* Main Content */}
+      <div className="px-4 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Timer Column */}
+            <div className="lg:col-span-1">
+              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden`}>
+                {/* Timer Header */}
+                <div className={`px-4 py-3 ${
+                  theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"
+                } border-b`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg shadow-lg ${
+                      theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'
+                    }`}>
+                      <FaClock className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                        Time Tracker
+                      </h2>
+                      <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                        Track your work sessions and productivity
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timer Content */}
+                <div className="p-4">
+                  <TimerAndFormPanel
+                    elapsedTime={elapsedTime}
+                    isRunning={pomodoroMode ? pomodoroRunning : isRunning}
+                    onStart={startTimer}
+                    onStop={stopTimer}
+                    onReset={resetTimer}
+                    theme={theme}
+                    sessionName={sessionName}
+                    sessionDescription={sessionDescription}
+                    sessionTag={sessionTag}
+                    setSessionTag={setSessionTag}
+                    onNameChange={setSessionName}
+                    onDescriptionChange={setSessionDescription}
+                    onSave={handleSaveSession}
+                    pomodoroMode={pomodoroMode}
+                    pomodoroPhase={pomodoroPhase}
+                    pomodoroTime={pomodoroTime}
+                    pomodoroCycles={pomodoroCycles}
+                    workDuration={WORK_DURATION}
+                    breakDuration={BREAK_DURATION}
+                  />
+                </div>
+
+                {/* Timer Footer */}
+                <div className={`px-4 py-3 ${
+                  theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"
+                } border-t`}>
+                  <TimeTrackingHeader
+                    theme={theme}
+                    streak={streak}
+                    pomodoroMode={pomodoroMode}
+                    onExport={handleExportCSV}
+                    onPomodoroToggle={() => {
+                      setPomodoroMode(!pomodoroMode);
+                      resetTimer();
+                      resetAll();
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Sessions List Column */}
+            <div className="lg:col-span-2">
+              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[900px] flex flex-col overflow-hidden`}>
+                {/* Sessions Header */}
+                <div className={`flex-shrink-0 px-4 py-3 ${
+                  theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-green-50 border-gray-200"
+                } border-b`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg shadow-lg ${
+                      theme === 'dark' ? 'bg-green-600' : 'bg-green-500'
+                    }`}>
+                      <FaChartLine className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                        Time Sessions
+                      </h2>
+                      <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                        View and manage your recorded time sessions
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sessions List */}
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <SessionList
+                    sessions={sessions}
+                    onDelete={handleDeleteSession}
+                    theme={theme}
+                    sessionSearch={sessionSearch}
+                    setSessionSearch={setSessionSearch}
+                    sessionTagFilter={sessionTagFilter}
+                    setSessionTagFilter={setSessionTagFilter}
+                    sessionSort={sessionSort}
+                    setSessionSort={setSessionSort}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
+};
+
+TimeTrackingPage.getLayout = function getLayout(page: React.ReactElement) {
+  return <DashboardLayout>{page}</DashboardLayout>;
 };
 
 export default TimeTrackingPage;

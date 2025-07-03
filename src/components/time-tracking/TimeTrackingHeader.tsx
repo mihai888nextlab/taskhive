@@ -1,4 +1,6 @@
 import React from "react";
+import { FaFileCsv, FaFire } from "react-icons/fa";
+import { GiTomato } from "react-icons/gi";
 
 interface Props {
   theme: string;
@@ -15,29 +17,55 @@ const TimeTrackingHeader: React.FC<Props> = ({
   onExport,
   onPomodoroToggle,
 }) => (
-  <div className="flex flex-col gap-3 w-full">
-    <div className="flex flex-row gap-3 w-full">
+  <div className="space-y-3">
+    {/* Action Buttons */}
+    <div className="flex gap-2">
       <button
-        className="flex-1 px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all text-base min-w-[120px]"
         onClick={onExport}
+        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+          theme === "dark"
+            ? "bg-blue-600 text-white hover:bg-blue-700"
+            : "bg-blue-500 text-white hover:bg-blue-600"
+        }`}
       >
-        Export Sessions as CSV
+        <FaFileCsv className="w-3 h-3" />
+        Export
       </button>
       <button
-        className={`flex-1 px-4 py-2 rounded-xl font-semibold shadow transition-all duration-200 min-w-[120px] text-base ${
-          pomodoroMode
-            ? "bg-red-600 text-white hover:bg-red-700"
-            : "bg-gray-200 text-gray-800 hover:bg-red-100"
-        }`}
         onClick={onPomodoroToggle}
+        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+          pomodoroMode
+            ? theme === "dark"
+              ? "bg-red-600 text-white hover:bg-red-700"
+              : "bg-red-500 text-white hover:bg-red-600"
+            : theme === "dark"
+            ? "bg-gray-600 text-white hover:bg-gray-700"
+            : "bg-gray-500 text-white hover:bg-gray-600"
+        }`}
       >
-        {pomodoroMode ? "Exit Pomodoro Mode" : "Pomodoro Mode"}
+        <GiTomato className="w-3 h-3" />
+        {pomodoroMode ? "Exit" : "Pomodoro"}
       </button>
     </div>
-    <div className="flex w-full justify-center">
-      <span className="inline-block bg-green-100 text-green-700 px-5 py-2 rounded-xl font-bold text-base shadow text-center w-full">
-        🔥 Productivity Streak: {streak} day{streak !== 1 ? "s" : ""}
-      </span>
+
+    {/* Streak Display */}
+    <div
+      className={`text-center p-3 rounded-lg ${
+        theme === "dark"
+          ? "bg-green-900/20 border border-green-700"
+          : "bg-green-50 border border-green-200"
+      }`}
+    >
+      <div className="flex items-center justify-center gap-2">
+        <FaFire className="text-orange-500" />
+        <span
+          className={`font-semibold ${
+            theme === "dark" ? "text-green-400" : "text-green-700"
+          }`}
+        >
+          {streak} day{streak !== 1 ? "s" : ""} streak
+        </span>
+      </div>
     </div>
   </div>
 );

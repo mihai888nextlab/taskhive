@@ -5,18 +5,18 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 // Define the Task interface for TypeScript
 export interface ITask extends Document {
   title: string;
-  description?: string; // Optional
+  description?: string;
   deadline: Date;
   completed: boolean;
-  userId: Types.ObjectId; // Link to the User model
+  userId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   createdBy: Types.ObjectId;
-  important: boolean;
+  priority: 'critical' | 'high' | 'medium' | 'low';
   // Subtask fields
-  parentTask?: Types.ObjectId; // Reference to parent task if this is a subtask
-  isSubtask: boolean; // Flag to identify subtasks
-  subtasks?: Types.ObjectId[]; // Array of subtask IDs
+  parentTask?: Types.ObjectId;
+  isSubtask: boolean;
+  subtasks?: Types.ObjectId[];
 }
 
 const TaskSchema: Schema = new Schema(
@@ -40,7 +40,7 @@ const TaskSchema: Schema = new Schema(
     },
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User", // Reference the 'User' model
+      ref: "User",
       required: true,
     },
     createdBy: {
@@ -48,9 +48,10 @@ const TaskSchema: Schema = new Schema(
       ref: "User",
       required: true,
     },
-    important: {
-      type: Boolean,
-      default: false,
+    priority: {
+      type: String,
+      enum: ['critical', 'high', 'medium', 'low'],
+      default: 'medium',
     },
     // Subtask fields
     parentTask: {
@@ -70,7 +71,7 @@ const TaskSchema: Schema = new Schema(
     ],
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields automatically
+    timestamps: true,
   }
 );
 

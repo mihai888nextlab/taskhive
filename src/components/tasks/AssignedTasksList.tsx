@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import TaskCard from "./TaskCard";
 import TaskDetailsModal from "./TaskDetailsModal";
+import { FaSearch, FaSpinner, FaTasks } from "react-icons/fa";
 
 interface Task {
   _id: string;
@@ -8,7 +9,7 @@ interface Task {
   description?: string;
   deadline: string;
   completed: boolean;
-  important?: boolean;
+  priority: 'critical' | 'high' | 'medium' | 'low';
   userId: any;
   createdAt: string;
   updatedAt: string;
@@ -25,7 +26,7 @@ interface AssignedTasksListProps {
   loading: boolean;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
-  onToggleComplete?: (task: Task) => void; // Made optional
+  onToggleComplete?: (task: Task) => void;
   isTaskOverdue: (task: Task) => boolean;
   theme?: string;
   controlsOnly?: boolean;
@@ -35,10 +36,10 @@ interface AssignedTasksListProps {
   onSearchChange?: (v: string) => void;
   filterStatus?: "all" | "completed" | "pending" | "overdue";
   onFilterStatusChange?: (v: "all" | "completed" | "pending" | "overdue") => void;
-  filterImportant?: "all" | "important" | "not-important";
-  onFilterImportantChange?: (v: "all" | "important" | "not-important") => void;
-  sortBy?: "createdAtDesc" | "deadlineAsc";
-  onSortByChange?: (v: "createdAtDesc" | "deadlineAsc") => void;
+  filterPriority?: "all" | "critical" | "high" | "medium" | "low";
+  onFilterPriorityChange?: (v: "all" | "critical" | "high" | "medium" | "low") => void;
+  sortBy?: "createdAtDesc" | "deadlineAsc" | "priorityDesc";
+  onSortByChange?: (v: "createdAtDesc" | "deadlineAsc" | "priorityDesc") => void;
 }
 
 const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
@@ -56,22 +57,22 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
   onSearchChange,
   filterStatus: controlledFilterStatus,
   onFilterStatusChange,
-  filterImportant: controlledFilterImportant,
-  onFilterImportantChange,
+  filterPriority: controlledFilterPriority,
+  onFilterPriorityChange,
   sortBy: controlledSortBy,
   onSortByChange,
 }) => {
   // Controlled or local state
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
-  const [filterImportant, setFilterImportant] = useState<"all" | "important" | "not-important">("all");
-  const [sortBy, setSortBy] = useState<"createdAtDesc" | "deadlineAsc">("deadlineAsc");
+  const [filterPriority, setFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all");
+  const [sortBy, setSortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc");
   const [detailsTask, setDetailsTask] = useState<Task | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const searchValue = controlledSearch !== undefined ? controlledSearch : search;
   const filterStatusValue = controlledFilterStatus !== undefined ? controlledFilterStatus : filterStatus;
-  const filterImportantValue = controlledFilterImportant !== undefined ? controlledFilterImportant : filterImportant;
+  const filterPriorityValue = controlledFilterPriority !== undefined ? controlledFilterPriority : filterPriority;
   const sortByValue = controlledSortBy !== undefined ? controlledSortBy : sortBy;
 
   const handleShowDetails = (task: Task) => {
@@ -81,23 +82,6 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
   const handleCloseModal = () => {
     setModalOpen(false);
     setDetailsTask(null);
-  };
-
-  // Fetch a single task by ID
-  const fetchTaskById = async (id: string) => {
-    const res = await fetch(`/api/tasks?id=${id}`);
-    if (!res.ok) throw new Error("Failed to fetch task");
-    return await res.json();
-  };
-
-  // Wrap onToggleComplete to also refetch the task and update the modal
-  const handleToggleComplete = async (task: Task) => {
-    if (onToggleComplete) await onToggleComplete(task);
-    // Refetch the updated task and update the modal if open and this is the task
-    if (modalOpen && detailsTask && detailsTask._id === task._id) {
-      const updatedTask = await fetchTaskById(task._id);
-      setDetailsTask(updatedTask);
-    }
   };
 
   // Helper function to check if user can complete a task
@@ -136,14 +120,16 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
       return true;
     });
 
-    // Filter by importance
+    // Filter by priority
     result = result.filter(task => {
-      if (filterImportantValue === "important") return !!task.important;
-      if (filterImportantValue === "not-important") return !task.important;
+      if (filterPriorityValue === "critical") return task.priority === "critical";
+      if (filterPriorityValue === "high") return task.priority === "high";
+      if (filterPriorityValue === "medium") return task.priority === "medium";
+      if (filterPriorityValue === "low") return task.priority === "low";
       return true;
     });
 
-    // Sort: Overdue first, then important, then by sortBy
+    // Sort with priority as primary factor
     result.sort((a, b) => {
       const isAOverdue = isTaskOverdue(a);
       const isBOverdue = isTaskOverdue(b);
@@ -152,9 +138,14 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
       if (isAOverdue && !a.completed && (!isBOverdue || b.completed)) return -1;
       if (isBOverdue && !b.completed && (!isAOverdue || a.completed)) return 1;
 
-      // 2. Important tasks (not completed, not overdue) next
-      if (a.important && !a.completed && !isAOverdue && (!b.important || b.completed || isBOverdue)) return -1;
-      if (b.important && !b.completed && !isBOverdue && (!a.important || a.completed || isAOverdue)) return 1;
+      // 2. Then by priority (critical > high > medium > low)
+      const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+      const aPriority = priorityOrder[a.priority ?? "medium"];
+      const bPriority = priorityOrder[b.priority ?? "medium"];
+      
+      if (aPriority !== bPriority) {
+        return bPriority - aPriority; // Higher priority first
+      }
 
       // 3. Then by completion
       if (a.completed && !b.completed) return 1;
@@ -164,41 +155,39 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
       if (sortByValue === "deadlineAsc") {
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
       }
+      if (sortByValue === "priorityDesc") {
+        return bPriority - aPriority;
+      }
       // Default: newest first
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
     return result;
-  }, [tasks, searchValue, filterStatusValue, filterImportantValue, sortByValue, isTaskOverdue]);
-
-  // All labels and inputs/selects use black text
-  const labelClass = "font-semibold text-sm text-black";
-  const inputClass = "ml-2 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary bg-inherit text-black";
-  const selectClass = "ml-2 rounded px-2 py-1 border border-gray-300 bg-inherit text-black";
+  }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue]);
 
   if (controlsOnly) {
     return (
-      <div
-        className="w-full flex flex-col md:flex-row md:items-center md:justify-between flex-wrap gap-4 mb-0 p-4 rounded-2xl shadow-sm bg-gray-50/80 border border-gray-100 box-border"
-        style={{ maxWidth: '100%' }}
-      >
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={searchValue}
-          onChange={e => {
-            if (onSearchChange) onSearchChange(e.target.value);
-            else setSearch(e.target.value);
-          }}
-          className="flex-1 min-w-[120px] max-w-xs px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base placeholder-gray-400 outline-none"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="relative">
+          <FaSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchValue}
+            onChange={e => {
+              if (onSearchChange) onSearchChange(e.target.value);
+              else setSearch(e.target.value);
+            }}
+            className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+          />
+        </div>
         <select
           value={filterStatusValue}
           onChange={e => {
             if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
             else setFilterStatus(e.target.value as any);
           }}
-          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
           <option value="all">Status: All</option>
           <option value="completed">Completed</option>
@@ -206,16 +195,18 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
           <option value="overdue">Overdue</option>
         </select>
         <select
-          value={filterImportantValue}
+          value={filterPriorityValue}
           onChange={e => {
-            if (onFilterImportantChange) onFilterImportantChange(e.target.value as any);
-            else setFilterImportant(e.target.value as any);
+            if (onFilterPriorityChange) onFilterPriorityChange(e.target.value as any);
+            else setFilterPriority(e.target.value as any);
           }}
-          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
-          <option value="all">Important: All</option>
-          <option value="important">Important</option>
-          <option value="not-important">Not Important</option>
+          <option value="all">Priority: All</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
         </select>
         <select
           value={sortByValue}
@@ -223,31 +214,51 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             if (onSortByChange) onSortByChange(e.target.value as any);
             else setSortBy(e.target.value as any);
           }}
-          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
           <option value="createdAtDesc">Sort: Newest First</option>
           <option value="deadlineAsc">Sort: Deadline</option>
+          <option value="priorityDesc">Sort: Priority</option>
         </select>
       </div>
     );
   }
+
   if (cardsOnly) {
     return (
       <>
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
-          {filteredTasks.map(task => (
-            <TaskCard
-              key={task._id}
-              task={task}
-              currentUserEmail={currentUserEmail}
-              loading={loading}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onToggleComplete={canUserCompleteTask(task) ? handleToggleComplete : undefined}
-              isTaskOverdue={isTaskOverdue}
-              onShowDetails={handleShowDetails}
-            />
-          ))}
+        <div className="p-4">
+          {loading ? (
+            <div className="text-center py-12">
+              <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">Loading tasks...</p>
+            </div>
+          ) : filteredTasks.length === 0 ? (
+            <div className="text-center py-12">
+              <FaTasks className="text-6xl text-gray-400 mx-auto mb-4" />
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">No Tasks Found</h4>
+              <p className="text-gray-500">
+                {searchValue.trim() ? "Try adjusting your search or filters" : "No assigned tasks found"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredTasks.map(task => (
+                <TaskCard
+                  key={task._id}
+                  task={task}
+                  currentUserEmail={currentUserEmail}
+                  loading={loading}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onToggleComplete={canUserCompleteTask(task) ? onToggleComplete : undefined}
+                  isTaskOverdue={isTaskOverdue}
+                  onShowDetails={handleShowDetails}
+                  theme={theme}
+                />
+              ))}
+            </div>
+          )}
         </div>
         <TaskDetailsModal
           open={modalOpen}
@@ -256,6 +267,9 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
           onEdit={onEdit}
           onDelete={onDelete}
           onToggleComplete={onToggleComplete || (() => {})}
+          onToggleSubtask={onToggleComplete}
+          theme={theme}
+          currentUserEmail={currentUserEmail}
         />
       </>
     );
@@ -263,28 +277,27 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
 
   return (
     <>
-      {/* Minimalist Controls - always fit in parent */}
-      <div
-        className="w-full flex flex-col md:flex-row md:items-center md:justify-between flex-wrap gap-4 mb-8 p-4 rounded-2xl shadow-sm bg-gray-50/80 border border-gray-100 box-border"
-        style={{maxWidth: '100%'}}
-      >
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={searchValue}
-          onChange={e => {
-            if (onSearchChange) onSearchChange(e.target.value);
-            else setSearch(e.target.value);
-          }}
-          className="flex-1 min-w-[120px] max-w-xs px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base placeholder-gray-400 outline-none"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
+        <div className="relative">
+          <FaSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={searchValue}
+            onChange={e => {
+              if (onSearchChange) onSearchChange(e.target.value);
+              else setSearch(e.target.value);
+            }}
+            className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+          />
+        </div>
         <select
           value={filterStatusValue}
           onChange={e => {
             if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
             else setFilterStatus(e.target.value as any);
           }}
-          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
           <option value="all">Status: All</option>
           <option value="completed">Completed</option>
@@ -292,16 +305,18 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
           <option value="overdue">Overdue</option>
         </select>
         <select
-          value={filterImportantValue}
+          value={filterPriorityValue}
           onChange={e => {
-            if (onFilterImportantChange) onFilterImportantChange(e.target.value as any);
-            else setFilterImportant(e.target.value as any);
+            if (onFilterPriorityChange) onFilterPriorityChange(e.target.value as any);
+            else setFilterPriority(e.target.value as any);
           }}
-          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
-          <option value="all">Important: All</option>
-          <option value="important">Important</option>
-          <option value="not-important">Not Important</option>
+          <option value="all">Priority: All</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
         </select>
         <select
           value={sortByValue}
@@ -309,38 +324,47 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             if (onSortByChange) onSortByChange(e.target.value as any);
             else setSortBy(e.target.value as any);
           }}
-          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
+          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
           <option value="createdAtDesc">Sort: Newest First</option>
           <option value="deadlineAsc">Sort: Deadline</option>
+          <option value="priorityDesc">Sort: Priority</option>
         </select>
       </div>
-      {/* Task List */}
-      {loading ? (
-        <div className="w-full flex justify-center items-center py-12">
-          <span className="text-lg text-gray-500">Loading tasks...</span>
-        </div>
-      ) : !filteredTasks.length ? (
-        <div className="w-full flex justify-center items-center py-12">
-          <span className="text-lg text-gray-400">No tasks found.</span>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
-          {filteredTasks.map(task => (
-            <TaskCard
-              key={task._id}
-              task={task}
-              currentUserEmail={currentUserEmail}
-              loading={loading}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onToggleComplete={canUserCompleteTask(task) && onToggleComplete ? handleToggleComplete : undefined}
-              isTaskOverdue={isTaskOverdue}
-              onShowDetails={handleShowDetails}
-            />
-          ))}
-        </div>
-      )}
+
+      <div className="p-4">
+        {loading ? (
+          <div className="text-center py-12">
+            <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">Loading tasks...</p>
+          </div>
+        ) : filteredTasks.length === 0 ? (
+          <div className="text-center py-12">
+            <FaTasks className="text-6xl text-gray-400 mx-auto mb-4" />
+            <h4 className="text-lg font-semibold text-gray-900 mb-2">No Tasks Found</h4>
+            <p className="text-gray-500">
+              {searchValue.trim() ? "Try adjusting your search or filters" : "No assigned tasks found"}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredTasks.map(task => (
+              <TaskCard
+                key={task._id}
+                task={task}
+                currentUserEmail={currentUserEmail}
+                loading={loading}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onToggleComplete={canUserCompleteTask(task) ? onToggleComplete : undefined}
+                isTaskOverdue={isTaskOverdue}
+                onShowDetails={handleShowDetails}
+                theme={theme}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       <TaskDetailsModal
         open={modalOpen}
         task={detailsTask}
@@ -348,6 +372,9 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
         onEdit={onEdit}
         onDelete={onDelete}
         onToggleComplete={onToggleComplete || (() => {})}
+        onToggleSubtask={onToggleComplete}
+        theme={theme}
+        currentUserEmail={currentUserEmail}
       />
     </>
   );

@@ -68,7 +68,7 @@ export default function FinanceSummaryCards({
             <div>
               <p className={`text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Profit</p>
               <p className={`text-2xl font-bold mt-1 ${profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                ${profit >= 0 ? '+' : ''}${profit.toFixed(2)}
+                {profit >= 0 ? '+' : '-'}${Math.abs(profit).toFixed(2)}
               </p>
             </div>
           </div>

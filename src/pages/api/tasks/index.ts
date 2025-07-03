@@ -55,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ message: "Failed to fetch tasks.", error: (error as Error).message });
     }
   } else if (req.method === "POST") {
-    const { title, description, deadline, assignedTo, important, subtasks } = req.body;
+    const { title, description, deadline, assignedTo, priority, subtasks } = req.body;
 
     if (!title || !deadline) {
       return res.status(400).json({ message: "Title and deadline are required." });
@@ -73,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         deadline: new Date(deadline),
         userId: assignedUserId,
         createdBy: userId,
-        important: !!important,
+        priority: priority || 'medium',
         isSubtask: false,
         subtasks: [],
       });
@@ -90,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               deadline: new Date(deadline),
               userId: assignedUserId,
               createdBy: userId,
-              important: false,
+              priority: priority || 'medium',
               isSubtask: true,
               parentTask: newTask._id,
             });

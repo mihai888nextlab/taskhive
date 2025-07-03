@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBullhorn, FaThumbtack, FaTrash } from "react-icons/fa";
+import { FaBullhorn, FaThumbtack, FaTrash, FaCalendarAlt, FaUser, FaChevronRight } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import styles from "@/styles/markdown.module.css";
@@ -22,14 +22,24 @@ interface AnnouncementCardProps {
   onPinToggle?: (id: string, pinned: boolean) => void;
   onComment?: (id: string, comment: string) => void;
   onDelete?: (id: string) => void;
-  onCardClick?: (announcement: Announcement) => void; // NEW
+  onCardClick?: (announcement: Announcement) => void;
 }
 
-const categoryColors: Record<string, string> = {
-  Update: "bg-blue-500",
-  Event: "bg-green-500",
-  Alert: "bg-red-500",
-  All: "bg-gray-400",
+const getCategoryColor = (category: string, theme: string) => {
+  const colors = {
+    Update: theme === 'dark' 
+      ? 'bg-blue-900/30 text-blue-300 border-blue-800' 
+      : 'bg-blue-50 text-blue-700 border-blue-200',
+    Event: theme === 'dark' 
+      ? 'bg-green-900/30 text-green-300 border-green-800' 
+      : 'bg-green-50 text-green-700 border-green-200',
+    Alert: theme === 'dark' 
+      ? 'bg-red-900/30 text-red-300 border-red-800' 
+      : 'bg-red-50 text-red-700 border-red-200',
+  };
+  return colors[category as keyof typeof colors] || (theme === 'dark' 
+    ? 'bg-gray-700 text-gray-300 border-gray-600' 
+    : 'bg-gray-100 text-gray-700 border-gray-200');
 };
 
 const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
@@ -47,101 +57,200 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
       ? localStorage.getItem(`announcement-read-${announcement._id}`) === "1"
       : false
   );
+
   useEffect(() => {
-    if (!read) {
+    if (!read && typeof window !== "undefined") {
       localStorage.setItem(`announcement-read-${announcement._id}`, "1");
       setRead(true);
     }
-  }, []);
+  }, [read, announcement._id]);
 
   // Expiry logic
   const expired =
     announcement.expiresAt &&
     new Date(new Date(announcement.expiresAt).setHours(23, 59, 59, 999)) < new Date();
+  
   if (expired) return null;
+
+  const getInitials = () => {
+    const firstName = announcement.createdBy.firstName || "";
+    const lastName = announcement.createdBy.lastName || "";
+    return (firstName[0] || "") + (lastName[0] || "");
+  };
+
+  const truncateContent = (content: string, maxWords: number = 15) => {
+    const words = content.split(/\s+/);
+    if (words.length <= maxWords) return content;
+    return words.slice(0, maxWords).join(' ') + '...';
+  };
 
   return (
     <div
-      className={`group flex flex-col md:flex-row items-start md:items-center p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4 border-primary bg-${theme === 'light' ? 'white' : 'gray-900'} relative min-h-[120px] focus:outline-none focus:ring-2 focus:ring-primary/40`}
-      tabIndex={0}
-      aria-label={`Announcement: ${announcement.title}`}
+      className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-[1.01] ${
+        theme === "dark"
+          ? "bg-gray-800 border-gray-700 hover:border-gray-600 hover:bg-gray-750"
+          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-lg"
+      }`}
       onClick={e => {
         if ((e.target as HTMLElement).closest('.admin-action-btn')) return;
         onCardClick && onCardClick(announcement);
       }}
-      style={{ cursor: onCardClick ? 'pointer' : 'default', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.03)' }}
     >
-      <div className="flex-shrink-0 mr-0 mb-4 md:mb-0 md:mr-4 flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 bg-primary/5 rounded-xl">
-        <FaBullhorn className="text-2xl sm:text-3xl text-primary" />
-      </div>
-      <div className="flex-1 w-full">
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white ${categoryColors[announcement.category] || "bg-gray-400"}`}>{announcement.category}</span>
-          {announcement.pinned && (
-            <span className="ml-2 text-yellow-500 flex items-center gap-1 font-semibold">
-              <FaThumbtack /> Pinned
-            </span>
-          )}
-          {!read && (
-            <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium animate-pulse">
-              New
-            </span>
-          )}
-        </div>
-        <h3 className={`text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-1 text-${theme === 'light' ? 'gray-900' : 'white'} tracking-tight group-hover:text-primary-dark transition-colors`}> 
-          {announcement.title}
-        </h3>
-        <div className={`mb-2 text-base sm:text-lg text-${theme === 'light' ? 'gray-700' : 'gray-300'} font-normal`}> 
-          <div className={styles.markdown} style={{ WebkitLineClamp: 2, display: '-webkit-box', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {/* Show only the first 9 words of content, add ... if longer, and render as markdown */}
-            {(() => {
-              const words = announcement.content.split(/\s+/);
-              const preview = words.slice(0, 9).join(' ');
-              const previewText = preview + (words.length > 9 ? '...' : '');
-              return (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{previewText}</ReactMarkdown>
-              );
-            })()}
-          </div>
-        </div>
-        <div className={`flex flex-wrap items-center text-xs text-${theme === 'light' ? 'gray-400' : 'gray-500'} mt-1 gap-x-2 gap-y-1 font-medium`}> 
-          <span>By <span className="font-semibold text-primary-dark">{announcement.createdBy.firstName} {announcement.createdBy.lastName}</span></span>
-          <span>({announcement.createdBy.email})</span>
-          <span>•</span>
-          <span>{new Date(announcement.createdAt).toLocaleDateString()}</span>
-          {announcement.expiresAt && (
-            <>
-              <span>•</span>
-              <span>Expires: {new Date(announcement.expiresAt).toLocaleDateString()}</span>
-            </>
-          )}
-        </div>
-      </div>
-      {/* Admin actions */}
+      {/* Admin Actions */}
       {isAdmin && (
-        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex gap-2">
+        <div className="absolute top-4 right-4 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {onPinToggle && (
             <button
-              className="admin-action-btn text-yellow-500 hover:text-white rounded-full p-2 bg-transparent hover:bg-yellow-100 dark:hover:bg-yellow-500 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              onClick={e => { e.stopPropagation(); onPinToggle(announcement._id, !announcement.pinned); }}
-              aria-label={announcement.pinned ? "Unpin announcement" : "Pin announcement"}
+              className={`admin-action-btn p-2 rounded-lg transition-all duration-200 ${
+                announcement.pinned
+                  ? theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300 hover:bg-yellow-800' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                  : theme === 'dark' ? 'bg-gray-700 text-gray-400 hover:bg-yellow-800 hover:text-yellow-300' : 'bg-gray-100 text-gray-500 hover:bg-yellow-100 hover:text-yellow-700'
+              }`}
+              onClick={e => { 
+                e.stopPropagation(); 
+                onPinToggle(announcement._id, !announcement.pinned); 
+              }}
               title={announcement.pinned ? "Unpin" : "Pin"}
-              type="button"
             >
-              <FaThumbtack />
+              <FaThumbtack className="w-3.5 h-3.5" />
             </button>
           )}
-          <button
-            className="admin-action-btn text-red-600 hover:text-white rounded-full p-2 bg-transparent hover:bg-red-100 dark:hover:bg-red-500 focus:bg-red-600 focus:text-white transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-            onClick={e => { e.stopPropagation(); onDelete && onDelete(announcement._id); }}
-            aria-label="Delete announcement"
-            title="Delete"
-            type="button"
-          >
-            <FaTrash />
-          </button>
+          {onDelete && (
+            <button
+              className={`admin-action-btn p-2 rounded-lg transition-all duration-200 ${
+                theme === 'dark' 
+                  ? 'bg-gray-700 text-gray-400 hover:bg-red-800 hover:text-red-300' 
+                  : 'bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-700'
+              }`}
+              onClick={e => { 
+                e.stopPropagation(); 
+                onDelete && onDelete(announcement._id); 
+              }}
+              title="Delete"
+            >
+              <FaTrash className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       )}
+
+      {/* Card Content */}
+      <div className="p-6">
+        {/* Header - Category and Pin Status */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${
+              theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+            }`}>
+              <FaBullhorn className={`w-4 h-4 ${
+                theme === "dark" ? "text-gray-400" : "text-gray-500"
+              }`} />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border ${getCategoryColor(announcement.category, theme)}`}>
+                {announcement.category}
+              </span>
+              
+              {announcement.pinned && (
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
+                  theme === 'dark' 
+                    ? 'bg-yellow-900/30 text-yellow-300 border border-yellow-800' 
+                    : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                }`}>
+                  <FaThumbtack className="w-2.5 h-2.5" />
+                  Pinned
+                </span>
+              )}
+              
+              {!read && (
+                <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium animate-pulse ${
+                  theme === 'dark' 
+                    ? 'bg-blue-900/30 text-blue-300' 
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  New
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Arrow Indicator */}
+          <div className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
+            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+          }`}>
+            <FaChevronRight className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* Title */}
+        <h3 className={`font-bold text-lg leading-tight mb-3 ${
+          theme === "dark" ? "text-white" : "text-gray-900"
+        } group-hover:text-blue-600 transition-colors duration-200`}>
+          {announcement.title}
+        </h3>
+
+        {/* Content Preview */}
+        <div className={`text-sm mb-4 leading-relaxed ${
+          theme === "dark" ? "text-gray-300" : "text-gray-600"
+        }`}>
+          <div className="line-clamp-2">
+            {truncateContent(announcement.content)}
+          </div>
+        </div>
+
+        {/* Meta Information */}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-4">
+            {/* Author */}
+            <div className="flex items-center gap-2">
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-medium ${
+                theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
+              }`}>
+                {getInitials() || <FaUser className="w-3 h-3" />}
+              </div>
+              <span className={`font-medium ${
+                theme === "dark" ? "text-gray-300" : "text-gray-700"
+              }`}>
+                {announcement.createdBy.firstName} {announcement.createdBy.lastName}
+              </span>
+            </div>
+
+            {/* Date */}
+            <div className="flex items-center gap-1.5">
+              <FaCalendarAlt className={`w-3 h-3 ${
+                theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+              }`} />
+              <span className={`${
+                theme === "dark" ? "text-gray-400" : "text-gray-500"
+              }`}>
+                {new Date(announcement.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </span>
+            </div>
+          </div>
+
+          {/* Expiry Date */}
+          {announcement.expiresAt && (
+            <div className={`text-xs px-2 py-1 rounded-lg ${
+              theme === 'dark' 
+                ? 'bg-gray-700 text-gray-400' 
+                : 'bg-gray-100 text-gray-500'
+            }`}>
+              Expires: {new Date(announcement.expiresAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Hover Border Effect */}
+      <div className={`absolute inset-0 rounded-2xl ring-2 ring-transparent group-hover:ring-blue-500 transition-all duration-200 pointer-events-none`} />
     </div>
   );
 };

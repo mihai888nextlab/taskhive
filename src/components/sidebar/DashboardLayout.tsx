@@ -8,7 +8,7 @@ import AIWindow from "../AIWindow";
 import { FaBars } from "react-icons/fa";
 import { menu } from "@/components/menuConfig"; // Your menu config
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
-import TimerAndFormPanel from "@/components/time-tracking/TimerAndFormPanel";
+import PersistentTimer from "@/components/time-tracking/PersistentTimer";
 import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext";
 import { useAIWindow } from "@/contexts/AIWindowContext";
 
@@ -21,9 +21,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const router = useRouter();
   const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } = useTimeTracking();
   const { isAIWindowOpen, setIsAIWindowOpen, toggleAIWindow } = useAIWindow();
-  const showPersistent =
-    (isRunning || pomodoroRunning) &&
-    router.pathname !== "/app/time-tracking";
+  const [showPersistentTimer, setShowPersistentTimer] = useState(false);
+  const [timerClosed, setTimerClosed] = useState(false);
+
+  // Show persistent timer only if time > 0, not on time-tracking page, and not closed
+  const shouldShowPersistentTimer =
+    !timerClosed &&
+    router.pathname !== "/app/time-tracking" &&
+    (
+      (pomodoroMode
+        ? timerContext.pomodoroTime > 0
+        : timerContext.elapsedTime > 0)
+    );
 
   // State to toggle AI window - now managed by context
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -120,37 +129,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <main className="flex-1 bg-gray-100 rounded-tl-lg shadow-lg min-h-screen">
           {children}
         </main>
-        {showPersistent && (
-          <div 
-            className={`fixed top-6 z-[100] max-w-full transition-all duration-300 ${isAIWindowOpen && isDesktop ? 'w-64' : 'w-96'}`}
-            style={{
-              right: isAIWindowOpen && isDesktop ? '440px' : '24px'
-            }}
-          >
-            <TimerAndFormPanel
-              {...timerContext}
-              isRunning={pomodoroMode ? pomodoroRunning : isRunning}
-              onStart={timerContext.startTimer}
-              onStop={timerContext.stopTimer}
-              onReset={timerContext.resetTimer}
-              theme="light"
-              sessionName={timerContext.sessionName}
-              sessionDescription={timerContext.sessionDescription}
-              sessionTag={timerContext.sessionTag}
-              setSessionTag={timerContext.setSessionTag}
-              onNameChange={timerContext.setSessionName}
-              onDescriptionChange={timerContext.setSessionDescription}
-              onSave={timerContext.saveSession}
-              pomodoroMode={pomodoroMode}
-              pomodoroPhase={timerContext.pomodoroPhase}
-              pomodoroTime={timerContext.pomodoroTime}
-              pomodoroCycles={timerContext.pomodoroCycles}
-              workDuration={timerContext.WORK_DURATION}
-              breakDuration={timerContext.BREAK_DURATION}
-              persistent
-              isAIWindowOpen={isAIWindowOpen && isDesktop}
-            />
-          </div>
+        
+        {/* Persistent Timer - Only show timer, no form */}
+        {shouldShowPersistentTimer && (
+          <PersistentTimer
+            elapsedTime={timerContext.elapsedTime}
+            isRunning={pomodoroMode ? pomodoroRunning : isRunning}
+            onStart={timerContext.startTimer}
+            onStop={timerContext.stopTimer}
+            onReset={timerContext.resetTimer}
+            onClose={() => setTimerClosed(true)}
+            pomodoroMode={pomodoroMode}
+            pomodoroPhase={timerContext.pomodoroPhase}
+            pomodoroTime={timerContext.pomodoroTime}
+            pomodoroCycles={timerContext.pomodoroCycles}
+            workDuration={timerContext.WORK_DURATION}
+            breakDuration={timerContext.BREAK_DURATION}
+          />
         )}
       </div>
       {/* AI Button (hide on desktop if open) */}

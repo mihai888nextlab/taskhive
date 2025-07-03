@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { FaSpinner, FaTimes } from "react-icons/fa";
+import { FaSpinner, FaTimes, FaUserPlus } from "react-icons/fa";
+import { createPortal } from 'react-dom';
 
-interface AddUsersModalProps {
+interface AddUserModalProps {
   onClose: () => void;
   onUserAdded: (
     email: string,
@@ -12,35 +13,36 @@ interface AddUsersModalProps {
   ) => Promise<string | undefined>;
 }
 
-const AddUsersModal: React.FC<AddUsersModalProps> = ({
-  onClose,
-  onUserAdded,
-}) => {
+const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const [roles, setRoles] = useState<string[]>([]); // Stocăm lista de roluri
+  const [roles, setRoles] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Fetch roles from backend
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const response = await fetch("/api/roles");
-        if (!response.ok) {
-          throw new Error("Failed to fetch roles.");
-        }
+        if (!response.ok) throw new Error("Failed to fetch roles");
         const data = await response.json();
-        // Convert roles to lowercase
-        setRoles(data.map((role: { name: string }) => role.name.toLowerCase()));
+        
+        // Get unique roles (case-insensitive) and keep original casing
+        const uniqueRoles = data
+          .map((role: { name: string }) => role.name)
+          .filter((role: string, index: number, arr: string[]) => 
+            arr.findIndex(r => r.toLowerCase() === role.toLowerCase()) === index
+          )
+          .sort();
+        
+        setRoles(uniqueRoles);
       } catch (error) {
         console.error("Error fetching roles:", error);
       }
     };
-
     fetchRoles();
   }, []);
 
@@ -56,175 +58,175 @@ const AddUsersModal: React.FC<AddUsersModalProps> = ({
     setError(null);
 
     try {
-      // Convert role to lowercase before passing it to onUserAdded
-      const lowercaseRole = role.toLowerCase();
-      const result = await onUserAdded(
-        email,
-        firstName,
-        lastName,
-        password,
-        lowercaseRole
-      );
+      // Send role as-is, let the backend handle case normalization
+      const result = await onUserAdded(email, firstName, lastName, password, role);
       if (result) {
         setError(result);
       } else {
         onClose();
       }
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message || "An unexpected error occurred.");
-      } else {
-        setError("An unexpected error occurred.");
-      }
+      setError(error instanceof Error ? error.message : "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50">
-      <div className="bg-white p-10 rounded-3xl shadow-2xl border border-gray-200/60 w-96 max-w-full relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden">
+        {/* Close Button */}
+        <button
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+          onClick={onClose}
+          aria-label="Close modal"
+        >
+          <FaTimes />
+        </button>
+
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 text-center w-full">
-            Add User
-          </h2>
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-all text-2xl"
-          >
-            <FaTimes />
-          </button>
-        </div>
-        {error && (
-          <div
-            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm"
-            role="alert"
-          >
-            <div className="flex items-center">
-              <svg
-                className="h-6 w-6 text-red-500 mr-3"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <div>
-                <p className="font-bold">Error</p>
-                <p className="text-sm">{error}</p>
-              </div>
+        <div className="p-6 border-b border-gray-200 bg-blue-50">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
+              <FaUserPlus className="text-xl text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Add New User</h2>
+              <p className="text-gray-600">Create a new team member account</p>
             </div>
           </div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-gray-700 text-sm font-semibold mb-2"
-            >
-              Email:
-            </label>
-            <input
-              type="email"
-              id="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="firstName"
-              className="block text-gray-700 text-sm font-semibold mb-2"
-            >
-              First Name:
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              placeholder="First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="lastName"
-              className="block text-gray-700 text-sm font-semibold mb-2"
-            >
-              Last Name:
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              placeholder="Last Name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-gray-700 text-sm font-semibold mb-2"
-            >
-              Password:
-            </label>
-            <input
-              type="password"
-              id="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="role"
-              className="block text-gray-700 text-sm font-semibold mb-2"
-            >
-              Role:
-            </label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-              required
-            >
-              <option value="">Select Role</option>
-              {roles.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex justify-end space-x-4">
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 font-medium text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-gray-900 font-semibold mb-2 text-sm">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                placeholder="john.doe@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-gray-900 font-semibold mb-2 text-sm">
+                  First Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="John"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-gray-900 font-semibold mb-2 text-sm">
+                  Last Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Doe"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-gray-900 font-semibold mb-2 text-sm">
+                Password *
+              </label>
+              <input
+                type="password"
+                placeholder="Enter secure password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-900 font-semibold mb-2 text-sm">
+                Role *
+              </label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+                required
+                disabled={loading}
+              >
+                <option value="">Select a role</option>
+                {roles.map((roleName) => (
+                  <option key={roleName} value={roleName}>
+                    {roleName.charAt(0).toUpperCase() + roleName.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex gap-3">
             <button
-              type="submit"
-              className="inline-flex items-center justify-center bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-300"
+              onClick={onClose}
+              className="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
               disabled={loading}
             >
-              {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}
-              Add User
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading || !email || !firstName || !lastName || !password || !role}
+              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
+                loading || !email || !firstName || !lastName || !password || !role
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <FaSpinner className="animate-spin w-3 h-3" />
+                  Creating...
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <FaUserPlus className="w-3 h-3" />
+                  Create User
+                </div>
+              )}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
 };
 
-export default AddUsersModal;
+export default AddUserModal;
