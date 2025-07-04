@@ -191,20 +191,13 @@ Please enhance and expand this existing description while keeping the original i
   return (
     <>
       <div className="flex h-full">
-        {/* Close Button */}
-        <Button
-          type="button"
-          variant="ghost"
-          className="absolute top-5 right-5 z-20 p-2 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-100 hover:text-gray-600 shadow transition-all duration-200 border border-gray-100"
-          onClick={onCancel}
-          aria-label="Close modal"
-          style={{
-            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
-            transition: "background 0.2s, color 0.2s, box-shadow 0.2s"
-          }}
-        >
-          <FaTimes className="w-5 h-5" />
-        </Button>
+        <button
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+            onClick={onCancel}
+            aria-label="Close modal"
+          >
+          <FaTimes />
+        </button>
 
         {/* Left Panel - Form Details */}
         <div className="w-2/5 bg-gray-50 border-r border-gray-200 flex flex-col">

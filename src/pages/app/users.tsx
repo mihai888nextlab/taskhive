@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { FaPlus, FaUsers, FaUserPlus, FaSitemap } from "react-icons/fa";
@@ -189,6 +189,19 @@ const UsersPage: NextPageWithLayout = () => {
       window.removeEventListener("open-user-profile", handleOpenUserProfile as EventListener);
     };
   }, [users]);
+
+  // Prevent background scroll when any modal is open
+  useLayoutEffect(() => {
+    const modalOpen = addUserModalOpen || addRoleModalOpen || orgChartModalOpen || profileModalOpen;
+    if (modalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [addUserModalOpen, addRoleModalOpen, orgChartModalOpen, profileModalOpen]);
 
   if (!user) {
     return <Loading />;

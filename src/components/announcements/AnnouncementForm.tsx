@@ -99,19 +99,13 @@ Write a clear, engaging, and informative announcement for all employees, based o
               </p>
             </div>
           </div>
-          <Button
-            type="button"
-            onClick={onCancel}
-            variant="ghost"
-            className={`w-10 h-10 p-2 rounded-lg transition-colors flex items-center justify-center
-              ${theme === 'dark' 
-                ? 'hover:bg-gray-700 text-gray-400 hover:text-white' 
-                : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
-            }`}
-            aria-label="Close form"
-          >
-            <FaTimes className="w-5 h-5" />
-          </Button>
+          <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+              onClick={onCancel}
+              aria-label="Close modal"
+            >
+            <FaTimes />
+          </button>
         </div>
       </div>
 
