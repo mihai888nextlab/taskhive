@@ -6,6 +6,8 @@ import FinanceStatistics from '../../components/FinanceStatistics';
 import TimeStatistics from '../../components/TimeStatistics';
 import classNames from 'classnames';
 import { FaTasks, FaMoneyBillWave, FaClock, FaComments, FaExclamationTriangle, FaChartLine } from 'react-icons/fa';
+import { Button } from "@/components/ui/button";
+import { Calendar as ShadcnCalendar } from "@/components/ui/calendar";
 
 // Types for user statistics
 interface Expense {
@@ -255,8 +257,20 @@ const InsightsPage = () => {
           <div className="bg-white rounded-3xl shadow-2xl p-10 min-h-[180px] flex flex-col justify-center col-span-2 border border-gray-200">
             <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">AI Analytics & Suggestions</h2>
             <div className="flex gap-4 mb-4">
-              <button onClick={() => setAiTab('analytics')} className={`px-6 py-2 rounded-full font-semibold text-base transition ${aiTab==='analytics' ? 'bg-gray-900 text-white shadow' : 'bg-gray-100 text-gray-700'}`}>Analytics</button>
-              <button onClick={() => setAiTab('suggestions')} className={`px-6 py-2 rounded-full font-semibold text-base transition ${aiTab==='suggestions' ? 'bg-gray-900 text-white shadow' : 'bg-gray-100 text-gray-700'}`}>Suggestions</button>
+              <Button
+                onClick={() => setAiTab('analytics')}
+                className={`px-6 py-2 rounded-full font-semibold text-base transition ${aiTab==='analytics' ? 'bg-gray-900 text-white shadow' : 'bg-gray-100 text-gray-700'}`}
+                variant={aiTab === 'analytics' ? "default" : "ghost"}
+              >
+                Analytics
+              </Button>
+              <Button
+                onClick={() => setAiTab('suggestions')}
+                className={`px-6 py-2 rounded-full font-semibold text-base transition ${aiTab==='suggestions' ? 'bg-gray-900 text-white shadow' : 'bg-gray-100 text-gray-700'}`}
+                variant={aiTab === 'suggestions' ? "default" : "ghost"}
+              >
+                Suggestions
+              </Button>
             </div>
             <div className="text-gray-800 text-base whitespace-pre-line min-h-[60px] leading-snug">
               {loading ? (
@@ -319,6 +333,15 @@ const InsightsPage = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+              {/* Example of shadcn calendar for insights (optional, for demo) */}
+              <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
+                <h2 className="font-bold text-xl mb-4 text-gray-900 tracking-tight">Calendar (Demo)</h2>
+                <ShadcnCalendar
+                  mode="single"
+                  className="border-none !bg-white text-gray-800 p-2 sm:p-4 react-calendar-light-theme w-full max-w-full"
+                  // ...add any custom day rendering or props as needed...
+                />
               </div>
             </div>
             {/* Right column: Trends + AI */}

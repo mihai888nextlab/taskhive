@@ -4,6 +4,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import styles from "@/styles/markdown.module.css";
 import { useTheme } from '@/components/ThemeContext';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface Announcement {
   _id: string;
@@ -129,7 +131,8 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
       <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden`}>
         {/* Close Button */}
-        <button
+        <Button
+          type="button"
           className={`absolute top-4 right-4 z-10 p-2 rounded-xl transition-all duration-200 ${
             theme === 'dark' 
               ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50' 
@@ -137,9 +140,10 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
           }`}
           onClick={onClose}
           aria-label="Close modal"
+          variant="ghost"
         >
           <FaTimes className="w-4 h-4" />
-        </button>
+        </Button>
 
         {/* Header */}
         <div className={`p-6 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-750' : 'border-gray-200 bg-gray-50'}`}>
@@ -333,7 +337,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                             <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                               {commentInput.length}/500 characters
                             </div>
-                            <button
+                            <Button
                               type="submit"
                               disabled={posting || !commentInput.trim()}
                               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${
@@ -353,7 +357,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                                   <span>Post Comment</span>
                                 </>
                               )}
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       </div>

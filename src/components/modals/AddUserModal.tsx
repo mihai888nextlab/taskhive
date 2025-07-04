@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaSpinner, FaTimes, FaUserPlus } from "react-icons/fa";
 import { createPortal } from 'react-dom';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface AddUserModalProps {
   onClose: () => void;
@@ -29,15 +32,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
         const response = await fetch("/api/roles");
         if (!response.ok) throw new Error("Failed to fetch roles");
         const data = await response.json();
-        
-        // Get unique roles (case-insensitive) and keep original casing
         const uniqueRoles = data
           .map((role: { name: string }) => role.name)
           .filter((role: string, index: number, arr: string[]) => 
             arr.findIndex(r => r.toLowerCase() === role.toLowerCase()) === index
           )
           .sort();
-        
         setRoles(uniqueRoles);
       } catch (error) {
         console.error("Error fetching roles:", error);
@@ -48,17 +48,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email || !firstName || !lastName || !password || !role) {
       setError("All fields are required.");
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
-      // Send role as-is, let the backend handle case normalization
       const result = await onUserAdded(email, firstName, lastName, password, role);
       if (result) {
         setError(result);
@@ -112,7 +108,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
               <label className="block text-gray-900 font-semibold mb-2 text-sm">
                 Email Address *
               </label>
-              <input
+              <Input
                 type="email"
                 placeholder="john.doe@company.com"
                 value={email}
@@ -128,7 +124,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
                 <label className="block text-gray-900 font-semibold mb-2 text-sm">
                   First Name *
                 </label>
-                <input
+                <Input
                   type="text"
                   placeholder="John"
                   value={firstName}
@@ -142,7 +138,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
                 <label className="block text-gray-900 font-semibold mb-2 text-sm">
                   Last Name *
                 </label>
-                <input
+                <Input
                   type="text"
                   placeholder="Doe"
                   value={lastName}
@@ -158,7 +154,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
               <label className="block text-gray-900 font-semibold mb-2 text-sm">
                 Password *
               </label>
-              <input
+              <Input
                 type="password"
                 placeholder="Enter secure password"
                 value={password}
@@ -173,20 +169,30 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
               <label className="block text-gray-900 font-semibold mb-2 text-sm">
                 Role *
               </label>
-              <select
+              <Select
                 value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
-                required
+                onValueChange={setRole}
                 disabled={loading}
+                required
               >
-                <option value="">Select a role</option>
-                {roles.map((roleName) => (
-                  <option key={roleName} value={roleName}>
-                    {roleName.charAt(0).toUpperCase() + roleName.slice(1)}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm bg-white">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-white border border-gray-300 rounded-lg shadow-lg p-0"
+                  sideOffset={4}
+                >
+                  {roles.map((roleName) => (
+                    <SelectItem
+                      key={roleName}
+                      value={roleName}
+                      className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                    >
+                      {roleName.charAt(0).toUpperCase() + roleName.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </form>
         </div>
@@ -194,14 +200,17 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
         {/* Footer */}
         <div className="p-6 border-t border-gray-200 bg-gray-50">
           <div className="flex gap-3">
-            <button
+            <Button
+              type="button"
+              variant="secondary"
               onClick={onClose}
-              className="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
+              className="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300"
               disabled={loading}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              type="submit"
               onClick={handleSubmit}
               disabled={loading || !email || !firstName || !lastName || !password || !role}
               className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
@@ -221,7 +230,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
                   Create User
                 </div>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

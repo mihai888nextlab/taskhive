@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaTimes, FaFile, FaImage } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface FileUploadModalProps {
   open: boolean;
@@ -102,12 +104,14 @@ export default function FileUploadModal({
               </p>
             </div>
           </div>
-          <button
+          <Button
             onClick={handleClose}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
+            variant="ghost"
+            size="icon"
           >
             <FaTimes className="text-lg" />
-          </button>
+          </Button>
         </div>
 
         {/* Content */}
@@ -117,7 +121,7 @@ export default function FileUploadModal({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Select File
             </label>
-            <input
+            <Input
               type="file"
               accept="*"
               onChange={handleFileChange}
@@ -184,7 +188,7 @@ export default function FileUploadModal({
           )}
 
           {/* Upload Button */}
-          <button
+          <Button
             onClick={handleUpload}
             disabled={!file || uploading}
             className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
@@ -201,7 +205,7 @@ export default function FileUploadModal({
             ) : (
               "Upload File"
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

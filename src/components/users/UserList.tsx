@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 import UserCard from "./UserCard";
 import { FaSearch, FaSpinner, FaUsers, FaFilter, FaSort } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface User {
   _id: string;
@@ -109,7 +111,7 @@ const UserList: React.FC<UserListProps> = ({
         {/* Search Bar */}
         <div className="flex-1 relative">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
+          <Input
             type="text"
             placeholder="Search by name or email..."
             value={search}
@@ -126,39 +128,48 @@ const UserList: React.FC<UserListProps> = ({
         <div className="flex gap-3">
           <div className="relative">
             <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-            <select
+            <Select
               value={filterRole}
-              onChange={e => onFilterRoleChange && onFilterRoleChange(e.target.value)}
-              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-              }`}
+              onValueChange={onFilterRoleChange}
             >
-              <option value="all">All Roles</option>
-              {companyRoles.map(role => (
-                <option key={role} value={role}>
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0">
+                <SelectItem
+                  value="all"
+                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                >
+                  All Roles
+                </SelectItem>
+                {companyRoles.map(role => (
+                  <SelectItem
+                    key={role}
+                    value={role}
+                    className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                  >
+                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="relative">
             <FaSort className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-            <select
+            <Select
               value={sortBy}
-              onChange={e => onSortByChange && onSortByChange(e.target.value as any)}
-              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[160px] ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-              }`}
+              onValueChange={onSortByChange}
             >
-              <option value="firstNameAsc">First Name</option>
-              <option value="lastNameAsc">Last Name</option>
-              <option value="roleAsc">Role</option>
-            </select>
+              <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0">
+                <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">First Name</SelectItem>
+                <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Last Name</SelectItem>
+                <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Role</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -253,7 +264,7 @@ const UserList: React.FC<UserListProps> = ({
         {/* Search Bar */}
         <div className="flex-1 relative">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
+          <Input
             type="text"
             placeholder="Search by name or email..."
             value={search}
@@ -270,39 +281,48 @@ const UserList: React.FC<UserListProps> = ({
         <div className="flex gap-3">
           <div className="relative">
             <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-            <select
+            <Select
               value={filterRole}
-              onChange={e => onFilterRoleChange && onFilterRoleChange(e.target.value)}
-              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-              }`}
+              onValueChange={onFilterRoleChange}
             >
-              <option value="all">All Roles</option>
-              {companyRoles.map(role => (
-                <option key={role} value={role}>
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0">
+                <SelectItem
+                  value="all"
+                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                >
+                  All Roles
+                </SelectItem>
+                {companyRoles.map(role => (
+                  <SelectItem
+                    key={role}
+                    value={role}
+                    className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                  >
+                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="relative">
             <FaSort className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-            <select
+            <Select
               value={sortBy}
-              onChange={e => onSortByChange && onSortByChange(e.target.value as any)}
-              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[160px] ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-              }`}
+              onValueChange={onSortByChange}
             >
-              <option value="firstNameAsc">First Name</option>
-              <option value="lastNameAsc">Last Name</option>
-              <option value="roleAsc">Role</option>
-            </select>
+              <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0">
+                <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">First Name</SelectItem>
+                <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Last Name</SelectItem>
+                <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Role</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>

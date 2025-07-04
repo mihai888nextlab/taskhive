@@ -10,6 +10,9 @@ import FileCard from "@/components/storage/StorageFileCard";
 import { useTheme } from "@/components/ThemeContext";
 import { useRouter } from "next/router";
 import { FiSend, FiVideo, FiPhone, FiMoreVertical, FiUsers, FiMessageCircle } from "react-icons/fi";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "../ui/textarea";
 
 interface ChatMessage {
   _id?: string;
@@ -505,7 +508,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
           {/* Message Input */}
           <div className="flex-1 relative">
-            <textarea
+            <Textarea
               value={newMessageContent}
               onChange={(e) => setNewMessageContent(e.target.value)}
               onKeyDown={(e) => {
@@ -524,15 +527,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
               disabled={!user || loadingMessages}
             />
           </div>
-
-          {/* Send Button */}
-          <button
+          <Button
             type="submit"
             disabled={!user || loadingMessages || !newMessageContent.trim()}
             className={`p-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
           >
             <FiSend className="w-5 h-5" />
-          </button>
+          </Button>
         </form>
       </div>
     </div>

@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import AnnouncementCard from "./AnnouncementCard";
 import { FaSearch, FaSpinner, FaBullhorn, FaFilter, FaThumbtack } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 
 interface Announcement {
   _id: string;
@@ -82,7 +84,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
         {/* Search Bar */}
         <div className="flex-1 relative">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
+          <Input
             type="text"
             placeholder="Search announcements..."
             value={search}
@@ -98,21 +100,26 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
         {/* Category Filter */}
         <div className="relative">
           <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-          <select
+          <Select
             value={categoryFilter}
-            onChange={e => onCategoryFilterChange && onCategoryFilterChange(e.target.value)}
-            className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-            }`}
+            onValueChange={v => onCategoryFilterChange && onCategoryFilterChange(v as string)}
           >
-            {categories.map(cat => (
-              <option key={cat} value={cat}>
-                {cat === "All" ? "All Categories" : cat}
-              </option>
-            ))}
-          </select>
+            <select
+              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] ${
+                theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
+                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
+              }`}
+              value={categoryFilter}
+              onChange={e => onCategoryFilterChange && onCategoryFilterChange(e.target.value)}
+            >
+              {categories.map(cat => (
+                <option key={cat} value={cat}>
+                  {cat === "All" ? "All Categories" : cat}
+                </option>
+              ))}
+            </select>
+          </Select>
         </div>
       </div>
     );
@@ -211,7 +218,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
         {/* Search Bar */}
         <div className="flex-1 relative">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
+          <Input
             type="text"
             placeholder="Search announcements..."
             value={search}
@@ -227,21 +234,26 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
         {/* Category Filter */}
         <div className="relative">
           <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-          <select
+          <Select
             value={categoryFilter}
-            onChange={e => onCategoryFilterChange && onCategoryFilterChange(e.target.value)}
-            className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-            }`}
+            onValueChange={v => onCategoryFilterChange && onCategoryFilterChange(v as string)}
           >
-            {categories.map(cat => (
-              <option key={cat} value={cat}>
-                {cat === "All" ? "All Categories" : cat}
-              </option>
-            ))}
-          </select>
+            <select
+              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] ${
+                theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
+                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
+              }`}
+              value={categoryFilter}
+              onChange={e => onCategoryFilterChange && onCategoryFilterChange(e.target.value)}
+            >
+              {categories.map(cat => (
+                <option key={cat} value={cat}>
+                  {cat === "All" ? "All Categories" : cat}
+                </option>
+              ))}
+            </select>
+          </Select>
         </div>
       </div>
 

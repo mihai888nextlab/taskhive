@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { FaSpinner, FaTimes, FaPlus } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface AddRoleModalProps {
   onClose: () => void;
@@ -67,7 +69,7 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
             <label className="block text-gray-900 font-semibold mb-2 text-sm">
               Role Name *
             </label>
-            <input
+            <Input
               type="text"
               placeholder="e.g., Project Manager, Developer, Designer"
               value={roleName}
@@ -85,14 +87,17 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
         {/* Footer */}
         <div className="p-6 border-t border-gray-200 bg-gray-50">
           <div className="flex gap-3">
-            <button
+            <Button
+              type="button"
+              variant="secondary"
               onClick={onClose}
               className="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
               disabled={loading}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              type="submit"
               onClick={handleSubmit}
               disabled={loading || !roleName.trim()}
               className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
@@ -112,7 +117,7 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
                   Add Role
                 </div>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

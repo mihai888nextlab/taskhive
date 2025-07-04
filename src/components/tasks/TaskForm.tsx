@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaSpinner, FaMagic, FaTimes, FaTasks, FaExclamationTriangle, FaBolt, FaFileAlt, FaLightbulb, FaList } from "react-icons/fa";
 import SubtasksModal from "./SubtasksModal";
+import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Button } from "@/components/ui/button";
 
 interface Subtask {
   title: string;
@@ -180,19 +183,28 @@ Please enhance and expand this existing description while keeping the original i
     }
   }, [show]);
 
+  // Convert string date to Date object for DatePicker
+  const deadlineDateObj = taskDeadline ? new Date(taskDeadline) : undefined;
+
   if (!show) return null;
   
   return (
     <>
       <div className="flex h-full">
         {/* Close Button */}
-        <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+        <Button
+          type="button"
+          variant="ghost"
+          className="absolute top-5 right-5 z-20 p-2 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-100 hover:text-gray-600 shadow transition-all duration-200 border border-gray-100"
           onClick={onCancel}
           aria-label="Close modal"
+          style={{
+            boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
+            transition: "background 0.2s, color 0.2s, box-shadow 0.2s"
+          }}
         >
-          <FaTimes />
-        </button>
+          <FaTimes className="w-5 h-5" />
+        </Button>
 
         {/* Left Panel - Form Details */}
         <div className="w-2/5 bg-gray-50 border-r border-gray-200 flex flex-col">
@@ -228,7 +240,7 @@ Please enhance and expand this existing description while keeping the original i
                 <label className="block text-gray-900 text-lg font-semibold mb-3">
                   Task Title *
                 </label>
-                <input
+                <Input
                   type="text"
                   className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
                   placeholder="Enter task title..."
@@ -243,13 +255,17 @@ Please enhance and expand this existing description while keeping the original i
                 <label className="block text-gray-900 text-lg font-semibold mb-3">
                   Deadline *
                 </label>
-                <input
-                  type="date"
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
-                  value={taskDeadline}
-                  onChange={e => onDeadlineChange(e.target.value)}
-                  required
+                <DatePicker
+                  value={deadlineDateObj}
+                  onChange={date => {
+                    if (date) {
+                      const formatted = date.toISOString().split("T")[0];
+                      onDeadlineChange(formatted);
+                    }
+                  }}
                   disabled={loading}
+                  className="w-full"
+                  placeholder="mm / dd / yyyy"
                 />
               </div>
 
@@ -294,7 +310,7 @@ Please enhance and expand this existing description while keeping the original i
                         <div>
                           <div className="font-semibold capitalize">{level}</div>
                           <div className="text-xs opacity-75">
-                            {level === 'critical' && 'Urgent & Important'}
+                            {level === 'critical' && 'Urgent'}
                             {level === 'high' && 'Important'}
                             {level === 'medium' && 'Normal'}
                             {level === 'low' && 'Nice to have'}
@@ -306,6 +322,43 @@ Please enhance and expand this existing description while keeping the original i
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Description + Subtasks */}
+        <div className="flex-1 flex flex-col bg-white">
+          {/* Description Header */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <label className="block text-gray-900 text-lg font-semibold">
+                Task Description
+              </label>
+              <Button
+                type="button"
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center font-semibold shadow-sm hover:bg-purple-600 transition disabled:opacity-60"
+                onClick={handleGenerateDescription}
+                disabled={!taskTitle || generatingDescription}
+                title="Generate description from title"
+              >
+                {generatingDescription ? <FaSpinner className="animate-spin mr-2" /> : <FaMagic className="mr-2" />}
+                AI Generate
+              </Button>
+            </div>
+            <p className="text-sm text-gray-600 mt-1">
+              Provide detailed information about the task (optional)
+            </p>
+          </div>
+
+          {/* Description Content + Subtasks */}
+          <div className="flex-1 p-6 flex flex-col">
+            <textarea
+              rows={6}
+              className="w-full h-auto min-h-[144px] max-h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200 text-lg"
+              placeholder="Describe the task in detail. What needs to be accomplished? What are the key requirements? Any specific instructions or context..."
+              value={taskDescription}
+              onChange={e => onDescriptionChange(e.target.value)}
+              disabled={loading || generatingDescription}
+            />
 
             {/* Subtasks Section - Only for new tasks */}
             {!editingTaskId && (
@@ -314,7 +367,7 @@ Please enhance and expand this existing description while keeping the original i
                   <label className="text-gray-900 text-lg font-semibold">
                     Subtasks
                   </label>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setShowSubtasksModal(true)}
                     className="px-4 py-2 bg-indigo-500 text-white rounded-lg flex items-center text-sm font-medium shadow-sm hover:bg-indigo-600 transition-all duration-200"
@@ -322,7 +375,7 @@ Please enhance and expand this existing description while keeping the original i
                   >
                     <FaList className="mr-2 w-4 h-4" />
                     {subtasks.length > 0 ? `Manage (${subtasks.length})` : 'Break Down Task'}
-                  </button>
+                  </Button>
                 </div>
 
                 {subtasks.length > 0 && (
@@ -333,7 +386,8 @@ Please enhance and expand this existing description while keeping the original i
                         {subtasks.length} subtask{subtasks.length > 1 ? 's' : ''} ready
                       </span>
                     </div>
-                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {/* ↑ max-h-48 (192px) instead of 32 (128px) */}
                       {subtasks.map((subtask, index) => (
                         <div key={index} className="text-sm text-gray-600 bg-gray-50 p-2 rounded border">
                           <div className="font-medium">{subtask.title}</div>
@@ -347,77 +401,6 @@ Please enhance and expand this existing description while keeping the original i
                 )}
               </div>
             )}
-          </div>
-
-          {/* Footer */}
-          <div className="p-6 border-t border-gray-200 bg-white">
-            <div className="flex gap-4">
-              <button
-                onClick={onCancel}
-                className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition-all duration-200"
-                disabled={loading}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={loading || !taskTitle.trim() || !taskDeadline.trim()}
-                className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
-                  loading || !taskTitle.trim() || !taskDeadline.trim()
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
-                }`}
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <FaSpinner className="animate-spin" />
-                    {editingTaskId ? "Updating..." : "Creating..."}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <FaTasks />
-                    {editingTaskId ? "Update Task" : "Create Task"}
-                  </div>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Panel - Description */}
-        <div className="flex-1 flex flex-col bg-white">
-          {/* Description Header */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <label className="block text-gray-900 text-lg font-semibold">
-                Task Description
-              </label>
-              <button
-                type="button"
-                className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center font-semibold shadow-sm hover:bg-purple-600 transition disabled:opacity-60"
-                onClick={handleGenerateDescription}
-                disabled={!taskTitle || generatingDescription}
-                title="Generate description from title"
-              >
-                {generatingDescription ? <FaSpinner className="animate-spin mr-2" /> : <FaMagic className="mr-2" />}
-                AI Generate
-              </button>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              Provide detailed information about the task (optional)
-            </p>
-          </div>
-
-          {/* Description Content */}
-          <div className="flex-1 p-6">
-            <textarea
-              rows={12}
-              className="w-full h-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200 text-lg"
-              placeholder="Describe the task in detail. What needs to be accomplished? What are the key requirements? Any specific instructions or context..."
-              value={taskDescription}
-              onChange={e => onDescriptionChange(e.target.value)}
-              disabled={loading || generatingDescription}
-            />
           </div>
 
           {/* Edit Mode Info */}
@@ -448,6 +431,43 @@ Please enhance and expand this existing description while keeping the original i
         onSave={handleSaveSubtasks}
         onCancel={() => setShowSubtasksModal(false)}
       />
+
+      {/* Footer - full width */}
+      <div className="p-6 border-t border-gray-200 bg-white">
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition-all duration-200"
+            disabled={loading}
+            variant="ghost"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading || !taskTitle.trim() || !taskDeadline.trim()}
+            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
+              loading || !taskTitle.trim() || !taskDeadline.trim()
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
+            } flex items-center justify-center gap-2`}
+          >
+            {loading ? (
+              <>
+                <FaSpinner className="animate-spin" />
+                {editingTaskId ? "Updating..." : "Creating..."}
+              </>
+            ) : (
+              <>
+                <FaTasks />
+                {editingTaskId ? "Update Task" : "Create Task"}
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
     </>
   );
 };

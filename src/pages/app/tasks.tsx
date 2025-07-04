@@ -7,6 +7,8 @@ import TaskForm from "@/components/tasks/TaskForm";
 import TaskList from "@/components/tasks/TaskList";
 import AssignedTasksList from "@/components/tasks/AssignedTasksList";
 import { createPortal } from 'react-dom';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface TaskUser {
   _id: string;
@@ -323,7 +325,8 @@ const TasksPage: NextPageWithLayout = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             {/* Tab Buttons */}
             <div className={`flex rounded-xl p-1 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-              <button
+              <Button
+                type="button"
                 onClick={() => setActiveTab('my-tasks')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                   activeTab === 'my-tasks'
@@ -334,11 +337,13 @@ const TasksPage: NextPageWithLayout = () => {
                       ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
+                variant="ghost"
               >
                 <FaTasks className="w-4 h-4" />
                 <span>My Tasks</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => setActiveTab('assigned-tasks')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                   activeTab === 'assigned-tasks'
@@ -349,14 +354,16 @@ const TasksPage: NextPageWithLayout = () => {
                       ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
+                variant="ghost"
               >
                 <FaUserCheck className="w-4 h-4" />
                 <span>Assigned by Me</span>
-              </button>
+              </Button>
             </div>
 
             {/* Create Task Button */}
-            <button
+            <Button
+              type="button"
               onClick={() => {
                 resetForm();
                 setShowForm(true);
@@ -368,7 +375,7 @@ const TasksPage: NextPageWithLayout = () => {
             >
               <FaPlus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
               <span>Create Task</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -377,11 +384,11 @@ const TasksPage: NextPageWithLayout = () => {
       <div className="px-4 lg:px-8 pt-4">
         <div className="max-w-6xl mx-auto">
           {/* Tab Content - Dynamic height container */}
-          <div className={`${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl shadow-lg border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
+          <Card className={`${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl shadow-lg border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
             {activeTab === 'my-tasks' ? (
               <div className="flex flex-col">
                 {/* My Tasks Header - Compact */}
-                <div className={`p-4 ${theme === "light" ? "bg-blue-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                <CardHeader className={`p-4 ${theme === "light" ? "bg-blue-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
                       <FaTasks className="w-4 h-4 text-white" />
@@ -395,10 +402,10 @@ const TasksPage: NextPageWithLayout = () => {
                       </p>
                     </div>
                   </div>
-                </div>
+                </CardHeader>
 
                 {/* Controls */}
-                <div className={`p-3 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                <CardContent className={`p-3 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
                   <TaskList
                     tasks={tasks}
                     currentUserEmail={currentUserEmail}
@@ -418,7 +425,7 @@ const TasksPage: NextPageWithLayout = () => {
                     sortBy={mySortBy}
                     onSortByChange={setMySortBy}
                   />
-                </div>
+                </CardContent>
 
                 {/* Tasks List - Dynamic height with max height and scroll */}
                 <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
@@ -442,7 +449,7 @@ const TasksPage: NextPageWithLayout = () => {
             ) : (
               <div className="flex flex-col">
                 {/* Assigned Tasks Header - Compact */}
-                <div className={`p-4 ${theme === "light" ? "bg-green-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                <CardHeader className={`p-4 ${theme === "light" ? "bg-green-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-green-600' : 'bg-green-500'}`}>
                       <FaUserCheck className="w-4 h-4 text-white" />
@@ -456,10 +463,10 @@ const TasksPage: NextPageWithLayout = () => {
                       </p>
                     </div>
                   </div>
-                </div>
+                </CardHeader>
 
                 {/* Controls */}
-                <div className={`p-3 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                <CardContent className={`p-3 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
                   <AssignedTasksList
                     tasks={assignedTasks}
                     loading={loading}
@@ -489,7 +496,7 @@ const TasksPage: NextPageWithLayout = () => {
                     sortBy={assignedSortBy}
                     onSortByChange={setAssignedSortBy}
                   />
-                </div>
+                </CardContent>
 
                 {/* Tasks List - Dynamic height with max height and scroll */}
                 <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
@@ -521,7 +528,7 @@ const TasksPage: NextPageWithLayout = () => {
                 </div>
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
 

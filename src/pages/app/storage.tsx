@@ -10,6 +10,7 @@ import { useTheme } from '@/components/ThemeContext';
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom'; // Add this import
 import { FaFile, FaFileImage, FaFilePdf, FaFileArchive, FaFileAlt, FaSignature, FaCloudUploadAlt } from 'react-icons/fa';
+import { Button } from "@/components/ui/button";
 
 const MAX_STORAGE_BYTES = 1024 * 1024 * 1024; // 1 GB
 
@@ -191,20 +192,22 @@ const Storage = () => {
               </p>
             </div>
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={() => setSignatureModal(true)}
                 className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-700 transform hover:scale-102 transition-all duration-200 shadow-lg"
+                variant="default"
               >
                 <FaSignature className="text-lg" />
                 <span className="font-medium">Manage Signatures</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setUploadFileModal(true)}
                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transform hover:scale-102 transition-all duration-200 shadow-lg"
+                variant="default"
               >
                 <FaCloudUploadAlt className="text-lg" />
                 <span className="font-medium">Upload Files</span>
-              </button>
+              </Button>
             </div>
           </div>
 

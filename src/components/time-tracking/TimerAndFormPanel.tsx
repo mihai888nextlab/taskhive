@@ -1,5 +1,9 @@
 import React from "react";
 import { FaPlay, FaPause, FaStop, FaSave } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface TimerAndFormPanelProps {
   elapsedTime: number;
@@ -85,7 +89,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
         
         {/* Timer Controls */}
         <div className="flex justify-center gap-2 mb-6">
-          <button
+          <Button
             onClick={onStart}
             disabled={isRunning}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${
@@ -98,8 +102,8 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
           >
             <FaPlay className="w-3 h-3" />
             Start
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onStop}
             disabled={!isRunning}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${
@@ -112,8 +116,8 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
           >
             <FaPause className="w-3 h-3" />
             Stop
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onReset}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${
               theme === 'dark'
@@ -123,7 +127,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
           >
             <FaStop className="w-3 h-3" />
             Reset
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -139,7 +143,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
           <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
             Session Name
           </label>
-          <input
+          <Input
             type="text"
             value={sessionName}
             onChange={e => onNameChange(e.target.value)}
@@ -157,7 +161,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
           <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
             Description
           </label>
-          <textarea
+          <Textarea
             value={sessionDescription}
             onChange={e => onDescriptionChange(e.target.value)}
             placeholder="Add details about your work..."
@@ -175,24 +179,46 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
           <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
             Category
           </label>
-          <select
+          <Select
             value={sessionTag}
-            onChange={e => setSessionTag(e.target.value)}
-            className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 ${
-              theme === "dark"
-                ? "bg-gray-700 text-white border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                : "bg-white text-gray-900 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-            }`}
+            onValueChange={setSessionTag}
             required
+            disabled={false}
           >
-            <option value="">Select category</option>
-            {tags.map(tag => (
-              <option key={tag} value={tag}>{tag}</option>
-            ))}
-          </select>
+            <SelectTrigger
+              className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  : "bg-white text-gray-900 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              }`}
+            >
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-lg border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              {tags.map(tag => (
+                <SelectItem
+                  key={tag}
+                  value={tag}
+                  className={`cursor-pointer transition-colors ${
+                    theme === "dark"
+                      ? "data-[state=highlighted]:bg-gray-600 data-[state=highlighted]:text-white"
+                      : "data-[state=highlighted]:bg-gray-100 data-[state=highlighted]:text-gray-900"
+                  }`}
+                >
+                  {tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={!sessionName || !sessionDescription || !sessionTag}
           className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition-all duration-200 ${
@@ -205,7 +231,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
         >
           <FaSave className="w-4 h-4" />
           Save Session
-        </button>
+        </Button>
       </form>
     </div>
   );

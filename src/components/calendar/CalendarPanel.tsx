@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Calendar from "react-calendar";
+import { Calendar as ShadcnCalendar } from "@/components/ui/calendar";
 import { FaArrowLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "react-calendar/dist/Calendar.css";
 
@@ -322,61 +322,18 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({
   const renderMonthView = () => {
     return (
       <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
-        <Calendar
-          onChange={(val) => {
-            const date = val instanceof Date ? val : null;
-            if (date) {
-              handleMonthDateClick(date);
-            }
-          }}
-          value={selectedDate}
-          className="border-none !bg-white text-gray-800 p-2 sm:p-4 react-calendar-light-theme w-full max-w-full"
-          tileClassName={({ date, view }) => {
-            if (view === 'month' && deadlines.includes(date.toDateString())) {
-              return 'highlight-deadline';
-            }
-            return null;
-          }}
-          tileContent={({ date, view }) => {
-            const highlight = view === 'month' && deadlines.includes(date.toDateString());
-            const circleColor = getCircleColor(date);
-            
-            return (
-              <>
-                {highlight && circleColor && (
-                  <div
-                    className="highlight-circle-content"
-                    style={{
-                      backgroundColor: circleColor,
-                      color: 'white',
-                    }}
-                  >
-                    {date.getDate()}
-                  </div>
-                )}
-                <div
-                  style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', background: 'transparent' }}
-                  onDragOver={e => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                  }}
-                  onDrop={e => {
-                    e.preventDefault();
-                    const taskId = e.dataTransfer.getData('text/plain');
-                    if (onTaskDrop && taskId) {
-                      onTaskDrop(taskId, date);
-                    }
-                  }}
-                />
-              </>
-            );
-          }}
-          navigationLabel={({ date, label }) => (
-            <span className="font-bold text-blue-600 text-base sm:text-lg">{label}</span>
-          )}
-          nextLabel={<span className="text-blue-600 text-lg sm:text-2xl font-bold">›</span>}
-          prevLabel={<span className="text-blue-600 text-lg sm:text-2xl font-bold">‹</span>}
-        />
+        <div className="w-full">
+          <ShadcnCalendar
+            mode="single"
+            selected={selectedDate ?? undefined}
+            onSelect={date => {
+              if (date) {
+                handleMonthDateClick(date);
+              }
+            }}
+            className="border-none !bg-white text-gray-800 p-2 sm:p-4 react-calendar-light-theme w-full max-w-full"
+          />
+        </div>
       </div>
     );
   };

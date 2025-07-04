@@ -11,6 +11,8 @@ import AddRoleModal from "@/components/modals/AddRoleModal";
 import OrgChartModal from "@/components/modals/OrgChartModal";
 import UserProfileModal from "@/components/modals/UserProfileModal";
 import { createPortal } from 'react-dom';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface User {
   _id: string;
@@ -194,13 +196,11 @@ const UsersPage: NextPageWithLayout = () => {
 
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
-
-      {/* Main Content */}
       <div className="px-2 lg:px-4 pt-4 mt-4">
         <div className="max-w-[100vw] mx-auto">
-          <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
+          <Card className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
             {/* Users Header with Action Buttons */}
-            <div className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"} border-b`}>
+            <CardHeader className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"} border-b`}>
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} shadow-lg`}>
@@ -215,44 +215,48 @@ const UsersPage: NextPageWithLayout = () => {
                     </p>
                   </div>
                 </div>
-
                 {/* Action Buttons */}
                 {user.role === "admin" && (
                   <div className="flex flex-wrap gap-3">
-                    <button
-                      onClick={() => setAddUserModalOpen(true)}
+                    <Button
+                      asChild
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 ${
                         theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
                       }`}
                     >
-                      <FaUserPlus className="w-4 h-4" />
-                      <span>Add User</span>
-                    </button>
-                    <button
-                      onClick={() => setAddRoleModalOpen(true)}
+                      <span onClick={() => setAddUserModalOpen(true)}>
+                        <FaUserPlus className="w-4 h-4" />
+                        <span>Add User</span>
+                      </span>
+                    </Button>
+                    <Button
+                      asChild
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 ${
                         theme === 'dark' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-500 hover:bg-green-600 text-white'
                       }`}
                     >
-                      <FaPlus className="w-4 h-4" />
-                      <span>Add Role</span>
-                    </button>
-                    <button
-                      onClick={() => setOrgChartModalOpen(true)}
+                      <span onClick={() => setAddRoleModalOpen(true)}>
+                        <FaPlus className="w-4 h-4" />
+                        <span>Add Role</span>
+                      </span>
+                    </Button>
+                    <Button
+                      asChild
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 ${
                         theme === 'dark' ? 'bg-slate-600 hover:bg-slate-700 text-white' : 'bg-slate-500 hover:bg-slate-600 text-white'
                       }`}
                     >
-                      <FaSitemap className="w-4 h-4" />
-                      <span>Org Chart</span>
-                    </button>
+                      <span onClick={() => setOrgChartModalOpen(true)}>
+                        <FaSitemap className="w-4 h-4" />
+                        <span>Org Chart</span>
+                      </span>
+                    </Button>
                   </div>
                 )}
               </div>
-            </div>
-
+            </CardHeader>
             {/* Controls */}
-            <div className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"} border-b`}>
+            <CardContent className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"} border-b`}>
               <UserList
                 users={users}
                 loading={loading}
@@ -267,8 +271,7 @@ const UsersPage: NextPageWithLayout = () => {
                 sortBy={sortBy}
                 onSortByChange={setSortBy}
               />
-            </div>
-
+            </CardContent>
             {/* Users List */}
             <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
               <UserList
@@ -283,10 +286,9 @@ const UsersPage: NextPageWithLayout = () => {
                 sortBy={sortBy}
               />
             </div>
-          </div>
+          </Card>
         </div>
       </div>
-
       {/* Modals */}
       {addUserModalOpen && typeof window !== 'undefined' && createPortal(
         <AddUserModal
@@ -295,7 +297,6 @@ const UsersPage: NextPageWithLayout = () => {
         />,
         document.body
       )}
-
       {addRoleModalOpen && typeof window !== 'undefined' && createPortal(
         <AddRoleModal
           onClose={() => setAddRoleModalOpen(false)}
@@ -303,12 +304,10 @@ const UsersPage: NextPageWithLayout = () => {
         />,
         document.body
       )}
-
       {orgChartModalOpen && typeof window !== 'undefined' && createPortal(
         <OrgChartModal onClose={() => setOrgChartModalOpen(false)} />,
         document.body
       )}
-
       {profileModalOpen && typeof window !== 'undefined' && createPortal(
         <UserProfileModal
           open={profileModalOpen}

@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import { FaSpinner, FaMagic, FaCalendarAlt, FaTags } from "react-icons/fa";
 import { useTheme } from '@/components/ThemeContext';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface IncomeFormProps {
@@ -75,7 +79,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
         <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
           Income Title
         </label>
-        <input
+        <Input
           type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
@@ -99,7 +103,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
             $
           </div>
-          <input
+          <Input
             type="number"
             value={amount}
             onChange={(e) => onAmountChange(e.target.value)}
@@ -122,7 +126,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           Description
         </label>
         <div className="flex gap-2">
-          <textarea
+          <Textarea
             value={description}
             onChange={(e) => onDescriptionChange(e.target.value)}
             placeholder="Describe this income..."
@@ -135,7 +139,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
             disabled={loading || generatingDescription}
             rows={3}
           />
-          <button
+          <Button
             type="button"
             onClick={handleGenerateDescription}
             disabled={!title || generatingDescription || loading}
@@ -153,7 +157,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
             ) : (
               <FaMagic className="w-4 h-4" />
             )}
-          </button>
+          </Button>
         </div>
         {generatingDescription && (
           <div className={`flex items-center gap-2 mt-2 text-sm ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
@@ -191,27 +195,48 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
             <FaTags className="inline w-3 h-3 mr-1" />
             Category
           </label>
-          <select
+          <Select
             value={category}
-            onChange={e => onCategoryChange(e.target.value)}
-            className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
-              theme === "dark"
-                ? "bg-gray-700 text-white border-gray-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
-                : "bg-white text-gray-900 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
-            }`}
-            required
+            onValueChange={onCategoryChange}
             disabled={loading}
           >
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+            <SelectTrigger
+              className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  : "bg-white text-gray-900 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+              }`}
+            >
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-xl border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              {categories.map(cat => (
+                <SelectItem
+                  key={cat}
+                  value={cat}
+                  className={`cursor-pointer transition-colors ${
+                    theme === "dark"
+                      ? "data-[state=highlighted]:bg-gray-600 data-[state=highlighted]:text-white"
+                      : "data-[state=highlighted]:bg-gray-100 data-[state=highlighted]:text-gray-900"
+                  }`}
+                >
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Submit Button */}
       <div className="pt-2">
-        <button
+        <Button
           type="submit"
           disabled={loading}
           className={`w-full py-3 rounded-xl font-bold transition-all duration-200 ${
@@ -230,7 +255,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           ) : (
             "Add Income"
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

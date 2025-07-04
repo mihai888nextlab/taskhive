@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { FaTimes, FaUsers, FaPlus, FaSearch, FaSpinner } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { createPortal } from 'react-dom';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface NewGroupChatModalProps {
   isOpen: boolean;
@@ -204,7 +206,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                 <label htmlFor="groupName" className="block text-gray-900 text-lg font-semibold mb-3">
                   Group Name *
                 </label>
-                <input
+                <Input
                   type="text"
                   id="groupName"
                   value={groupName}
@@ -274,14 +276,15 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
               {/* Action Buttons */}
               <div className="p-6 border-t border-gray-200 bg-white">
                 <div className="flex gap-4">
-                  <button
+                  <Button
                     onClick={handleClose}
                     className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-200"
                     disabled={creatingGroup}
+                    variant="ghost"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleCreateGroup}
                     disabled={creatingGroup || selectedUsers.length < 1 || !groupName.trim()}
                     className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
@@ -301,7 +304,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                         Create Group
                       </div>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -315,7 +318,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                 </label>
                 <div className="relative">
                   <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
+                  <Input
                     type="text"
                     placeholder="Search users by name or email..."
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
@@ -384,14 +387,14 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                               Added
                             </div>
                           ) : (
-                            <button 
+                            <Button 
                               onClick={() => toggleUserSelection(u)}
                               className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 flex items-center gap-2"
                               disabled={creatingGroup}
                             >
                               <FaPlus className="text-sm" />
                               Add
-                            </button>
+                            </Button>
                           )}
                         </div>
                       );

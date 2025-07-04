@@ -2,6 +2,9 @@ import React, { useState, useMemo } from "react";
 import TaskCard from "./TaskCard";
 import TaskDetailsModal from "./TaskDetailsModal";
 import { FaSearch, FaSpinner, FaTasks } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface Task {
   _id: string;
@@ -170,7 +173,7 @@ const TaskList: React.FC<TaskListProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
         <div className="relative">
           <FaSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-          <input
+          <Input
             type="text"
             placeholder="Search tasks..."
             value={searchValue}
@@ -181,45 +184,69 @@ const TaskList: React.FC<TaskListProps> = ({
             className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
           />
         </div>
-        <select
+        <Select
           value={filterStatusValue}
-          onChange={e => {
-            if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
-            else setFilterStatus(e.target.value as any);
+          onValueChange={v => {
+            if (onFilterStatusChange) onFilterStatusChange(v as any);
+            else setFilterStatus(v as any);
           }}
-          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
-          <option value="all">Status: All</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-          <option value="overdue">Overdue</option>
-        </select>
-        <select
+          <select
+            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            value={filterStatusValue}
+            onChange={e => {
+              if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
+              else setFilterStatus(e.target.value as any);
+            }}
+          >
+            <option value="all">Status: All</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </Select>
+        <Select
           value={filterPriorityValue}
-          onChange={e => {
-            if (onFilterPriorityChange) onFilterPriorityChange(e.target.value as any);
-            else setFilterPriority(e.target.value as any);
+          onValueChange={v => {
+            if (onFilterPriorityChange) onFilterPriorityChange(v as any);
+            else setFilterPriority(v as any);
           }}
-          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
-          <option value="all">Priority: All</option>
-          <option value="critical">Critical</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-        </select>
-        <select
+          <select
+            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            value={filterPriorityValue}
+            onChange={e => {
+              if (onFilterPriorityChange) onFilterPriorityChange(e.target.value as any);
+              else setFilterPriority(e.target.value as any);
+            }}
+          >
+            <option value="all">Priority: All</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </Select>
+        <Select
           value={sortByValue}
-          onChange={e => {
-            if (onSortByChange) onSortByChange(e.target.value as any);
-            else setSortBy(e.target.value as any);
+          onValueChange={v => {
+            if (onSortByChange) onSortByChange(v as any);
+            else setSortBy(v as any);
           }}
-          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
-          <option value="createdAtDesc">Sort: Newest First</option>
-          <option value="deadlineAsc">Sort: Deadline</option>
-          <option value="priorityDesc">Sort: Priority</option>
-        </select>
+          <select
+            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            value={sortByValue}
+            onChange={e => {
+              if (onSortByChange) onSortByChange(e.target.value as any);
+              else setSortBy(e.target.value as any);
+            }}
+          >
+            <option value="createdAtDesc">Sort: Newest First</option>
+            <option value="deadlineAsc">Sort: Deadline</option>
+            <option value="priorityDesc">Sort: Priority</option>
+          </select>
+        </Select>
       </div>
     );
   }
@@ -280,7 +307,7 @@ const TaskList: React.FC<TaskListProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
         <div className="relative">
           <FaSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-          <input
+          <Input
             type="text"
             placeholder="Search tasks..."
             value={searchValue}
@@ -291,45 +318,69 @@ const TaskList: React.FC<TaskListProps> = ({
             className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
           />
         </div>
-        <select
+        <Select
           value={filterStatusValue}
-          onChange={e => {
-            if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
-            else setFilterStatus(e.target.value as any);
+          onValueChange={v => {
+            if (onFilterStatusChange) onFilterStatusChange(v as any);
+            else setFilterStatus(v as any);
           }}
-          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
-          <option value="all">Status: All</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-          <option value="overdue">Overdue</option>
-        </select>
-        <select
+          <select
+            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            value={filterStatusValue}
+            onChange={e => {
+              if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
+              else setFilterStatus(e.target.value as any);
+            }}
+          >
+            <option value="all">Status: All</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </Select>
+        <Select
           value={filterPriorityValue}
-          onChange={e => {
-            if (onFilterPriorityChange) onFilterPriorityChange(e.target.value as any);
-            else setFilterPriority(e.target.value as any);
+          onValueChange={v => {
+            if (onFilterPriorityChange) onFilterPriorityChange(v as any);
+            else setFilterPriority(v as any);
           }}
-          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
-          <option value="all">Priority: All</option>
-          <option value="critical">Critical</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-        </select>
-        <select
+          <select
+            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            value={filterPriorityValue}
+            onChange={e => {
+              if (onFilterPriorityChange) onFilterPriorityChange(e.target.value as any);
+              else setFilterPriority(e.target.value as any);
+            }}
+          >
+            <option value="all">Priority: All</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </Select>
+        <Select
           value={sortByValue}
-          onChange={e => {
-            if (onSortByChange) onSortByChange(e.target.value as any);
-            else setSortBy(e.target.value as any);
+          onValueChange={v => {
+            if (onSortByChange) onSortByChange(v as any);
+            else setSortBy(v as any);
           }}
-          className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
         >
-          <option value="createdAtDesc">Sort: Newest First</option>
-          <option value="deadlineAsc">Sort: Deadline</option>
-          <option value="priorityDesc">Sort: Priority</option>
-        </select>
+          <select
+            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            value={sortByValue}
+            onChange={e => {
+              if (onSortByChange) onSortByChange(e.target.value as any);
+              else setSortBy(e.target.value as any);
+            }}
+          >
+            <option value="createdAtDesc">Sort: Newest First</option>
+            <option value="deadlineAsc">Sort: Deadline</option>
+            <option value="priorityDesc">Sort: Priority</option>
+          </select>
+        </Select>
       </div>
 
       <div className="p-4">

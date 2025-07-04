@@ -1,6 +1,7 @@
 import React from "react";
 import { FaPlay, FaPause, FaStop, FaTimes } from "react-icons/fa";
 import { useTheme } from "@/components/ThemeContext";
+import { Button } from "@/components/ui/button";
 
 interface PersistentTimerProps {
   elapsedTime: number;
@@ -49,14 +50,16 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
 
   if (inSidebar) {
     return (
-      <div className="p-3 m-3 bg-gray-800 rounded-xl border border-gray-700">
+      <div className="p-3 m-3 bg-gray-800 rounded-xl border border-gray-700 relative">
         {/* Close button */}
-        <button
+        <Button
           onClick={onClose}
           className="absolute top-2 right-2 p-1 rounded-lg transition-all duration-200 text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+          variant="ghost"
+          size="icon"
         >
           <FaTimes className="w-3 h-3" />
-        </button>
+        </Button>
 
         {/* Pomodoro info */}
         {pomodoroMode && (
@@ -82,7 +85,7 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
 
         {/* Control buttons */}
         <div className="flex justify-center gap-1">
-          <button
+          <Button
             onClick={onStart}
             disabled={isRunning}
             className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
@@ -90,11 +93,12 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                 : 'bg-green-600 text-white hover:bg-green-700'
             }`}
+            variant="ghost"
           >
             <FaPlay className="w-2 h-2" />
             Start
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onStop}
             disabled={!isRunning}
             className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
@@ -102,17 +106,19 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                 : 'bg-red-600 text-white hover:bg-red-700'
             }`}
+            variant="ghost"
           >
             <FaPause className="w-2 h-2" />
             Stop
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onReset}
             className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-600 text-white hover:bg-gray-700"
+            variant="ghost"
           >
             <FaStop className="w-2 h-2" />
             Reset
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -127,16 +133,18 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
     }`}>
       <div className="p-4 relative flex flex-col items-center justify-center">
         {/* Close button */}
-        <button
+        <Button
           onClick={onClose}
           className={`absolute top-3 right-3 p-1.5 rounded-lg transition-all duration-200 hover:scale-110 ${
             theme === 'dark'
               ? 'text-gray-400 hover:text-red-400 hover:bg-red-900/20'
               : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
           }`}
+          variant="ghost"
+          size="icon"
         >
           <FaTimes className="w-3 h-3" />
-        </button>
+        </Button>
 
         {/* Pomodoro info */}
         {pomodoroMode && (
@@ -162,7 +170,7 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
 
         {/* Control buttons */}
         <div className="flex justify-center gap-2 w-full">
-          <button
+          <Button
             onClick={onStart}
             disabled={isRunning}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 shadow-sm ${
@@ -172,11 +180,12 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
                   ? 'bg-green-600 text-white hover:bg-green-700 hover:shadow-md'
                   : 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md'
             }`}
+            variant="ghost"
           >
             <FaPlay className="w-2.5 h-2.5" />
             Start
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onStop}
             disabled={!isRunning}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 shadow-sm ${
@@ -186,21 +195,23 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
                   ? 'bg-red-600 text-white hover:bg-red-700 hover:shadow-md'
                   : 'bg-red-500 text-white hover:bg-red-600 hover:shadow-md'
             }`}
+            variant="ghost"
           >
             <FaPause className="w-2.5 h-2.5" />
             Stop
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onReset}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 shadow-sm ${
               theme === 'dark'
                 ? 'bg-gray-600 text-white hover:bg-gray-700 hover:shadow-md'
                 : 'bg-gray-500 text-white hover:bg-gray-600 hover:shadow-md'
             }`}
+            variant="ghost"
           >
             <FaStop className="w-2.5 h-2.5" />
             Reset
-          </button>
+          </Button>
         </div>
       </div>
     </div>

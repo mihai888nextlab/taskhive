@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaSpinner, FaRobot, FaPlus, FaTrash, FaTimes, FaTasks } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface Subtask {
   title: string;
@@ -80,13 +82,15 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-[90vw] max-w-4xl h-[80vh] relative overflow-hidden">
         {/* Close Button */}
-        <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl z-10"
+        <Button
+          type="button"
+          variant="ghost"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl z-10 bg-transparent p-2 rounded-full"
           onClick={onCancel}
           aria-label="Close modal"
         >
           <FaTimes />
-        </button>
+        </Button>
 
         {/* Header */}
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -109,7 +113,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-gray-800">Subtasks</h3>
             <div className="flex gap-3">
-              <button
+              <Button
                 type="button"
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center text-sm font-medium shadow-sm hover:bg-blue-600 transition disabled:opacity-60"
                 onClick={handleGenerateSubtasks}
@@ -121,15 +125,15 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                   <FaRobot className="mr-2 w-4 h-4" />
                 )}
                 AI Generate
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 className="px-4 py-2 bg-green-500 text-white rounded-lg flex items-center text-sm font-medium shadow-sm hover:bg-green-600 transition"
                 onClick={addManualSubtask}
               >
                 <FaPlus className="mr-2 w-4 h-4" />
                 Add Manual
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -147,7 +151,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                 {subtasks.map((subtask, index) => (
                   <div key={index} className="flex gap-3 items-start p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex-1 space-y-3">
-                      <input
+                      <Input
                         type="text"
                         placeholder="Subtask title"
                         value={subtask.title}
@@ -162,13 +166,14 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                         className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200"
                       />
                     </div>
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
                       onClick={() => removeSubtask(index)}
                       className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors duration-200"
                     >
                       <FaTrash className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -183,18 +188,21 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
               {subtasks.filter(s => s.title.trim()).length} of {subtasks.length} subtasks ready
             </p>
             <div className="flex gap-3">
-              <button
+              <Button
+                type="button"
                 onClick={onCancel}
                 className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200"
+                variant="ghost"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={handleSave}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm hover:shadow-md transition-all duration-200"
               >
                 Save Subtasks
-              </button>
+              </Button>
             </div>
           </div>
         </div>

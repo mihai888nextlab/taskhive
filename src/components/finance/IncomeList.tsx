@@ -3,6 +3,9 @@ import { FaTrash, FaFileCsv, FaFilePdf, FaSearch, FaSpinner, FaCoins } from "rea
 import DatePicker from "react-datepicker";
 import { useTheme } from '@/components/ThemeContext';
 import "react-datepicker/dist/react-datepicker.css";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface Income {
   _id: string;
@@ -61,7 +64,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
         <div className="flex gap-3">
           <div className="flex-1 relative">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
+            <Input
               type="text"
               placeholder="Search income..."
               value={search}
@@ -74,9 +77,8 @@ const IncomeList: React.FC<IncomeListProps> = ({
               disabled={loading}
             />
           </div>
-          
           <div className="flex gap-2">
-            <button
+            <Button
               onClick={onExportCSV}
               disabled={loading}
               className={`p-3 rounded-xl font-medium transition-all duration-200 ${
@@ -87,10 +89,11 @@ const IncomeList: React.FC<IncomeListProps> = ({
                     : 'bg-blue-500 text-white hover:bg-blue-600'
               }`}
               title="Export CSV"
+              variant="ghost"
             >
               <FaFileCsv className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={onExportPDF}
               disabled={loading}
               className={`p-3 rounded-xl font-medium transition-all duration-200 ${
@@ -101,50 +104,89 @@ const IncomeList: React.FC<IncomeListProps> = ({
                     : 'bg-red-500 text-white hover:bg-red-600'
               }`}
               title="Export PDF"
+              variant="ghost"
             >
               <FaFilePdf className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Filters Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-          <select
-            value={categoryFilter}
-            onChange={e => onCategoryFilterChange(e.target.value)}
-            className={`px-4 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
-            }`}
+          {/* Category Filter */}
+          <Select
+            value={categoryFilter || undefined}
+            onValueChange={onCategoryFilterChange}
             disabled={loading}
           >
-            <option value="">All Categories</option>
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-
-          <select
+            <SelectTrigger
+              className={`w-full px-4 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
+                theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
+                  : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
+              }`}
+            >
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-xl border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-800 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              <SelectItem value="All">All Categories</SelectItem>
+              {categories
+                .filter(cat => cat !== "All")
+                .map(cat => (
+                  <SelectItem
+                    key={cat}
+                    value={cat}
+                    className={`cursor-pointer transition-colors ${
+                      theme === "dark"
+                        ? "data-[state=highlighted]:bg-gray-700 data-[state=highlighted]:text-white"
+                        : "data-[state=highlighted]:bg-gray-100 data-[state=highlighted]:text-gray-900"
+                    }`}
+                  >
+                    {cat}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          {/* Sorting */}
+          <Select
             value={`${sortBy}-${sortOrder}`}
-            onChange={e => {
-              const [newSortBy, newSortOrder] = e.target.value.split('-');
+            onValueChange={v => {
+              const [newSortBy, newSortOrder] = v.split('-');
               onSortByChange(newSortBy);
               onSortOrderChange(newSortOrder);
             }}
-            className={`px-4 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
-            }`}
             disabled={loading}
           >
-            <option value="date-desc">Newest First</option>
-            <option value="date-asc">Oldest First</option>
-            <option value="amount-desc">Highest Amount</option>
-            <option value="amount-asc">Lowest Amount</option>
-          </select>
+            <SelectTrigger
+              className={`w-full px-4 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
+                theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
+                  : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
+              }`}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-xl border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-800 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              <SelectItem value="date-desc">Newest First</SelectItem>
+              <SelectItem value="date-asc">Oldest First</SelectItem>
+              <SelectItem value="amount-desc">Highest Amount</SelectItem>
+              <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+            </SelectContent>
+          </Select>
 
+          {/* Start Date */}
           <DatePicker
             selected={dateRange[0]}
             onChange={date => onDateRangeChange([date, dateRange[1]])}
@@ -160,6 +202,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
             disabled={loading}
           />
 
+          {/* End Date */}
           <DatePicker
             selected={dateRange[1]}
             onChange={date => onDateRangeChange([dateRange[0], date])}
@@ -178,7 +221,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
       </div>
 
       {/* Scrollable List Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 max-h-[420px]">
         {loading ? (
           <div className="flex items-center justify-center min-h-[200px]">
             <div className="text-center">
@@ -253,7 +296,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
                       )}
                     </div>
                   </div>
-                  <button
+                  <Button
                     onClick={() => onDelete(income)}
                     className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
                       theme === 'dark' 
@@ -261,9 +304,10 @@ const IncomeList: React.FC<IncomeListProps> = ({
                         : 'text-red-600 hover:bg-red-50'
                     }`}
                     title="Delete Income"
+                    variant="ghost"
                   >
                     <FaTrash size={16} />
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}

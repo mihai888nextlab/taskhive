@@ -2,6 +2,8 @@ import React from "react";
 import { useRouter } from "next/router";
 import { FaTimes, FaEnvelope, FaUser, FaUserTag } from "react-icons/fa";
 import { createPortal } from 'react-dom';
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -20,7 +22,7 @@ interface UserProfileModalProps {
 
 const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user }) => {
   const router = useRouter();
-  
+
   if (!open || !user) return null;
 
   const handleSendMessage = () => {
@@ -53,30 +55,35 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative animate-fadeIn overflow-hidden">
             {/* Close Button */}
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
               onClick={onClose}
               aria-label="Close modal"
             >
               <FaTimes />
-            </button>
+            </Button>
 
             {/* Header */}
             <div className="p-6 border-b border-gray-200 bg-blue-50">
               <div className="flex items-center gap-4">
-                {/* Avatar */}
+                {/* Avatar using shadcn/ui */}
                 <div className="flex-shrink-0">
-                  {user.profileImage?.data ? (
-                    <img
-                      src={user.profileImage.data}
-                      alt="Profile"
-                      className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-lg"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                      {getInitials() || <FaUser className="w-6 h-6" />}
-                    </div>
-                  )}
+                  <Avatar className="w-16 h-16 rounded-full border-4 border-white shadow-lg bg-blue-500 text-white font-bold text-xl flex items-center justify-center">
+                    {user.profileImage?.data ? (
+                      <AvatarImage
+                        src={user.profileImage.data}
+                        alt="Profile"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <AvatarFallback>
+                        {getInitials() || <FaUser className="w-6 h-6" />}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
                 </div>
 
                 {/* User Info */}
@@ -102,13 +109,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
                 </div>
 
                 {/* Send Message Button */}
-                <button
+                <Button
+                  type="button"
                   onClick={handleSendMessage}
                   className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center gap-2"
                 >
                   <FaEnvelope className="w-4 h-4" />
                   Send Message
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -149,12 +157,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
             {/* Footer */}
             <div className="p-6 border-t border-gray-200 bg-gray-50">
               <div className="flex justify-end">
-                <button
+                <Button
+                  type="button"
                   onClick={onClose}
                   className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200"
                 >
                   Close
-                </button>
+                </Button>
               </div>
             </div>
           </div>

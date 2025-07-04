@@ -1,5 +1,6 @@
 import React from "react";
 import { FaCloudUploadAlt, FaHdd } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
 
 interface StorageHeaderProps {
   usedStorage: number;
@@ -25,6 +26,14 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
           Monitor your file storage consumption
         </p>
       </div>
+      <Button
+        onClick={onUploadClick}
+        className="ml-auto flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow"
+        variant="default"
+      >
+        <FaCloudUploadAlt className="text-lg" />
+        Upload
+      </Button>
     </div>
 
     <div className="mb-4">

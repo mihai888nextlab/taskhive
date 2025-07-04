@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { FaBullhorn, FaSpinner, FaMagic, FaTimes } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface AnnouncementFormProps {
   title: string;
@@ -97,19 +99,19 @@ Write a clear, engaging, and informative announcement for all employees, based o
               </p>
             </div>
           </div>
-          
-          {/* Close Button */}
-          <button
+          <Button
+            type="button"
             onClick={onCancel}
-            className={`p-2 rounded-lg transition-colors ${
-              theme === 'dark' 
+            variant="ghost"
+            className={`w-10 h-10 p-2 rounded-lg transition-colors flex items-center justify-center
+              ${theme === 'dark' 
                 ? 'hover:bg-gray-700 text-gray-400 hover:text-white' 
                 : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
             }`}
             aria-label="Close form"
           >
             <FaTimes className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -130,16 +132,12 @@ Write a clear, engaging, and informative announcement for all employees, based o
             }`}>
               Announcement Title *
             </label>
-            <input
+            <Input
               type="text"
               placeholder="Enter announcement title..."
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
-              className={`w-full px-4 py-3 text-base rounded-xl border transition-all duration-200 ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
-              }`}
+              className="w-full py-3 px-4 text-base rounded-xl"
               required
               disabled={loading}
             />
@@ -153,10 +151,10 @@ Write a clear, engaging, and informative announcement for all employees, based o
               }`}>
                 Content *
               </label>
-              <button
+              <Button
                 type="button"
-                className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  !title || generatingContent
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 min-w-[120px] h-10
+                  ${!title || generatingContent
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : theme === 'dark'
                       ? 'bg-purple-600 text-white hover:bg-purple-700'
@@ -172,15 +170,15 @@ Write a clear, engaging, and informative announcement for all employees, based o
                   <FaMagic className="w-3.5 h-3.5" />
                 )}
                 Generate
-              </button>
+              </Button>
             </div>
             <textarea
               placeholder="Write your announcement content here... (Markdown supported)"
               value={content}
               onChange={e => onContentChange(e.target.value)}
               rows={6}
-              className={`w-full px-4 py-3 text-base rounded-xl border transition-all duration-200 resize-y ${
-                theme === 'dark' 
+              className={`w-full py-3 px-4 text-base rounded-xl border transition-all duration-200 resize-y min-h-[120px] max-h-64
+                ${theme === 'dark' 
                   ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
                   : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
               }`}
@@ -203,19 +201,20 @@ Write a clear, engaging, and informative announcement for all employees, based o
               </label>
               <div className="space-y-2">
                 {categories.map((cat) => (
-                  <button
+                  <Button
                     key={cat}
                     type="button"
                     onClick={() => onCategoryChange(cat)}
-                    className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
-                      category === cat
+                    className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
+                      ${category === cat
                         ? `bg-gradient-to-r ${getCategoryColor(cat)} text-white border-transparent shadow-lg`
                         : theme === 'dark'
                           ? 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
                           : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                     }`}
+                    variant={category === cat ? "default" : "outline"}
                   >
-                    <div className="text-left">
+                    <div>
                       <div className="font-semibold">{cat}</div>
                       <div className={`text-xs ${
                         category === cat ? 'text-white/80' : theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
@@ -225,7 +224,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
                         {cat === 'Alert' && 'Urgent notifications'}
                       </div>
                     </div>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -238,11 +237,11 @@ Write a clear, engaging, and informative announcement for all employees, based o
                 Priority
               </label>
               <div className="space-y-2">
-                <button
+                <Button
                   type="button"
                   onClick={() => onPinnedChange(false)}
-                  className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
-                    !pinned
+                  className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
+                    ${!pinned
                       ? theme === 'dark'
                         ? 'bg-blue-600 text-white border-blue-600 shadow-lg'
                         : 'bg-blue-500 text-white border-blue-500 shadow-lg'
@@ -250,8 +249,9 @@ Write a clear, engaging, and informative announcement for all employees, based o
                         ? 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                   }`}
+                  variant={!pinned ? "default" : "outline"}
                 >
-                  <div className="text-left">
+                  <div>
                     <div className="font-semibold">Normal</div>
                     <div className={`text-xs ${
                       !pinned ? 'text-white/80' : theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
@@ -259,19 +259,20 @@ Write a clear, engaging, and informative announcement for all employees, based o
                       Standard announcement
                     </div>
                   </div>
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => onPinnedChange(true)}
-                  className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
-                    pinned
+                  className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
+                    ${pinned
                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-transparent shadow-lg'
                       : theme === 'dark'
                         ? 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                   }`}
+                  variant={pinned ? "default" : "outline"}
                 >
-                  <div className="text-left">
+                  <div>
                     <div className="font-semibold">Pin to Top</div>
                     <div className={`text-xs ${
                       pinned ? 'text-white/80' : theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
@@ -279,7 +280,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
                       High priority announcement
                     </div>
                   </div>
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -290,16 +291,12 @@ Write a clear, engaging, and informative announcement for all employees, based o
               }`}>
                 Expiry Date
               </label>
-              <input
+              <Input
                 type="date"
                 value={expiresAt}
                 onChange={e => onExpiresAtChange(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className={`w-full px-4 py-3 text-base rounded-xl border transition-all duration-200 ${
-                  theme === 'dark' 
-                    ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                    : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
-                }`}
+                className="w-full py-3 px-4 text-base rounded-xl"
               />
               <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 Optional: When this announcement should stop being visible
@@ -312,21 +309,24 @@ Write a clear, engaging, and informative announcement for all employees, based o
       {/* Footer */}
       <div className={`p-6 border-t ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
         <div className="flex gap-3">
-          <button
+          <Button
+            type="button"
             onClick={onCancel}
-            className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
+            className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
               theme === 'dark'
                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
             disabled={loading}
+            variant="ghost"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            type="submit"
             onClick={onSubmit}
             disabled={loading || !title || !content || !category}
-            className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
+            className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
               loading || !title || !content || !category
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl'
@@ -343,7 +343,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
                 Publish Announcement
               </div>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

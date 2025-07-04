@@ -3,6 +3,7 @@ import { FaBullhorn, FaThumbtack, FaTrash, FaCalendarAlt, FaUser, FaChevronRight
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import styles from "@/styles/markdown.module.css";
+import { Button } from "@/components/ui/button";
 
 interface Announcement {
   _id: string;
@@ -100,7 +101,8 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
       {isAdmin && (
         <div className="absolute top-4 right-4 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {onPinToggle && (
-            <button
+            <Button
+              type="button"
               className={`admin-action-btn p-2 rounded-lg transition-all duration-200 ${
                 announcement.pinned
                   ? theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300 hover:bg-yellow-800' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
@@ -111,12 +113,14 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
                 onPinToggle(announcement._id, !announcement.pinned); 
               }}
               title={announcement.pinned ? "Unpin" : "Pin"}
+              variant="ghost"
             >
               <FaThumbtack className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           )}
           {onDelete && (
-            <button
+            <Button
+              type="button"
               className={`admin-action-btn p-2 rounded-lg transition-all duration-200 ${
                 theme === 'dark' 
                   ? 'bg-gray-700 text-gray-400 hover:bg-red-800 hover:text-red-300' 
@@ -127,9 +131,10 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
                 onDelete && onDelete(announcement._id); 
               }}
               title="Delete"
+              variant="ghost"
             >
               <FaTrash className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           )}
         </div>
       )}

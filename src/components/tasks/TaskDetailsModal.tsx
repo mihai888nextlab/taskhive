@@ -1,6 +1,8 @@
 import React from "react";
 import { FaEdit, FaTrash, FaCheckCircle, FaRegCircle, FaCalendarAlt, FaFlag, FaTimes, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { FiCalendar, FiUser, FiClock } from "react-icons/fi";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface Task {
   _id: string;
@@ -20,7 +22,7 @@ interface Task {
   subtasks?: Task[];
   isSubtask?: boolean;
   parentTask?: string;
-  important?: boolean; // Keep this for backward compatibility with existing subtasks
+  important?: boolean;
 }
 
 interface TaskDetailsModalProps {
@@ -186,57 +188,68 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               
               {/* Status and Priority Badges */}
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${statusColor}`}>
+                <Badge className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${statusColor}`}>
                   {localTask.completed && <FaCheckCircle className="w-2.5 h-2.5" />}
                   {isOverdue && !localTask.completed && <FaCalendarAlt className="w-2.5 h-2.5" />}
                   {isToday && !localTask.completed && <FiClock className="w-2.5 h-2.5" />}
                   {status}
-                </span>
+                </Badge>
                 
                 {totalSubtasks > 0 && (
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
+                  <Badge className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                     theme === 'dark' ? 'bg-purple-900/30 text-purple-400 border-purple-500/50' : 'bg-purple-50 text-purple-700 border-purple-200'
                   }`}>
                     {completedSubtasks}/{totalSubtasks} Subtasks
-                  </span>
+                  </Badge>
                 )}
 
                 {localTask.priority === 'critical' && (
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
+                  <Badge className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                     theme === 'dark' ? 'bg-red-900/30 text-red-400 border-red-500/50' : 'bg-red-50 text-red-700 border-red-200'
                   }`}>
                     🔥 Critical
-                  </span>
+                  </Badge>
                 )}
                 
                 {localTask.priority === 'high' && (
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
+                  <Badge className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                     theme === 'dark' ? 'bg-orange-900/30 text-orange-400 border-orange-500/50' : 'bg-orange-50 text-orange-700 border-orange-200'
                   }`}>
                     ⚡ High Priority
-                  </span>
+                  </Badge>
                 )}
 
                 {localTask.priority === 'medium' && (
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
+                  <Badge className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                     theme === 'dark' ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/50' : 'bg-yellow-50 text-yellow-700 border-yellow-200'
                   }`}>
                     📝 Medium
-                  </span>
+                  </Badge>
                 )}
 
                 {localTask.priority === 'low' && (
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
+                  <Badge className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
                     theme === 'dark' ? 'bg-green-900/30 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-200'
                   }`}>
                     💡 Low Priority
-                  </span>
+                  </Badge>
                 )}
+                {/* Tags as badges */}
+                {localTask.tags && localTask.tags.map((tag, idx) => (
+                  <Badge
+                    key={idx}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
               </div>
             </div>
             
             {/* Close Button */}
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={onClose}
               className={`p-1.5 rounded-full transition-all duration-200 hover:scale-110 ${
                 theme === 'dark' 
@@ -246,7 +259,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               aria-label="Close modal"
             >
               <FaTimes className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -335,13 +348,16 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
             }`}>
               <div className="flex items-center justify-between mb-2">
-                <button
+                <Button
+                  type="button"
+                  variant="ghost"
                   onClick={() => setShowSubtasks(!showSubtasks)}
-                  className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-2 text-sm font-medium px-0 py-0 h-auto bg-transparent shadow-none hover:bg-transparent ${
                     theme === 'dark' 
                       ? 'text-white hover:text-gray-300' 
                       : 'text-gray-900 hover:text-gray-700'
                   }`}
+                  style={{ backgroundColor: "transparent" }}
                 >
                   {showSubtasks ? (
                     <FaChevronDown className="w-3 h-3" />
@@ -349,7 +365,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                     <FaChevronRight className="w-3 h-3" />
                   )}
                   Subtasks Progress
-                </button>
+                </Button>
                 <span className={`text-xs px-2 py-0.5 rounded-full ${
                   theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'
                 }`}>
@@ -378,9 +394,11 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                         }`}
                       >
                         <div className="flex-shrink-0">
-                          <button
+                          <Button
+                            type="button"
+                            variant="ghost"
                             onClick={() => handleSubtaskToggle(subtask)}
-                            className="transition-transform hover:scale-110"
+                            className="p-0 h-auto w-auto min-w-0 transition-transform hover:scale-110"
                             disabled={!onToggleSubtask}
                           >
                             {subtask.completed ? (
@@ -392,7 +410,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                                 'text-gray-400'
                               } ${onToggleSubtask ? 'cursor-pointer hover:text-green-500' : 'cursor-default'}`} />
                             )}
-                          </button>
+                          </Button>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-medium ${
@@ -414,11 +432,9 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                                 day: 'numeric',
                               })}
                             </span>
-                            {/* Keep the flag for existing subtasks that might have important flag */}
                             {subtask.important && (
                               <FaFlag className="w-2.5 h-2.5 text-orange-500" />
                             )}
-                            {/* Also check for priority on subtasks */}
                             {subtask.priority === 'critical' && (
                               <span className="text-xs">🔥</span>
                             )}
@@ -456,7 +472,8 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
         }`}>
           <div className="flex items-center justify-between gap-3">
             {/* Complete Toggle */}
-            <button
+            <Button
+              type="button"
               onClick={() => canCompleteTask && !hasSubtasks && handleMainTaskToggle(localTask)}
               disabled={hasSubtasks}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -495,11 +512,12 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                   {hasSubtasks ? 'Managed by subtasks' : 'Complete'}
                 </>
               )}
-            </button>
+            </Button>
 
             {/* Edit and Delete Actions */}
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                type="button"
                 onClick={() => onEdit(localTask)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 ${
                   theme === 'dark'
@@ -509,8 +527,9 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               >
                 <FaEdit className="w-3.5 h-3.5" />
                 Edit
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => {
                   if (window.confirm('Are you sure you want to delete this task?')) {
                     onDelete(localTask._id);
@@ -525,7 +544,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               >
                 <FaTrash className="w-3.5 h-3.5" />
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

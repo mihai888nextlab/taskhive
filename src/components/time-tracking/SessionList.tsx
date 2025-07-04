@@ -1,5 +1,8 @@
 import React from "react";
 import { FaSearch, FaTrash, FaSpinner, FaClock } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface Session {
   _id: string;
@@ -69,7 +72,7 @@ const SessionList: React.FC<SessionListProps> = ({
         {/* Search */}
         <div className="relative">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
+          <Input
             type="text"
             placeholder="Search sessions..."
             value={sessionSearch}
@@ -84,35 +87,71 @@ const SessionList: React.FC<SessionListProps> = ({
 
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <select
+          <Select
             value={sessionTagFilter}
-            onChange={e => setSessionTagFilter(e.target.value)}
-            className={`px-4 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
-            }`}
+            onValueChange={setSessionTagFilter}
+            disabled={false}
           >
-            <option value="all">All Categories</option>
-            {tags.map(tag => (
-              <option key={tag} value={tag}>{tag}</option>
-            ))}
-          </select>
+            <SelectTrigger
+              className={`px-4 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
+                theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
+                  : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
+              }`}
+            >
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-xl border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-800 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              <SelectItem value="all">All Categories</SelectItem>
+              {tags.map(tag => (
+                <SelectItem
+                  key={tag}
+                  value={tag}
+                  className={`cursor-pointer transition-colors ${
+                    theme === "dark"
+                      ? "data-[state=highlighted]:bg-gray-700 data-[state=highlighted]:text-white"
+                      : "data-[state=highlighted]:bg-gray-100 data-[state=highlighted]:text-gray-900"
+                  }`}
+                >
+                  {tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <select
+          <Select
             value={sessionSort}
-            onChange={e => setSessionSort(e.target.value)}
-            className={`px-4 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
-            }`}
+            onValueChange={setSessionSort}
+            disabled={false}
           >
-            <option value="dateDesc">Newest First</option>
-            <option value="dateAsc">Oldest First</option>
-            <option value="durationDesc">Longest Duration</option>
-            <option value="durationAsc">Shortest Duration</option>
-          </select>
+            <SelectTrigger
+              className={`px-4 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
+                theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
+                  : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
+              }`}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-xl border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-800 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              <SelectItem value="dateDesc">Newest First</SelectItem>
+              <SelectItem value="dateAsc">Oldest First</SelectItem>
+              <SelectItem value="durationDesc">Longest Duration</SelectItem>
+              <SelectItem value="durationAsc">Shortest Duration</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -176,7 +215,7 @@ const SessionList: React.FC<SessionListProps> = ({
                       )}
                     </div>
                   </div>
-                  <button
+                  <Button
                     onClick={() => onDelete(session._id)}
                     className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
                       theme === 'dark' 
@@ -184,9 +223,10 @@ const SessionList: React.FC<SessionListProps> = ({
                         : 'text-red-600 hover:bg-red-50'
                     }`}
                     title="Delete Session"
+                    variant="ghost"
                   >
                     <FaTrash size={16} />
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}

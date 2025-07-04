@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import mongoose from "mongoose";
 import { useTheme } from "@/components/ThemeContext";
 import { FiMessageCircle, FiUsers, FiPlus } from "react-icons/fi";
+import { Button } from "@/components/ui/button";
 
 export interface PopulatedConversation extends mongoose.Document {
   _id: string;
@@ -90,20 +91,20 @@ const ConversationList: React.FC<ConversationListProps> = ({
         
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <button
+          <Button
             onClick={onNewChatClick}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
           >
             <FiPlus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
             <span className="hidden sm:inline">New Chat</span>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onNewGroupClick}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-500 hover:bg-gray-600 text-white'}`}
           >
             <FiUsers className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
             <span className="hidden sm:inline">New Group</span>
-          </button>
+          </Button>
         </div>
       </div>
 

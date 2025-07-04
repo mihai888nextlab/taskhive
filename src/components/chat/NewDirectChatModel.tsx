@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { FaTimes, FaComments, FaSearch, FaSpinner, FaUser } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { createPortal } from 'react-dom';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface NewDirectChatModalProps {
   isOpen: boolean;
@@ -170,7 +172,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
                 </label>
                 <div className="relative">
                   <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
+                  <Input
                     type="text"
                     placeholder="Search users by name or email..."
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
@@ -231,7 +233,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
                             <p className="text-gray-600">{u.userId.email}</p>
                           </div>
                         </div>
-                        <button
+                        <Button
                           onClick={() => handleStartChat(u.userId._id as string)}
                           disabled={creatingChat}
                           className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
@@ -251,7 +253,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
                               Start Chat
                             </div>
                           )}
-                        </button>
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -261,13 +263,14 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
 
             {/* Footer */}
             <div className="p-6 border-t border-gray-200 bg-gray-50">
-              <button
+              <Button
                 onClick={handleClose}
                 className="w-full py-3 px-6 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-200"
                 disabled={creatingChat}
+                variant="ghost"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         </div>,

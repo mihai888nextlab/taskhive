@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaPen, FaTrash, FaCheck, FaTimes, FaSignature, FaEye, FaDownload } from "react-icons/fa";
 import FileSigningModal from "@/components/signature/FileSigningModal";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type FileType = {
   _id: string;
@@ -110,37 +112,43 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
               
               {/* Action Buttons */}
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
+                <Button
                   onClick={() => handleSignFile(file)}
                   className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
                   title="Sign file"
+                  variant="ghost"
+                  size="icon"
                 >
                   <FaSignature size={14} />
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => {
                     setRenamingId(file._id);
                     setRenameValue(file.fileName);
                   }}
                   className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
                   title="Rename"
+                  variant="ghost"
+                  size="icon"
                 >
                   <FaPen size={14} />
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => handleDelete(file._id)}
                   className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
                   title="Delete"
+                  variant="ghost"
+                  size="icon"
                 >
                   <FaTrash size={14} />
-                </button>
+                </Button>
               </div>
             </div>
 
             {/* File Name */}
             {renamingId === file._id ? (
               <div className="mb-3">
-                <input
+                <Input
                   type="text"
                   value={renameValue}
                   onChange={(e) => setRenameValue(e.target.value)}
@@ -155,21 +163,23 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
                   autoFocus
                 />
                 <div className="flex gap-2 mt-2">
-                  <button
+                  <Button
                     onClick={() => handleRename(file._id)}
                     className="flex-1 p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all duration-200"
+                    variant="ghost"
                   >
                     <FaCheck size={12} />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {
                       setRenamingId(null);
                       setRenameValue("");
                     }}
                     className="flex-1 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                    variant="ghost"
                   >
                     <FaTimes size={12} />
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (
