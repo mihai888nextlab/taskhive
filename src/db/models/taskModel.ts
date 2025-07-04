@@ -9,6 +9,7 @@ export interface ITask extends Document {
   deadline: Date;
   completed: boolean;
   userId: Types.ObjectId; // Link to the User model
+  companyId: Types.ObjectId; // Optional link to the Company model
   createdAt: Date;
   updatedAt: Date;
   createdBy: Types.ObjectId;
@@ -42,6 +43,11 @@ const TaskSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User", // Reference the 'User' model
       required: true,
+    },
+    companyId: {
+      type: Schema.Types.ObjectId,
+      ref: "Company", // Optional reference to the 'Company' model
+      required: true, // Not required for all tasks
     },
     createdBy: {
       type: Schema.Types.ObjectId,

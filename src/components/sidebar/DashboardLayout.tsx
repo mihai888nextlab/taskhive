@@ -11,6 +11,7 @@ import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
 import TimerAndFormPanel from "@/components/time-tracking/TimerAndFormPanel";
 import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext";
 import { useAIWindow } from "@/contexts/AIWindowContext";
+import Link from "next/link";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -19,11 +20,11 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, loadingUser, isAuthenticated, logout } = useAuth();
   const router = useRouter();
-  const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } = useTimeTracking();
+  const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } =
+    useTimeTracking();
   const { isAIWindowOpen, setIsAIWindowOpen, toggleAIWindow } = useAIWindow();
   const showPersistent =
-    (isRunning || pomodoroRunning) &&
-    router.pathname !== "/app/time-tracking";
+    (isRunning || pomodoroRunning) && router.pathname !== "/app/time-tracking";
 
   // State to toggle AI window - now managed by context
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,8 +34,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     // Responsive check for desktop
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
     checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
   const [tasks, setTasks] = useState<any[]>([]);
@@ -109,7 +110,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Main Content */}
       <div
         className="flex-1 flex flex-col bg-gray-100"
-        style={isAIWindowOpen && isDesktop ? { marginRight: 420, transition: 'margin 0.3s' } : {}}
+        style={
+          isAIWindowOpen && isDesktop
+            ? { marginRight: 420, transition: "margin 0.3s" }
+            : {}
+        }
       >
         {/* Universal Search Bar at the top, centered between sidebar and right edge */}
         <div className="w-full flex justify-center items-center mt-7">
@@ -121,10 +126,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {children}
         </main>
         {showPersistent && (
-          <div 
-            className={`fixed top-6 z-[100] max-w-full transition-all duration-300 ${isAIWindowOpen && isDesktop ? 'w-64' : 'w-96'}`}
+          <div
+            className={`fixed top-6 z-[100] max-w-full transition-all duration-300 ${
+              isAIWindowOpen && isDesktop ? "w-64" : "w-96"
+            }`}
             style={{
-              right: isAIWindowOpen && isDesktop ? '440px' : '24px'
+              right: isAIWindowOpen && isDesktop ? "440px" : "24px",
             }}
           >
             <TimerAndFormPanel
@@ -154,30 +161,35 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         )}
       </div>
       {/* AI Button (hide on desktop if open) */}
-      {!(sidebarOpen && typeof window !== 'undefined' && window.innerWidth < 768) && (!isDesktop || !isAIWindowOpen) && (
-        <button
-          onClick={toggleAIWindow}
-          className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95 z-50"
-        >
-          <span className="text-lg font-semibold">AI</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-6 w-6 transform transition-transform duration-300 ${
-              isAIWindowOpen ? "rotate-45" : "rotate-0"
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+      {!(
+        sidebarOpen &&
+        typeof window !== "undefined" &&
+        window.innerWidth < 768
+      ) &&
+        (!isDesktop || !isAIWindowOpen) && (
+          <button
+            onClick={toggleAIWindow}
+            className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95 z-50"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-        </button>
-      )}
+            <span className="text-lg font-semibold">AI</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-6 w-6 transform transition-transform duration-300 ${
+                isAIWindowOpen ? "rotate-45" : "rotate-0"
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+          </button>
+        )}
       {/* AI Window: right panel on desktop, modal on mobile */}
       <AIWindow
         isOpen={isAIWindowOpen}

@@ -6,6 +6,7 @@ import { JWTPayload } from "@/types";
 import userModel from "@/db/models/userModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
 import dbConnect from "@/db/dbConfig";
+import companyModel from "@/db/models/companyModel";
 
 export default async function handler(
   req: NextApiRequest,
@@ -46,17 +47,41 @@ export default async function handler(
 
     const userCompany = await userCompanyModel.findOne({
       userId: decodedToken.userId,
+      companyId: decodedToken.companyId,
     });
 
     if (!userCompany) {
       return res.status(404).json({ message: "UserCompany not found" });
     }
 
+    const company = await companyModel.findById(userCompany.companyId);
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    const userCompanies = await userCompanyModel.find({
+      userId: decodedToken.userId,
+    });
+
+    const companies = await Promise.all(
+      userCompanies.map(async (uc) => {
+        const comp = await companyModel.findById(uc.companyId);
+        return {
+          id: comp?._id.toString(),
+          name: comp?.name,
+          role: uc.role,
+        };
+      })
+    );
+
     return res.status(200).json({
       user: {
         ...user,
         role: userCompany.role,
         companyId: userCompany.companyId,
+        companyName: company.name,
+        companies,
       },
     });
   } catch (error) {
