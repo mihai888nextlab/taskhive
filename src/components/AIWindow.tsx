@@ -315,7 +315,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
 
   return (
     <div
-      className={`fixed z-50 animate-slide-up flex flex-col transition-all aiwindow-mobile ${isDesktop ? 'aiwindow-desktop' : ''}`}
+      className={`fixed z-[101] animate-slide-up flex flex-col transition-all aiwindow-mobile ${isDesktop ? 'aiwindow-desktop' : ''}`}
       style={panelStyle}
     >
       <style>{`

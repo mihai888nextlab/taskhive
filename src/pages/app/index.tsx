@@ -16,28 +16,48 @@ import Head from 'next/head';
 
 // Generic card wrapper for consistent UI
 const DashboardCard: React.FC<{
-  icon: React.ReactNode;
+  icon: React.ReactElement<any>;
   title: string;
   description: string;
+  headerBg: string;
+  iconBg: string;
+  iconColor: string;
   children?: React.ReactNode;
-}> = ({ icon, title, description, children }) => {
+}> = ({ icon, title, description, headerBg, iconBg, iconColor, children }) => {
   const { theme } = useTheme();
-  const cardBackground = 'bg-white';
-  const cardTextColor = theme === 'light' ? 'text-gray-900' : 'text-white';
-  const borderColor = 'border-gray-200';
+  const cardBackground = theme === 'dark' ? 'bg-gray-800' : 'bg-white';
+  const borderColor = theme === 'dark' ? 'border-gray-700' : 'border-gray-200';
+
+  // Map headerBg to border hover color
+  let borderHover = '';
+  if (headerBg.includes('blue')) borderHover = 'hover:border-blue-500';
+  else if (headerBg.includes('yellow')) borderHover = 'hover:border-yellow-500';
+  else if (headerBg.includes('green')) borderHover = 'hover:border-green-500';
+  else if (headerBg.includes('purple')) borderHover = 'hover:border-purple-500';
+  else borderHover = theme === 'dark' ? 'hover:border-gray-500' : 'hover:border-gray-400';
 
   return (
     <div
-      className={`group relative ${cardBackground} p-8 rounded-2xl border ${borderColor} shadow-sm transition-all duration-300 flex flex-col overflow-hidden`}
+      className={`relative ${cardBackground} rounded-2xl border ${borderColor} ${borderHover} transition-colors duration-200 flex flex-col overflow-hidden h-full`}
     >
-      <div className="flex items-center mb-4">
-        <div className="p-3 bg-primary-light/10 rounded-full mr-4 flex-shrink-0">
-          {icon}
+      {/* Card Header */}
+      <div className={`flex items-center gap-4 p-6 border-b ${headerBg}`}>
+        <div className={`p-3 rounded-xl flex-shrink-0 flex items-center justify-center ${iconBg}`}>
+          {React.cloneElement(icon, {
+            className: `w-5 h-5 ${iconColor}`,
+          })}
         </div>
-        <h2 className={`text-2xl font-bold leading-snug ${cardTextColor}`}>{title}</h2>
+        <div>
+          <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+            {title}
+          </h2>
+          <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+            {description}
+          </p>
+        </div>
       </div>
-      <p className={`text-base mb-4 flex-grow ${cardTextColor}`}>{description}</p>
-      {children && <div className="mt-auto">{children}</div>}
+      {/* Card Content */}
+      <div className="flex-1 flex flex-col p-6">{children}</div>
     </div>
   );
 };
@@ -150,18 +170,9 @@ const DashboardPage: NextPageWithLayout = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </Head>
 
-      {/* {loadingStats ? (
-        <p className="text-center text-gray-600 mb-8">Loading statistics...</p>
-      ) : (
-        stats && (
-          <div className="mb-10">
-            <Statistics {...stats} />
-          </div>
-        )
-      )} */}
-
+      {/* Cards Grid */}
       <div
-        className="w-full flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 md:gap-8"
+        className="w-full flex flex-col gap-5 md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 md:gap-5"
       >
         {/* Tasks Card */}
         <div
@@ -174,11 +185,35 @@ const DashboardPage: NextPageWithLayout = () => {
           aria-label="Go to tasks page"
         >
           <DashboardCard
-            icon={<FaTasks className="text-primary text-3xl" />}
+            icon={<FaTasks />}
             title={tasksCardTitle}
             description="Organize and track your team's assignments and progress."
+            headerBg={theme === "dark" ? "bg-blue-900 border-blue-800" : "bg-blue-50 border-blue-200"}
+            iconBg={theme === "dark" ? "bg-blue-600" : "bg-blue-500"}
+            iconColor="text-white"
           >
-            <DashboardTaskPreview userId={currentUser?._id} userEmail={currentUser?.email} setTitle={setTasksCardTitle} />
+            <DashboardTaskPreview
+              userId={currentUser?._id}
+              userEmail={currentUser?.email}
+              setTitle={setTasksCardTitle}
+            />
+            {/* Tasks empty state (like tasks page) */}
+            {/* 
+              Example usage:
+              {!hasTasks && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className={`flex items-center justify-center w-20 h-20 rounded-full mb-4 ${
+                    theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+                  }`}>
+                    <FaTasks className="text-4xl text-gray-400" />
+                  </div>
+                  <h4 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>No Tasks Found</h4>
+                  <p className={`text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Create your first task to get started
+                  </p>
+                </div>
+              )}
+            */}
           </DashboardCard>
         </div>
         {/* Announcements Card */}
@@ -191,9 +226,12 @@ const DashboardPage: NextPageWithLayout = () => {
           aria-label="Go to announcements page"
         >
           <DashboardCard
-            icon={<FaBullhorn className="text-primary text-3xl" />}
+            icon={<FaBullhorn />}
             title="Announcement"
             description="Stay up to date with the latest company news and updates."
+            headerBg={theme === "dark" ? "bg-yellow-900 border-yellow-800" : "bg-yellow-50 border-yellow-200"}
+            iconBg={theme === "dark" ? "bg-yellow-600" : "bg-yellow-500"}
+            iconColor="text-white"
           >
             {/* Only render the announcement content, no extra container or heading */}
             {loadingAnnouncement ? (
@@ -207,10 +245,18 @@ const DashboardPage: NextPageWithLayout = () => {
                 <p className="text-sm italic">{announcementError}</p>
               </div>
             ) : !announcementPreview ? (
-              <div className="text-center p-5 bg-blue-50/20 rounded-md border border-blue-200 shadow-inner">
-                <p className="font-bold text-lg mb-2">No announcements yet.</p>
-                <p className="text-sm leading-relaxed">
-                  Stay tuned for important company updates!
+              // Empty state for announcements (copied from AnnouncementList)
+              <div className="text-center py-16">
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                }`}>
+                  <FaBullhorn className="text-2xl text-gray-400" />
+                </div>
+                <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  No announcements yet
+                </h3>
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Check back later for company updates and news
                 </p>
               </div>
             ) : (
@@ -252,10 +298,14 @@ const DashboardPage: NextPageWithLayout = () => {
           aria-label="Go to finance page"
         >
           <DashboardCard
-            icon={<FaMoneyBillWave className="text-primary text-3xl" />}
+            icon={<FaMoneyBillWave />}
             title="Finance"
             description="Keep track of your income, expenses, and overall financial health."
+            headerBg={theme === "dark" ? "bg-green-900 border-green-800" : "bg-green-50 border-green-200"}
+            iconBg={theme === "dark" ? "bg-green-600" : "bg-green-500"}
+            iconColor="text-white"
           >
+            {/* You can add a similar empty state for finance if needed */}
             <DashboardFinancePreview
               totalExpenses={totalExpenses}
               totalIncomes={totalIncomes}
@@ -273,9 +323,12 @@ const DashboardPage: NextPageWithLayout = () => {
           aria-label="Go to users page"
         >
           <DashboardCard
-            icon={<FaUserClock className="text-primary text-3xl" />}
+            icon={<FaUserClock />}
             title="Users"
             description="Manage user accounts, roles, and permissions within your team."
+            headerBg={theme === "dark" ? "bg-blue-900 border-blue-800" : "bg-blue-50 border-blue-200"}
+            iconBg={theme === "dark" ? "bg-blue-600" : "bg-blue-500"}
+            iconColor="text-white"
           >
             <div className="flex flex-col h-full">
               {loadingUsers ? (
@@ -298,13 +351,24 @@ const DashboardPage: NextPageWithLayout = () => {
                       { key: "lastName", header: "Last Name" },
                       { key: "email", header: "Email" },
                     ]}
-                    emptyMessage="No users registered."
+                    emptyMessage=""
                   />
                 </>
               ) : (
-                <p className="text-gray-600 text-center p-5 bg-white rounded-md border border-gray-200 shadow-inner">
-                  No users registered yet.
-                </p>
+                // Empty state for users (copied from UserList)
+                <div className="text-center py-16">
+                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+                    theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                  }`}>
+                    <FaUserClock className="text-2xl text-gray-400" />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    No team members yet
+                  </h3>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Start by adding your first team member
+                  </p>
+                </div>
               )}
             </div>
           </DashboardCard>
@@ -312,11 +376,15 @@ const DashboardPage: NextPageWithLayout = () => {
         {/* Calendar Card */}
         <div className="w-full px-2 flex md:block md:px-0">
           <DashboardCard
-            icon={<FaCalendarAlt className="text-primary text-3xl" />}
+            icon={<FaCalendarAlt />}
             title="Calendar"
             description="View deadlines, scheduled meetings, and project milestones."
+            headerBg={theme === "dark" ? "bg-purple-900 border-purple-800" : "bg-purple-50 border-purple-200"}
+            iconBg={theme === "dark" ? "bg-purple-600" : "bg-purple-500"}
+            iconColor="text-white"
           >
             <DashboardCalendarPreview userId={currentUser?._id} userEmail={currentUser?.email} />
+            {/* Optionally add an empty state for calendar if needed */}
           </DashboardCard>
         </div>
       </div>

@@ -87,10 +87,10 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-xl cursor-pointer transform hover:scale-[1.01] ${
+      className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer transform hover:scale-[1.01] ${
         theme === "dark"
           ? "bg-gray-800 border-gray-700 hover:border-gray-600 hover:bg-gray-750"
-          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-lg"
+          : "bg-white border-gray-200 hover:border-gray-300"
       }`}
       onClick={e => {
         if ((e.target as HTMLElement).closest('.admin-action-btn')) return;

@@ -194,7 +194,7 @@ const Storage = () => {
             <div className="flex gap-3">
               <Button
                 onClick={() => setSignatureModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-700 transform hover:scale-102 transition-all duration-200 shadow-lg"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-700 transform hover:scale-102 transition-all duration-200"
                 variant="default"
               >
                 <FaSignature className="text-lg" />
@@ -202,7 +202,7 @@ const Storage = () => {
               </Button>
               <Button
                 onClick={() => setUploadFileModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transform hover:scale-102 transition-all duration-200 shadow-lg"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transform hover:scale-102 transition-all duration-200"
                 variant="default"
               >
                 <FaCloudUploadAlt className="text-lg" />
@@ -251,7 +251,7 @@ const Storage = () => {
         <>
           {uploadFileModal && createPortal(
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+              <div className="bg-white rounded-3xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
                   onClick={() => {
@@ -281,7 +281,7 @@ const Storage = () => {
           
           {signatureModal && createPortal(
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
+              <div className="bg-white rounded-3xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
                   onClick={() => setSignatureModal(false)}
@@ -301,7 +301,7 @@ const Storage = () => {
           
           {fileSigningModal && createPortal(
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-7xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+              <div className="bg-white rounded-3xl p-0 max-w-7xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
                   onClick={() => {

@@ -123,23 +123,23 @@ const InsightsPage = () => {
         const statsSummary = `User statistics summary:\n- Total expenses: ${expensesData.length}, total spent: ${expensesData.reduce((a,b)=>a+b.amount,0)}\n- Total incomes: ${incomesData.length}, total earned: ${incomesData.reduce((a,b)=>a+b.amount,0)}\n- Expenses by category: ${Object.entries(pie).map(([k,v])=>`${k}: ${v}`).join(', ')}\n- Time sessions: ${timeData.length}, total hours: ${totalHours.toFixed(2)}\n- Tasks: total ${last7dTasks.length}, completed last 7d: ${completedLast7d}, trend: ${trendArr.join(', ')}.\nGive me personalized, actionable recommendations to improve my productivity and finances, referencing my most frequent categories and time usage.\n`;
         const analyticsPrompt = `You are a world-class business and productivity analyst. Given the following user statistics, provide a highly structured, data-driven analysis using only bullet points. Each bullet should start with a bolded label (e.g., *Business Expenses: 40%*) followed by a concise insight. Use clear section headers in bold markdown (e.g., **Financial Analysis:**, **Time Analysis:**, **Task Analysis:**). Use percentages, comparisons, and highlight strengths and weaknesses. Do not give advice or suggestions—focus only on analysis and insights. No paragraphs, only bullet points. Limit your response to the 3 most important insights per section, and keep each bullet point under 15 words. Make the response as short as possible while remaining useful.\n\nUser statistics:\n- Total expenses: ${expensesData.length}, total spent: ${expensesData.reduce((a,b)=>a+b.amount,0)}\n- Total incomes: ${incomesData.length}, total earned: ${incomesData.reduce((a,b)=>a+b.amount,0)}\n- Expenses by category: ${Object.entries(pie).map(([k,v])=>`${k}: ${v}`).join(', ')}\n- Time sessions: ${timeData.length}, total hours: ${totalHours.toFixed(2)}\n- Tasks: total ${last7dTasks.length}, completed last 7d: ${completedLast7d}, trend: ${trendArr.join(', ')}.`;
         const suggestionsPrompt = `You are a world-class productivity and finance coach. Given the following user statistics, provide highly structured, actionable suggestions using only bullet points. Each bullet should start with a bolded label (e.g., *Prioritize Tasks:*) followed by a concise, motivating suggestion. Use clear section headers in bold markdown (e.g., **Financial Suggestions:**, **Time Management Suggestions:**, **Task Suggestions:**). Reference the user's most frequent categories, time usage, and task completion trends. Use a friendly, motivating tone. No paragraphs, only bullet points. Limit your response to the 3 most important suggestions per section, and keep each bullet point under 15 words. Make the response as short as possible while remaining useful.\n\nUser statistics:\n- Total expenses: ${expensesData.length}, total spent: ${expensesData.reduce((a,b)=>a+b.amount,0)}\n- Total incomes: ${incomesData.length}, total earned: ${incomesData.reduce((a,b)=>a+b.amount,0)}\n- Expenses by category: ${Object.entries(pie).map(([k,v])=>`${k}: ${v}`).join(', ')}\n- Time sessions: ${timeData.length}, total hours: ${totalHours.toFixed(2)}\n- Tasks: total ${last7dTasks.length}, completed last 7d: ${completedLast7d}, trend: ${trendArr.join(', ')}.`;
-        // Fetch both analytics and suggestions in parallel
-        const [analyticsRes, suggestionsRes] = await Promise.all([
-          fetch('/api/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: analyticsPrompt })
-          }),
-          fetch('/api/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: suggestionsPrompt })
-          })
-        ]);
-        const analyticsData = await analyticsRes.json();
-        const suggestionsData = await suggestionsRes.json();
-        setAiAnalytics(analyticsData.response || 'No analytics available.');
-        setAiSuggestions(suggestionsData.response || 'No suggestions available.');
+
+        // Fetch AI analytics and suggestions asynchronously (do not block UI)
+        setTimeout(() => {
+          Promise.all([
+            fetch('/api/gemini', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ prompt: analyticsPrompt })
+            }).then(res => res.json()).then(data => setAiAnalytics(data.response || 'No analytics available.')).catch(() => setAiAnalytics('Failed to load AI analytics.')),
+            fetch('/api/gemini', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ prompt: suggestionsPrompt })
+            }).then(res => res.json()).then(data => setAiSuggestions(data.response || 'No suggestions available.')).catch(() => setAiSuggestions('Failed to load AI suggestions.'))
+          ]);
+        }, 0);
+
       } catch (err) {
         setAiInsights('Failed to load AI insights.');
       } finally {
@@ -154,29 +154,29 @@ const InsightsPage = () => {
       <div className="p-6 md:p-8 bg-gray-100 min-h-screen font-sans">
         {/* Executive Summary Card */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-            <div className="bg-white rounded-3xl shadow-xl flex flex-col items-center p-10 border border-gray-200 animate-pulse">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+            <div className="bg-white rounded-3xl flex flex-col items-center p-10 border border-gray-200 animate-pulse">
               <div className="h-10 w-10 bg-gray-200 rounded-full mb-4" />
               <div className="h-4 w-20 bg-gray-200 rounded mb-2" />
               <div className="h-8 w-24 bg-gray-200 rounded mb-2" />
               <div className="h-4 w-24 bg-gray-200 rounded" />
               <div className="text-xs text-gray-400 mt-4">Loading tasks...</div>
             </div>
-            <div className="bg-white rounded-3xl shadow-xl flex flex-col items-center p-10 border border-gray-200 animate-pulse">
+            <div className="bg-white rounded-3xl flex flex-col items-center p-10 border border-gray-200 animate-pulse">
               <div className="h-10 w-10 bg-gray-200 rounded-full mb-4" />
               <div className="h-4 w-20 bg-gray-200 rounded mb-2" />
               <div className="h-8 w-24 bg-gray-200 rounded mb-2" />
               <div className="h-4 w-24 bg-gray-200 rounded" />
               <div className="text-xs text-gray-400 mt-4">Loading expenses...</div>
             </div>
-            <div className="bg-white rounded-3xl shadow-xl flex flex-col items-center p-10 border border-gray-200 animate-pulse">
+            <div className="bg-white rounded-3xl flex flex-col items-center p-10 border border-gray-200 animate-pulse">
               <div className="h-10 w-10 bg-gray-200 rounded-full mb-4" />
               <div className="h-4 w-20 bg-gray-200 rounded mb-2" />
               <div className="h-8 w-24 bg-gray-200 rounded mb-2" />
               <div className="h-4 w-24 bg-gray-200 rounded" />
               <div className="text-xs text-gray-400 mt-4">Loading time tracked...</div>
             </div>
-            <div className="bg-white rounded-3xl shadow-xl flex flex-col items-center p-10 border border-gray-200 animate-pulse">
+            <div className="bg-white rounded-3xl flex flex-col items-center p-10 border border-gray-200 animate-pulse">
               <div className="h-10 w-10 bg-gray-200 rounded-full mb-4" />
               <div className="h-4 w-20 bg-gray-200 rounded mb-2" />
               <div className="h-8 w-24 bg-gray-200 rounded mb-2" />
@@ -185,26 +185,26 @@ const InsightsPage = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-            <div className="bg-white rounded-3xl shadow-xl flex flex-col items-center p-10 border border-gray-200 hover:shadow-2xl transition-shadow group">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+            <div className="bg-white rounded-3xl flex flex-col items-center p-10 border border-gray-200 group">
               <FaTasks className="text-4xl text-blue-600 mb-4 group-hover:scale-110 transition-transform" />
               <div className="text-xs text-gray-400 mb-1 tracking-wide uppercase">Tasks</div>
               <div className="text-4xl font-black text-gray-900 mb-1 tracking-tight">{taskStats.total}</div>
               <div className="text-sm text-green-600 font-semibold">{taskStats.completed} completed (7d)</div>
             </div>
-            <div className="bg-white rounded-3xl shadow-xl flex flex-col items-center p-10 border border-gray-200 hover:shadow-2xl transition-shadow group">
+            <div className="bg-white rounded-3xl flex flex-col items-center p-10 border border-gray-200 group">
               <FaMoneyBillWave className="text-4xl text-green-600 mb-4 group-hover:scale-110 transition-transform" />
               <div className="text-xs text-gray-400 mb-1 tracking-wide uppercase">Total Spent</div>
               <div className="text-4xl font-black text-gray-900 mb-1 tracking-tight">${expenses.reduce((a,b)=>a+b.amount,0)}</div>
               <div className="text-sm text-gray-500 font-medium">{Object.keys(pieData).length} categories</div>
             </div>
-            <div className="bg-white rounded-3xl shadow-xl flex flex-col items-center p-10 border border-gray-200 hover:shadow-2xl transition-shadow group">
+            <div className="bg-white rounded-3xl flex flex-col items-center p-10 border border-gray-200 group">
               <FaClock className="text-4xl text-purple-600 mb-4 group-hover:scale-110 transition-transform" />
               <div className="text-xs text-gray-400 mb-1 tracking-wide uppercase">Time Tracked</div>
               <div className="text-4xl font-black text-gray-900 mb-1 tracking-tight">{(timeSessions.reduce((a,b)=>a+b.duration,0)/3600).toFixed(2)} hrs</div>
               <div className="text-sm text-gray-500 font-medium">{timeSessions.length} sessions</div>
             </div>
-            <div className="bg-white rounded-3xl shadow-xl flex flex-col items-center p-10 border border-gray-200 hover:shadow-2xl transition-shadow group">
+            <div className="bg-white rounded-3xl flex flex-col items-center p-10 border border-gray-200 group">
               <FaComments className="text-4xl text-pink-600 mb-4 group-hover:scale-110 transition-transform" />
               <div className="text-xs text-gray-400 mb-1 tracking-wide uppercase">Communication</div>
               <div className="text-4xl font-black text-gray-900 mb-1 tracking-tight">-</div>
@@ -214,15 +214,15 @@ const InsightsPage = () => {
         )}
         {/* Predictive Analytics & Anomaly Detection */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-white rounded-3xl shadow-xl p-10 border border-gray-200 animate-pulse min-h-[140px] flex flex-col justify-center items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="bg-white rounded-3xl p-10 border border-gray-200 animate-pulse min-h-[140px] flex flex-col justify-center items-center">
               <div className="h-6 w-40 bg-gray-200 rounded mb-4" />
               <div className="h-4 w-64 bg-gray-200 rounded mb-2" />
               <div className="h-4 w-56 bg-gray-200 rounded mb-2" />
               <div className="h-4 w-48 bg-gray-200 rounded" />
               <div className="text-xs text-gray-400 mt-4">Loading analytics...</div>
             </div>
-            <div className="bg-white rounded-3xl shadow-xl p-10 border border-gray-200 animate-pulse min-h-[140px] flex flex-col justify-center items-center">
+            <div className="bg-white rounded-3xl p-10 border border-gray-200 animate-pulse min-h-[140px] flex flex-col justify-center items-center">
               <div className="h-6 w-40 bg-gray-200 rounded mb-4" />
               <div className="h-4 w-64 bg-gray-200 rounded mb-2" />
               <div className="h-4 w-56 bg-gray-200 rounded mb-2" />
@@ -231,8 +231,8 @@ const InsightsPage = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-white rounded-3xl shadow-xl p-10 border border-gray-200 hover:shadow-2xl transition-shadow min-h-[140px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="bg-white rounded-3xl p-10 border border-gray-200 min-h-[140px]">
               <div className="flex items-center mb-4"><FaChartLine className="text-blue-500 mr-2 text-xl" /><span className="font-bold text-gray-900 text-lg tracking-tight">Predictive Analytics</span></div>
               <ul className="text-base text-gray-700 pl-2 list-disc space-y-2">
                 <li><span className="font-semibold">Task Completion Forecast:</span> Next week’s completion rate is likely to be similar to this week’s ({taskStats.completed}/7d).</li>
@@ -240,7 +240,7 @@ const InsightsPage = () => {
                 <li><span className="font-semibold">Time Usage:</span> Avg session: {timeSessions.length ? Math.round(timeSessions.reduce((a,b)=>a+b.duration,0)/timeSessions.length) : 0} min.</li>
               </ul>
             </div>
-            <div className="bg-white rounded-3xl shadow-xl p-10 border border-gray-200 hover:shadow-2xl transition-shadow min-h-[140px]">
+            <div className="bg-white rounded-3xl p-10 border border-gray-200 min-h-[140px]">
               <div className="flex items-center mb-4"><FaExclamationTriangle className="text-yellow-500 mr-2 text-xl" /><span className="font-bold text-gray-900 text-lg tracking-tight">Anomaly Detection</span></div>
               <ul className="text-base text-gray-700 pl-2 list-disc space-y-2">
                 <li><span className="font-semibold">Expense Spike:</span> {expenses.length > 0 && Math.max(...expenses.map(e=>e.amount)) > 500 ? 'Unusually high expense detected.' : 'No anomalies.'}</li>
@@ -251,16 +251,16 @@ const InsightsPage = () => {
           </div>
         )}
         {/* AI Analytics & Suggestions between summary and main dashboard */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-          <div className="bg-white rounded-3xl shadow-2xl p-10 min-h-[180px] flex flex-col justify-center col-span-2 border border-gray-200">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <div className="bg-white rounded-3xl p-10 min-h-[180px] flex flex-col justify-center col-span-2 border border-gray-200">
             <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">AI Analytics & Suggestions</h2>
             <div className="flex gap-4 mb-4">
-              <button onClick={() => setAiTab('analytics')} className={`px-6 py-2 rounded-full font-semibold text-base transition ${aiTab==='analytics' ? 'bg-gray-900 text-white shadow' : 'bg-gray-100 text-gray-700'}`}>Analytics</button>
-              <button onClick={() => setAiTab('suggestions')} className={`px-6 py-2 rounded-full font-semibold text-base transition ${aiTab==='suggestions' ? 'bg-gray-900 text-white shadow' : 'bg-gray-100 text-gray-700'}`}>Suggestions</button>
+              <button onClick={() => setAiTab('analytics')} className={`px-6 py-2 rounded-full font-semibold text-base transition ${aiTab==='analytics' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700'}`}>Analytics</button>
+              <button onClick={() => setAiTab('suggestions')} className={`px-6 py-2 rounded-full font-semibold text-base transition ${aiTab==='suggestions' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700'}`}>Suggestions</button>
             </div>
             <div className="text-gray-800 text-base whitespace-pre-line min-h-[60px] leading-snug">
-              {loading ? (
-                <div className="text-gray-400 text-lg">Loading AI insights...</div>
+              {(aiTab === 'analytics' && !aiAnalytics) || (aiTab === 'suggestions' && !aiSuggestions) ? (
+                <div className="text-gray-400 text-lg">Loading AI {aiTab}...</div>
               ) : aiTab === 'analytics' ? (
                 <div className="ai-response" dangerouslySetInnerHTML={{ __html: aiAnalytics.replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-gray-900">$1</span>').replace(/\*(.*?)\*/g, '<span class="font-semibold text-gray-900">$1</span>').replace(/\n- /g, '<br>• ') }} />
               ) : (
@@ -272,18 +272,18 @@ const InsightsPage = () => {
         {loading ? (
           <div className="text-center text-gray-400 text-xl font-medium py-24">Loading your insights...</div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Left column: Pie + Table */}
-            <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-4">
               {/* Expenses and Incomes Pie Charts side by side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="bg-white rounded-3xl shadow-2xl p-12 flex flex-col items-center min-h-[340px] border border-gray-200 hover:shadow-2xl transition-shadow">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white rounded-3xl p-12 flex flex-col items-center min-h-[340px] border border-gray-200">
                   <h2 className="font-bold text-2xl mb-8 text-gray-900 tracking-tight">Expenses by Category</h2>
                   <div className="w-full flex flex-col items-center">
                     <div className="w-56 h-56 flex items-center justify-center">
                       <ExpensePieChart data={pieData} />
                     </div>
-                    <div className="flex flex-wrap justify-center gap-3 mt-8">
+                    <div className="flex flex-wrap justify-center gap-4 mt-4">
                       {Object.entries(pieData).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([cat], i) => (
                         <span key={cat} className={classNames('px-4 py-1 rounded-full text-sm font-semibold', [
                           'bg-[#FF6384] text-white',
@@ -298,13 +298,13 @@ const InsightsPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-3xl shadow-2xl p-12 flex flex-col items-center min-h-[340px] border border-gray-200 hover:shadow-2xl transition-shadow">
-                  <h2 className="font-bold text-2xl mb-8 text-gray-900 tracking-tight">Incomes by Category</h2>
+                <div className="bg-white rounded-3xl p-12 flex flex-col items-center min-h-[340px] border border-gray-200">
+                  <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">Incomes by Category</h2>
                   <div className="w-full flex flex-col items-center">
                     <div className="w-56 h-56 flex items-center justify-center">
                       <ExpensePieChart data={incomePieData} />
                     </div>
-                    <div className="flex flex-wrap justify-center gap-3 mt-8">
+                    <div className="flex flex-wrap justify-center gap-4 mt-4">
                       {Object.entries(incomePieData).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([cat], i) => (
                         <span key={cat} className={classNames('px-4 py-1 rounded-full text-sm font-semibold', [
                           'bg-[#36A2EB] text-white',
@@ -322,8 +322,8 @@ const InsightsPage = () => {
               </div>
             </div>
             {/* Right column: Trends + AI */}
-            <div className="flex flex-col gap-10">
-                <div className="bg-white rounded-3xl shadow-2xl p-16 min-h-[380px] flex flex-col justify-center border border-gray-200 hover:shadow-2xl transition-shadow">
+            <div className="flex flex-col gap-4">
+                <div className="bg-white rounded-3xl p-16 min-h-[380px] flex flex-col justify-center border border-gray-200">
                   <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">Finance Overview (Last 7 Days)</h2>
                   <FinanceStatistics 
                     expensesData={financeStats.expenses} 
@@ -336,8 +336,8 @@ const InsightsPage = () => {
                 </div>
             </div>
             {/* Full width row: Time & Tasks */}
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-10 mt-2">
-              <div className="bg-white rounded-3xl shadow-2xl p-16 min-h-[380px] flex flex-col justify-center border border-gray-200 hover:shadow-2xl transition-shadow">
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white rounded-3xl p-16 min-h-[380px] flex flex-col justify-center border border-gray-200">
                 <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">Hours Worked (Last 7 Days)</h2>
                 <TimeStatistics 
                   last7DaysHours={timeSessions.map(t => t.duration/60).slice(0,7)} 
@@ -346,9 +346,9 @@ const InsightsPage = () => {
                   className="h-[320px]"
                 />
               </div>
-              <div className="bg-white rounded-3xl shadow-2xl p-16 min-h-[380px] flex flex-col justify-center border border-gray-200 hover:shadow-2xl transition-shadow">
+              <div className="bg-white rounded-3xl p-16 min-h-[380px] flex flex-col justify-center border border-gray-200">
                 <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">Task Statistics</h2>
-                <div className="mb-6 text-lg text-gray-700 font-medium flex flex-wrap items-center gap-4">
+                <div className="mb-4 text-lg text-gray-700 font-medium flex flex-wrap items-center gap-4">
                   <span>Total Tasks: <span className="font-bold text-gray-900">{taskStats.total}</span></span>
                   <span className="hidden md:inline">|</span>
                   <span>Completed (7d): <span className="font-bold text-green-700">{taskStats.completed}</span></span>

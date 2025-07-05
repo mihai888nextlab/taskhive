@@ -51,9 +51,10 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   });
 
   return (
-    <aside className="hidden md:flex w-[300px] bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 flex-col shadow-lg">
+    <aside className="hidden md:flex fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] text-white px-5 flex-col shadow-lg border-r border-[#23272f] z-[90]">
+      {/* Logo/Brand */}
       <Link href="/app">
-        <div className="relative w-48 h-20 mx-auto">
+        <div className="relative w-48 h-20 mx-auto mt-2 mb-2">
           <Image
             src="/logo.png"
             alt="Logo"
@@ -83,15 +84,19 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       <nav>
         <ul className="mt-4 space-y-2">
           {menuWithNotifications.map((item) => (
-            <li
+            <Link
               key={item.name}
-              className={`p-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md ${
-                router.pathname === item.path
-                  ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-md"
-                  : "hover:bg-gray-700 hover:text-white text-gray-300"
-              }`}
+              href={item.path}
+              className="block"
+              tabIndex={0}
             >
-              <Link href={item.path} className="flex items-center">
+              <li
+                className={`flex items-center w-full h-full p-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md ${
+                  router.pathname === item.path
+                    ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-md"
+                    : "hover:bg-gray-700 hover:text-white text-gray-300"
+                }`}
+              >
                 {item.icon && (
                   <item.icon className="mr-3 text-xl text-primary-light" />
                 )}
@@ -101,44 +106,11 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
                     {item.notification}
                   </span>
                 )}
-              </Link>
-            </li>
+              </li>
+            </Link>
           ))}
         </ul>
       </nav>
-      {/* Separator before user info */}
-      <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
-      {/* User Profile Section */}
-      <Link
-        href="/app/settings"
-        className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
-      >
-        <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg overflow-hidden">
-          {user.profileImage &&
-          typeof user.profileImage === "object" &&
-          user.profileImage.data ? (
-            <div className="relative w-10 h-10 object-cover rounded-full">
-              <Image src={user.profileImage.data} alt="Profile" fill={true} />
-            </div>
-          ) : user.firstName ? (
-            user.firstName[0].toUpperCase()
-          ) : (
-            "U"
-          )}
-        </div>
-        <div>
-          <p className="font-semibold text-white">
-            {user.firstName} {user.lastName}
-          </p>
-          <p className="text-xs text-gray-400">{user.email}</p>
-        </div>
-      </Link>
-      <button
-        onClick={auth.logout}
-        className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center"
-      >
-        <span className="text-center">Logout</span>
-      </button>
     </aside>
   );
 };

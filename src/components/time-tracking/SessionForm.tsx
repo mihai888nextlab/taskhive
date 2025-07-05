@@ -1,5 +1,6 @@
 import React from "react";
 import { FaSave } from "react-icons/fa";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface SessionFormProps {
   sessionName: string;
@@ -27,7 +28,7 @@ const SessionForm: React.FC<SessionFormProps> = ({
   return (
     <div className="transition-all duration-500 ease-in-out py-4">
       <div
-        className={`bg-${theme === 'light' ? 'gray-50' : 'gray-800'} p-4 md:p-6 rounded-2xl shadow-xl border border-gray-200 animate-fadeIn`}
+        className={`bg-${theme === 'light' ? 'gray-50' : 'gray-800'} p-4 md:p-6 rounded-2xl border border-gray-200 animate-fadeIn`}
       >
         <h2 className={`text-2xl font-bold text-${theme === 'light' ? 'gray-800' : 'white'} mb-4 text-center`}>
           Log a New Session
@@ -72,22 +73,36 @@ const SessionForm: React.FC<SessionFormProps> = ({
               <label htmlFor="sessionTag" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-1 after:content-['*'] after:ml-0.5 after:text-red-500`}>
                 Tag:
               </label>
-              <select
-                id="sessionTag"
-                className={`w-full py-2 px-3 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 text-base`}
+              <Select
                 value={sessionTag}
-                onChange={e => setSessionTag(e.target.value)}
+                onValueChange={setSessionTag}
                 required
               >
-                <option value="">Select tag</option>
-                {tags.map(tag => <option key={tag} value={tag}>{tag}</option>)}
-              </select>
+                <SelectTrigger
+                  className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+                  style={{ height: "40px" }}
+                >
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+                  <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">All Categories</SelectItem>
+                  {tags.map(tag => (
+                    <SelectItem
+                      key={tag}
+                      value={tag}
+                      className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                    >
+                      {tag}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="flex justify-end">
             <button
               type="submit"
-              className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-2 px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-base"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-2 px-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-base"
             >
               <FaSave className="mr-2" />
               Save Session

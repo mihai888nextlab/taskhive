@@ -5,6 +5,7 @@ import {
   FaRegCircle,
   FaExclamationTriangle,
   FaArrowRight,
+  FaTasks,
 } from "react-icons/fa";
 import Link from "next/link";
 // import { useRouter } from 'next/router';
@@ -181,11 +182,18 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
           </button>
         </div>
       ) : tasks.length === 0 ? (
-        <div className="text-center p-5 bg-green-50/20 rounded-md border border-green-200 shadow-inner">
-          <p className="font-bold text-lg mb-2">No active tasks! 🎉</p>
-          <p className="text-sm leading-relaxed">
-            All your tasks are either completed or you haven&apos;t added any
-            yet.
+        // Empty state: visually like announcements, content like tasks page
+        <div className="text-center py-16">
+          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+          }`}>
+            <FaTasks className="text-2xl text-gray-400" />
+          </div>
+          <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            No Tasks Found
+          </h3>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            Create your first task to get started
           </p>
         </div>
       ) : (

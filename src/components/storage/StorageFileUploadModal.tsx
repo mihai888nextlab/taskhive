@@ -88,7 +88,7 @@ export default function FileUploadModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full border border-white/20">
+      <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl max-w-md w-full border border-white/20">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
           <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ export default function FileUploadModal({
             className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
               !file || uploading
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 shadow-lg"
+                : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105"
             }`}
           >
             {uploading ? (

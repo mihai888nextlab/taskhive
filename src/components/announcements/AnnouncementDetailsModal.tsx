@@ -129,7 +129,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden`}>
+      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-3xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden`}>
         {/* Close Button */}
         <Button
           type="button"
@@ -282,7 +282,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                       {comments.map((comment, index) => (
                         <div
                           key={comment._id || index}
-                          className={`p-4 rounded-2xl border transition-all duration-200 hover:shadow-md ${
+                          className={`p-4 rounded-2xl border transition-all duration-200 ${
                             theme === 'dark' 
                               ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' 
                               : 'bg-white border-gray-200 hover:border-gray-300'
@@ -343,7 +343,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${
                                 posting || !commentInput.trim()
                                   ? theme === 'dark' ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                                  : 'bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-[1.02]'
                               }`}
                             >
                               {posting ? (

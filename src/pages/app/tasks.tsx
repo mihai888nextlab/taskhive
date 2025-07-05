@@ -324,19 +324,19 @@ const TasksPage: NextPageWithLayout = () => {
           {/* Tab Navigation & Create Button */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             {/* Tab Buttons */}
-            <div className={`flex rounded-xl p-1 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+            <div className={`flex rounded-xl p-1 gap-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
               <Button
                 type="button"
                 onClick={() => setActiveTab('my-tasks')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === 'my-tasks'
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200
+                  ${activeTab === 'my-tasks'
                     ? theme === 'dark'
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-blue-500 text-white shadow-lg'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-500 text-white'
                     : theme === 'dark'
-                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
+                      ? 'text-gray-400 hover:text-white hover:bg-blue-700'
+                      : 'text-gray-600 hover:text-white hover:bg-blue-500'
+                  }`}
                 variant="ghost"
               >
                 <FaTasks className="w-4 h-4" />
@@ -345,15 +345,15 @@ const TasksPage: NextPageWithLayout = () => {
               <Button
                 type="button"
                 onClick={() => setActiveTab('assigned-tasks')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === 'assigned-tasks'
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200
+                  ${activeTab === 'assigned-tasks'
                     ? theme === 'dark'
-                      ? 'bg-green-600 text-white shadow-lg'
-                      : 'bg-green-500 text-white shadow-lg'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-green-500 text-white'
                     : theme === 'dark'
-                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
+                      ? 'text-gray-400 hover:text-white hover:bg-green-700'
+                      : 'text-gray-600 hover:text-white hover:bg-green-500'
+                  }`}
                 variant="ghost"
               >
                 <FaUserCheck className="w-4 h-4" />
@@ -368,7 +368,7 @@ const TasksPage: NextPageWithLayout = () => {
                 resetForm();
                 setShowForm(true);
               }}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 group ${
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${
                 theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
               }`}
               disabled={loading}
@@ -384,7 +384,7 @@ const TasksPage: NextPageWithLayout = () => {
       <div className="px-4 lg:px-8 pt-4">
         <div className="max-w-6xl mx-auto">
           {/* Tab Content - Dynamic height container */}
-          <Card className={`${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl shadow-lg border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
+          <Card className={`${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
             {activeTab === 'my-tasks' ? (
               <div className="flex flex-col">
                 {/* My Tasks Header - Compact */}
@@ -535,7 +535,7 @@ const TasksPage: NextPageWithLayout = () => {
       {/* Task Form Modal */}
       {showForm && typeof window !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
             <TaskForm
               show={true}
               loading={loading}

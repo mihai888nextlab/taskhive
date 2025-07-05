@@ -15,7 +15,7 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
   onUploadClick,
   formatBytes,
 }) => (
-  <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-gray-200/50">
+  <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-gray-200/50">
     <div className="flex items-center gap-3 mb-4">
       <div className="p-3 bg-blue-100 rounded-xl">
         <FaHdd className="text-2xl text-blue-600" />
@@ -28,7 +28,7 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
       </div>
       <Button
         onClick={onUploadClick}
-        className="ml-auto flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow"
+        className="ml-auto flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200"
         variant="default"
       >
         <FaCloudUploadAlt className="text-lg" />

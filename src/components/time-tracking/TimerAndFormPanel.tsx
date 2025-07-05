@@ -186,30 +186,18 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
             disabled={false}
           >
             <SelectTrigger
-              className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 ${
-                theme === "dark"
-                  ? "bg-gray-700 text-white border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                  : "bg-white text-gray-900 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-              }`}
+              className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
             >
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent
-              className={`rounded-lg border mt-1 ${
-                theme === "dark"
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-200"
-              }`}
+              className="bg-white border border-gray-300 rounded-lg p-0"
             >
               {tags.map(tag => (
                 <SelectItem
                   key={tag}
                   value={tag}
-                  className={`cursor-pointer transition-colors ${
-                    theme === "dark"
-                      ? "data-[state=highlighted]:bg-gray-600 data-[state=highlighted]:text-white"
-                      : "data-[state=highlighted]:bg-gray-100 data-[state=highlighted]:text-gray-900"
-                  }`}
+                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
                 >
                   {tag}
                 </SelectItem>

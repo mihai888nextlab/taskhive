@@ -30,7 +30,8 @@ const StorageSearchSort: React.FC<StorageSearchSortProps> = ({
         placeholder="Search files..."
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full pl-12 pr-4 py-3 bg-white/80 backdrop-blur-md border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 shadow-sm"
+        className="w-full pl-12 pr-4 py-3 bg-white/80 backdrop-blur-md border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+        style={{ height: "46px" }}
       />
     </div>
     <div className="relative w-full sm:w-auto">
@@ -39,7 +40,9 @@ const StorageSearchSort: React.FC<StorageSearchSortProps> = ({
         value={sortBy}
         onValueChange={v => setSortBy(v as "name" | "size")}
       >
-        <SelectTrigger className="pl-12 pr-8 py-3 bg-white/80 backdrop-blur-md border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 shadow-sm appearance-none cursor-pointer w-full sm:w-auto">
+        <SelectTrigger className="pl-12 pr-8 py-3 bg-white/80 backdrop-blur-md border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer w-full sm:w-auto"
+          style={{ height: "46px" }}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="rounded-xl border mt-1 bg-white text-gray-900 border-gray-200">

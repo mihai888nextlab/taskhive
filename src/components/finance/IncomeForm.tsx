@@ -44,6 +44,15 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
   const { theme } = useTheme();
   const [generatingDescription, setGeneratingDescription] = useState(false);
 
+  // Set default category if not set
+  React.useEffect(() => {
+    if (!category && categories.length > 0) {
+      onCategoryChange(categories[0]);
+    }
+    // Only run on mount or if category changes to empty
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
+
   const handleGenerateDescription = async () => {
     if (!title) return;
     setGeneratingDescription(true);
@@ -178,7 +187,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           <DatePicker
             selected={date}
             onChange={(d) => { if (d) onDateChange(d); }}
-            className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
+            className={`w-full px-4 py-2 h-[36px] rounded-xl border transition-all duration-200 ${
               theme === "dark"
                 ? "bg-gray-700 text-white border-gray-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                 : "bg-white text-gray-900 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
@@ -196,7 +205,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
             Category
           </label>
           <Select
-            value={category}
+            value={category || categories[0]}
             onValueChange={onCategoryChange}
             disabled={loading}
           >
@@ -206,6 +215,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
                   ? "bg-gray-700 text-white border-gray-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                   : "bg-white text-gray-900 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
               }`}
+              style={{ height: "36px" }}
             >
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -220,11 +230,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
                 <SelectItem
                   key={cat}
                   value={cat}
-                  className={`cursor-pointer transition-colors ${
-                    theme === "dark"
-                      ? "data-[state=highlighted]:bg-gray-600 data-[state=highlighted]:text-white"
-                      : "data-[state=highlighted]:bg-gray-100 data-[state=highlighted]:text-gray-900"
-                  }`}
+                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
                 >
                   {cat}
                 </SelectItem>
@@ -243,8 +249,8 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
             loading
               ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
               : theme === "dark"
-                ? "bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-xl"
-                : "bg-green-500 text-white hover:bg-green-600 shadow-lg hover:shadow-xl"
+                ? "bg-green-600 text-white hover:bg-green-700"
+                : "bg-green-500 text-white hover:bg-green-600"
           }`}
         >
           {loading ? (

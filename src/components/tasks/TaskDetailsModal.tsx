@@ -169,7 +169,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className={`relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl ${
+      <div className={`relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl ${
         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
       }`}>
         {/* Header */}

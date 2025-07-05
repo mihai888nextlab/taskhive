@@ -3,7 +3,7 @@ import AnnouncementCard from "./AnnouncementCard";
 import { FaSearch, FaSpinner, FaBullhorn, FaFilter, FaThumbtack } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface Announcement {
   _id: string;
@@ -83,42 +83,43 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Search Bar */}
         <div className="flex-1 relative">
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
           <Input
             type="text"
             placeholder="Search announcements..."
             value={search}
             onChange={e => onSearchChange && onSearchChange(e.target.value)}
-            className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
+            className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200 ${
+              theme === 'dark'
+                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
             }`}
+            style={{ height: "36px" }}
           />
         </div>
-
         {/* Category Filter */}
         <div className="relative">
-          <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+          <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 pointer-events-none" />
           <Select
             value={categoryFilter}
             onValueChange={v => onCategoryFilterChange && onCategoryFilterChange(v as string)}
           >
-            <select
-              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-              }`}
-              value={categoryFilter}
-              onChange={e => onCategoryFilterChange && onCategoryFilterChange(e.target.value)}
+            <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+              style={{ height: "36px" }}
             >
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
               {categories.map(cat => (
-                <option key={cat} value={cat}>
+                <SelectItem
+                  key={cat}
+                  value={cat}
+                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                >
                   {cat === "All" ? "All Categories" : cat}
-                </option>
+                </SelectItem>
               ))}
-            </select>
+            </SelectContent>
           </Select>
         </div>
       </div>
@@ -217,33 +218,35 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
       <div className="flex flex-col lg:flex-row gap-4 mb-6">
         {/* Search Bar */}
         <div className="flex-1 relative">
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" style={{ top: "50%" }} />
           <Input
             type="text"
             placeholder="Search announcements..."
             value={search}
             onChange={e => onSearchChange && onSearchChange(e.target.value)}
-            className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
-              theme === 'dark' 
+            className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 h-12
+              ${theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-            }`}
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+              }`}
+            style={{ height: "48px" }}
           />
         </div>
 
         {/* Category Filter */}
-        <div className="relative">
-          <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+        <div className="relative" style={{ minWidth: 160 }}>
+          <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 pointer-events-none" style={{ top: "50%" }} />
           <Select
             value={categoryFilter}
             onValueChange={v => onCategoryFilterChange && onCategoryFilterChange(v as string)}
           >
             <select
-              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] ${
-                theme === 'dark' 
+              className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] h-12
+                ${theme === 'dark' 
                   ? 'bg-gray-800 border-gray-600 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
-              }`}
+                  : 'bg-white border-gray-200 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                }`}
+              style={{ height: "48px" }}
               value={categoryFilter}
               onChange={e => onCategoryFilterChange && onCategoryFilterChange(e.target.value)}
             >

@@ -3,7 +3,7 @@ import TaskCard from "./TaskCard";
 import TaskDetailsModal from "./TaskDetailsModal";
 import { FaSearch, FaSpinner, FaTasks } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 interface Task {
@@ -172,16 +172,21 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
         <div className="relative">
-          <FaSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
           <Input
             type="text"
-            placeholder="Search tasks..."
+            placeholder="Search by title or description..."
             value={searchValue}
             onChange={e => {
               if (onSearchChange) onSearchChange(e.target.value);
               else setSearch(e.target.value);
             }}
-            className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200 ${
+              theme === 'dark'
+                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+            }`}
+            style={{ height: "36px" }}
           />
         </div>
         <Select
@@ -191,19 +196,17 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             else setFilterStatus(v as any);
           }}
         >
-          <select
-            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            value={filterStatusValue}
-            onChange={e => {
-              if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
-              else setFilterStatus(e.target.value as any);
-            }}
+          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+            style={{ height: "36px" }}
           >
-            <option value="all">Status: All</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="overdue">Overdue</option>
-          </select>
+            <SelectValue placeholder="Status: All" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+            <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Status: All</SelectItem>
+            <SelectItem value="completed" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Completed</SelectItem>
+            <SelectItem value="pending" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Pending</SelectItem>
+            <SelectItem value="overdue" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Overdue</SelectItem>
+          </SelectContent>
         </Select>
         <Select
           value={filterPriorityValue}
@@ -212,20 +215,18 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             else setFilterPriority(v as any);
           }}
         >
-          <select
-            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            value={filterPriorityValue}
-            onChange={e => {
-              if (onFilterPriorityChange) onFilterPriorityChange(e.target.value as any);
-              else setFilterPriority(e.target.value as any);
-            }}
+          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+            style={{ height: "36px" }}
           >
-            <option value="all">Priority: All</option>
-            <option value="critical">Critical</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
+            <SelectValue placeholder="Priority: All" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+            <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Priority: All</SelectItem>
+            <SelectItem value="critical" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Critical</SelectItem>
+            <SelectItem value="high" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">High</SelectItem>
+            <SelectItem value="medium" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Medium</SelectItem>
+            <SelectItem value="low" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Low</SelectItem>
+          </SelectContent>
         </Select>
         <Select
           value={sortByValue}
@@ -234,18 +235,16 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             else setSortBy(v as any);
           }}
         >
-          <select
-            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            value={sortByValue}
-            onChange={e => {
-              if (onSortByChange) onSortByChange(e.target.value as any);
-              else setSortBy(e.target.value as any);
-            }}
+          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]"
+            style={{ height: "36px" }}
           >
-            <option value="createdAtDesc">Sort: Newest First</option>
-            <option value="deadlineAsc">Sort: Deadline</option>
-            <option value="priorityDesc">Sort: Priority</option>
-          </select>
+            <SelectValue placeholder="Sort: Newest First" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+            <SelectItem value="createdAtDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Sort: Newest First</SelectItem>
+            <SelectItem value="deadlineAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Sort: Deadline</SelectItem>
+            <SelectItem value="priorityDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Sort: Priority</SelectItem>
+          </SelectContent>
         </Select>
       </div>
     );
@@ -306,16 +305,21 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
         <div className="relative">
-          <FaSearch className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
           <Input
             type="text"
-            placeholder="Search tasks..."
+            placeholder="Search by title or description..."
             value={searchValue}
             onChange={e => {
               if (onSearchChange) onSearchChange(e.target.value);
               else setSearch(e.target.value);
             }}
-            className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200 ${
+              theme === 'dark'
+                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+            }`}
+            style={{ height: "36px" }}
           />
         </div>
         <Select
@@ -325,19 +329,17 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             else setFilterStatus(v as any);
           }}
         >
-          <select
-            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            value={filterStatusValue}
-            onChange={e => {
-              if (onFilterStatusChange) onFilterStatusChange(e.target.value as any);
-              else setFilterStatus(e.target.value as any);
-            }}
+          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+            style={{ height: "36px" }}
           >
-            <option value="all">Status: All</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="overdue">Overdue</option>
-          </select>
+            <SelectValue placeholder="Status: All" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+            <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Status: All</SelectItem>
+            <SelectItem value="completed" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Completed</SelectItem>
+            <SelectItem value="pending" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Pending</SelectItem>
+            <SelectItem value="overdue" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Overdue</SelectItem>
+          </SelectContent>
         </Select>
         <Select
           value={filterPriorityValue}
@@ -346,20 +348,18 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             else setFilterPriority(v as any);
           }}
         >
-          <select
-            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            value={filterPriorityValue}
-            onChange={e => {
-              if (onFilterPriorityChange) onFilterPriorityChange(e.target.value as any);
-              else setFilterPriority(e.target.value as any);
-            }}
+          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+            style={{ height: "36px" }}
           >
-            <option value="all">Priority: All</option>
-            <option value="critical">Critical</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
+            <SelectValue placeholder="Priority: All" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+            <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Priority: All</SelectItem>
+            <SelectItem value="critical" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Critical</SelectItem>
+            <SelectItem value="high" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">High</SelectItem>
+            <SelectItem value="medium" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Medium</SelectItem>
+            <SelectItem value="low" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Low</SelectItem>
+          </SelectContent>
         </Select>
         <Select
           value={sortByValue}
@@ -368,18 +368,16 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             else setSortBy(v as any);
           }}
         >
-          <select
-            className="w-full py-1.5 px-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            value={sortByValue}
-            onChange={e => {
-              if (onSortByChange) onSortByChange(e.target.value as any);
-              else setSortBy(e.target.value as any);
-            }}
+          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]"
+            style={{ height: "36px" }}
           >
-            <option value="createdAtDesc">Sort: Newest First</option>
-            <option value="deadlineAsc">Sort: Deadline</option>
-            <option value="priorityDesc">Sort: Priority</option>
-          </select>
+            <SelectValue placeholder="Sort: Newest First" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+            <SelectItem value="createdAtDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Sort: Newest First</SelectItem>
+            <SelectItem value="deadlineAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Sort: Deadline</SelectItem>
+            <SelectItem value="priorityDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Sort: Priority</SelectItem>
+          </SelectContent>
         </Select>
       </div>
 
