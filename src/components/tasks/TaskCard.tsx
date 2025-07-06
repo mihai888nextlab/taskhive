@@ -183,7 +183,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   return (
     <>
-      <div className="mb-4">
+      <div className="">
         <Card className="w-full bg-transparent shadow-none border-none p-0 m-0">
           <CardContent className="p-0 m-0">
             <div

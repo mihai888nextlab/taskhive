@@ -63,17 +63,18 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
         {/* Search and Export Row */}
         <div className="flex gap-3">
           <div className="flex-1 relative">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
             <Input
               type="text"
               placeholder="Search expenses..."
               value={search}
               onChange={e => onSearchChange(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
-                theme === 'dark' 
+              className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200
+                ${theme === 'dark' 
                   ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm'
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
               }`}
+              style={{ height: "36px" }}
               disabled={loading}
             />
           </div>
@@ -81,13 +82,14 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             <Button
               onClick={onExportCSV}
               disabled={loading}
-              className={`p-3 rounded-xl font-medium transition-all duration-200 ${
-                loading
+              className={`p-2 rounded-xl font-medium transition-all duration-200 h-11 w-11 flex items-center justify-center
+                ${loading
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : theme === 'dark'
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
+                }`}
+              style={{ height: "36px", width: "36px", minWidth: "36px", minHeight: "36px" }}
               title="Export CSV"
               variant="ghost"
             >
@@ -96,13 +98,14 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             <Button
               onClick={onExportPDF}
               disabled={loading}
-              className={`p-3 rounded-xl font-medium transition-all duration-200 ${
-                loading
+              className={`p-2 rounded-xl font-medium transition-all duration-200 h-11 w-11 flex items-center justify-center
+                ${loading
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : theme === 'dark'
                     ? 'bg-red-600 text-white hover:bg-red-700'
                     : 'bg-red-500 text-white hover:bg-red-600'
-              }`}
+                }`}
+              style={{ height: "36px", width: "36px", minWidth: "36px", minHeight: "36px" }}
               title="Export PDF"
               variant="ghost"
             >
@@ -110,7 +113,6 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             </Button>
           </div>
         </div>
-
         {/* Filters Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
           {/* Category Filter */}
@@ -120,11 +122,8 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             disabled={loading}
           >
             <SelectTrigger
-              className={`w-full px-4 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm'
-              }`}
+              className={`w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 min-w-[140px]`}
+              style={{ height: "36px" }}
             >
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
@@ -135,19 +134,14 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                   : "bg-white text-gray-900 border-gray-200"
               }`}
             >
-              {/* Remove the empty string value for SelectItem */}
-              <SelectItem value="All">All Categories</SelectItem>
+              <SelectItem value="All" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">All Categories</SelectItem>
               {categories
                 .filter(cat => cat !== "All")
                 .map(cat => (
                   <SelectItem
                     key={cat}
                     value={cat}
-                    className={`cursor-pointer transition-colors ${
-                      theme === "dark"
-                        ? "data-[state=highlighted]:bg-gray-700 data-[state=highlighted]:text-white"
-                        : "data-[state=highlighted]:bg-gray-100 data-[state=highlighted]:text-gray-900"
-                    }`}
+                    className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
                   >
                     {cat}
                   </SelectItem>
@@ -165,11 +159,8 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             disabled={loading}
           >
             <SelectTrigger
-              className={`w-full px-4 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm'
-              }`}
+              className={`w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 min-w-[140px]`}
+              style={{ height: "36px" }}
             >
               <SelectValue />
             </SelectTrigger>
@@ -180,10 +171,10 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                   : "bg-white text-gray-900 border-gray-200"
               }`}
             >
-              <SelectItem value="date-desc">Newest First</SelectItem>
-              <SelectItem value="date-asc">Oldest First</SelectItem>
-              <SelectItem value="amount-desc">Highest Amount</SelectItem>
-              <SelectItem value="amount-asc">Lowest Amount</SelectItem>
+              <SelectItem value="date-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Newest First</SelectItem>
+              <SelectItem value="date-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Oldest First</SelectItem>
+              <SelectItem value="amount-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Highest Amount</SelectItem>
+              <SelectItem value="amount-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Lowest Amount</SelectItem>
             </SelectContent>
           </Select>
 
@@ -195,10 +186,10 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             startDate={dateRange[0]}
             endDate={dateRange[1]}
             placeholderText="Start Date"
-            className={`w-full px-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
-              theme === 'dark' 
+            className={`w-full px-4 py-2 text-sm rounded-xl border transition-all duration-200 h-[36px]
+              ${theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
             }`}
             disabled={loading}
           />
@@ -211,10 +202,10 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             startDate={dateRange[0]}
             endDate={dateRange[1]}
             placeholderText="End Date"
-            className={`w-full px-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
-              theme === 'dark' 
+            className={`w-full px-4 py-2 text-sm rounded-xl border transition-all duration-200 h-[36px]
+              ${theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
             }`}
             disabled={loading}
           />
@@ -263,7 +254,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
             {expenses.map(expense => (
               <div
                 key={expense._id}
-                className={`p-4 rounded-xl border transition-all duration-200 hover:shadow-md ${
+                className={`p-4 rounded-xl border transition-all duration-200 ${
                   theme === "dark"
                     ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
                     : "bg-white border-gray-200 hover:border-gray-300"

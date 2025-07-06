@@ -69,7 +69,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden">
         {/* Close Button */}
         <button
@@ -179,7 +179,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onUserAdded }) => 
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent
-                  className="bg-white border border-gray-300 rounded-lg shadow-lg p-0"
+                  className="bg-white border border-gray-300 rounded-lg shadow-lg p-0 z-[250]"
                   sideOffset={4}
                 >
                   {roles.map((roleName) => (

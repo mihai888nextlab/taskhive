@@ -55,7 +55,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
 
   return (
     <Card
-      className={`relative p-6 rounded-2xl border border-[#e5e7eb] shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer group bg-white`}
+      className={`relative p-6 rounded-2xl border border-[#e5e7eb] transition-all duration-150 cursor-pointer group bg-white`}
       onClick={onClick}
     >
       <CardContent className="p-0">
@@ -69,7 +69,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
                 className="object-cover"
               />
             ) : (
-              <AvatarFallback className="bg-blue-500 text-white">
+              <AvatarFallback>
                 {getInitials() || <FaUser className="w-5 h-5" />}
               </AvatarFallback>
             )}

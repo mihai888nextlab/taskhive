@@ -179,48 +179,22 @@ const Storage = () => {
       onDragLeave={handleDrag}
       onDrop={handleDrop}
     >
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="max-w-[100vw] mx-auto px-2 lg:px-4 py-8">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                File Storage
-              </h1>
-              <p className={`mt-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Manage your documents and signatures
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => setSignatureModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-700 transform hover:scale-102 transition-all duration-200 shadow-lg"
-                variant="default"
-              >
-                <FaSignature className="text-lg" />
-                <span className="font-medium">Manage Signatures</span>
-              </Button>
-              <Button
-                onClick={() => setUploadFileModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transform hover:scale-102 transition-all duration-200 shadow-lg"
-                variant="default"
-              >
-                <FaCloudUploadAlt className="text-lg" />
-                <span className="font-medium">Upload Files</span>
-              </Button>
-            </div>
-          </div>
+        <div className="mb-4">
 
+          {/* Pass setSignatureModal to StorageHeader */}
           <StorageHeader
             usedStorage={usedStorage}
             percentUsed={percentUsed}
             onUploadClick={() => setUploadFileModal(true)}
+            onSignatureClick={() => setSignatureModal(true)}
             formatBytes={formatBytes}
           />
         </div>
 
         {/* Search and Sort */}
-        <div className="mb-8">
+        <div className="mb-4">
           <StorageSearchSort
             search={search}
             setSearch={setSearch}
@@ -250,8 +224,8 @@ const Storage = () => {
       {typeof window !== 'undefined' && (
         <>
           {uploadFileModal && createPortal(
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="bg-white rounded-3xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
                   onClick={() => {
@@ -280,8 +254,8 @@ const Storage = () => {
           )}
           
           {signatureModal && createPortal(
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="bg-white rounded-3xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
                   onClick={() => setSignatureModal(false)}
@@ -300,8 +274,8 @@ const Storage = () => {
           )}
           
           {fileSigningModal && createPortal(
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-7xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="bg-white rounded-3xl p-0 max-w-7xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
                   onClick={() => {

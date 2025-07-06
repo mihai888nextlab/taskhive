@@ -10,15 +10,17 @@ import Image from "next/image";
 import { Kanit } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 const kanit = Kanit({
   subsets: ["latin"],
   weight: ["400", "700"],
 });
 
-export default function Register() {
+function RegisterForm() {
   const router = useRouter();
   const auth = useAuth();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const [values, setValues] = useState({
     firstName: "",
@@ -56,7 +58,37 @@ export default function Register() {
       return;
     }
 
+    let recaptchaToken = null;
+    if (executeRecaptcha) {
+      recaptchaToken = await executeRecaptcha("register");
+    }
+    if (!recaptchaToken) {
+      setError("Could not verify reCAPTCHA. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    // Verify reCAPTCHA token with backend
     try {
+      const verifyRes = await fetch("/api/verify-recaptcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: recaptchaToken }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok || !verifyData.success) {
+        setError(verifyData.error || "reCAPTCHA verification failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      setError("Could not verify reCAPTCHA. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Pass recaptchaToken to your backend for verification if needed
       const res = await auth.register(
         values.userEmail,
         values.userPassword,
@@ -199,6 +231,15 @@ export default function Register() {
                 </div>
               )}
 
+              {/* Add a visible reCAPTCHA badge/info for user clarity */}
+              <div className="text-xs text-gray-400 text-center mb-2">
+                This site is protected by reCAPTCHA and the Google&nbsp;
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Privacy Policy</a>
+                &nbsp;and&nbsp;
+                <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Terms of Service</a>
+                &nbsp;apply.
+              </div>
+
               <Button
                 type="submit"
                 className="w-full"
@@ -221,5 +262,13 @@ export default function Register() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function Register() {
+  return (
+    <GoogleReCaptchaProvider reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}>
+      <RegisterForm />
+    </GoogleReCaptchaProvider>
   );
 }

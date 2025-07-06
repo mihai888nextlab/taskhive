@@ -175,8 +175,8 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
   return (
     <>
       {typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-[90vw] max-w-6xl h-[85vh] relative animate-fadeIn overflow-hidden flex">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-[90vw] max-w-6xl h-[85vh] relative animate-fadeIn overflow-hidden flex">
             {/* Close Button */}
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
@@ -191,7 +191,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
               {/* Header */}
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
+                  <div className="p-3 bg-blue-600 rounded-xl">
                     <FaUsers className="text-xl text-white" />
                   </div>
                   <div>
@@ -290,7 +290,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                     className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
                       creatingGroup || selectedUsers.length < 1 || !groupName.trim()
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-800 shadow-lg hover:shadow-xl'
+                        : 'bg-blue-600 text-white hover:bg-blue-800'
                     }`}
                   >
                     {creatingGroup ? (

@@ -97,19 +97,19 @@ const TimeTrackingPage: NextPageWithLayout = () => {
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       {/* Main Content */}
-      <div className="px-4 lg:px-8 py-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="px-2 lg:px-4 py-4">
+        <div className="max-w-[100vw] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
             
             {/* Timer Column */}
             <div className="lg:col-span-1">
-              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden`}>
+              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
                 {/* Timer Header */}
                 <div className={`px-4 py-3 ${
                   theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"
                 } border-b`}>
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg shadow-lg ${
+                    <div className={`p-2 rounded-lg ${
                       theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'
                     }`}>
                       <FaClock className="w-4 h-4 text-white" />
@@ -171,13 +171,13 @@ const TimeTrackingPage: NextPageWithLayout = () => {
 
             {/* Sessions List Column */}
             <div className="lg:col-span-2">
-              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[900px] flex flex-col overflow-hidden`}>
+              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[900px] flex flex-col overflow-hidden mx-2`}>
                 {/* Sessions Header */}
                 <div className={`flex-shrink-0 px-4 py-3 ${
                   theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-green-50 border-gray-200"
                 } border-b`}>
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg shadow-lg ${
+                    <div className={`p-2 rounded-lg ${
                       theme === 'dark' ? 'bg-green-600' : 'bg-green-500'
                     }`}>
                       <FaChartLine className="w-4 h-4 text-white" />

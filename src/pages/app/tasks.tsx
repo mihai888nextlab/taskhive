@@ -319,24 +319,24 @@ const TasksPage: NextPageWithLayout = () => {
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       {/* Header Section - Outside main container */}
-      <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} px-4 lg:px-8 py-4`}>
-        <div className="max-w-6xl mx-auto">
+      <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} px-4 lg:px-8 pt-10`}>
+        <div className="max-w-[100vw] mx-auto">
           {/* Tab Navigation & Create Button */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             {/* Tab Buttons */}
-            <div className={`flex rounded-xl p-1 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+            <div className={`flex rounded-xl p-1 gap-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
               <Button
                 type="button"
                 onClick={() => setActiveTab('my-tasks')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === 'my-tasks'
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200
+                  ${activeTab === 'my-tasks'
                     ? theme === 'dark'
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-blue-500 text-white shadow-lg'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-500 text-white'
                     : theme === 'dark'
-                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
+                      ? 'text-gray-400 hover:text-white hover:bg-blue-700'
+                      : 'text-gray-600 hover:text-white hover:bg-blue-500'
+                  }`}
                 variant="ghost"
               >
                 <FaTasks className="w-4 h-4" />
@@ -345,15 +345,15 @@ const TasksPage: NextPageWithLayout = () => {
               <Button
                 type="button"
                 onClick={() => setActiveTab('assigned-tasks')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === 'assigned-tasks'
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200
+                  ${activeTab === 'assigned-tasks'
                     ? theme === 'dark'
-                      ? 'bg-green-600 text-white shadow-lg'
-                      : 'bg-green-500 text-white shadow-lg'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-green-500 text-white'
                     : theme === 'dark'
-                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
+                      ? 'text-gray-400 hover:text-white hover:bg-green-700'
+                      : 'text-gray-600 hover:text-white hover:bg-green-500'
+                  }`}
                 variant="ghost"
               >
                 <FaUserCheck className="w-4 h-4" />
@@ -368,7 +368,7 @@ const TasksPage: NextPageWithLayout = () => {
                 resetForm();
                 setShowForm(true);
               }}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 group ${
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${
                 theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
               }`}
               disabled={loading}
@@ -381,23 +381,23 @@ const TasksPage: NextPageWithLayout = () => {
       </div>
 
       {/* Main Content Area - Full height */}
-      <div className="px-4 lg:px-8 pt-4">
-        <div className="max-w-6xl mx-auto">
+      <div className="px-2 lg:px-4 pt-4">
+        <div className="max-w-[100vw] mx-auto">
           {/* Tab Content - Dynamic height container */}
-          <Card className={`${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl shadow-lg border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
+          <Card className={`${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden mx-2`}>
             {activeTab === 'my-tasks' ? (
               <div className="flex flex-col">
                 {/* My Tasks Header - Compact */}
-                <CardHeader className={`p-4 ${theme === "light" ? "bg-blue-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
-                      <FaTasks className="w-4 h-4 text-white" />
+                <CardHeader className={`p-6 ${theme === "light" ? "bg-blue-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
+                      <FaTasks className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h2 className={`text-lg font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+                      <h2 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
                         My Tasks
                       </h2>
-                      <p className={`text-xs ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
+                      <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
                         Tasks assigned to you and personal tasks you've created
                       </p>
                     </div>
@@ -449,16 +449,16 @@ const TasksPage: NextPageWithLayout = () => {
             ) : (
               <div className="flex flex-col">
                 {/* Assigned Tasks Header - Compact */}
-                <CardHeader className={`p-4 ${theme === "light" ? "bg-green-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-green-600' : 'bg-green-500'}`}>
-                      <FaUserCheck className="w-4 h-4 text-white" />
+                <CardHeader className={`p-6 ${theme === "light" ? "bg-green-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-green-600' : 'bg-green-500'}`}>
+                      <FaUserCheck className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h2 className={`text-lg font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+                      <h2 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
                         Tasks Assigned by Me
                       </h2>
-                      <p className={`text-xs ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
+                      <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
                         Monitor and manage tasks you've assigned to team members
                       </p>
                     </div>
@@ -534,8 +534,8 @@ const TasksPage: NextPageWithLayout = () => {
 
       {/* Task Form Modal */}
       {showForm && typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
             <TaskForm
               show={true}
               loading={loading}

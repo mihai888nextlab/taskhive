@@ -77,10 +77,10 @@ const SessionList: React.FC<SessionListProps> = ({
             placeholder="Search sessions..."
             value={sessionSearch}
             onChange={e => setSessionSearch(e.target.value)}
-            className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
+            className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl h-[36px] border transition-all duration-200 ${
               theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20'
             }`}
           />
         </div>
@@ -93,31 +93,18 @@ const SessionList: React.FC<SessionListProps> = ({
             disabled={false}
           >
             <SelectTrigger
-              className={`px-4 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
-              }`}
+              className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
+              style={{ height: "36px" }}
             >
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
-            <SelectContent
-              className={`rounded-xl border mt-1 ${
-                theme === "dark"
-                  ? "bg-gray-800 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-200"
-              }`}
-            >
-              <SelectItem value="all">All Categories</SelectItem>
+            <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+              <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">All Categories</SelectItem>
               {tags.map(tag => (
                 <SelectItem
                   key={tag}
                   value={tag}
-                  className={`cursor-pointer transition-colors ${
-                    theme === "dark"
-                      ? "data-[state=highlighted]:bg-gray-700 data-[state=highlighted]:text-white"
-                      : "data-[state=highlighted]:bg-gray-100 data-[state=highlighted]:text-gray-900"
-                  }`}
+                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
                 >
                   {tag}
                 </SelectItem>
@@ -131,25 +118,16 @@ const SessionList: React.FC<SessionListProps> = ({
             disabled={false}
           >
             <SelectTrigger
-              className={`px-4 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer ${
-                theme === 'dark' 
-                  ? 'bg-gray-800 border-gray-600 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
-                  : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 shadow-sm'
-              }`}
+              className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
+              style={{ height: "36px" }}
             >
               <SelectValue />
             </SelectTrigger>
-            <SelectContent
-              className={`rounded-xl border mt-1 ${
-                theme === "dark"
-                  ? "bg-gray-800 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-200"
-              }`}
-            >
-              <SelectItem value="dateDesc">Newest First</SelectItem>
-              <SelectItem value="dateAsc">Oldest First</SelectItem>
-              <SelectItem value="durationDesc">Longest Duration</SelectItem>
-              <SelectItem value="durationAsc">Shortest Duration</SelectItem>
+            <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+              <SelectItem value="dateDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Newest First</SelectItem>
+              <SelectItem value="dateAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Oldest First</SelectItem>
+              <SelectItem value="durationDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Longest Duration</SelectItem>
+              <SelectItem value="durationAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Shortest Duration</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -181,7 +159,7 @@ const SessionList: React.FC<SessionListProps> = ({
             {filteredSessions.map(session => (
               <div
                 key={session._id}
-                className={`p-4 rounded-xl border transition-all duration-200 hover:shadow-md ${
+                className={`p-4 rounded-xl border transition-all duration-200 ${
                   theme === "dark"
                     ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
                     : "bg-white border-gray-200 hover:border-gray-300"

@@ -195,20 +195,20 @@ const AnnouncementsPage: NextPageWithLayout = () => {
 
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
-      {/* Header Section */}
-      <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} px-4 lg:px-8 py-4`}>
-        <div className="max-w-6xl mx-auto">
+      {/* Header Section - Outside main container */}
+      <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} px-4 lg:px-8 pt-10`}>
+        <div className="max-w-[100vw] mx-auto">
           {/* Tab Navigation & Action Buttons */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             {/* Tab Buttons */}
-            <div className={`flex rounded-xl p-1 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+            <div className={`flex rounded-xl p-1 gap-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
               <button
                 onClick={() => setActiveTab('all')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                   activeTab === 'all'
                     ? theme === 'dark'
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-blue-500 text-white shadow-lg'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-500 text-white'
                     : theme === 'dark'
                       ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -222,8 +222,8 @@ const AnnouncementsPage: NextPageWithLayout = () => {
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                   activeTab === 'pinned'
                     ? theme === 'dark'
-                      ? 'bg-yellow-600 text-white shadow-lg'
-                      : 'bg-yellow-500 text-white shadow-lg'
+                      ? 'bg-yellow-600 text-white'
+                      : 'bg-yellow-500 text-white'
                     : theme === 'dark'
                       ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -239,7 +239,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
               {isAdmin && (
                 <button
                   onClick={() => setShowForm(true)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 group ${
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${
                     theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
                   }`}
                 >
@@ -249,7 +249,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
               )}
               <button
                 onClick={handleExportCSV}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 ${
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
                   theme === 'dark' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-500 hover:bg-green-600 text-white'
                 }`}
               >
@@ -261,18 +261,18 @@ const AnnouncementsPage: NextPageWithLayout = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="px-4 lg:px-8 pt-4">
-        <div className="max-w-6xl mx-auto">
-          <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden`}>
-            {/* Header */}
+      {/* Main Content Area - Full height */}
+      <div className="px-2 lg:px-4 pt-4">
+        <div className="max-w-[100vw] mx-auto">
+          <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
+            {/* Announcements Header */}
             <div className={`p-6 ${
               activeTab === 'all' 
-                ? theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"
-                : theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-yellow-50 border-gray-200"
+                ? theme === "dark" ? "bg-blue-50 border-gray-200" : "bg-blue-50 border-gray-200"
+                : theme === "dark" ? "bg-yellow-50 border-gray-200" : "bg-yellow-50 border-gray-200"
             } border-b`}>
               <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl shadow-lg ${
+                <div className={`p-3 rounded-xl ${
                   activeTab === 'all'
                     ? theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'
                     : theme === 'dark' ? 'bg-yellow-600' : 'bg-yellow-500'
@@ -336,8 +336,8 @@ const AnnouncementsPage: NextPageWithLayout = () => {
 
       {/* Announcement Form Modal */}
       {showForm && typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
             <AnnouncementForm
               title={title}
               content={content}

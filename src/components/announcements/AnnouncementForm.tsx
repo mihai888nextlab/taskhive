@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaBullhorn, FaSpinner, FaMagic, FaTimes } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface AnnouncementFormProps {
   title: string;
@@ -81,13 +82,16 @@ Write a clear, engaging, and informative announcement for all employees, based o
     }
   };
 
+  // Convert string date to Date object for DatePicker
+  const expiresAtDateObj = expiresAt ? new Date(expiresAt) : undefined;
+
   return (
     <div className="flex flex-col h-full max-h-[90vh]">
       {/* Header */}
       <div className={`p-6 border-b ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-blue-50 border-gray-200'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} shadow-lg`}>
+            <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
               <FaBullhorn className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -201,7 +205,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
                     onClick={() => onCategoryChange(cat)}
                     className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
                       ${category === cat
-                        ? `bg-gradient-to-r ${getCategoryColor(cat)} text-white border-transparent shadow-lg`
+                        ? `bg-gradient-to-r ${getCategoryColor(cat)} text-white border-transparent`
                         : theme === 'dark'
                           ? 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
                           : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -237,8 +241,8 @@ Write a clear, engaging, and informative announcement for all employees, based o
                   className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
                     ${!pinned
                       ? theme === 'dark'
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-lg'
-                        : 'bg-blue-500 text-white border-blue-500 shadow-lg'
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-blue-500 text-white border-blue-500'
                       : theme === 'dark'
                         ? 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -259,7 +263,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
                   onClick={() => onPinnedChange(true)}
                   className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
                     ${pinned
-                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-transparent shadow-lg'
+                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-transparent'
                       : theme === 'dark'
                         ? 'bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
@@ -285,12 +289,19 @@ Write a clear, engaging, and informative announcement for all employees, based o
               }`}>
                 Expiry Date
               </label>
-              <Input
-                type="date"
-                value={expiresAt}
-                onChange={e => onExpiresAtChange(e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
-                className="w-full py-3 px-4 text-base rounded-xl"
+              <DatePicker
+                value={expiresAtDateObj}
+                onChange={date => {
+                  if (date) {
+                    const formatted = date.toISOString().split("T")[0];
+                    onExpiresAtChange(formatted);
+                  } else {
+                    onExpiresAtChange("");
+                  }
+                }}
+                disabled={loading}
+                className="w-full h-10" // reduced height
+                placeholder="mm / dd / yyyy"
               />
               <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 Optional: When this announcement should stop being visible
@@ -323,7 +334,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
             className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
               loading || !title || !content || !category
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl'
+                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
             }`}
           >
             {loading ? (

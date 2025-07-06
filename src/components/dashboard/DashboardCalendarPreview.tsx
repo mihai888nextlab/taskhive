@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaCalendarAlt } from "react-icons/fa";
 import { useTheme } from "@/components/ThemeContext";
 
 interface Task {
@@ -109,17 +109,44 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = ({
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : deadlines.length === 0 ? (
-          <p className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
-            No upcoming deadlines.
-          </p>
+          // Empty state styled like announcement/task card
+          <div className="text-center py-16">
+            <div
+              className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+                theme === "dark" ? "bg-gray-700" : "bg-gray-100"
+              }`}
+            >
+              <FaCalendarAlt className="text-2xl text-gray-400" />
+            </div>
+            <h3
+              className={`text-lg font-semibold mb-2 ${
+                theme === "dark" ? "text-white" : "text-gray-900"
+              }`}
+            >
+              No upcoming deadlines
+            </h3>
+            <p
+              className={`text-sm ${
+                theme === "dark" ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              You have no scheduled tasks or events
+            </p>
+          </div>
         ) : (
           <ul className="space-y-5">
             {deadlines.slice(0, 2).map((date, idx) => (
               <li
                 key={idx}
-                className={theme === "dark" ? listItemClassDark : listItemClassLight}
+                className={
+                  theme === "dark" ? listItemClassDark : listItemClassLight
+                }
               >
-                <span className={theme === "dark" ? textClassDark : textClassLight}>
+                <span
+                  className={
+                    theme === "dark" ? textClassDark : textClassLight
+                  }
+                >
                   {date.toLocaleDateString(undefined, {
                     weekday: "long",
                     year: "numeric",

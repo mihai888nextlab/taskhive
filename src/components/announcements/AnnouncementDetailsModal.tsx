@@ -128,22 +128,15 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
   if (!open || !announcement) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden`}>
-        {/* Close Button */}
-        <Button
-          type="button"
-          className={`absolute top-4 right-4 z-10 p-2 rounded-xl transition-all duration-200 ${
-            theme === 'dark' 
-              ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50' 
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/80'
-          }`}
-          onClick={onClose}
-          aria-label="Close modal"
-          variant="ghost"
-        >
-          <FaTimes className="w-4 h-4" />
-        </Button>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-3xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden`}>
+        <button
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+                    onClick={onClose}
+                    aria-label="Close modal"
+                  >
+                  <FaTimes />
+                </button>
 
         {/* Header */}
         <div className={`p-6 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-750' : 'border-gray-200 bg-gray-50'}`}>
@@ -194,7 +187,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
 
             {/* Admin Actions */}
             {isAdmin && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 mr-6">
                 {onPinToggle && (
                   <button
                     className={`p-3 rounded-xl transition-all duration-200 ${
@@ -282,7 +275,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                       {comments.map((comment, index) => (
                         <div
                           key={comment._id || index}
-                          className={`p-4 rounded-2xl border transition-all duration-200 hover:shadow-md ${
+                          className={`p-4 rounded-2xl border transition-all duration-200 ${
                             theme === 'dark' 
                               ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' 
                               : 'bg-white border-gray-200 hover:border-gray-300'
@@ -343,7 +336,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${
                                 posting || !commentInput.trim()
                                   ? theme === 'dark' ? 'bg-gray-600 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                                  : 'bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-[1.02]'
                               }`}
                             >
                               {posting ? (

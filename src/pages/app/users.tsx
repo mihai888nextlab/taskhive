@@ -211,12 +211,12 @@ const UsersPage: NextPageWithLayout = () => {
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <div className="px-2 lg:px-4 pt-4 mt-4">
         <div className="max-w-[100vw] mx-auto">
-          <Card className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
+          <Card className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
             {/* Users Header with Action Buttons */}
             <CardHeader className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"} border-b`}>
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} shadow-lg`}>
+                  <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
                     <FaUsers className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -233,7 +233,7 @@ const UsersPage: NextPageWithLayout = () => {
                   <div className="flex flex-wrap gap-3">
                     <Button
                       asChild
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
                         theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
                       }`}
                     >
@@ -242,10 +242,10 @@ const UsersPage: NextPageWithLayout = () => {
                         <span>Add User</span>
                       </span>
                     </Button>
-                    <Button
+                   <Button
                       asChild
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 ${
-                        theme === 'dark' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-500 hover:bg-green-600 text-white'
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
+                        theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
                       }`}
                     >
                       <span onClick={() => setAddRoleModalOpen(true)}>
@@ -255,7 +255,7 @@ const UsersPage: NextPageWithLayout = () => {
                     </Button>
                     <Button
                       asChild
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
                         theme === 'dark' ? 'bg-slate-600 hover:bg-slate-700 text-white' : 'bg-slate-500 hover:bg-slate-600 text-white'
                       }`}
                     >

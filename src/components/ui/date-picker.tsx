@@ -63,7 +63,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       </PopoverTrigger>
       <PopoverContent
         className={cn(
-          "w-auto p-0 z-50 rounded-xl border border-gray-200 bg-white shadow-xl mt-2"
+          "w-auto p-0 z-[300] rounded-xl border border-gray-200 bg-white shadow-xl mt-2"
         )}
         align="start"
       >

@@ -22,9 +22,9 @@ const FinancePage = () => {
     <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       {/* Header Section - Fixed Height */}
       <div className={`flex-shrink-0 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} px-4 lg:px-8 py-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[100vw] mx-auto">
           {/* Summary Cards */}
-          <div className="mb-6">
+          <div className="">
             <FinanceSummaryCards
               totalExpenses={logic.totalExpenses}
               totalIncomes={logic.totalIncomes}
@@ -34,23 +34,23 @@ const FinancePage = () => {
               profitTrend={logic.profitTrend}
             />
           </div>
-
-          {/* Tabs */}
-          <FinanceTabs
-            activeTab={logic.activeTab}
-            setActiveTab={logic.setActiveTab}
-            loading={logic.loading}
-          />
         </div>
       </div>
 
-      {/* Main Content - Flexible Height */}
-      <div className="flex-1 px-4 lg:px-8 py-4 overflow-hidden">
-        <div className="max-w-7xl mx-auto h-full">
+      {/* Main Content - Tabs+Form left, List right */}
+      <div className="flex-1 px-2 lg:px-4 py-2 overflow-hidden">
+        <div className="max-w-[100vw] mx-auto h-full">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-            {/* Form Column */}
-            <div className="lg:col-span-1">
-              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-fit max-h-full flex flex-col overflow-hidden`}>
+            {/* Tabs + Form Column */}
+            <div className="lg:col-span-1 flex flex-col gap-4">
+              {/* Tabs */}
+              <FinanceTabs
+                activeTab={logic.activeTab}
+                setActiveTab={logic.setActiveTab}
+                loading={logic.loading}
+              />
+              {/* Form */}
+              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-fit max-h-full flex flex-col overflow-hidden mx-2`}>
                 {/* Form Header */}
                 <div className={`flex-shrink-0 px-4 py-3 ${
                   logic.activeTab === 'expenses' 
@@ -58,7 +58,7 @@ const FinancePage = () => {
                     : theme === "dark" ? "bg-green-900/20 border-gray-600" : "bg-green-50 border-gray-200"
                 } border-b`}>
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg shadow-lg ${
+                    <div className={`p-2 rounded-lg ${
                       logic.activeTab === 'expenses'
                         ? theme === 'dark' ? 'bg-red-600' : 'bg-red-500'
                         : theme === 'dark' ? 'bg-green-600' : 'bg-green-500'
@@ -78,7 +78,6 @@ const FinancePage = () => {
                     </div>
                   </div>
                 </div>
-
                 {/* Form Content */}
                 <div className="flex-1 overflow-y-auto p-4">
                   {logic.activeTab === 'expenses' ? (
@@ -92,7 +91,7 @@ const FinancePage = () => {
 
             {/* List Column */}
             <div className="lg:col-span-2">
-              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[700px] flex flex-col overflow-hidden`}>
+              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[700px] flex flex-col overflow-hidden mx-2`}>
                 {/* List Header */}
                 <div className={`flex-shrink-0 px-4 py-3 ${
                   logic.activeTab === 'expenses' 
@@ -102,7 +101,7 @@ const FinancePage = () => {
                   <div className="flex items-center justify-between">
                     {/* Left side - Title and description */}
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg shadow-lg ${
+                      <div className={`p-2 rounded-lg ${
                         logic.activeTab === 'expenses'
                           ? theme === 'dark' ? 'bg-red-600' : 'bg-red-500'
                           : theme === 'dark' ? 'bg-green-600' : 'bg-green-500'

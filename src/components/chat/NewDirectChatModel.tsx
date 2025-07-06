@@ -48,8 +48,11 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
         const res = await fetch("/api/get-users");
         if (!res.ok) throw new Error("Failed to fetch users");
         const data = await res.json();
+        // Only users in the same company as me and not myself
         const users = data.users.filter(
-          (u: GetUsersResponse) => (u.userId._id as string) !== user._id
+          (u: GetUsersResponse) =>
+            (u.userId._id as string) !== user._id &&
+            u.companyId === user.companyId
         );
         setAllUsers(users);
         setFilteredUsers(users);
@@ -139,8 +142,8 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
   return (
     <>
       {typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl p-0 max-w-xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-0 max-w-xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
             {/* Close Button */}
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
@@ -153,7 +156,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
             {/* Header */}
             <div className="p-6 border-b border-gray-200 bg-blue-50">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
+                <div className="p-3 bg-blue-600 rounded-xl">
                   <FaComments className="text-xl text-white" />
                 </div>
                 <div>
@@ -239,7 +242,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
                           className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
                             creatingChat
                               ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-800 shadow-lg hover:shadow-xl'
+                              : 'bg-blue-600 text-white hover:bg-blue-800'
                           }`}
                         >
                           {creatingChat ? (

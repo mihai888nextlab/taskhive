@@ -95,7 +95,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="w-full h-full max-w-4xl mx-auto bg-white rounded-3xl overflow-hidden">
+    <div className="w-full z-[300] h-full max-w-4xl mx-auto bg-white rounded-3xl overflow-hidden">
       {/* Header */}
       <div className="p-6 border-b border-gray-200 bg-white rounded-t-3xl">
         <div className="flex items-center gap-3">

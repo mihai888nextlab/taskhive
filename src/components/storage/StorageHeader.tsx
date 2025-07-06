@@ -1,11 +1,12 @@
 import React from "react";
-import { FaCloudUploadAlt, FaHdd } from "react-icons/fa";
+import { FaCloudUploadAlt, FaHdd, FaSignature } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 
 interface StorageHeaderProps {
   usedStorage: number;
   percentUsed: number;
   onUploadClick: () => void;
+  onSignatureClick: () => void;
   formatBytes: (bytes: number) => string;
 }
 
@@ -13,9 +14,10 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
   usedStorage,
   percentUsed,
   onUploadClick,
+  onSignatureClick,
   formatBytes,
 }) => (
-  <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg border border-gray-200/50">
+  <div className="bg-white/80 backdrop-blur-md rounded-2xl px-6 pt-6 pb-3 border border-gray-200/50">
     <div className="flex items-center gap-3 mb-4">
       <div className="p-3 bg-blue-100 rounded-xl">
         <FaHdd className="text-2xl text-blue-600" />
@@ -26,14 +28,24 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
           Monitor your file storage consumption
         </p>
       </div>
-      <Button
-        onClick={onUploadClick}
-        className="ml-auto flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow"
-        variant="default"
-      >
-        <FaCloudUploadAlt className="text-lg" />
-        Upload
-      </Button>
+      <div className="ml-auto flex gap-2">
+        <Button
+          onClick={onSignatureClick}
+          className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-700 transform hover:scale-102 transition-all duration-200"
+          variant="default"
+        >
+          <FaSignature className="text-lg" />
+          <span className="font-medium">Manage Signatures</span>
+        </Button>
+        <Button
+          onClick={onUploadClick}
+          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transition-all duration-200"
+          variant="default"
+        >
+          <FaCloudUploadAlt className="text-lg" />
+          <span className="font-medium">Upload Files</span>
+        </Button>
+      </div>
     </div>
 
     <div className="mb-4">

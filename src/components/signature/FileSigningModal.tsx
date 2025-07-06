@@ -186,7 +186,7 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
   return (
     <>
       {typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-xl w-[95vw] h-[95vh] relative overflow-hidden flex flex-col">
             {/* Close Button and Header remain the same */}
             <button
@@ -536,7 +536,7 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
 
       {/* Signature Selection Modal - unchanged */}
       {showSignatureModal && typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-xl p-0 max-w-3xl w-full mx-4 max-h-[80vh] relative">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl z-10 p-1"

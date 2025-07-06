@@ -96,11 +96,11 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
         {files.map((file) => (
           <div
             key={file._id}
-            className={`group relative p-6 rounded-2xl transition-all duration-300 hover:transform hover:scale-105 ${
+            className={`group relative p-6 rounded-2xl transition-all duration-300 hover:transform hover:scale-102 ${
               theme === "dark" 
                 ? "bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 hover:bg-gray-700/70" 
                 : "bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:bg-white/90"
-            } shadow-lg hover:shadow-xl`}
+            }`}
           >
             {/* File Icon */}
             <div className="flex items-center justify-between mb-4">
@@ -192,7 +192,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
                   href={file.fileLocation}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-all duration-200 shadow-sm"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-all duration-200"
                 >
                   <FaEye size={12} />
                   View
@@ -200,7 +200,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
                 <a
                   href={file.fileLocation}
                   download={file.fileName}
-                  className="flex items-center justify-center px-3 py-2 bg-gray-500 text-white text-xs rounded-lg hover:bg-gray-600 transition-all duration-200 shadow-sm"
+                  className="flex items-center justify-center px-3 py-2 bg-gray-500 text-white text-xs rounded-lg hover:bg-gray-600 transition-all duration-200"
                 >
                   <FaDownload size={12} />
                 </a>

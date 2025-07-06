@@ -126,7 +126,7 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
 
   // Original floating timer (fallback)
   return (
-    <div className={`fixed bottom-4 left-6 z-40 rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl ${
+    <div className={`fixed bottom-4 left-6 z-[200] rounded-2xl border transition-all duration-300 ${
       theme === 'dark' 
         ? 'bg-gray-800 border-gray-700' 
         : 'bg-white border-gray-200'
@@ -173,12 +173,12 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
           <Button
             onClick={onStart}
             disabled={isRunning}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 shadow-sm ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
               isRunning
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : theme === 'dark'
-                  ? 'bg-green-600 text-white hover:bg-green-700 hover:shadow-md'
-                  : 'bg-green-500 text-white hover:bg-green-600 hover:shadow-md'
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-green-500 text-white hover:bg-green-600'
             }`}
             variant="ghost"
           >
@@ -188,12 +188,12 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
           <Button
             onClick={onStop}
             disabled={!isRunning}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 shadow-sm ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
               !isRunning
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : theme === 'dark'
-                  ? 'bg-red-600 text-white hover:bg-red-700 hover:shadow-md'
-                  : 'bg-red-500 text-white hover:bg-red-600 hover:shadow-md'
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-red-500 text-white hover:bg-red-600'
             }`}
             variant="ghost"
           >
@@ -202,10 +202,10 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
           </Button>
           <Button
             onClick={onReset}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 shadow-sm ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
               theme === 'dark'
-                ? 'bg-gray-600 text-white hover:bg-gray-700 hover:shadow-md'
-                : 'bg-gray-500 text-white hover:bg-gray-600 hover:shadow-md'
+                ? 'bg-gray-600 text-white hover:bg-gray-700'
+                : 'bg-gray-500 text-white hover:bg-gray-600'
             }`}
             variant="ghost"
           >

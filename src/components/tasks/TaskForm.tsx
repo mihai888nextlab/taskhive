@@ -190,7 +190,7 @@ Please enhance and expand this existing description while keeping the original i
   
   return (
     <>
-      <div className="flex h-full">
+      <div className="flex flex-col md:flex-row h-full bg-gray-50 md:bg-transparent">
         <button
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
             onClick={onCancel}
@@ -200,7 +200,7 @@ Please enhance and expand this existing description while keeping the original i
         </button>
 
         {/* Left Panel - Form Details */}
-        <div className="w-2/5 bg-gray-50 border-r border-gray-200 flex flex-col">
+        <div className="w-full md:w-2/5 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none shadow-none md:shadow-lg">
           {/* Header */}
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center gap-4">
@@ -254,6 +254,8 @@ Please enhance and expand this existing description while keeping the original i
                     if (date) {
                       const formatted = date.toISOString().split("T")[0];
                       onDeadlineChange(formatted);
+                    } else {
+                      onDeadlineChange("");
                     }
                   }}
                   disabled={loading}
@@ -319,7 +321,7 @@ Please enhance and expand this existing description while keeping the original i
         </div>
 
         {/* Right Panel - Description + Subtasks */}
-        <div className="flex-1 flex flex-col bg-white">
+        <div className="flex-1 flex flex-col bg-white rounded-b-3xl md:rounded-r-3xl md:rounded-bl-none shadow-none md:shadow-lg">
           {/* Description Header */}
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -426,7 +428,7 @@ Please enhance and expand this existing description while keeping the original i
       />
 
       {/* Footer - full width */}
-      <div className="p-6 border-t border-gray-200 bg-white">
+      <div className="p-6 border-t border-gray-200 bg-white rounded-b-3xl">
         <div className="flex gap-4">
           <Button
             type="button"

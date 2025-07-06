@@ -119,7 +119,7 @@ const UserList: React.FC<UserListProps> = ({
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
               theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
             }`}
           />
         </div>
@@ -135,7 +135,7 @@ const UserList: React.FC<UserListProps> = ({
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
                 <SelectValue placeholder="All Roles" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0">
+              <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
                 <SelectItem
                   value="all"
                   className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
@@ -164,7 +164,7 @@ const UserList: React.FC<UserListProps> = ({
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0">
+              <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
                 <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">First Name</SelectItem>
                 <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Last Name</SelectItem>
                 <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Role</SelectItem>
@@ -272,7 +272,7 @@ const UserList: React.FC<UserListProps> = ({
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
               theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
             }`}
           />
         </div>
@@ -288,7 +288,7 @@ const UserList: React.FC<UserListProps> = ({
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
                 <SelectValue placeholder="All Roles" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0">
+              <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
                 <SelectItem
                   value="all"
                   className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
@@ -317,7 +317,7 @@ const UserList: React.FC<UserListProps> = ({
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0">
+              <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
                 <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">First Name</SelectItem>
                 <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Last Name</SelectItem>
                 <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Role</SelectItem>

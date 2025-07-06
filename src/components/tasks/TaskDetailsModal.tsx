@@ -168,8 +168,8 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className={`relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl ${
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+      <div className={`relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl ${
         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
       }`}>
         {/* Header */}
@@ -246,20 +246,13 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
               </div>
             </div>
             
-            {/* Close Button */}
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onClose}
-              className={`p-1.5 rounded-full transition-all duration-200 hover:scale-110 ${
-                theme === 'dark' 
-                  ? 'hover:bg-gray-700 text-gray-400 hover:text-white' 
-                  : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
-              }`}
-              aria-label="Close modal"
-            >
-              <FaTimes className="w-4 h-4" />
-            </Button>
+            <button
+                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+                        onClick={onClose}
+                        aria-label="Close modal"
+                      >
+                      <FaTimes />
+                    </button>
           </div>
         </div>
 
