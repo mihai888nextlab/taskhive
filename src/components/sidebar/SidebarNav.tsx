@@ -178,24 +178,28 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
         </div>
         {dropdownOpen && (
           <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-lg z-50 py-2">
-            {user.companies?.map((company) => (
-              <button
-                key={company.id}
-                className={`block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition ${
-                  selectedCompany.id === company.id
-                    ? "font-bold bg-gray-100"
-                    : ""
-                }`}
-                onClick={() => {
-                  setSelectedCompany(company);
-                  setDropdownOpen(false);
+            {user.companies
+              ?.sort((a, b) => {
+                return a.id == selectedCompany.id ? -1 : 1;
+              })
+              .map((company) => (
+                <button
+                  key={company.id}
+                  className={`block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition ${
+                    selectedCompany.id === company.id
+                      ? "font-bold bg-gray-100"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedCompany(company);
+                    setDropdownOpen(false);
 
-                  handleCompanyChange(company);
-                }}
-              >
-                {company.name}
-              </button>
-            ))}
+                    handleCompanyChange(company);
+                  }}
+                >
+                  {company.name}
+                </button>
+              ))}
           </div>
         )}
       </div>

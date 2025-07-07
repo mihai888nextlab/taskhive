@@ -58,7 +58,9 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
 
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
-  const [sortBy, setSortBy] = useState<"firstNameAsc" | "lastNameAsc" | "roleAsc">("firstNameAsc");
+  const [sortBy, setSortBy] = useState<
+    "firstNameAsc" | "lastNameAsc" | "roleAsc"
+  >("firstNameAsc");
 
   const projectColumns: TableColumn<Project>[] = [
     {
@@ -279,8 +281,12 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
   };
 
   const filteredUsers = users
-    .filter(u => u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined))
-    .filter(u => {
+    .filter(
+      (u) =>
+        u.companyId ===
+        (user && "companyId" in user ? (user as any).companyId : undefined)
+    )
+    .filter((u) => {
       const q = search.trim().toLowerCase();
       if (!q) return true;
       return (
@@ -289,10 +295,12 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         u.userId.email.toLowerCase().includes(q)
       );
     })
-    .filter(u => (filterRole === "all" ? true : u.role === filterRole))
+    .filter((u) => (filterRole === "all" ? true : u.role === filterRole))
     .sort((a, b) => {
       if (sortBy === "firstNameAsc") {
-        return (a.userId.firstName || "").localeCompare(b.userId.firstName || "");
+        return (a.userId.firstName || "").localeCompare(
+          b.userId.firstName || ""
+        );
       }
       if (sortBy === "lastNameAsc") {
         return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
@@ -305,8 +313,21 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
 
   // Only roles from users in your company
   const companyRoles = Array.from(
-    new Set(users.filter(u => u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined)).map(u => u.role))
+    new Set(
+      users
+        .filter(
+          (u) =>
+            u.companyId ===
+            (user && "companyId" in user ? (user as any).companyId : undefined)
+        )
+        .map((u) => u.role)
+    )
   );
+
+  // TESTE - DE STERS DUPA
+  const handleTestButtonClick = () => {};
+
+  //TERMINAT TEST
 
   useEffect(() => {
     fetchUsers();
@@ -431,7 +452,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
                 type="text"
                 placeholder="Search users..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary bg-inherit text-black"
               />
             </label>
@@ -441,18 +462,26 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
               <span className="mb-1 sm:mb-0 sm:mr-2">Role:</span>
               <select
                 value={filterRole}
-                onChange={e => setFilterRole(e.target.value)}
+                onChange={(e) => setFilterRole(e.target.value)}
                 className="w-full sm:w-40 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
               >
                 <option value="all">All</option>
                 {Array.from(
                   new Set(
-                    users.filter(u =>
-                      u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined)
-                    ).map(u => u.role)
+                    users
+                      .filter(
+                        (u) =>
+                          u.companyId ===
+                          (user && "companyId" in user
+                            ? (user as any).companyId
+                            : undefined)
+                      )
+                      .map((u) => u.role)
                   )
-                ).map(role => (
-                  <option key={role} value={role}>{role}</option>
+                ).map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
                 ))}
               </select>
             </label>
@@ -460,7 +489,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
               <span className="mb-1 sm:mb-0 sm:mr-2">Sort by:</span>
               <select
                 value={sortBy}
-                onChange={e => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-full sm:w-48 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
               >
                 <option value="firstNameAsc">First Name (A-Z)</option>
@@ -481,11 +510,18 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             return 0;
           })
           .map((user) => (
-            <UserCard key={user._id} user={user} theme={theme} onClick={handleUserClick} />
+            <UserCard
+              key={user._id}
+              user={user}
+              theme={theme}
+              onClick={handleUserClick}
+            />
           ))}
       </div>
       {/* Table view for desktop only */}
-      <div className={`bg-white/90 shadow-2xl rounded-2xl overflow-x-auto hidden md:block border border-gray-200/60 backdrop-blur-lg z-10 relative`}>
+      <div
+        className={`bg-white/90 shadow-2xl rounded-2xl overflow-x-auto hidden md:block border border-gray-200/60 backdrop-blur-lg z-10 relative`}
+      >
         <Table<Project>
           title="Users List"
           data={filteredUsers.map((user) => ({
