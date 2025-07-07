@@ -28,7 +28,7 @@ interface User {
 interface UserCardProps {
   user: User;
   theme: string;
-  onClick: () => void;
+  onClick: (userId: string) => void; // <-- Fix: expects userId argument
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
@@ -56,7 +56,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
   return (
     <Card
       className={`relative p-6 rounded-2xl border border-[#e5e7eb] transition-all duration-150 cursor-pointer group bg-white`}
-      onClick={onClick}
+      onClick={() => onClick(user.userId._id)} // <-- Pass userId to onClick
     >
       <CardContent className="p-0">
         <div className="flex items-start gap-4">

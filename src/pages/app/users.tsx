@@ -13,6 +13,15 @@ import UserProfileModal from "@/components/modals/UserProfileModal";
 import { createPortal } from 'react-dom';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import UserCard from "@/components/users/UserCard";
+import {
+  Table as ShadcnTable,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
 interface User {
   _id: string;
@@ -131,6 +140,16 @@ const UsersPage: NextPageWithLayout = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: roleName }),
       });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add role: ${errorText}`);
+      }
+      await fetchRoles();
+      setAddRoleModalOpen(false);
+    } catch (error) {
+      console.error("Error adding role:", error);
+    }
+  };
 
   const filteredUsers = users
     .filter(
@@ -157,34 +176,11 @@ const UsersPage: NextPageWithLayout = () => {
       if (sortBy === "lastNameAsc") {
         return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
       }
-
-      // Handle org chart update
-      const orgChartResponse = await fetch("/api/org-chart");
-      if (orgChartResponse.ok) {
-        const orgChartData = await orgChartResponse.json();
-        const departments = orgChartData.departments || [];
-        const availableDept = departments.find((d: any) => d.id === "available-roles");
-
-        if (availableDept) {
-          if (availableDept.levels.length > 0 && !availableDept.levels[0].roles.includes(roleName)) {
-            availableDept.levels[0].roles.push(roleName);
-          } else if (availableDept.levels.length === 0) {
-            availableDept.levels.push({ id: "available-roles-level", roles: [roleName] });
-          }
-        } else {
-          departments.unshift({
-            id: "available-roles",
-            name: "Available Roles",
-            levels: [{ id: "available-roles-level", roles: [roleName] }],
-          });
-        }
-
-        await fetch("/api/org-chart", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ departments }),
-        });
+      if (sortBy === "roleAsc") {
+        return (a.role || "").localeCompare(b.role || "");
       }
+      return 0;
+    })
 
   // Only roles from users in your company
   const companyRoles = Array.from(
@@ -470,22 +466,44 @@ const UsersPage: NextPageWithLayout = () => {
       <div
         className={`bg-white/90 shadow-2xl rounded-2xl overflow-x-auto hidden md:block border border-gray-200/60 backdrop-blur-lg z-10 relative`}
       >
-        <Table<Project>
-          title="Users List"
-          data={filteredUsers.map((user) => ({
-            id: user._id,
-            user_id: user.userId._id,
-            user_email: user.userId.email,
-            user_firstName: user.userId.firstName,
-            user_lastName: user.userId.lastName,
-            companyId: user.companyId,
-            role: user.role,
-            permissions: user.permissions,
-          }))}
-          columns={projectColumns}
-          emptyMessage="No users registered."
-          rowOnClick={(item) => handleUserClick(item.user_id)}
-        />
+        <ShadcnTable>
+          <TableHeader>
+            <TableRow>
+              <TableHead>First Name</TableHead>
+              <TableHead>Last Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Permissions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  No users registered.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredUsers.map((user) => (
+                <TableRow
+                  key={user._id}
+                  className="cursor-pointer hover:bg-blue-50"
+                  onClick={() => handleUserClick(user.userId._id)}
+                >
+                  <TableCell>{user.userId.firstName}</TableCell>
+                  <TableCell>{user.userId.lastName}</TableCell>
+                  <TableCell>{user.userId.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    {user.permissions && user.permissions.length > 0
+                      ? user.permissions.join(", ")
+                      : "-"}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </ShadcnTable>
       </div>
     </div>
   );
