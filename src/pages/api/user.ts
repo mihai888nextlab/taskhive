@@ -14,10 +14,11 @@ export function createUserHandler(deps?: {
   userCompanyModel?: typeof userCompanyModel;
   dbConnect?: typeof dbConnect;
   jwtVerify?: typeof jwt.verify;
+  companyModel?: typeof companyModel; // <-- add this for DI
 }) {
   const _userModel = deps?.userModel || userModel;
   const _userCompanyModel = deps?.userCompanyModel || userCompanyModel;
-  const companyModel = deps?.companyModel || companyModel;
+  const _companyModel = deps?.companyModel || companyModel; // <-- fix variable name
   const _dbConnect = deps?.dbConnect || dbConnect;
   const _jwtVerify = deps?.jwtVerify || jwt.verify;
 

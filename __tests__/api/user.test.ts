@@ -28,9 +28,10 @@ describe("/api/user handler", () => {
   const userModel = createUserModelMock(mockUser);
   const userCompanyModel = {
     findOne: jest.fn().mockResolvedValue(mockUserCompany),
+    find: jest.fn(), // Add find as a mock function to satisfy type checker
   };
   const dbConnect = jest.fn().mockResolvedValue(undefined);
-  const jwtVerify = jest.fn().mockReturnValue({ userId: "123" });
+  const jwtVerify = jest.fn().mockReturnValue({ userId: "123", companyId: "company123" });
 
   const handler = createUserHandler({
     userModel: userModel as any,
@@ -53,18 +54,41 @@ describe("/api/user handler", () => {
     } as unknown as NextApiRequest;
     const res = mockRes();
 
-    await handler(req, res);
+    // Patch userCompanyModel.findOne to also return a valid company object for company lookup
+    userCompanyModel.findOne.mockResolvedValueOnce(mockUserCompany);
+    // Patch userCompanyModel.find to return all companies for the user
+    userCompanyModel.find = jest.fn().mockResolvedValue([
+      { companyId: "company123", role: "admin" }
+    ]);
+    // Patch companyModel for company lookup
+    const companyModel = {
+      findById: jest.fn().mockResolvedValue({ _id: "company123", name: "Test Company" })
+    };
+    // Patch handler with companyModel injected
+    const handlerWithCompany = createUserHandler({
+      userModel: userModel as any,
+      userCompanyModel: userCompanyModel as any,
+      dbConnect,
+      jwtVerify,
+      companyModel: companyModel as any,
+    });
+
+    await handlerWithCompany(req, res);
 
     expect(dbConnect).toHaveBeenCalled();
     expect(jwtVerify).toHaveBeenCalledWith("validtoken", expect.any(String));
     expect(userModel.findById).toHaveBeenCalledWith("123");
-    expect(userCompanyModel.findOne).toHaveBeenCalledWith({ userId: "123" });
+    expect(userCompanyModel.findOne).toHaveBeenCalledWith({ userId: "123", companyId: "company123" });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       user: {
         ...mockUser,
         role: mockUserCompany.role,
         companyId: mockUserCompany.companyId,
+        companyName: "Test Company",
+        companies: [
+          { id: "company123", name: "Test Company", role: "admin" }
+        ]
       },
     });
   });
