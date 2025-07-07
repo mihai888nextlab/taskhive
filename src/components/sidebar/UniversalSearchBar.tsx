@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import UserProfileModal from "../modals/UserProfileModal";
 
@@ -60,6 +60,37 @@ const UniversalSearchBar: React.FC = () => {
   const [userProfileModalOpen, setUserProfileModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
+  // Add a ref to the input
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input on Cmd+K or Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+K (Mac) or Ctrl+K (Windows/Linux)
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setShowDropdown(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleResultClick = (result: any) => {
+    if (result.type === "user") {
+      setSelectedUser(result);
+      setUserProfileModalOpen(true);
+      setShowDropdown(false);
+    } else {
+      const url = getResultUrl(result);
+      if (url && url !== "#") {
+        window.location.href = url;
+      }
+      setShowDropdown(false);
+    }
+  };
+
   useEffect(() => {
     if (!search.trim()) {
       setSearchResults([]);
@@ -70,9 +101,30 @@ const UniversalSearchBar: React.FC = () => {
 
     const timeout = setTimeout(async () => {
       try {
+        // Fetch universal search results (users, tasks, etc.)
         const res = await fetch(`/api/universal-search?q=${encodeURIComponent(search)}`);
         const data = await res.json();
-        setSearchResults(flattenResults(data.results));
+        let results = flattenResults(data.results);
+
+        // Fetch files separately and add to results
+        const filesRes = await fetch(`/api/getFiles`);
+        const filesData = await filesRes.json();
+        if (Array.isArray(filesData.files)) {
+          const fileMatches = filesData.files
+            .filter((file: any) =>
+              (file.fileName || "").toLowerCase().includes(search.toLowerCase())
+            )
+            .map((file: any) => ({
+              ...file,
+              type: "file",
+              title: file.fileName,
+              name: file.fileName,
+              description: file.description || "",
+            }));
+          results = [...results, ...fileMatches];
+        }
+
+        setSearchResults(results);
         setShowDropdown(true);
       } catch {
         setSearchResults([]);
@@ -87,14 +139,14 @@ const UniversalSearchBar: React.FC = () => {
   return (
     <div className="relative">
       <input
+        ref={inputRef}
         type="text"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         onFocus={() => search && setShowDropdown(true)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
         placeholder="Search tasks, users, files, etc..."
-        className="w-full px-5 py-2.5 rounded-3xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/60 shadow border border-gray-200 text-base font-medium transition-all"
-        style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.10)' }}
+        className="w-full px-5 py-2 rounded-3xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/60 border border-gray-200 text-base font-medium transition-all"
       />
       {loading && (
         <div className="absolute right-4 top-2.5 animate-spin text-primary">
@@ -104,81 +156,120 @@ const UniversalSearchBar: React.FC = () => {
           </svg>
         </div>
       )}
-      {showDropdown && searchResults.length > 0 && (
+      {showDropdown && (
         <div className="absolute left-0 right-0 mt-2 bg-white text-gray-900 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto border border-primary/20 backdrop-blur-xl" style={{boxShadow:'0 8px 32px 0 rgba(31,38,135,0.15)'}}>
-          {searchResults.map((result, idx) => {
-            const tag = LABELS[result.type] || LABELS.page;
-            let href = getResultUrl(result);
-            if (result.type === "user") {
-              return (
-                <button
-                  key={result._id ? result._id + idx : result.name + idx}
-                  type="button"
-                  className="block w-full text-left px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-200 hover:bg-primary/10 cursor-pointer bg-white"
-                  onClick={() => {
-                    setSelectedUser(result);
-                    setUserProfileModalOpen(true);
-                    setShowDropdown(false);
-                  }}
-                >
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-base">
-                      {result.fullName ||
-                        `${result.firstName || ""} ${result.lastName || ""}`.trim() ||
-                        "Unknown User"}
-                    </span>
-                    <div className="flex items-center mt-1">
-                      <span className="text-xs text-gray-400">{result.email}</span>
-                      <span className={`ml-3 text-xs ${tag.color} text-white px-3 py-1 rounded-full font-semibold shadow-sm`}>
-                        {tag.label}
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              );
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center text-gray-400">
+              <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" />
+              </svg>
+              <span className="text-base font-medium">Searching...</span>
+            </div>
+          ) : (() => {
+            // Define the categories you want to show
+            const CATEGORY_ORDER = [
+              { key: "users", label: "Users" },
+              { key: "tasks", label: "Tasks" },
+              { key: "time-tracking", label: "Time Tracking" },
+              { key: "finance", label: "Incomes & Expenses" },
+              { key: "announcements", label: "Announcements" },
+              { key: "storage", label: "Files in Storage" },
+            ];
+
+            // Group results by category
+            const grouped: Record<string, any[]> = {};
+            for (const result of searchResults) {
+              // Map result.type to your categories
+              let cat = "";
+              switch (result.type) {
+                case "user":
+                  cat = "users";
+                  break;
+                case "task":
+                  cat = "tasks";
+                  break;
+                case "timesession":
+                case "timetracking":
+                  cat = "time-tracking";
+                  break;
+                case "income":
+                case "expense":
+                case "finance":
+                  cat = "finance";
+                  break;
+                case "announcement":
+                  cat = "announcements";
+                  break;
+                case "storage":
+                case "file":
+                  cat = "storage";
+                  break;
+                default:
+                  cat = "Other";
+              }
+              if (!grouped[cat]) grouped[cat] = [];
+              grouped[cat].push(result);
             }
-            if (result.type === "task") {
+
+            // Only show categories with results, in the specified order
+            const categoriesWithResults = CATEGORY_ORDER.filter(cat => grouped[cat.key] && grouped[cat.key].length > 0);
+
+            if (categoriesWithResults.length === 0) {
               return (
-                <Link
-                  key={result._id ? result._id + idx : result.name + idx}
-                  href={getResultUrl(result)}
-                  className="block px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-200 hover:bg-primary/10 flex items-center bg-white"
-                  onClick={() => {
-                    setSearch("");
-                    setShowDropdown(false);
-                  }}
-                >
-                  <div className="flex-1">
-                    <span className="font-semibold text-base">{result.title}</span>
-                  </div>
-                  <span className={`ml-4 text-xs ${tag.color} text-white px-3 py-1 rounded-full font-semibold shadow-sm`}>
-                    {tag.label}
-                  </span>
-                </Link>
-              );
-            }
-            return (
-              <Link
-                key={result._id ? result._id + idx : result.name + idx}
-                href={href}
-                className="block px-6 py-4 mb-2 rounded-xl shadow hover:shadow-xl transition-all border border-gray-200 hover:bg-primary/10 flex items-center bg-white"
-                onClick={() => {
-                  setSearch("");
-                  setShowDropdown(false);
-                }}
-              >
-                <div className="flex-1">
-                  <span className="font-semibold text-base">{result.name || result.title || result.fullName}</span>
-                  {result.description && !["task", "expense", "income"].includes(result.type) && (
-                    <span className="block text-xs text-gray-400 mt-1">{result.description}</span>
-                  )}
+                <div className="flex flex-col items-center justify-center py-8 text-center text-gray-400">
+                  <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" />
+                  </svg>
+                  <span className="text-base font-medium">No results found</span>
+                  <span className="text-xs text-gray-400 mt-1">Try a different search term</span>
                 </div>
-                <span className={`ml-4 text-xs ${tag.color} text-white px-3 py-1 rounded-full font-semibold shadow-sm`}>
-                  {tag.label}
-                </span>
-              </Link>
+              );
+            }
+
+            // Helper to render each result (show preview of first 8 words of description if present, and email for users)
+            const renderResult = (result: any, idx: number) => {
+              let preview = "";
+              if (result.description) {
+                const words = result.description.split(/\s+/).slice(0, 8);
+                preview = words.join(" ");
+                if (result.description.split(/\s+/).length > 8) preview += "...";
+              }
+              return (
+                <li
+                  key={result._id || result.id || idx}
+                  className="px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors rounded"
+                  onMouseDown={() => handleResultClick(result)}
+                >
+                  <span className="font-medium">{result.title || result.name || result.fullName}</span>
+                  {/* Show email for users */}
+                  {result.type === "user" && result.email && (
+                    <span className="ml-2 text-xs text-gray-500">{result.email}</span>
+                  )}
+                  {/* Show preview for other types if description exists */}
+                  {preview && result.type !== "user" && (
+                    <span className="ml-2 text-xs text-gray-500">{preview}</span>
+                  )}
+                </li>
+              );
+            };
+
+            return (
+              <div>
+                {categoriesWithResults.map(cat => (
+                  <div key={cat.key} className="mb-2">
+                    <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary/80 bg-primary/5 border-b border-primary/10 rounded-t-lg">
+                      {cat.label}
+                    </div>
+                    <ul>
+                      {grouped[cat.key].map(renderResult)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
             );
-          })}
+          })()}
         </div>
       )}
       <UserProfileModal

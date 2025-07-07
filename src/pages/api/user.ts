@@ -8,83 +8,100 @@ import userCompanyModel from "@/db/models/userCompanyModel";
 import dbConnect from "@/db/dbConfig";
 import companyModel from "@/db/models/companyModel";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  await dbConnect();
+// Allow dependency injection for easier Jest testing
+export function createUserHandler(deps?: {
+  userModel?: typeof userModel;
+  userCompanyModel?: typeof userCompanyModel;
+  dbConnect?: typeof dbConnect;
+  jwtVerify?: typeof jwt.verify;
+}) {
+  const _userModel = deps?.userModel || userModel;
+  const _userCompanyModel = deps?.userCompanyModel || userCompanyModel;
+  const companyModel = deps?.companyModel || companyModel;
+  const _dbConnect = deps?.dbConnect || dbConnect;
+  const _jwtVerify = deps?.jwtVerify || jwt.verify;
 
-  if (req.method !== "GET") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
+  return async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+  ) {
+    await _dbConnect();
 
-  const cookies = cookie.parse(req.headers.cookie || "");
-  const token = cookies.auth_token;
-
-  if (!token) {
-    return res.status(401).json({ message: "No token provided" });
-  }
-
-  let decodedToken: JWTPayload;
-  try {
-    decodedToken = jwt.verify(
-      token,
-      process.env.JWT_SECRET || ""
-    ) as JWTPayload;
-  } catch {
-    return res.status(401).json({ message: "Invalid or expired token" });
-  }
-
-  try {
-    const user = await userModel
-      .findById(decodedToken.userId)
-      .select("-password")
-      .lean();
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (req.method !== "GET") {
+      return res.status(405).json({ message: "Method not allowed" });
     }
 
-    const userCompany = await userCompanyModel.findOne({
-      userId: decodedToken.userId,
-      companyId: decodedToken.companyId,
-    });
+    const cookies = cookie.parse(req.headers.cookie || "");
+    const token = cookies.auth_token;
 
-    if (!userCompany) {
-      return res.status(404).json({ message: "UserCompany not found" });
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
     }
 
-    const company = await companyModel.findById(userCompany.companyId);
-
-    if (!company) {
-      return res.status(404).json({ message: "Company not found" });
+    let decodedToken: JWTPayload;
+    try {
+      decodedToken = _jwtVerify(
+        token,
+        process.env.JWT_SECRET || ""
+      ) as JWTPayload;
+    } catch {
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
 
-    const userCompanies = await userCompanyModel.find({
-      userId: decodedToken.userId,
-    });
+    try {
+      const user = await _userModel
+        .findById(decodedToken.userId)
+        .select("-password")
+        .lean();
 
-    const companies = await Promise.all(
-      userCompanies.map(async (uc) => {
-        const comp = await companyModel.findById(uc.companyId);
-        return {
-          id: comp?._id.toString(),
-          name: comp?.name,
-          role: uc.role,
-        };
-      })
-    );
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const userCompany = await _userCompanyModel.findOne({
+        userId: decodedToken.userId,
+        companyId: decodedToken.companyId,
+      });
 
-    return res.status(200).json({
-      user: {
-        ...user,
-        role: userCompany.role,
-        companyId: userCompany.companyId,
-        companyName: company.name,
-        companies,
-      },
-    });
-  } catch (error) {
-    return res.status(500).json({ message: "Internal server error" });
-  }
+      if (!userCompany) {
+        return res.status(404).json({ message: "UserCompany not found" });
+      }
+    
+      const company = await _companyModel.findById(userCompany.companyId);
+
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+
+      const userCompanies = await _userCompanyModel.find({
+        userId: decodedToken.userId,
+      });
+
+      const companies = await Promise.all(
+        userCompanies.map(async (uc) => {
+          const comp = await _companyModel.findById(uc.companyId);
+          return {
+            id: comp?._id.toString(),
+            name: comp?.name,
+            role: uc.role,
+          };
+        })
+      );
+
+      return res.status(200).json({
+        user: {
+          ...user,
+          role: userCompany.role,
+          companyId: userCompany.companyId,
+          companyName: company.name,
+          companies,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
 }
+
+// Default export for Next.js API route
+export default createUserHandler();

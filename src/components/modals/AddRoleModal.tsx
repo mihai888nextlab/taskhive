@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { FaSpinner, FaTimes } from "react-icons/fa";
+import { FaSpinner, FaTimes, FaPlus } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface AddRoleModalProps {
   onClose: () => void;
@@ -21,23 +23,15 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
           body: JSON.stringify({ name: roleName }),
         });
 
-        if (!response.ok) {
-          if (response.status === 409) {
-            // Role already exists, ignore or show a message
-            // Optionally: return here or continue
-            // Example: just return silently
-            return;
-            // Or show a toast: toast.info("Role already exists");
-          } else {
-            throw new Error("Failed to add role");
-          }
+        if (!response.ok && response.status !== 409) {
+          throw new Error("Failed to add role");
         }
 
         onRoleAdded(roleName.trim());
         setRoleName("");
         onClose();
       } catch (error) {
-        // handle error
+        console.error("Error adding role:", error);
       } finally {
         setLoading(false);
       }
@@ -45,42 +39,87 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50">
-      <div className="bg-white p-10 rounded-3xl shadow-2xl border border-gray-200/60 w-96 max-w-full relative">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden">
+        {/* Close Button */}
+        <button
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+          onClick={onClose}
+          aria-label="Close modal"
+        >
+          <FaTimes />
+        </button>
+
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 text-center w-full">Add Role</h2>
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-all text-2xl"
-          >
-            <FaTimes />
-          </button>
+        <div className="p-6 border-b border-gray-200 bg-green-50">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-600 rounded-xl shadow-lg">
+              <FaPlus className="text-xl text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Add New Role</h2>
+              <p className="text-gray-600">Create a new role for your organization</p>
+            </div>
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* Content */}
+        <form onSubmit={handleSubmit} className="p-6">
           <div>
-            <label htmlFor="roleName" className="block text-gray-700 text-sm font-semibold mb-2">Role Name:</label>
-            <input
+            <label className="block text-gray-900 font-semibold mb-2 text-sm">
+              Role Name *
+            </label>
+            <Input
               type="text"
-              id="roleName"
-              placeholder="Role Name"
+              placeholder="e.g., Project Manager, Developer, Designer"
               value={roleName}
               onChange={(e) => setRoleName(e.target.value)}
-              className="w-full py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm"
               required
-            />
-          </div>
-          <div className="flex justify-end space-x-4">
-            <button
-              type="submit"
-              className="inline-flex items-center justify-center bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-300"
               disabled={loading}
-            >
-              {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}
-              Add
-            </button>
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Enter a descriptive name for the new role
+            </p>
           </div>
         </form>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              className="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={loading || !roleName.trim()}
+              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
+                loading || !roleName.trim()
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md'
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <FaSpinner className="animate-spin w-3 h-3" />
+                  Creating...
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <FaPlus className="w-3 h-3" />
+                  Add Role
+                </div>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

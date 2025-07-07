@@ -1,7 +1,11 @@
 import React from "react";
-import { FaTrash, FaFileCsv, FaFilePdf } from "react-icons/fa";
+import { FaTrash, FaFileCsv, FaFilePdf, FaSearch, FaSpinner, FaReceipt } from "react-icons/fa";
 import DatePicker from "react-datepicker";
+import { useTheme } from '@/components/ThemeContext';
 import "react-datepicker/dist/react-datepicker.css";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface Expense {
   _id: string;
@@ -17,8 +21,6 @@ export interface ExpenseListProps {
   expenses: Expense[];
   loading: boolean;
   onDelete: (item: Expense) => void;
-  theme: string;
-  // Menu controls
   search: string;
   onSearchChange: (v: string) => void;
   categoryFilter: string;
@@ -38,7 +40,6 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   expenses,
   loading,
   onDelete,
-  theme,
   search,
   onSearchChange,
   categoryFilter,
@@ -52,193 +53,260 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   onSortOrderChange,
   onExportCSV,
   onExportPDF,
-}) => (
-  <div>
-    {/* Responsive Search and Filters */}
-    <div className={`space-y-3 mb-4 p-3 rounded-lg border ${
-      theme === "dark"
-        ? "bg-gray-900 border-gray-700"
-        : "bg-gray-50 border-gray-200"
-    }`}>
-      {/* First Row: Search and Quick Actions */}
-      <div className="flex gap-2">
-        {/* Search */}
-        <div className="flex-1 min-w-0">
-          <input
-            type="text"
-            placeholder="Search expenses..."
-            value={search}
-            onChange={e => onSearchChange(e.target.value)}
-            className={`w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              theme === "dark"
-                ? "bg-gray-800 text-white border-gray-600"
-                : "bg-white text-gray-900 border-gray-300"
+}) => {
+  const { theme } = useTheme();
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Controls */}
+      <div className="flex-shrink-0 p-3 space-y-3">
+        {/* Search and Export Row */}
+        <div className="flex gap-3">
+          <div className="flex-1 relative">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            <Input
+              type="text"
+              placeholder="Search expenses..."
+              value={search}
+              onChange={e => onSearchChange(e.target.value)}
+              className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200
+                ${theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+              }`}
+              style={{ height: "36px" }}
+              disabled={loading}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={onExportCSV}
+              disabled={loading}
+              className={`p-2 rounded-xl font-medium transition-all duration-200 h-11 w-11 flex items-center justify-center
+                ${loading
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : theme === 'dark'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              style={{ height: "36px", width: "36px", minWidth: "36px", minHeight: "36px" }}
+              title="Export CSV"
+              variant="ghost"
+            >
+              <FaFileCsv className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={onExportPDF}
+              disabled={loading}
+              className={`p-2 rounded-xl font-medium transition-all duration-200 h-11 w-11 flex items-center justify-center
+                ${loading
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : theme === 'dark'
+                    ? 'bg-red-600 text-white hover:bg-red-700'
+                    : 'bg-red-500 text-white hover:bg-red-600'
+                }`}
+              style={{ height: "36px", width: "36px", minWidth: "36px", minHeight: "36px" }}
+              title="Export PDF"
+              variant="ghost"
+            >
+              <FaFilePdf className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        {/* Filters Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+          {/* Category Filter */}
+          <Select
+            value={categoryFilter || undefined}
+            onValueChange={onCategoryFilterChange}
+            disabled={loading}
+          >
+            <SelectTrigger
+              className={`w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 min-w-[140px]`}
+              style={{ height: "36px" }}
+            >
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-xl border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-800 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              <SelectItem value="All" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">All Categories</SelectItem>
+              {categories
+                .filter(cat => cat !== "All")
+                .map(cat => (
+                  <SelectItem
+                    key={cat}
+                    value={cat}
+                    className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                  >
+                    {cat}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          {/* Sorting */}
+          <Select
+            value={`${sortBy}-${sortOrder}`}
+            onValueChange={v => {
+              const [newSortBy, newSortOrder] = v.split('-');
+              onSortByChange(newSortBy);
+              onSortOrderChange(newSortOrder);
+            }}
+            disabled={loading}
+          >
+            <SelectTrigger
+              className={`w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 min-w-[140px]`}
+              style={{ height: "36px" }}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-xl border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-800 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              <SelectItem value="date-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Newest First</SelectItem>
+              <SelectItem value="date-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Oldest First</SelectItem>
+              <SelectItem value="amount-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Highest Amount</SelectItem>
+              <SelectItem value="amount-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Lowest Amount</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Start Date */}
+          <DatePicker
+            selected={dateRange[0]}
+            onChange={date => onDateRangeChange([date, dateRange[1]])}
+            selectsStart
+            startDate={dateRange[0]}
+            endDate={dateRange[1]}
+            placeholderText="Start Date"
+            className={`w-full px-4 py-2 text-sm rounded-xl border transition-all duration-200 h-[36px]
+              ${theme === 'dark' 
+                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+            }`}
+            disabled={loading}
+          />
+
+          {/* End Date */}
+          <DatePicker
+            selected={dateRange[1]}
+            onChange={date => onDateRangeChange([dateRange[0], date])}
+            selectsEnd
+            startDate={dateRange[0]}
+            endDate={dateRange[1]}
+            placeholderText="End Date"
+            className={`w-full px-4 py-2 text-sm rounded-xl border transition-all duration-200 h-[36px]
+              ${theme === 'dark' 
+                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
             }`}
             disabled={loading}
           />
         </div>
-        
-        {/* Export Actions */}
-        <div className="flex gap-1">
-          <button
-            onClick={onExportCSV}
-            className={`p-2 rounded-md border text-sm hover:bg-opacity-80 transition-colors ${
-              theme === "dark"
-                ? "bg-blue-600 text-white border-blue-500 hover:bg-blue-700"
-                : "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
-            }`}
-            disabled={loading}
-            title="Export CSV"
-          >
-            <FaFileCsv />
-          </button>
-          <button
-            onClick={onExportPDF}
-            className={`p-2 rounded-md border text-sm hover:bg-opacity-80 transition-colors ${
-              theme === "dark"
-                ? "bg-red-600 text-white border-red-500 hover:bg-red-700"
-                : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
-            }`}
-            disabled={loading}
-            title="Export PDF"
-          >
-            <FaFilePdf />
-          </button>
-        </div>
       </div>
 
-      {/* Second Row: Filters and Sort - Responsive Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2">
-        {/* Category Filter */}
-        <select
-          value={categoryFilter}
-          onChange={e => onCategoryFilterChange(e.target.value)}
-          className={`px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            theme === "dark"
-              ? "bg-gray-800 text-white border-gray-600"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
-          disabled={loading}
-        >
-          <option value="">All Categories</option>
-          {categories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-
-        {/* Sort */}
-        <select
-          value={`${sortBy}-${sortOrder}`}
-          onChange={e => {
-            const [newSortBy, newSortOrder] = e.target.value.split('-');
-            onSortByChange(newSortBy);
-            onSortOrderChange(newSortOrder);
-          }}
-          className={`px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            theme === "dark"
-              ? "bg-gray-800 text-white border-gray-600"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
-          disabled={loading}
-        >
-          <option value="date-desc">Newest</option>
-          <option value="date-asc">Oldest</option>
-          <option value="amount-desc">Highest</option>
-          <option value="amount-asc">Lowest</option>
-        </select>
-
-        {/* Start Date */}
-        <DatePicker
-          selected={dateRange[0]}
-          onChange={date => onDateRangeChange([date, dateRange[1]])}
-          selectsStart
-          startDate={dateRange[0]}
-          endDate={dateRange[1]}
-          placeholderText="Start Date"
-          className={`w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            theme === "dark"
-              ? "bg-gray-800 text-white border-gray-600"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
-          disabled={loading}
-        />
-
-        {/* End Date */}
-        <DatePicker
-          selected={dateRange[1]}
-          onChange={date => onDateRangeChange([dateRange[0], date])}
-          selectsEnd
-          startDate={dateRange[0]}
-          endDate={dateRange[1]}
-          placeholderText="End Date"
-          className={`w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            theme === "dark"
-              ? "bg-gray-800 text-white border-gray-600"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
-          disabled={loading}
-        />
-      </div>
-    </div>
-
-    {/* List */}
-    <div className="max-h-96 overflow-y-auto space-y-3 pr-2">
-      {loading ? (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-          <p className={`mt-2 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading expenses...</p>
-        </div>
-      ) : expenses.length === 0 ? (
-        <p className={`text-center py-8 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-          No expenses found. Add your first expense using the form.
-        </p>
-      ) : (
-        expenses.map(expense => (
-          <div
-            key={expense._id}
-            className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-              theme === "dark"
-                ? "bg-red-900/10 border-gray-700 hover:bg-red-900/20"
-                : "bg-red-50/50 border-red-100 hover:bg-red-50"
-            }`}
-          >
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-1">
-                <h3 className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  {expense.title}
-                </h3>
-                <span className="text-lg font-bold text-red-500">
-                  ${expense.amount.toFixed(2)}
-                </span>
+      {/* Scrollable List Content */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 max-h-[420px]">
+        {loading ? (
+          <div className="flex items-center justify-center min-h-[200px]">
+            <div className="text-center">
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-3 ${
+                theme === 'dark' ? 'bg-gray-700' : 'bg-red-50'
+              }`}>
+                <FaSpinner className="animate-spin text-xl text-red-600" />
               </div>
-              <p className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                {expense.description}
+              <h3 className={`text-base font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Loading expenses...
+              </h3>
+              <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                Please wait while we fetch your expense data
               </p>
-              <div className="flex gap-4 text-xs">
-                <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                  {expense.date ? new Date(expense.date).toLocaleDateString() : "No date"}
-                </span>
-                {expense.category && (
-                  <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                    {expense.category}
-                  </span>
-                )}
-              </div>
             </div>
-            <button
-              onClick={() => onDelete(expense)}
-              className={`p-2 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors ${
-                theme === 'dark' ? 'hover:text-red-400' : 'hover:text-red-600'
-              }`}
-              title="Delete Expense"
-            >
-              <FaTrash size={16} />
-            </button>
           </div>
-        ))
-      )}
+        ) : expenses.length === 0 ? (
+          <div className="flex items-center justify-center min-h-[200px]">
+            <div className="text-center">
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-3 ${
+                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+              }`}>
+                <FaReceipt className="text-xl text-gray-400" />
+              </div>
+              <h3 className={`text-base font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {search.trim() ? 'No matching expenses found' : 'No expenses yet'}
+              </h3>
+              <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                {search.trim() 
+                  ? 'Try adjusting your search criteria or filters' 
+                  : 'Add your first expense using the form on the left'
+                }
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {expenses.map(expense => (
+              <div
+                key={expense._id}
+                className={`p-4 rounded-xl border transition-all duration-200 ${
+                  theme === "dark"
+                    ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
+                    : "bg-white border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className={`font-semibold text-base truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {expense.title}
+                      </h3>
+                      <span className="text-lg font-bold text-red-500">
+                        -${expense.amount.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className={`text-sm mb-2 leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {expense.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                        {expense.date ? new Date(expense.date).toLocaleDateString() : "No date"}
+                      </span>
+                      {expense.category && (
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          theme === 'dark' 
+                            ? 'bg-red-900/30 text-red-400' 
+                            : 'bg-red-50 text-red-700'
+                        }`}>
+                          {expense.category}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onDelete(expense)}
+                    className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
+                      theme === 'dark' 
+                        ? 'text-red-400 hover:bg-red-900/20 hover:text-red-300' 
+                        : 'text-red-600 hover:bg-red-50'
+                    }`}
+                    title="Delete Expense"
+                  >
+                    <FaTrash size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-export default ExpenseList
+export default ExpenseList;

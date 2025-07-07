@@ -85,7 +85,7 @@ const Communication: NextPageWithLayout = () => {
   };
 
   return (
-    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} p-4 lg:p-8`}>
+    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} p-4 lg:px-8`}>
       {loadingUser && <Loading />}
 
       {/* Main Communication Container */}

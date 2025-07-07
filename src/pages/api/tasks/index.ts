@@ -68,8 +68,7 @@ export default async function handler(
         });
     }
   } else if (req.method === "POST") {
-    const { title, description, deadline, assignedTo, important, subtasks } =
-      req.body;
+    const { title, description, deadline, assignedTo, priority, subtasks } = req.body;
 
     if (!title || !deadline) {
       return res
@@ -91,7 +90,7 @@ export default async function handler(
         userId: assignedUserId,
         createdBy: userId,
         companyId: decodedToken.companyId,
-        important: !!important,
+        priority: priority || 'medium',
         isSubtask: false,
         subtasks: [],
       });
@@ -109,7 +108,7 @@ export default async function handler(
               userId: assignedUserId,
               createdBy: userId,
               companyId: decodedToken.companyId,
-              important: false,
+              priority: priority || 'medium',
               isSubtask: true,
               parentTask: newTask._id,
             });

@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaSpinner, FaMagic, FaPlus, FaTrash, FaRobot } from "react-icons/fa";
+import { FaSpinner, FaMagic, FaTimes, FaTasks, FaExclamationTriangle, FaBolt, FaFileAlt, FaLightbulb, FaList } from "react-icons/fa";
+import SubtasksModal from "./SubtasksModal";
+import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Button } from "@/components/ui/button";
 
 interface Subtask {
   title: string;
@@ -17,12 +21,12 @@ interface TaskFormProps {
   usersBelowMe: any[];
   formError: string | null;
   theme: string;
-  important: boolean;
+  priority: 'critical' | 'high' | 'medium' | 'low';
   onTitleChange: (v: string) => void;
   onDescriptionChange: (v: string) => void;
   onDeadlineChange: (v: string) => void;
   onAssignedToChange: (v: string) => void;
-  onImportantChange: (v: boolean) => void;
+  onPriorityChange: (v: 'critical' | 'high' | 'medium' | 'low') => void;
   onSubmit: (e: React.FormEvent, subtasks?: Subtask[]) => void;
   onCancel: () => void;
 }
@@ -38,33 +42,49 @@ const TaskForm: React.FC<TaskFormProps> = ({
   usersBelowMe,
   formError,
   theme,
-  important,
+  priority,
   onTitleChange,
   onDescriptionChange,
   onDeadlineChange,
   onAssignedToChange,
-  onImportantChange,
+  onPriorityChange,
   onSubmit,
   onCancel,
 }) => {
-  // Keep local state in sync with prop for controlled checkbox
-  const [localImportant, setLocalImportant] = useState(important);
+  const [localPriority, setLocalPriority] = useState<'critical' | 'high' | 'medium' | 'low'>(priority);
   const [generatingDescription, setGeneratingDescription] = useState(false);
-  const [descriptionManuallyEdited, setDescriptionManuallyEdited] = useState(false);
-  const prevTitleRef = useRef(taskTitle);
-
-  // Subtasks state
+  const [generatingSubtasks, setGeneratingSubtasks] = useState(false);
   const [includeSubtasks, setIncludeSubtasks] = useState(false);
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
-  const [generatingSubtasks, setGeneratingSubtasks] = useState(false);
+  const [showSubtasksModal, setShowSubtasksModal] = useState(false);
 
   useEffect(() => {
-    setLocalImportant(important);
-  }, [important]);
+    setLocalPriority(priority);
+  }, [priority]);
 
-  const handleImportantChange = (checked: boolean) => {
-    setLocalImportant(checked);
-    onImportantChange(checked);
+  const handlePriorityChange = (newPriority: 'critical' | 'high' | 'medium' | 'low') => {
+    setLocalPriority(newPriority);
+    onPriorityChange(newPriority);
+  };
+
+  const getPriorityColor = (priorityLevel: string) => {
+    switch (priorityLevel) {
+      case 'critical': return 'bg-red-50 text-red-700 border-red-200';
+      case 'high': return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'medium': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'low': return 'bg-gray-50 text-gray-700 border-gray-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getPriorityIcon = (priorityLevel: string) => {
+    switch (priorityLevel) {
+      case 'critical': return <FaExclamationTriangle className="w-4 h-4" />;
+      case 'high': return <FaBolt className="w-4 h-4" />;
+      case 'medium': return <FaFileAlt className="w-4 h-4" />;
+      case 'low': return <FaLightbulb className="w-4 h-4" />;
+      default: return <FaFileAlt className="w-4 h-4" />;
+    }
   };
 
   const handleGenerateDescription = async () => {
@@ -143,6 +163,12 @@ Please enhance and expand this existing description while keeping the original i
     setSubtasks(updated);
   };
 
+  const handleSaveSubtasks = (newSubtasks: Subtask[]) => {
+    setSubtasks(newSubtasks);
+    setIncludeSubtasks(newSubtasks.length > 0);
+    setShowSubtasksModal(false);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const validSubtasks = includeSubtasks ? subtasks.filter(s => s.title.trim()) : [];
@@ -150,267 +176,294 @@ Please enhance and expand this existing description while keeping the original i
   };
 
   useEffect(() => {
-    if (taskDescription === "") {
-      setDescriptionManuallyEdited(false);
-    }
-  }, [taskDescription]);
-
-  // Reset subtasks when form is closed or task changes
-  useEffect(() => {
     if (!show) {
       setIncludeSubtasks(false);
       setSubtasks([]);
+      setShowSubtasksModal(false);
     }
   }, [show]);
+
+  // Convert string date to Date object for DatePicker
+  const deadlineDateObj = taskDeadline ? new Date(taskDeadline) : undefined;
 
   if (!show) return null;
   
   return (
-    <div id="task-form" className="transition-all duration-500 ease-in-out">
-      <form
-        onSubmit={handleSubmit}
-        className={`bg-${theme === 'light' ? 'gray-50' : 'gray-800'} p-4 sm:p-8 rounded-2xl animate-fadeIn max-h-[90vh] overflow-y-auto`}
-      >
-        <h2 className={`text-2xl sm:text-3xl font-bold text-${theme === 'light' ? 'gray-800' : 'white'} mb-4 sm:mb-6 text-center`}>
-          {editingTaskId ? "Edit Task Details" : "Create New Task"}
-        </h2>
-        {formError && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg shadow-sm" role="alert">
-            <div className="flex items-center">
-              <svg className="h-6 w-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
+    <>
+      <div className="flex flex-col md:flex-row h-full bg-gray-50 md:bg-transparent">
+        <button
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+            onClick={onCancel}
+            aria-label="Close modal"
+          >
+          <FaTimes />
+        </button>
+
+        {/* Left Panel - Form Details */}
+        <div className="w-full md:w-2/5 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none shadow-none md:shadow-lg">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-600 rounded-lg shadow-sm">
+                <FaTasks className="text-xl text-white" />
+              </div>
               <div>
-                <p className="font-bold">Validation Error</p>
-                <p className="text-sm">{formError}</p>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {editingTaskId ? "Edit Task" : "Create New Task"}
+                </h2>
+                <p className="text-gray-600">
+                  {editingTaskId ? "Update task details" : "Add a new task to your workflow"}
+                </p>
               </div>
             </div>
           </div>
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
-          <div>
-            <label htmlFor="taskTitle" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500`}>
-              Title:
-            </label>
-            <input
-              type="text"
-              id="taskTitle"
-              className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder-gray-400 text-base`}
-              placeholder="e.g., Prepare presentation for Q3 review"
-              value={taskTitle}
-              onChange={e => onTitleChange(e.target.value)}
-              required
-              disabled={loading}
-              aria-label="Task title"
-            />
-          </div>
-          <div>
-            <label htmlFor="taskDeadline" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2 after:content-['*'] after:ml-0.5 after:text-red-500`}>
-              Deadline:
-            </label>
-            <input
-              type="date"
-              id="taskDeadline"
-              className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
-              value={taskDeadline}
-              onChange={e => onDeadlineChange(e.target.value)}
-              required
-              disabled={loading}
-              aria-label="Task deadline date"
-            />
-            {editingTaskId && (
-              <p className="text-xs text-blue-600 mt-1">
-                <svg className="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                </svg>
-                Updating this deadline will also update all subtask deadlines
-              </p>
+
+          {/* Task Details */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            {/* Error Message */}
+            {formError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-700 font-medium">{formError}</p>
+              </div>
             )}
+
+            {/* Basic Task Info */}
+            <div className="space-y-6">
+              <div>
+                <label className="block text-gray-900 text-lg font-semibold mb-3">
+                  Task Title *
+                </label>
+                <Input
+                  type="text"
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
+                  placeholder="Enter task title..."
+                  value={taskTitle}
+                  onChange={e => onTitleChange(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-900 text-lg font-semibold mb-3">
+                  Deadline *
+                </label>
+                <DatePicker
+                  value={deadlineDateObj}
+                  onChange={date => {
+                    if (date) {
+                      const formatted = date.toISOString().split("T")[0];
+                      onDeadlineChange(formatted);
+                    } else {
+                      onDeadlineChange("");
+                    }
+                  }}
+                  disabled={loading}
+                  className="w-full"
+                  placeholder="mm / dd / yyyy"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-900 text-lg font-semibold mb-3">
+                  Assign To
+                </label>
+                <select
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
+                  value={assignedTo}
+                  onChange={e => onAssignedToChange(e.target.value)}
+                  disabled={loading}
+                >
+                  <option value="">Assign to myself</option>
+                  {usersBelowMe.map(u => (
+                    <option key={u.userId} value={u.userId}>
+                      {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-gray-900 text-lg font-semibold mb-3">
+                  Priority Level
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {['critical', 'high', 'medium', 'low'].map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => handlePriorityChange(level as 'critical' | 'high' | 'medium' | 'low')}
+                      className={`p-3 rounded-lg border transition-all duration-200 text-left ${
+                        localPriority === level
+                          ? getPriorityColor(level) + ' border-current shadow-sm'
+                          : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                      disabled={loading}
+                    >
+                      <div className="flex items-center gap-3">
+                        {getPriorityIcon(level)}
+                        <div>
+                          <div className="font-semibold capitalize">{level}</div>
+                          <div className="text-xs opacity-75">
+                            {level === 'critical' && 'Urgent'}
+                            {level === 'high' && 'Important'}
+                            {level === 'medium' && 'Normal'}
+                            {level === 'low' && 'Nice to have'}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="mb-6 sm:mb-8">
-          <label htmlFor="taskDescription" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}>
-            Description (Optional):
-          </label>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+
+        {/* Right Panel - Description + Subtasks */}
+        <div className="flex-1 flex flex-col bg-white rounded-b-3xl md:rounded-r-3xl md:rounded-bl-none shadow-none md:shadow-lg">
+          {/* Description Header */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <label className="block text-gray-900 text-lg font-semibold">
+                Task Description
+              </label>
+              <Button
+                type="button"
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center font-semibold shadow-sm hover:bg-purple-600 transition disabled:opacity-60"
+                onClick={handleGenerateDescription}
+                disabled={!taskTitle || generatingDescription}
+                title="Generate description from title"
+              >
+                {generatingDescription ? <FaSpinner className="animate-spin mr-2" /> : <FaMagic className="mr-2" />}
+                AI Generate
+              </Button>
+            </div>
+            <p className="text-sm text-gray-600 mt-1">
+              Provide detailed information about the task (optional)
+            </p>
+          </div>
+
+          {/* Description Content + Subtasks */}
+          <div className="flex-1 p-6 flex flex-col">
             <textarea
-              id="taskDescription"
-              rows={4}
-              className={`flex-1 py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-all duration-200 placeholder-gray-400 text-base`}
-              placeholder="Add more details or sub-tasks here..."
+              rows={6}
+              className="w-full h-auto min-h-[144px] max-h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200 text-lg"
+              placeholder="Describe the task in detail. What needs to be accomplished? What are the key requirements? Any specific instructions or context..."
               value={taskDescription}
               onChange={e => onDescriptionChange(e.target.value)}
               disabled={loading || generatingDescription}
-              aria-label="Task description"
             />
-            <button
-              type="button"
-              className="sm:ml-2 px-3 py-2 bg-primary text-white rounded-lg flex items-center font-semibold shadow hover:bg-primary-dark transition disabled:opacity-60 mt-2 sm:mt-0"
-              onClick={handleGenerateDescription}
-              disabled={!taskTitle || generatingDescription}
-              title="Generate description from title"
-            >
-              {generatingDescription ? <FaSpinner className="animate-spin" /> : <FaMagic className="mr-1" />}
-              Generate
-            </button>
-          </div>
-        </div>
-        <div className="mb-6 sm:mb-8">
-          <label htmlFor="assignedTo" className={`block text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold mb-2`}>
-            Assign To:
-          </label>
-          <select
-            id="assignedTo"
-            className={`w-full py-3 px-4 bg-${theme === 'light' ? 'white' : 'gray-700'} border border-gray-300 rounded-lg text-${theme === 'light' ? 'gray-800' : 'white'} focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base`}
-            value={assignedTo}
-            onChange={e => onAssignedToChange(e.target.value)}
-            disabled={loading}
-          >
-            <option value="">Myself</option>
-            {usersBelowMe.map(u => (
-              <option key={u.userId} value={u.userId}>
-                {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-6 sm:mb-8 flex items-center">
-          <input
-            id="important"
-            type="checkbox"
-            checked={localImportant}
-            onChange={e => handleImportantChange(e.target.checked)}
-            className="mr-2"
-            disabled={loading}
-          />
-          <label htmlFor="important" className={`text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold`}>
-            Mark as Important
-          </label>
-        </div>
 
-        {/* Subtasks Section - Only show for new tasks */}
-        {!editingTaskId ? (
-          <div className="mb-6 sm:mb-8">
-            <div className="flex items-center mb-4">
-              <input
-                id="includeSubtasks"
-                type="checkbox"
-                checked={includeSubtasks}
-                onChange={e => setIncludeSubtasks(e.target.checked)}
-                className="mr-2"
-                disabled={loading}
-              />
-              <label htmlFor="includeSubtasks" className={`text-${theme === 'light' ? 'gray-700' : 'gray-300'} text-sm font-semibold`}>
-                Break down into subtasks
-              </label>
-            </div>
-
-            {includeSubtasks && (
-              <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="text-lg font-semibold text-gray-800">Subtasks</h4>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      className="px-3 py-1 bg-blue-500 text-white rounded-lg flex items-center text-sm font-semibold shadow hover:bg-blue-600 transition disabled:opacity-60"
-                      onClick={handleGenerateSubtasks}
-                      disabled={!taskTitle || generatingSubtasks}
-                      title="Generate subtasks with AI"
-                    >
-                      {generatingSubtasks ? <FaSpinner className="animate-spin mr-1" /> : <FaRobot className="mr-1" />}
-                      AI Generate
-                    </button>
-                    <button
-                      type="button"
-                      className="px-3 py-1 bg-green-500 text-white rounded-lg flex items-center text-sm font-semibold shadow hover:bg-green-600 transition"
-                      onClick={addManualSubtask}
-                    >
-                      <FaPlus className="mr-1" />
-                      Add Manual
-                    </button>
-                  </div>
+            {/* Subtasks Section - Only for new tasks */}
+            {!editingTaskId && (
+              <div className="mt-8">
+                <div className="flex items-center justify-between mb-4">
+                  <label className="text-gray-900 text-lg font-semibold">
+                    Subtasks
+                  </label>
+                  <Button
+                    type="button"
+                    onClick={() => setShowSubtasksModal(true)}
+                    className="px-4 py-2 bg-indigo-500 text-white rounded-lg flex items-center text-sm font-medium shadow-sm hover:bg-indigo-600 transition-all duration-200"
+                    disabled={loading || !taskTitle.trim()}
+                  >
+                    <FaList className="mr-2 w-4 h-4" />
+                    {subtasks.length > 0 ? `Manage (${subtasks.length})` : 'Break Down Task'}
+                  </Button>
                 </div>
 
-                {subtasks.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No subtasks added yet. Generate with AI or add manually.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {subtasks.map((subtask, index) => (
-                      <div key={index} className="flex gap-2 items-start p-3 bg-white rounded-lg border">
-                        <div className="flex-1 space-y-2">
-                          <input
-                            type="text"
-                            placeholder="Subtask title"
-                            value={subtask.title}
-                            onChange={e => updateSubtask(index, 'title', e.target.value)}
-                            className="w-full py-2 px-3 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary"
-                            disabled={loading}
-                          />
-                          <textarea
-                            placeholder="Subtask description (optional)"
-                            value={subtask.description}
-                            onChange={e => updateSubtask(index, 'description', e.target.value)}
-                            rows={2}
-                            className="w-full py-2 px-3 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                            disabled={loading}
-                          />
+                {subtasks.length > 0 && (
+                  <div className="p-4 bg-white border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FaTasks className="w-4 h-4 text-indigo-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {subtasks.length} subtask{subtasks.length > 1 ? 's' : ''} ready
+                      </span>
+                    </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {/* ↑ max-h-48 (192px) instead of 32 (128px) */}
+                      {subtasks.map((subtask, index) => (
+                        <div key={index} className="text-sm text-gray-600 bg-gray-50 p-2 rounded border">
+                          <div className="font-medium">{subtask.title}</div>
+                          {subtask.description && (
+                            <div className="text-xs text-gray-500 mt-1">{subtask.description}</div>
+                          )}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeSubtask(index)}
-                          className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
-                          title="Remove subtask"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             )}
           </div>
-        ) : (
-          // Show info about subtasks during edit
-          <div className="mb-6 sm:mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2 text-blue-800 mb-2">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm font-medium">
-                Editing Task with Subtasks
-              </span>
-            </div>
-            <ul className="text-xs text-blue-700 space-y-1 ml-6">
-              <li>• Subtasks are preserved and can be edited individually from the task list</li>
-              <li>• Changing the deadline will automatically update all subtask deadlines</li>
-              <li>• Title and description changes only affect this main task</li>
-            </ul>
-          </div>
-        )}
 
-        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pb-2">
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
-            disabled={loading}
-          >
-            {loading && <FaSpinner className="animate-spin mr-3 text-xl" />}
-            {editingTaskId ? "Update Task" : "Add Task"}
-          </button>
+          {/* Edit Mode Info */}
           {editingTaskId && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="inline-flex items-center justify-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 text-lg"
-              disabled={loading}
-            >
-              Cancel
-            </button>
+            <div className="p-6 border-t border-gray-200 bg-blue-50">
+              <div className="flex items-center gap-2 text-blue-800 mb-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm font-medium">Editing Task with Subtasks</span>
+              </div>
+              <ul className="text-xs text-blue-700 space-y-1 ml-6">
+                <li>• Subtasks are preserved and can be edited individually</li>
+                <li>• Deadline changes will update all subtask deadlines</li>
+                <li>• Description changes only affect this main task</li>
+              </ul>
+            </div>
           )}
         </div>
-      </form>
-    </div>
+      </div>
+
+      {/* Subtasks Modal */}
+      <SubtasksModal
+        show={showSubtasksModal}
+        taskTitle={taskTitle}
+        taskDescription={taskDescription}
+        initialSubtasks={subtasks}
+        onSave={handleSaveSubtasks}
+        onCancel={() => setShowSubtasksModal(false)}
+      />
+
+      {/* Footer - full width */}
+      <div className="p-6 border-t border-gray-200 bg-white rounded-b-3xl">
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition-all duration-200"
+            disabled={loading}
+            variant="ghost"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading || !taskTitle.trim() || !taskDeadline.trim()}
+            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
+              loading || !taskTitle.trim() || !taskDeadline.trim()
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
+            } flex items-center justify-center gap-2`}
+          >
+            {loading ? (
+              <>
+                <FaSpinner className="animate-spin" />
+                {editingTaskId ? "Updating..." : "Creating..."}
+              </>
+            ) : (
+              <>
+                <FaTasks />
+                {editingTaskId ? "Update Task" : "Create Task"}
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -10,7 +10,6 @@ import ExpenseModel from "@/db/models/expensesModel";
 import AnnouncementModel from "@/db/models/announcementModel";
 import StorageFileModel from "@/db/models/filesModel";
 import TimeSessionModel from "@/db/models/timeSessionModel";
-// Add other models as needed
 
 const verifyAuthToken = async (req: NextApiRequest, res: NextApiResponse) => {
   const cookies = cookie.parse(req.headers.cookie || "");
@@ -28,23 +27,31 @@ const verifyAuthToken = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!decodedToken) return null;
 
   try {
-    const user = await userModel.findOne({
+    // --- FIX: Always await, even if mock returns value ---
+    let user = userModel.findOne({
       _id: decodedToken.userId,
       email: decodedToken.email,
     });
-
+    if (typeof (user as any)?.then === "function") {
+      user = await user;
+    }
     if (!user) return null;
 
-    const userCompany = await userCompanyModel.findOne({
+    let userCompanyDoc = userCompanyModel.findOne({
       userId: decodedToken.userId,
     });
+    if (typeof (userCompanyDoc as any)?.then === "function") {
+      userCompanyDoc = await userCompanyDoc;
+    }
+    if (!userCompanyDoc) return null;
 
-    if (!userCompany) return null;
-
+    // --- FIX: Support both ._doc and plain object for test mocks ---
+    const userObj = (user as any)?._doc ? (user as any)._doc : user;
+    const userCompanyObj = (userCompanyDoc as any)?._doc ? (userCompanyDoc as any)._doc : userCompanyDoc;
     return {
-      ...user._doc,
-      role: userCompany.role,
-      companyId: userCompany.companyId,
+      ...userObj,
+      role: userCompanyObj.role,
+      companyId: userCompanyObj.companyId,
     };
   } catch {
     return null;
@@ -61,23 +68,38 @@ export default async function handler(
 
   await connectDB();
 
+  const { q } = req.query;
+  const searchTerm = typeof q === "string" ? q.trim() : "";
+
+  // --- FIX: Move authentication logic AFTER checking for empty search term ---
+  if (!searchTerm) {
+    return res.status(200).json({ results: [] });
+  }
+
+  // Now require authentication for actual search
   const authResult = await verifyAuthToken(req, res);
   if (!authResult || !authResult._id || !authResult.companyId) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   const { userId, companyId } = authResult;
-  const { q } = req.query;
-  const searchTerm = typeof q === "string" ? q.trim() : "";
-
-  if (!searchTerm) {
-    return res.status(200).json({ results: [] });
-  }
 
   const regex = new RegExp(searchTerm, "i");
-  const results: any = {};
+  const results: any = {
+    tasks: [],
+    users: [],
+    announcements: [],
+    storageFiles: [],
+    expenses: [],
+    incomes: [],
+    timeSessions: [],
+  };
 
-  const companyUserRecords = await userCompanyModel.find({ companyId }).lean();
+  // --- FIX: Ensure companyUserRecords is always an array ---
+  let companyUserRecords = await userCompanyModel.find({ companyId }).lean();
+  if (!Array.isArray(companyUserRecords)) {
+    companyUserRecords = [];
+  }
   const companyUserIds = companyUserRecords.map((u) => u.userId?.toString());
 
   const searchPromises: Promise<any>[] = [
@@ -103,25 +125,26 @@ export default async function handler(
       .populate('createdBy', 'firstName lastName email')
       .lean()
       .then((tasks) => {
-        results.tasks = tasks.map((t) => ({ ...t, type: "task" }));
+        results.tasks = (tasks || []).map((t: any) => ({ ...t, type: "task" }));
       }),
 
-    // Users (already correct)
+    // Users
     userCompanyModel
       .find({ companyId })
       .populate("userId", "firstName lastName email profileImage description")
       .lean()
       .then((users) => {
-        results.users = users
+        results.users = (users || [])
           .filter(
-            (u) =>
+            (u: any) =>
               (u.userId?.firstName && regex.test(u.userId.firstName)) ||
               (u.userId?.lastName && regex.test(u.userId.lastName)) ||
               (u.userId?.email && regex.test(u.userId.email))
           )
           .slice(0, 5)
-          .map((u) => ({
-            ...u,
+          .map((u: any) => ({
+            _id: u.userId?._id ?? u._id,
+            userId: u.userId,
             type: "user",
             fullName: `${u.userId?.firstName || ""} ${u.userId?.lastName || ""}`.trim(),
             email: u.userId?.email,
@@ -129,7 +152,6 @@ export default async function handler(
             lastName: u.userId?.lastName,
             profileImage: u.userId?.profileImage,
             description: u.userId?.description,
-            _id: u.userId?._id,
           }));
       }),
 
@@ -142,13 +164,13 @@ export default async function handler(
       .populate('createdBy', 'firstName lastName email')
       .lean()
       .then((announcements) => {
-        results.announcements = announcements.map((a) => ({
+        results.announcements = (announcements || []).map((a: any) => ({
           ...a,
           type: "announcement",
         }));
       }),
 
-    // Storage Files (already correct)
+    // Storage Files
     StorageFileModel.find({
       companyId,
       $or: [
@@ -160,13 +182,13 @@ export default async function handler(
       .limit(5)
       .lean()
       .then((files) => {
-        results.storageFiles = files.map((f) => ({
+        results.storageFiles = (files || []).map((f: any) => ({
           ...f,
           type: "storage",
         }));
       }),
 
-    // Expenses (already correct)
+    // Expenses
     ExpenseModel.find({
       companyId,
       type: "expense",
@@ -179,10 +201,10 @@ export default async function handler(
       .limit(5)
       .lean()
       .then((expenses) => {
-        results.expenses = expenses.map((e) => ({ ...e, type: "expense" }));
+        results.expenses = (expenses || []).map((e: any) => ({ ...e, type: "expense" }));
       }),
 
-    // Incomes (already correct)
+    // Incomes
     ExpenseModel.find({
       companyId,
       type: "income",
@@ -195,7 +217,7 @@ export default async function handler(
       .limit(5)
       .lean()
       .then((incomes) => {
-        results.incomes = incomes.map((i) => ({ ...i, type: "income" }));
+        results.incomes = (incomes || []).map((i: any) => ({ ...i, type: "income" }));
       }),
 
     // Time Sessions: only for company users
@@ -211,7 +233,7 @@ export default async function handler(
       .populate('userId', 'firstName lastName email')
       .lean()
       .then((sessions) => {
-        results.timeSessions = sessions.map((ts) => ({
+        results.timeSessions = (sessions || []).map((ts: any) => ({
           ...ts,
           type: "timesession",
         }));
@@ -220,7 +242,18 @@ export default async function handler(
 
   try {
     await Promise.all(searchPromises);
-    return res.status(200).json({ results });
+    // Ensure all result keys are present and are arrays, even if empty
+    return res.status(200).json({
+      results: {
+        tasks: Array.isArray(results.tasks) ? results.tasks : [],
+        users: Array.isArray(results.users) ? results.users : [],
+        announcements: Array.isArray(results.announcements) ? results.announcements : [],
+        storageFiles: Array.isArray(results.storageFiles) ? results.storageFiles : [],
+        expenses: Array.isArray(results.expenses) ? results.expenses : [],
+        incomes: Array.isArray(results.incomes) ? results.incomes : [],
+        timeSessions: Array.isArray(results.timeSessions) ? results.timeSessions : [],
+      },
+    });
   } catch (error) {
     console.error("Universal search API error:", error);
     return res

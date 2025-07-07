@@ -42,7 +42,7 @@ const TimerPanel: React.FC<TimerPanelProps> = ({
   const progress = pomodoroMode ? ((totalPhase - (pomodoroTime || 0)) / totalPhase) * 100 : 0;
 
   return (
-    <div className={`rounded-2xl p-6 sm:p-8 mb-2 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+    <div className={`rounded-2xl p-6 sm:p-8 mb-2 hover:scale-[1.005] transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
       {pomodoroMode ? (
         <>
           <div className="mb-4 text-center">
@@ -77,21 +77,21 @@ const TimerPanel: React.FC<TimerPanelProps> = ({
       <div className="flex flex-wrap gap-3 justify-center items-center mb-4">
         <button
           onClick={onStart}
-          className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-green-600' : 'bg-gradient-to-r from-green-500 to-green-700'} text-white font-bold py-2 px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
+          className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-green-600' : 'bg-gradient-to-r from-green-500 to-green-700'} text-white font-bold py-2 px-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
           disabled={isRunning}
         >
           Start
         </button>
         <button
           onClick={onStop}
-          className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-red-600' : 'bg-gradient-to-r from-red-500 to-red-700'} text-white font-bold py-2 px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
+          className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-red-600' : 'bg-gradient-to-r from-red-500 to-red-700'} text-white font-bold py-2 px-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
           disabled={!isRunning}
         >
           Stop
         </button>
         <button
           onClick={onReset}
-          className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-gray-600' : 'bg-gradient-to-r from-gray-500 to-gray-700'} text-white font-bold py-2 px-5 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
+          className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-gray-600' : 'bg-gradient-to-r from-gray-500 to-gray-700'} text-white font-bold py-2 px-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
         >
           Reset
         </button>

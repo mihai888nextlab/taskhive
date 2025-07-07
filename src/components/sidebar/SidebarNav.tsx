@@ -91,9 +91,10 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   });
 
   return (
-    <aside className="hidden md:flex w-[300px] bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 flex-col shadow-lg">
+    <aside className="hidden md:flex fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] text-white px-5 flex-col shadow-lg border-r border-[#23272f] z-[90]">
+      {/* Logo/Brand */}
       <Link href="/app">
-        <div className="relative w-48 h-20 mx-auto">
+        <div className="relative w-48 h-20 mx-auto mt-2 mb-2">
           <Image
             src="/logo.png"
             alt="Logo"
@@ -123,15 +124,19 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       <nav>
         <ul className="mt-4 space-y-2">
           {menuWithNotifications.map((item) => (
-            <li
+            <Link
               key={item.name}
-              className={`p-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md ${
-                router.pathname === item.path
-                  ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-md"
-                  : "hover:bg-gray-700 hover:text-white text-gray-300"
-              }`}
+              href={item.path}
+              className="block"
+              tabIndex={0}
             >
-              <Link href={item.path} className="flex items-center">
+              <li
+                className={`flex items-center w-full h-full p-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md ${
+                  router.pathname === item.path
+                    ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-md"
+                    : "hover:bg-gray-700 hover:text-white text-gray-300"
+                }`}
+              >
                 {item.icon && (
                   <item.icon className="mr-3 text-xl text-primary-light" />
                 )}
@@ -141,8 +146,8 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
                     {item.notification}
                   </span>
                 )}
-              </Link>
-            </li>
+              </li>
+            </Link>
           ))}
         </ul>
       </nav>
