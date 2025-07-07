@@ -38,6 +38,7 @@ export default async function handler(
       const conversations = await conversationsModel
         .find({
           participants: { $in: [new Types.ObjectId(currentUserId)] },
+          companyId: decodedToken.companyId,
         })
         .populate("participants", "firstName lastName email") // Populate participant details
         .sort({ updatedAt: -1 }) // Sort by last updated
@@ -64,11 +65,9 @@ export default async function handler(
       !allParticipants ||
       allParticipants.length < (type === "direct" ? 2 : 2)
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "Missing required fields or insufficient participants.",
-        });
+      return res.status(400).json({
+        message: "Missing required fields or insufficient participants.",
+      });
     }
     if (type === "group" && !name) {
       return res.status(400).json({ message: "Group chat requires a name." });
@@ -86,28 +85,25 @@ export default async function handler(
         });
 
         if (existingDirectConvo) {
-          return res
-            .status(200)
-            .json({
-              message: "Conversation already exists",
-              conversationId: existingDirectConvo._id,
-            });
+          return res.status(200).json({
+            message: "Conversation already exists",
+            conversationId: existingDirectConvo._id,
+          });
         }
       }
 
       const newConversation = new conversationsModel({
         type,
         participants: allParticipants.map((id) => new Types.ObjectId(id)),
+        companyId: decodedToken.companyId,
         name: type === "group" ? name : undefined,
       });
 
       await newConversation.save();
-      res
-        .status(201)
-        .json({
-          message: "Conversation created successfully",
-          conversationId: newConversation._id,
-        });
+      res.status(201).json({
+        message: "Conversation created successfully",
+        conversationId: newConversation._id,
+      });
     } catch (error) {
       console.error("Error creating conversation:", error);
       res.status(500).json({ message: "Internal server error" });

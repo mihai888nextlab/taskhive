@@ -33,7 +33,10 @@ export default async function handler(
   let user = await UserModel.findById(decoded.userId);
   let userCompany = null;
   if (user) {
-    userCompany = await userCompanyModel.findOne({ userId: user._id });
+    userCompany = await userCompanyModel.findOne({
+      userId: user._id,
+      companyId: decoded.companyId,
+    });
   }
 
   // Only admin can delete
@@ -57,7 +60,9 @@ export default async function handler(
       }
       return res.status(200).json({ message: "Announcement deleted." });
     } catch (err: any) {
-      return res.status(500).json({ message: err.message || "Failed to delete announcement." });
+      return res
+        .status(500)
+        .json({ message: err.message || "Failed to delete announcement." });
     }
   }
 

@@ -10,6 +10,7 @@ import { menu } from "@/components/menuConfig"; // Your menu config
 import PersistentTimer from "@/components/time-tracking/PersistentTimer";
 import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext";
 import { useAIWindow } from "@/contexts/AIWindowContext";
+import Link from "next/link";
 import HeaderNavBar from "@/components/header/HeaderNavBar";
 
 interface DashboardLayoutProps {
@@ -19,7 +20,8 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, loadingUser, isAuthenticated, logout } = useAuth();
   const router = useRouter();
-  const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } = useTimeTracking();
+  const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } =
+    useTimeTracking();
   const { isAIWindowOpen, setIsAIWindowOpen, toggleAIWindow } = useAIWindow();
   const [showPersistentTimer, setShowPersistentTimer] = useState(false);
   const [timerClosed, setTimerClosed] = useState(false);
@@ -42,8 +44,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     // Responsive check for desktop
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
     checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
   const [tasks, setTasks] = useState<any[]>([]);
@@ -139,30 +141,35 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         )}
       </div>
       {/* AI Button (hide on desktop if open) */}
-      {!(sidebarOpen && typeof window !== 'undefined' && window.innerWidth < 768) && (!isDesktop || !isAIWindowOpen) && (
-        <button
-          onClick={toggleAIWindow}
-          className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95 z-50"
-        >
-          <span className="text-lg font-semibold">AI</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-6 w-6 transform transition-transform duration-300 ${
-              isAIWindowOpen ? "rotate-45" : "rotate-0"
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+      {!(
+        sidebarOpen &&
+        typeof window !== "undefined" &&
+        window.innerWidth < 768
+      ) &&
+        (!isDesktop || !isAIWindowOpen) && (
+          <button
+            onClick={toggleAIWindow}
+            className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95 z-50"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-        </button>
-      )}
+            <span className="text-lg font-semibold">AI</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-6 w-6 transform transition-transform duration-300 ${
+                isAIWindowOpen ? "rotate-45" : "rotate-0"
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+          </button>
+        )}
       {/* AI Window: right panel on desktop, modal on mobile */}
       <AIWindow
         isOpen={isAIWindowOpen}

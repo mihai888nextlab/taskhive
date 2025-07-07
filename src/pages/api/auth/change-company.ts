@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import bcrypt from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { serialize } from "cookie";
 import dbConnect from "@/db/dbConfig";
@@ -19,41 +18,31 @@ export default async function handler(
 
   await dbConnect();
 
-  const { email, password } = req.body;
+  const { userId, companyId } = req.body;
 
   // Basic validation
-  if (!email || !password) {
+  if (!userId) {
     return res
       .status(400)
       .json({ message: "All required fields must be filled." });
   }
 
   try {
-    const existingUser = await userModel.findOne({ email });
+    const existingUser = await userModel.findById(userId);
     if (!existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Email or password are incorect!" });
-    }
-
-    const hashedPassword = existingUser.password;
-    const isPasswordValid = bcrypt.compareSync(password, hashedPassword);
-
-    if (!isPasswordValid) {
-      return res
-        .status(400)
-        .json({ message: "Email or password are incorect!" });
+      return res.status(400).json({ message: "Error! Try again later." });
     }
 
     const userCompany = await userCompanyModel.findOne({
       userId: existingUser._id,
+      companyId,
     });
 
     if (!userCompany) {
       return res.status(400).json({ message: "An error occured!" });
     }
 
-    const company = await companyModel.findById(userCompany.companyId);
+    const company = await companyModel.findById(companyId);
 
     if (!company) {
       return res.status(400).json({ message: "An error occured!" });

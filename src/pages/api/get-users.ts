@@ -34,7 +34,9 @@ export default async function handler(
 
   try {
     const users = await userCompanyModel
-      .find({})
+      .find({
+        companyId: decodedToken.companyId,
+      })
       .populate({
         path: "userId",
         select: "-password",

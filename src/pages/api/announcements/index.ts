@@ -33,20 +33,23 @@ export default async function handler(
   let user = await UserModel.findById(decoded.userId);
   let userCompany = null;
   if (user) {
-    userCompany = await userCompanyModel.findOne({ userId: user._id });
+    userCompany = await userCompanyModel.findOne({
+      userId: user._id,
+      companyId: decoded.companyId,
+    });
   }
 
-  const companyUserRecords = await userCompanyModel
-    .find({ companyId: decoded.companyId })
-    .select("userId")
-    .lean();
+  // const companyUserRecords = await userCompanyModel
+  //   .find({ companyId: decoded.companyId })
+  //   .select("userId")
+  //   .lean();
 
-  const companyUserIds = companyUserRecords.map((record) => record.userId);
+  // const companyUserIds = companyUserRecords.map((record) => record.userId);
 
   if (req.method === "GET") {
     // Anyone can view announcements
     const announcements = await AnnouncementModel.find({
-      createdBy: { $in: companyUserIds },
+      companyId: decoded.companyId,
     })
       .sort({ createdAt: -1 })
       .populate("createdBy", "firstName lastName email");
@@ -78,15 +81,14 @@ export default async function handler(
         pinned: !!pinned,
         expiresAt: expiresAt ? new Date(expiresAt) : undefined,
         createdBy: user._id,
+        companyId: decoded.companyId,
       });
       await announcement.populate("createdBy", "firstName lastName email");
       return res.status(201).json(announcement);
     } catch (err: any) {
-      return res
-        .status(500)
-        .json({
-          message: err.message || "Failed to create announcement.",
-        });
+      return res.status(500).json({
+        message: err.message || "Failed to create announcement.",
+      });
     }
   }
 

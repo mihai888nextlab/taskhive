@@ -54,7 +54,9 @@ const UsersPage: NextPageWithLayout = () => {
   // Filter state
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
-  const [sortBy, setSortBy] = useState<"firstNameAsc" | "lastNameAsc" | "roleAsc">("firstNameAsc");
+  const [sortBy, setSortBy] = useState<
+    "firstNameAsc" | "lastNameAsc" | "roleAsc"
+  >("firstNameAsc");
 
   // Fetch data functions
   const fetchUsers = async () => {
@@ -130,8 +132,30 @@ const UsersPage: NextPageWithLayout = () => {
         body: JSON.stringify({ name: roleName }),
       });
 
-      if (!response.ok && response.status !== 409) {
-        throw new Error("Failed to add role");
+  const filteredUsers = users
+    .filter(
+      (u) =>
+        u.companyId ===
+        (user && "companyId" in user ? (user as any).companyId : undefined)
+    )
+    .filter((u) => {
+      const q = search.trim().toLowerCase();
+      if (!q) return true;
+      return (
+        u.userId.firstName.toLowerCase().includes(q) ||
+        u.userId.lastName.toLowerCase().includes(q) ||
+        u.userId.email.toLowerCase().includes(q)
+      );
+    })
+    .filter((u) => (filterRole === "all" ? true : u.role === filterRole))
+    .sort((a, b) => {
+      if (sortBy === "firstNameAsc") {
+        return (a.userId.firstName || "").localeCompare(
+          b.userId.firstName || ""
+        );
+      }
+      if (sortBy === "lastNameAsc") {
+        return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
       }
 
       // Handle org chart update
@@ -162,14 +186,25 @@ const UsersPage: NextPageWithLayout = () => {
         });
       }
 
-      await fetchRoles();
-      setOrgChartModalOpen(true);
-    } catch (error) {
-      console.error("Error adding role:", error);
-    }
-  };
+  // Only roles from users in your company
+  const companyRoles = Array.from(
+    new Set(
+      users
+        .filter(
+          (u) =>
+            u.companyId ===
+            (user && "companyId" in user ? (user as any).companyId : undefined)
+        )
+        .map((u) => u.role)
+    )
+  );
 
-  // Effects
+  // TESTE - DE STERS DUPA
+  const handleTestButtonClick = () => {};
+
+  //TERMINAT TEST
+        
+        //effects
   useEffect(() => {
     fetchUsers();
     fetchRoles();
@@ -329,6 +364,129 @@ const UsersPage: NextPageWithLayout = () => {
         />,
         document.body
       )}
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-6 sm:mb-8 justify-center items-center z-10 relative w-full px-2 sm:px-0">
+        {user && user.role === "admin" && (
+          <>
+            <button
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              onClick={() => setAddUserModalOpen(true)}
+            >
+              Add User
+            </button>
+            <button
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+              onClick={() => setAddRoleModalOpen(true)}
+            >
+              Add Role
+            </button>
+          </>
+        )}
+        {user && user.role === "admin" && (
+          <button
+            className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-sky-400 to-sky-600 hover:from-sky-600 hover:to-sky-400 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-xl shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 transition-all duration-300 active:scale-95"
+            onClick={() => setOrgChartModalOpen(true)}
+          >
+            View Org Chart
+          </button>
+        )}
+      </div>
+      <div className="w-full mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-6 rounded-2xl shadow-xl bg-white/80 border border-gray-200/60 backdrop-blur-lg z-10 relative">
+          {/* Search left, Role/Sort right on desktop; stacked on mobile */}
+          <div className="flex flex-col w-full sm:w-auto">
+            <label className="font-semibold text-sm text-black flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
+              <span className="mb-1 sm:mb-0 sm:mr-2">Search:</span>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary bg-inherit text-black"
+              />
+            </label>
+          </div>
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-center justify-end w-full sm:w-auto mt-2 sm:mt-0">
+            <label className="font-semibold text-sm text-black flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
+              <span className="mb-1 sm:mb-0 sm:mr-2">Role:</span>
+              <select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+                className="w-full sm:w-40 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
+              >
+                <option value="all">All</option>
+                {Array.from(
+                  new Set(
+                    users
+                      .filter(
+                        (u) =>
+                          u.companyId ===
+                          (user && "companyId" in user
+                            ? (user as any).companyId
+                            : undefined)
+                      )
+                      .map((u) => u.role)
+                  )
+                ).map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="font-semibold text-sm text-black flex flex-col sm:flex-row items-start sm:items-center w-full sm:w-auto">
+              <span className="mb-1 sm:mb-0 sm:mr-2">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="w-full sm:w-48 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
+              >
+                <option value="firstNameAsc">First Name (A-Z)</option>
+                <option value="lastNameAsc">Last Name (A-Z)</option>
+                <option value="roleAsc">Role (A-Z)</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+      {/* Card view for mobile only */}
+      <div className="flex flex-col gap-4 sm:gap-6 md:hidden z-10 relative w-full px-1">
+        {[...filteredUsers]
+          .sort((a, b) => {
+            // Admins always on top
+            if (a.role === "admin" && b.role !== "admin") return -1;
+            if (a.role !== "admin" && b.role === "admin") return 1;
+            return 0;
+          })
+          .map((user) => (
+            <UserCard
+              key={user._id}
+              user={user}
+              theme={theme}
+              onClick={handleUserClick}
+            />
+          ))}
+      </div>
+      {/* Table view for desktop only */}
+      <div
+        className={`bg-white/90 shadow-2xl rounded-2xl overflow-x-auto hidden md:block border border-gray-200/60 backdrop-blur-lg z-10 relative`}
+      >
+        <Table<Project>
+          title="Users List"
+          data={filteredUsers.map((user) => ({
+            id: user._id,
+            user_id: user.userId._id,
+            user_email: user.userId.email,
+            user_firstName: user.userId.firstName,
+            user_lastName: user.userId.lastName,
+            companyId: user.companyId,
+            role: user.role,
+            permissions: user.permissions,
+          }))}
+          columns={projectColumns}
+          emptyMessage="No users registered."
+          rowOnClick={(item) => handleUserClick(item.user_id)}
+        />
+      </div>
     </div>
   );
 };
