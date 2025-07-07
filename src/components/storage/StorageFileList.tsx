@@ -1,28 +1,35 @@
-import React from "react";
-// Update the import path and/or filename to match the actual file location and name.
-// For example, if the file is named 'StorageFileCard.tsx' in the same folder:
-import FileCard from "@/components/storage/StorageFileCard";
-// If the file is named differently or in a different folder, update accordingly, e.g.:
-// import FileCard from "../storage/StorageFileCard";
+import React, { useState } from "react";
+import { FaPen, FaTrash, FaCheck, FaTimes, FaSignature, FaEye, FaDownload } from "react-icons/fa";
+import FileSigningModal from "@/components/signature/FileSigningModal";
 
-interface FileType {
+type FileType = {
   _id: string;
   fileName: string;
   fileSize: number;
   fileLocation?: string;
-}
+  fileType?: string;
+};
 
 interface StorageFileListProps {
   files: FileType[];
   loading: boolean;
-  theme: string;
+  theme: any;
   renamingId: string | null;
   renameValue: string;
   setRenamingId: (id: string | null) => void;
-  setRenameValue: (v: string) => void;
-  handleDelete: (id: string) => void;
-  handleRename: (id: string) => void;
-  getFileIcon: (fileName: string) => React.ReactNode;
+  setRenameValue: (value: string) => void;
+  handleDelete: (fileId: string) => void;
+  handleRename: (fileId: string) => void;
+  getFileIcon: (fileName: string) => React.ReactElement;
+  fetchFiles?: () => void;
+}
+
+function formatBytes(bytes: number) {
+  if (bytes >= 1024 * 1024 * 1024)
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+  if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+  if (bytes >= 1024) return (bytes / 1024).toFixed(2) + " KB";
+  return bytes + " B";
 }
 
 const StorageFileList: React.FC<StorageFileListProps> = ({
@@ -36,67 +43,188 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
   handleDelete,
   handleRename,
   getFileIcon,
-}) => (
-  <div className="mt-6 sm:mt-10 max-w-lg sm:max-w-2xl mx-auto space-y-3 sm:space-y-4">
-    {loading ? (
-      <div className="text-center text-gray-500 text-base sm:text-lg">Loading files...</div>
-    ) : files.length === 0 ? (
-      <div className="text-center text-gray-400 text-base sm:text-lg">No files uploaded yet.</div>
-    ) : (
-      files.map((file) => (
-        <FileCard
-          key={file._id}
-          fileName={file.fileName}
-          fileSize={file.fileSize}
-          downloadUrl={file.fileLocation}
-          theme={theme}
-          fileIcon={getFileIcon(file.fileName)}
-        >
-          <button
-            className="text-red-500 hover:text-red-700 ml-2"
-            onClick={() => handleDelete(file._id)}
+  fetchFiles,
+}) => {
+  const [signingFile, setSigningFile] = useState<FileType | null>(null);
+
+  const handleSignFile = (file: FileType) => {
+    setSigningFile(file);
+  };
+
+  const handleSigningComplete = () => {
+    if (typeof fetchFiles === 'function') {
+      fetchFiles();
+    }
+    setSigningFile(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+        </div>
+        <p className={`mt-6 text-lg font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          Loading your files...
+        </p>
+      </div>
+    );
+  }
+
+  if (files.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className={`p-6 rounded-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} mb-4`}>
+          <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 className={`text-xl font-semibold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+          No files found
+        </h3>
+        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+          Upload some files to get started
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {files.map((file) => (
+          <div
+            key={file._id}
+            className={`group relative p-6 rounded-2xl transition-all duration-300 hover:transform hover:scale-102 ${
+              theme === "dark" 
+                ? "bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 hover:bg-gray-700/70" 
+                : "bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:bg-white/90"
+            }`}
           >
-            Delete
-          </button>
-          {renamingId === file._id ? (
-            <>
-              <input
-                className="ml-2 px-1 py-0.5 border rounded text-xs sm:text-sm"
-                value={renameValue}
-                onChange={e => setRenameValue(e.target.value)}
-                autoFocus
-              />
-              <button
-                className="text-green-600 hover:text-green-800 ml-1"
-                onClick={() => handleRename(file._id)}
-                type="button"
-              >
-                Save
-              </button>
-              <button
-                className="text-gray-500 hover:text-gray-700 ml-1"
-                onClick={() => setRenamingId(null)}
-                type="button"
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button
-              className="text-blue-500 hover:text-blue-700 ml-2"
-              onClick={() => {
-                setRenamingId(file._id);
-                setRenameValue(file.fileName);
-              }}
-              type="button"
-            >
-              Rename
-            </button>
-          )}
-        </FileCard>
-      ))
-    )}
-  </div>
-);
+            {/* File Icon */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-4xl opacity-80 group-hover:opacity-100 transition-opacity">
+                {getFileIcon(file.fileName)}
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => handleSignFile(file)}
+                  className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                  title="Sign file"
+                >
+                  <FaSignature size={14} />
+                </button>
+                <button
+                  onClick={() => {
+                    setRenamingId(file._id);
+                    setRenameValue(file.fileName);
+                  }}
+                  className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                  title="Rename"
+                >
+                  <FaPen size={14} />
+                </button>
+                <button
+                  onClick={() => handleDelete(file._id)}
+                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
+                  title="Delete"
+                >
+                  <FaTrash size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* File Name */}
+            {renamingId === file._id ? (
+              <div className="mb-3">
+                <input
+                  type="text"
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRename(file._id);
+                    if (e.key === "Escape") {
+                      setRenamingId(null);
+                      setRenameValue("");
+                    }
+                  }}
+                  autoFocus
+                />
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => handleRename(file._id)}
+                    className="flex-1 p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all duration-200"
+                  >
+                    <FaCheck size={12} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRenamingId(null);
+                      setRenameValue("");
+                    }}
+                    className="flex-1 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                  >
+                    <FaTimes size={12} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <h3 className={`font-semibold text-sm mb-3 truncate group-hover:text-blue-600 transition-colors ${
+                theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+              }`} title={file.fileName}>
+                {file.fileName}
+              </h3>
+            )}
+
+            {/* File Size */}
+            <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              {formatBytes(file.fileSize)}
+            </p>
+
+            {/* Action Buttons */}
+            {file.fileLocation && (
+              <div className="flex gap-2">
+                <a
+                  href={file.fileLocation}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-all duration-200"
+                >
+                  <FaEye size={12} />
+                  View
+                </a>
+                <a
+                  href={file.fileLocation}
+                  download={file.fileName}
+                  className="flex items-center justify-center px-3 py-2 bg-gray-500 text-white text-xs rounded-lg hover:bg-gray-600 transition-all duration-200"
+                >
+                  <FaDownload size={12} />
+                </a>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      {signingFile && signingFile.fileLocation && signingFile.fileType && (
+        <FileSigningModal
+          isOpen={!!signingFile}
+          onClose={() => setSigningFile(null)}
+          file={{
+            _id: signingFile._id,
+            fileName: signingFile.fileName,
+            fileLocation: signingFile.fileLocation,
+            fileType: signingFile.fileType,
+          }}
+          onSigningComplete={handleSigningComplete}
+        />
+      )}
+    </>
+  );
+};
 
 export default StorageFileList;

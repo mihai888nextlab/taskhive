@@ -1,5 +1,6 @@
 import React, { FC, ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { Button } from "@/components/ui/button";
 
 interface ModalProps {
   isOpen: boolean;
@@ -23,12 +24,13 @@ const Modal: FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
       >
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-          <button
+          <Button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl"
+            variant="ghost"
           >
             &times;
-          </button>
+          </Button>
         </div>
         <div className="flex-grow">{children}</div>
       </div>

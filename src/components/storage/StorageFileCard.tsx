@@ -28,7 +28,7 @@ const FileCard: React.FC<FileCardProps> = ({
   <div
     className={`p-3 sm:p-4 rounded-xl sm:rounded-lg ${
       theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
-    } shadow-none sm:shadow-md border border-gray-200 sm:border-0`}
+    } border border-gray-200 sm:border-0`}
   >
     <div className="flex items-center gap-2 sm:gap-3">
       <IoIosDocument className="text-2xl sm:text-3xl text-primary" />

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
-import { MdAddTask } from "react-icons/md";
-import { FaSpinner } from "react-icons/fa";
+import { FaPlus, FaTasks, FaUserCheck } from "react-icons/fa";
 import { useTheme } from "@/components/ThemeContext";
 import TaskForm from "@/components/tasks/TaskForm";
 import TaskList from "@/components/tasks/TaskList";
 import AssignedTasksList from "@/components/tasks/AssignedTasksList";
-import TaskCard from "@/components/tasks/TaskCard";
+import { createPortal } from 'react-dom';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface TaskUser {
   _id: string;
@@ -20,6 +21,7 @@ interface Task {
   description?: string;
   deadline: string;
   completed: boolean;
+  priority: 'critical' | 'high' | 'medium' | 'low'; // Changed from important
   userId: string | TaskUser | null;
   createdAt: string;
   updatedAt: string;
@@ -28,16 +30,9 @@ interface Task {
     lastName: string;
     email: string;
   };
-  important?: boolean;
   isSubtask?: boolean;
   parentTask?: string;
-  subtasks?: Task[]; // Array of populated subtask objects
-}
-
-async function fetchCurrentUser() {
-  const res = await fetch("/api/user", { method: "GET" });
-  if (!res.ok) throw new Error("Failed to fetch current user");
-  return await res.json();
+  subtasks?: Task[];
 }
 
 const isTaskOverdue = (task: Task): boolean => {
@@ -49,8 +44,11 @@ const isTaskOverdue = (task: Task): boolean => {
   return deadlineDate < now;
 };
 
+type ActiveTab = 'my-tasks' | 'assigned-tasks';
+
 const TasksPage: NextPageWithLayout = () => {
   const { theme } = useTheme();
+  const [activeTab, setActiveTab] = useState<ActiveTab>('my-tasks');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [assignedTasks, setAssignedTasks] = useState<Task[]>([]);
   const [usersBelowMe, setUsersBelowMe] = useState<any[]>([]);
@@ -64,7 +62,7 @@ const TasksPage: NextPageWithLayout = () => {
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDeadline, setTaskDeadline] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
-  const [important, setImportant] = useState(false);
+  const [priority, setPriority] = useState<'critical' | 'high' | 'medium' | 'low'>('medium'); // Changed from important
   const [formError, setFormError] = useState<string | null>(null);
 
   // UI state
@@ -74,14 +72,14 @@ const TasksPage: NextPageWithLayout = () => {
   // --- Controlled state for My Task List ---
   const [mySearch, setMySearch] = useState("");
   const [myFilterStatus, setMyFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
-  const [myFilterImportant, setMyFilterImportant] = useState<"all" | "important" | "not-important">("all");
-  const [mySortBy, setMySortBy] = useState<"createdAtDesc" | "deadlineAsc">("deadlineAsc");
+  const [myFilterPriority, setMyFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all"); // Changed from filterImportant
+  const [mySortBy, setMySortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc"); // Changed default
 
   // --- Controlled state for Assigned Tasks List ---
   const [assignedSearch, setAssignedSearch] = useState("");
   const [assignedFilterStatus, setAssignedFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
-  const [assignedFilterImportant, setAssignedFilterImportant] = useState<"all" | "important" | "not-important">("all");
-  const [assignedSortBy, setAssignedSortBy] = useState<"createdAtDesc" | "deadlineAsc">("deadlineAsc");
+  const [assignedFilterPriority, setAssignedFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all"); // Changed from filterImportant
+  const [assignedSortBy, setAssignedSortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc"); // Changed default
 
   // Fetch tasks
   const fetchTasks = async () => {
@@ -97,17 +95,12 @@ const TasksPage: NextPageWithLayout = () => {
 
       // Only tasks assigned to me
       const myTasks = data.filter((task) => {
-        // Assigned to me (by id or by email)
         if (!task.userId) return false;
-        // userId is string
         if (typeof task.userId === "string") {
           return task.userId === currentUserId;
         }
-        // userId is object
         if (typeof task.userId === "object") {
-          // Try _id first (robust for ObjectId)
           if (task.userId._id && String(task.userId._id) === String(currentUserId)) return true;
-          // Fallback to email if available
           if (task.userId.email && task.userId.email.trim().toLowerCase() === currentUserEmail) return true;
         }
         return false;
@@ -120,8 +113,10 @@ const TasksPage: NextPageWithLayout = () => {
 
         if (isAOverdue && !a.completed && (!isBOverdue || b.completed)) return -1;
         if (isBOverdue && !b.completed && (!isAOverdue || a.completed)) return 1;
-        if (a.important && !a.completed && !isAOverdue && (!b.important || b.completed || isBOverdue)) return -1;
-        if (b.important && !b.completed && !isBOverdue && (!a.important || a.completed || isAOverdue)) return 1;
+        if (a.priority === 'critical' && !a.completed && !isAOverdue && (!b.priority || b.completed || isBOverdue)) return -1;
+        if (b.priority === 'critical' && !b.completed && !isBOverdue && (!a.priority || a.completed || isAOverdue)) return 1;
+        if (a.priority === 'high' && !a.completed && !isAOverdue && (!b.priority || b.completed || isBOverdue)) return -1;
+        if (b.priority === 'high' && !b.completed && !isBOverdue && (!a.priority || a.completed || isAOverdue)) return 1;
         if (a.completed && !b.completed) return 1;
         if (!a.completed && b.completed) return -1;
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
@@ -178,7 +173,6 @@ const TasksPage: NextPageWithLayout = () => {
     if (currentUserId) {
       fetchTasks();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId, mySortBy]);
 
   useEffect(() => {
@@ -193,7 +187,7 @@ const TasksPage: NextPageWithLayout = () => {
     setEditingTaskId(null);
     setFormError(null);
     setAssignedTo("");
-    setImportant(false);
+    setPriority('medium'); // Changed from setImportant(false)
   };
 
   const handleAddTask = async (e: React.FormEvent, subtasks?: any[]) => {
@@ -205,22 +199,12 @@ const TasksPage: NextPageWithLayout = () => {
     setLoading(true);
     setFormError(null);
     
-    // Debug log
-    console.log("Creating task with data:", {
-      title: taskTitle.trim(),
-      description: taskDescription.trim(),
-      deadline: taskDeadline,
-      assignedTo: assignedTo || undefined, // <- Fix: Don't send empty string
-      important,
-      subtasks: subtasks || [],
-    });
-    
     const taskData = {
       title: taskTitle.trim(),
       description: taskDescription.trim(),
       deadline: taskDeadline,
-      ...(assignedTo && { assignedTo }), // <- Only include if not empty
-      important,
+      ...(assignedTo && { assignedTo }),
+      priority, // Changed from important
       subtasks: subtasks || [],
     };
     
@@ -240,9 +224,7 @@ const TasksPage: NextPageWithLayout = () => {
         });
       }
       
-      // Debug the response
       const responseText = await response.text();
-      console.log("API Response:", responseText);
       
       if (!response.ok) {
         let errorMessage = "Failed to save task.";
@@ -261,52 +243,6 @@ const TasksPage: NextPageWithLayout = () => {
       setShowForm(false);
     } catch (err) {
       console.error("Error creating task:", err);
-      setFormError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditTask = async (e: React.FormEvent, subtasks?: any[]) => {
-    e.preventDefault();
-    if (loading || !editingTaskId) return;
-
-    setLoading(true);
-    try {
-      // Only include fields that are being edited
-      const updateData: any = {
-        title: taskTitle,
-        description: taskDescription,
-        deadline: taskDeadline,
-        important: important,
-      };
-
-      // Only include assignedTo if it's different
-      if (assignedTo) {
-        updateData.assignedTo = assignedTo;
-      }
-
-      // NOTE: We don't include subtasks in edit operations to preserve existing ones
-      // Subtasks should be managed separately through the subtask edit functionality
-
-      console.log("Updating task with data:", updateData);
-
-      const response = await fetch(`/api/tasks/${editingTaskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update task.");
-      }
-
-      await fetchTasks();
-      await fetchAssignedTasks();
-      resetForm();
-    } catch (err) {
-      console.error("Error updating task:", err);
       setFormError((err as Error).message);
     } finally {
       setLoading(false);
@@ -332,7 +268,6 @@ const TasksPage: NextPageWithLayout = () => {
   const handleToggleComplete = async (task: Task) => {
     if (loading) return;
     
-    // Don't allow manual completion of tasks that have subtasks
     if (task.subtasks && task.subtasks.length > 0 && !task.isSubtask) {
       alert("This task has subtasks. Complete all subtasks to automatically complete this task.");
       return;
@@ -351,7 +286,6 @@ const TasksPage: NextPageWithLayout = () => {
         throw new Error(errorData.message || "Failed to update task.");
       }
 
-      // Refresh both task lists to ensure parent tasks are updated correctly
       await fetchTasks();
       await fetchAssignedTasks();
     } catch (err) {
@@ -362,238 +296,270 @@ const TasksPage: NextPageWithLayout = () => {
     }
   };
 
-  // Find the handleEditClick function and update it:
   const handleEditClick = (task: Task) => {
     setEditingTaskId(task._id);
     setTaskTitle(task.title);
     setTaskDescription(task.description || "");
     
-    // Format the deadline properly for the date input
     const deadlineDate = new Date(task.deadline);
-    const formattedDeadline = deadlineDate.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
+    const formattedDeadline = deadlineDate.toISOString().split('T')[0];
     setTaskDeadline(formattedDeadline);
     
     setAssignedTo(typeof task.userId === "object" && task.userId ? task.userId._id : (task.userId as string) || "");
-    setImportant(task.important || false);
+    setPriority(task.priority || 'medium'); // Changed from setImportant(task.important || false)
     setFormError(null);
     setShowForm(true);
   };
 
+  const handleClose = () => {
+    resetForm();
+    setShowForm(false);
+  };
+
   return (
-    <div className="relative min-h-screen bg-gray-100 px-2 font-sans overflow-hidden">
-      {/* Decorative background */}
-      <div className="absolute top-10 left-1/4 w-32 h-32 sm:w-48 sm:h-48 bg-primary-light rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-      <div className="absolute bottom-10 right-1/4 w-40 h-40 sm:w-64 sm:h-64 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute top-1/2 left-1/2 w-36 h-36 sm:w-56 sm:h-56 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-
-      <main className="relative z-10 w-full mx-auto px-0 sm:px-2 md:px-4 py-8" style={{maxWidth: '100vw'}}>
-        {/* Heading and description
-        <div className="mb-8 text-center max-w-2xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">
-            Your Personal Task Manager
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-500 mb-2">
-            Organize your day, prioritize your goals, and track your progress with ease.
-          </p>
-        </div> */}
-
-        {/* Two-column layout for tasks */}
-        <div className="flex flex-col md:flex-row gap-10 items-start w-full">
-          {/* Left: My Tasks */}
-          <section className="bg-white/90 rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100 flex flex-col w-full md:flex-1 md:max-w-none min-h-[700px] max-h-[850px]">
-            <div className="flex items-center justify-between mb-6 mt-2 pb-2 border-b-2 border-primary-dark">
-              <h2 className="text-2xl font-bold text-gray-900 text-left">
-                My Task List
-              </h2>
-              <button
-                onClick={() => {
-                  resetForm();
-                  setShowForm(true);
-                }}
-                className="py-2 px-4 bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center space-x-2 text-base"
-                disabled={loading}
-                aria-expanded={showForm}
-                aria-controls="task-form"
+    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+      {/* Header Section - Outside main container */}
+      <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} px-4 lg:px-8 pt-10`}>
+        <div className="max-w-[100vw] mx-auto">
+          {/* Tab Navigation & Create Button */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            {/* Tab Buttons */}
+            <div className={`flex rounded-xl p-1 gap-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+              <Button
+                type="button"
+                onClick={() => setActiveTab('my-tasks')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200
+                  ${activeTab === 'my-tasks'
+                    ? theme === 'dark'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-500 text-white'
+                    : theme === 'dark'
+                      ? 'text-gray-400 hover:text-white hover:bg-blue-700'
+                      : 'text-gray-600 hover:text-white hover:bg-blue-500'
+                  }`}
+                variant="ghost"
               >
-                <MdAddTask className="text-xl" />
-                <span>Add New Task</span>
-              </button>
-            </div>
-            {/* Controls always visible on top, sticky */}
-            <div className="sticky top-0 z-20 bg-white/90 pb-4" style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.01)' }}>
-              <TaskList
-                tasks={tasks}
-                currentUserEmail={currentUserEmail}
-                loading={loading}
-                onEdit={(task: Task) => {
-                  setEditingTaskId(task._id);
-                  setTaskTitle(task.title);
-                  setTaskDescription(task.description || "");
-                  
-                  // Format the deadline properly for the date input
-                  const deadlineDate = new Date(task.deadline);
-                  const formattedDeadline = deadlineDate.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
-                  setTaskDeadline(formattedDeadline);
-                  
-                  setAssignedTo(typeof task.userId === "object" && task.userId ? task.userId._id : (task.userId as string) || "");
-                  setImportant(task.important || false);
-                  setFormError(null);
-                  setShowForm(true);
-                }}
-                onDelete={handleDeleteTask}
-                onToggleComplete={handleToggleComplete}
-                isTaskOverdue={isTaskOverdue}
-                theme={theme}
-                controlsOnly
-                search={mySearch}
-                onSearchChange={setMySearch}
-                filterStatus={myFilterStatus}
-                onFilterStatusChange={setMyFilterStatus}
-                filterImportant={myFilterImportant}
-                onFilterImportantChange={setMyFilterImportant}
-                sortBy={mySortBy}
-                onSortByChange={setMySortBy}
-              />
-            </div>
-            {/* Scrollable task cards only */}
-            <div className="flex-1 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100" style={{ minHeight: '400px', maxHeight: '700px' }}>
-              <TaskList
-                tasks={tasks}
-                currentUserEmail={currentUserEmail}
-                loading={loading}
-                onEdit={(task: Task) => {
-                  setEditingTaskId(task._id);
-                  setTaskTitle(task.title);
-                  setTaskDescription(task.description || "");
-                  
-                  // Format the deadline properly for the date input
-                  const deadlineDate = new Date(task.deadline);
-                  const formattedDeadline = deadlineDate.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
-                  setTaskDeadline(formattedDeadline);
-                  
-                  setAssignedTo(typeof task.userId === "object" && task.userId ? task.userId._id : (task.userId as string) || "");
-                  setImportant(task.important || false);
-                  setFormError(null);
-                  setShowForm(true);
-                }}
-                onDelete={handleDeleteTask}
-                onToggleComplete={handleToggleComplete}
-                isTaskOverdue={isTaskOverdue}
-                theme={theme}
-                cardsOnly
-                search={mySearch}
-                filterStatus={myFilterStatus}
-                filterImportant={myFilterImportant}
-                sortBy={mySortBy}
-              />
-            </div>
-          </section>
-
-          {/* Right: Assigned Tasks */}
-          <section className="bg-white/90 rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100 flex flex-col w-full md:flex-1 md:max-w-none min-h-[700px] max-h-[850px]">
-            <div className="flex items-center justify-between mb-6 mt-4 pb-2 border-b-2 border-primary-dark">
-              <h2 className="text-2xl font-bold text-gray-900 text-left">
-                Tasks Assigned By Me
-              </h2>
-            </div>
-            {/* Controls always visible on top, sticky */}
-            <div className="sticky top-0 z-20 bg-white/90 pb-4" style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.01)' }}>
-              <AssignedTasksList
-                tasks={assignedTasks}
-                loading={loading}
-                onEdit={(task: Task) => {
-                  setEditingTaskId(task._id);
-                  setTaskTitle(task.title);
-                  setTaskDescription(task.description || "");
-                  setTaskDeadline(task.deadline);
-                  setAssignedTo(
-                    typeof task.userId === "string"
-                      ? task.userId
-                      : (task.userId && task.userId._id) || ""
-                  );
-                  setImportant(!!task.important);
-                  setShowForm(true);
-                }}
-                onDelete={handleDeleteTask}
-                isTaskOverdue={isTaskOverdue}
-                currentUserEmail={currentUserEmail}
-                controlsOnly
-                search={assignedSearch}
-                onSearchChange={setAssignedSearch}
-                filterStatus={assignedFilterStatus}
-                onFilterStatusChange={setAssignedFilterStatus}
-                filterImportant={assignedFilterImportant}
-                onFilterImportantChange={setAssignedFilterImportant}
-                sortBy={assignedSortBy}
-                onSortByChange={setAssignedSortBy}
-              />
-            </div>
-            {/* Scrollable task cards only */}
-            <div className="flex-1 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100" style={{ minHeight: '400px', maxHeight: '700px' }}>
-              <AssignedTasksList
-                tasks={assignedTasks}
-                loading={loading}
-                onEdit={(task: Task) => {
-                  setEditingTaskId(task._id);
-                  setTaskTitle(task.title);
-                  setTaskDescription(task.description || "");
-                  setTaskDeadline(task.deadline);
-                  setAssignedTo(
-                    typeof task.userId === "string"
-                      ? task.userId
-                      : (task.userId && task.userId._id) || ""
-                  );
-                  setImportant(!!task.important);
-                  setShowForm(true);
-                }}
-                onDelete={handleDeleteTask}
-                isTaskOverdue={isTaskOverdue}
-                currentUserEmail={currentUserEmail}
-                cardsOnly
-                search={assignedSearch}
-                filterStatus={assignedFilterStatus}
-                filterImportant={assignedFilterImportant}
-                sortBy={assignedSortBy}
-              />
-            </div>
-          </section>
-        </div>
-
-        {/* Task Form Modal Overlay */}
-        {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-            <div className="bg-white rounded-3xl shadow-2xl p-0 sm:p-0 max-w-lg w-full relative animate-fadeIn">
-              <button
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
-                onClick={() => { resetForm(); setShowForm(false); }}
-                aria-label="Close form"
+                <FaTasks className="w-4 h-4" />
+                <span>My Tasks</span>
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setActiveTab('assigned-tasks')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200
+                  ${activeTab === 'assigned-tasks'
+                    ? theme === 'dark'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-green-500 text-white'
+                    : theme === 'dark'
+                      ? 'text-gray-400 hover:text-white hover:bg-green-700'
+                      : 'text-gray-600 hover:text-white hover:bg-green-500'
+                  }`}
+                variant="ghost"
               >
-                ×
-              </button>
-              <TaskForm
-                show={true}
-                loading={loading}
-                editingTaskId={editingTaskId}
-                taskTitle={taskTitle}
-                taskDescription={taskDescription}
-                taskDeadline={taskDeadline}
-                assignedTo={assignedTo}
-                usersBelowMe={usersBelowMe}
-                formError={formError}
-                theme={theme}
-                important={important}
-                onTitleChange={setTaskTitle}
-                onDescriptionChange={setTaskDescription}
-                onDeadlineChange={setTaskDeadline}
-                onAssignedToChange={setAssignedTo}
-                onImportantChange={setImportant}
-                onSubmit={handleAddTask}
-                onCancel={() => { resetForm(); setShowForm(false); }}
-              />
+                <FaUserCheck className="w-4 h-4" />
+                <span>Assigned by Me</span>
+              </Button>
             </div>
+
+            {/* Create Task Button */}
+            <Button
+              type="button"
+              onClick={() => {
+                resetForm();
+                setShowForm(true);
+              }}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${
+                theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+              disabled={loading}
+            >
+              <FaPlus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
+              <span>Create Task</span>
+            </Button>
           </div>
-        )}
-      </main>
+        </div>
+      </div>
+
+      {/* Main Content Area - Full height */}
+      <div className="px-2 lg:px-4 pt-4">
+        <div className="max-w-[100vw] mx-auto">
+          {/* Tab Content - Dynamic height container */}
+          <Card className={`${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden mx-2`}>
+            {activeTab === 'my-tasks' ? (
+              <div className="flex flex-col">
+                {/* My Tasks Header - Compact */}
+                <CardHeader className={`p-6 ${theme === "light" ? "bg-blue-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
+                      <FaTasks className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+                        My Tasks
+                      </h2>
+                      <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
+                        Tasks assigned to you and personal tasks you've created
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+
+                {/* Controls */}
+                <CardContent className={`p-3 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                  <TaskList
+                    tasks={tasks}
+                    currentUserEmail={currentUserEmail}
+                    loading={loading}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteTask}
+                    onToggleComplete={handleToggleComplete}
+                    isTaskOverdue={isTaskOverdue}
+                    theme={theme}
+                    controlsOnly
+                    search={mySearch}
+                    onSearchChange={setMySearch}
+                    filterStatus={myFilterStatus}
+                    onFilterStatusChange={setMyFilterStatus}
+                    filterPriority={myFilterPriority}
+                    onFilterPriorityChange={setMyFilterPriority}
+                    sortBy={mySortBy}
+                    onSortByChange={setMySortBy}
+                  />
+                </CardContent>
+
+                {/* Tasks List - Dynamic height with max height and scroll */}
+                <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
+                  <TaskList
+                    tasks={tasks}
+                    currentUserEmail={currentUserEmail}
+                    loading={loading}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteTask}
+                    onToggleComplete={handleToggleComplete}
+                    isTaskOverdue={isTaskOverdue}
+                    theme={theme}
+                    cardsOnly
+                    search={mySearch}
+                    filterStatus={myFilterStatus}
+                    filterPriority={myFilterPriority}
+                    sortBy={mySortBy}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                {/* Assigned Tasks Header - Compact */}
+                <CardHeader className={`p-6 ${theme === "light" ? "bg-green-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-green-600' : 'bg-green-500'}`}>
+                      <FaUserCheck className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+                        Tasks Assigned by Me
+                      </h2>
+                      <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
+                        Monitor and manage tasks you've assigned to team members
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+
+                {/* Controls */}
+                <CardContent className={`p-3 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+                  <AssignedTasksList
+                    tasks={assignedTasks}
+                    loading={loading}
+                    onEdit={(task: Task) => {
+                      setEditingTaskId(task._id);
+                      setTaskTitle(task.title);
+                      setTaskDescription(task.description || "");
+                      setTaskDeadline(task.deadline);
+                      setAssignedTo(
+                        typeof task.userId === "string"
+                          ? task.userId
+                          : (task.userId && task.userId._id) || ""
+                      );
+                      setPriority(task.priority || 'medium');
+                      setShowForm(true);
+                    }}
+                    onDelete={handleDeleteTask}
+                    isTaskOverdue={isTaskOverdue}
+                    currentUserEmail={currentUserEmail}
+                    controlsOnly
+                    search={assignedSearch}
+                    onSearchChange={setAssignedSearch}
+                    filterStatus={assignedFilterStatus}
+                    onFilterStatusChange={setAssignedFilterStatus}
+                    filterPriority={assignedFilterPriority}
+                    onFilterPriorityChange={setAssignedFilterPriority}
+                    sortBy={assignedSortBy}
+                    onSortByChange={setAssignedSortBy}
+                  />
+                </CardContent>
+
+                {/* Tasks List - Dynamic height with max height and scroll */}
+                <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
+                  <AssignedTasksList
+                    tasks={assignedTasks}
+                    loading={loading}
+                    onEdit={(task: Task) => {
+                      setEditingTaskId(task._id);
+                      setTaskTitle(task.title);
+                      setTaskDescription(task.description || "");
+                      setTaskDeadline(task.deadline);
+                      setAssignedTo(
+                        typeof task.userId === "string"
+                          ? task.userId
+                          : (task.userId && task.userId._id) || ""
+                      );
+                      setPriority(task.priority || 'medium');
+                      setShowForm(true);
+                    }}
+                    onDelete={handleDeleteTask}
+                    isTaskOverdue={isTaskOverdue}
+                    currentUserEmail={currentUserEmail}
+                    cardsOnly
+                    search={assignedSearch}
+                    filterStatus={assignedFilterStatus}
+                    filterPriority={assignedFilterPriority}
+                    sortBy={assignedSortBy}
+                  />
+                </div>
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
+
+      {/* Task Form Modal */}
+      {showForm && typeof window !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
+            <TaskForm
+              show={true}
+              loading={loading}
+              editingTaskId={editingTaskId}
+              taskTitle={taskTitle}
+              taskDescription={taskDescription}
+              taskDeadline={taskDeadline}
+              assignedTo={assignedTo}
+              usersBelowMe={usersBelowMe}
+              formError={formError}
+              theme={theme}
+              priority={priority}
+              onTitleChange={setTaskTitle}
+              onDescriptionChange={setTaskDescription}
+              onDeadlineChange={setTaskDeadline}
+              onAssignedToChange={setAssignedTo}
+              onPriorityChange={setPriority}
+              onSubmit={handleAddTask}
+              onCancel={handleClose}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

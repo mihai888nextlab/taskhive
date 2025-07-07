@@ -11,22 +11,7 @@ import AnnouncementModel from '@/db/models/announcementModel';
 import ExpenseModel from '@/db/models/expensesModel';
 import dbConnect from '@/db/dbConfig'; // Add this import
 
-// IMPORTANT: Never expose your API key directly in client-side code.
-// Use environment variables for sensitive information.
-const API_KEY = process.env.GEMINI_API_KEY;
-const JWT_SECRET = process.env.JWT_SECRET || ""; // Ensure JWT_SECRET is defined
-
-// Check if API key is defined
-if (!API_KEY) {
-  console.error('GEMINI_API_KEY is not set in environment variables.');
-  // In a production environment, you might want to throw an error or exit.
-}
-
-// Initialize the Google Generative AI client
-const genAI = new GoogleGenerativeAI(API_KEY || ''); // Provide a default empty string if API_KEY is undefined
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Add this line at the beginning
   await dbConnect();
   
   // Ensure JSON response header is set
@@ -36,9 +21,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
+  const API_KEY = process.env.GEMINI_API_KEY;
+  const JWT_SECRET = process.env.JWT_SECRET || ""; // Ensure JWT_SECRET is defined
+
+  // Check if API key is defined
   if (!API_KEY) {
     return res.status(500).json({ message: 'Server configuration error: Gemini API key is missing.' });
   }
+
+  // Initialize the Google Generative AI client
+  const genAI = new GoogleGenerativeAI(API_KEY);
 
   // Verify user authentication
   const cookies = cookie.parse(req.headers.cookie || "");

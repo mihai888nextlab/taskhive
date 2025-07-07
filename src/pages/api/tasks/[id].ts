@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "PUT") {
     try {
-      const { completed, title, description, deadline, assignedTo, important, ...otherUpdates } = req.body;
+      const { completed, title, description, deadline, assignedTo, priority, ...otherUpdates } = req.body;
       
       // Get the current task to check if it's a subtask and preserve subtasks
       const currentTask = await Task.findById(taskId);
@@ -83,8 +83,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ? Types.ObjectId.createFromHexString(assignedTo) 
           : currentTask.createdBy;
       }
-      if (important !== undefined) {
-        updateData.important = important;
+      if (priority !== undefined) {
+        updateData.priority = priority;
       }
 
       // IMPORTANT: Preserve existing subtasks array for parent tasks

@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import mongoose from "mongoose";
 import { useTheme } from "@/components/ThemeContext";
 import { FiMessageCircle, FiUsers, FiPlus } from "react-icons/fi";
+import { Button } from "@/components/ui/button";
 
 export interface PopulatedConversation extends mongoose.Document {
   _id: string;
@@ -76,7 +77,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   };
 
   return (
-    <div className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl shadow-lg border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
+    <div className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
       {/* Header */}
       <div className={`p-6 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
         <div className="flex items-center gap-3 mb-6">
@@ -90,20 +91,20 @@ const ConversationList: React.FC<ConversationListProps> = ({
         
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <button
+          <Button
             onClick={onNewChatClick}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
           >
             <FiPlus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
             <span className="hidden sm:inline">New Chat</span>
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onNewGroupClick}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-500 hover:bg-gray-600 text-white'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-500 hover:bg-gray-600 text-white'}`}
           >
             <FiUsers className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
             <span className="hidden sm:inline">New Group</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -130,8 +131,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
                   onClick={() => onSelectConversation(conversation)}
                   className={`relative p-4 rounded-2xl cursor-pointer transition-all duration-200 group ${
                     isSelected
-                      ? `${theme === 'dark' ? 'bg-blue-900/30 border-blue-500/50' : 'bg-blue-50 border-blue-200'} border-2 shadow-md`
-                      : `hover:${theme === "light" ? "bg-gray-50" : "bg-gray-700"} hover:shadow-md`
+                      ? `${theme === 'dark' ? 'bg-blue-900/30 border-blue-500/50' : 'bg-blue-50 border-blue-200'} border-2`
+                      : `hover:${theme === "light" ? "bg-gray-50" : "bg-gray-700"}`
                   }`}
                 >
                   <div className="flex items-center gap-4">

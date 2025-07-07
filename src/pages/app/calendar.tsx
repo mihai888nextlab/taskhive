@@ -91,22 +91,22 @@ const CalendarPage: NextPageWithLayout = () => {
 
   return (
     <div className={`bg-${theme === 'light' ? 'white' : 'gray-900'} text-${theme === 'light' ? 'gray-900' : 'white'}`}>
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] bg-gray-100 px-4 sm:px-6 lg:px-12 xl:px-16">
-        <main className="flex flex-col md:flex-row w-full max-w-[1400px] gap-2 sm:gap-4 md:gap-8 rounded-none sm:rounded-lg shadow-xl overflow-hidden min-h-[500px] md:min-h-[700px] bg-transparent">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-gray-100 px-2 sm:px-4 lg:px-6 xl:px-8">
+        <main className="flex flex-col lg:flex-row w-full max-w-[2000px] gap-3 sm:gap-4 lg:gap-6 rounded-lg overflow-hidden min-h-[600px] lg:min-h-[700px] bg-transparent">
           {/* Left Panel: Selected Date and Events */}
-          <div className="flex flex-col justify-between p-3 sm:p-6 md:p-8 bg-gray-800 text-white rounded-t-xl md:rounded-l-xl md:rounded-tr-none flex-1 min-w-0 w-full min-h-[320px] sm:min-h-[400px]">
-            <div>
+          <div className="flex flex-col justify-between p-4 sm:p-6 lg:p-6 xl:p-8 bg-gray-800 text-white rounded-t-lg lg:rounded-l-lg lg:rounded-tr-none flex-1 lg:flex-[1] min-w-0 w-full min-h-[400px] lg:min-h-[500px]">
+            <div className="mb-6 lg:mb-8 flex-shrink-0">
               {selectedDate ? (
                 <div>
-                  <h1 className="text-3xl sm:text-6xl md:text-8xl font-bold leading-none mb-1 sm:mb-2">
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-none mb-2 sm:mb-3 lg:mb-4">
                     {selectedDate.getDate()}
                   </h1>
-                  <h2 className="text-lg sm:text-2xl md:text-4xl font-bold mb-1 sm:mb-2">
+                  <h2 className="text-xl sm:text-2xl lg:text-2xl xl:text-3xl font-bold mb-2 sm:mb-3 lg:mb-4">
                     {selectedDate.toLocaleDateString(undefined, {
                       weekday: "long",
                     })}
                   </h2>
-                  <p className="text-base sm:text-xl md:text-2xl opacity-90">
+                  <p className="text-lg sm:text-xl lg:text-xl xl:text-xl opacity-90">
                     {selectedDate.toLocaleDateString(undefined, {
                       year: "numeric",
                       month: "long",
@@ -115,25 +115,30 @@ const CalendarPage: NextPageWithLayout = () => {
                 </div>
               ) : (
                 <div>
-                  <h1 className="text-xl sm:text-4xl font-bold">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
                     No Date Selected
                   </h1>
-                  <p className="text-base sm:text-2xl">
+                  <p className="text-lg sm:text-xl lg:text-xl">
                     Please select a date from the calendar.
                   </p>
                 </div>
               )}
             </div>
-            <CalendarEventsList
-              tasks={tasks}
-              selectedDate={selectedDate}
-              loading={loading}
-              listError={listError}
-            />
+            
+            {/* Events list with proper height for scrolling */}
+            <div className="flex-1 overflow-hidden min-h-0">
+              <CalendarEventsList
+                tasks={tasks}
+                selectedDate={selectedDate}
+                loading={loading}
+                listError={listError}
+              />
+            </div>
           </div>
+
           {/* Right Panel: Calendar */}
-          <div className={`flex-3 p-2 sm:p-6 md:p-8 rounded-b-xl md:rounded-r-xl md:rounded-bl-none flex justify-center items-center w-full overflow-x-auto ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} min-h-[320px] sm:min-h-[400px]`}> 
-            <div className="w-full max-w-full overflow-x-auto">
+          <div className={`flex-1 lg:flex-[4] p-3 sm:p-4 lg:p-6 xl:p-8 rounded-b-lg lg:rounded-r-lg lg:rounded-bl-none flex justify-center items-center w-full overflow-hidden ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} min-h-[400px] lg:min-h-[500px]`}> 
+            <div className="w-full h-full flex items-center justify-center">
               <CalendarPanel
                 selectedDate={selectedDate}
                 onDateChange={handleDateChange}
@@ -145,33 +150,6 @@ const CalendarPage: NextPageWithLayout = () => {
             </div>
           </div>
         </main>
-        {/* Keep your global styles for react-calendar here */}
-        <style jsx global>{`
-          @media (max-width: 640px) {
-            .react-calendar-light-theme {
-              padding: 0.5rem !important;
-              max-width: 100vw;
-              min-width: 0;
-            }
-            .react-calendar-light-theme .react-calendar__tile {
-              width: 36px;
-              height: 36px;
-              font-size: 1rem;
-            }
-            .react-calendar-light-theme .react-calendar__tile .highlight-circle-content {
-              width: 32px;
-              height: 32px;
-              font-size: 1rem;
-            }
-            .react-calendar-light-theme .react-calendar__month-view__weekdays__weekday {
-              font-size: 0.85rem;
-              padding: 0.5rem 0;
-            }
-            .react-calendar-light-theme .react-calendar__navigation__label {
-              font-size: 1.1rem;
-            }
-          }
-        `}</style>
       </div>
     </div>
   );

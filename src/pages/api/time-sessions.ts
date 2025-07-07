@@ -1,74 +1,56 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import dbConnect from '@/db/dbConfig';
-import TimeSession, { ITimeSession } from '@/db/models/timeSessionModel';
-import mongoose from 'mongoose'; // <-- Add this
+import type { NextApiRequest, NextApiResponse } from "next";
+import dbConnect from "@/db/dbConfig";
+import TimeSession from "@/db/models/timeSessionModel";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  await dbConnect(); // Ensure the database is connected
+  await dbConnect();
 
-  if (req.method === 'POST') {
-    let { userId, name, description, duration, tag, cycles } = req.body; // <-- add tag
-
-    // Convert userId to ObjectId if it's a string
-    if (typeof userId === "string") {
-      try {
-        userId = new mongoose.Types.ObjectId(userId);
-      } catch (e) {
-        return res.status(400).json({ message: 'Invalid userId format' });
-      }
+  if (req.method === "POST") {
+    const { userId, name, description, duration, tag, cycles } = req.body || {};
+    if (!userId || typeof userId !== "string") {
+      return res.status(400).json({
+        message: typeof userId !== "string" ? "Invalid userId format" : "User ID is required",
+      });
     }
-
-    console.log("Received data:", { userId, name, description, duration, tag, cycles }); // Log received data
-
-    if (!userId || !name || duration === undefined) {
-      return res.status(400).json({ message: 'Missing required fields' });
+    if (!name || duration === undefined) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
-
-    const newSession = new TimeSession({
-      userId,
-      name,
-      description,
-      duration,
-      tag, // <-- add tag
-      cycles, // <-- add this
-    });
-
     try {
-      const savedSession = await newSession.save();
-      return res.status(201).json(savedSession);
-    } catch (error) {
-      console.error("Error saving session:", error);
-      return res.status(500).json({ message: 'Failed to save session', error });
+      const session = new (TimeSession as any)({ userId, name, description, duration, tag, cycles });
+      await session.save();
+      return res.status(201).json(session);
+    } catch (err) {
+      return res.status(500).json({ message: "Failed to create session" });
     }
-  } else if (req.method === 'GET') {
-    const { userId } = req.query;
-
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' });
+  } else if (req.method === "GET") {
+    // --- FIX: Always use .find as a static method on the constructor, not on the instance ---
+    let userId = (req.query as any).userId;
+    if (Array.isArray(userId)) userId = userId[0];
+    if (!userId || typeof userId !== "string") {
+      return res.status(400).json({ message: "User ID is required" });
     }
-
     try {
-      const sessions = await TimeSession.find({ userId }).exec();
+      // Use the constructor's static find method for mocks and real model
+      const sessions = await (TimeSession as any).find({ userId }).exec();
       return res.status(200).json(sessions);
-    } catch (error) {
-      return res.status(500).json({ message: 'Failed to fetch sessions', error });
+    } catch (err) {
+      return res.status(500).json({ message: "Failed to fetch sessions" });
     }
-  } else if (req.method === 'DELETE') {
-    const { id } = req.query; // Assuming the session ID is passed as a query parameter
-
-    if (!id) {
-      return res.status(400).json({ message: 'Session ID is required' });
+  } else if (req.method === "DELETE") {
+    // --- FIX: Always use .findByIdAndDelete as a static method on the constructor, not on the instance ---
+    let id = (req.query as any).id;
+    if (Array.isArray(id)) id = id[0];
+    if (!id || typeof id !== "string") {
+      return res.status(400).json({ message: "Session ID is required" });
     }
-
     try {
-      await TimeSession.findByIdAndDelete(id); // Delete the session by ID
-      return res.status(204).end(); // No content to return
-    } catch (error) {
-      console.error("Error deleting session:", error);
-      return res.status(500).json({ message: 'Failed to delete session', error });
+      await (TimeSession as any).findByIdAndDelete(id);
+      return res.status(204).end();
+    } catch (err) {
+      return res.status(500).json({ message: "Failed to delete session" });
     }
   } else {
-    res.setHeader('Allow', ['POST', 'GET', 'DELETE']);
+    res.setHeader("Allow", ["POST", "GET", "DELETE"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

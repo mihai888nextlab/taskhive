@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
-import { FaSpinner, FaMagic } from "react-icons/fa";
+import { FaSpinner, FaMagic, FaCalendarAlt, FaTags } from "react-icons/fa";
+import { useTheme } from '@/components/ThemeContext';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface ExpenseFormProps {
@@ -10,7 +15,6 @@ interface ExpenseFormProps {
   date: Date;
   category: string;
   loading: boolean;
-  theme: string;
   onTitleChange: (v: string) => void;
   onAmountChange: (v: string) => void;
   onDescriptionChange: (v: string) => void;
@@ -20,7 +24,7 @@ interface ExpenseFormProps {
 }
 
 const categories = [
-  'General', 'Food', 'Transport', 'Utilities', 'Shopping', 'Health', 'Salary', 'Investment', 'Other'
+  'General', 'Food', 'Transport', 'Utilities', 'Shopping', 'Health', 'Entertainment', 'Business', 'Other'
 ];
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
@@ -30,7 +34,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   date,
   category,
   loading,
-  theme,
   onTitleChange,
   onAmountChange,
   onDescriptionChange,
@@ -38,6 +41,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   onCategoryChange,
   onSubmit,
 }) => {
+  const { theme } = useTheme();
   const [generatingDescription, setGeneratingDescription] = useState(false);
 
   const handleGenerateDescription = async () => {
@@ -69,114 +73,186 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
   };
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className={`space-y-4 rounded-xl shadow-md p-6 transition-all duration-200 ${
-        theme === "dark"
-          ? "bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700"
-          : "bg-gradient-to-br from-white to-red-50 border border-red-100"
-      }`}
-    >
-      <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-        Add Expense
-      </h3>
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => onTitleChange(e.target.value)}
-        placeholder="Expense Title"
-        className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-lg font-semibold shadow-sm transition-all duration-200 ${
-          theme === "dark"
-            ? "bg-gray-700 text-white border-gray-600 focus:ring-red-400"
-            : "bg-white text-gray-900 border-red-200 focus:ring-red-400"
-        }`}
-        required
-      />
-      <input
-        type="number"
-        value={amount}
-        onChange={(e) => onAmountChange(e.target.value)}
-        placeholder="Amount (e.g., 50.00)"
-        className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-lg font-semibold shadow-sm transition-all duration-200 ${
-          theme === "dark"
-            ? "bg-gray-700 text-white border-gray-600 focus:ring-red-400"
-            : "bg-white text-gray-900 border-red-200 focus:ring-red-400"
-        }`}
-        step="0.01"
-        required
-      />
-      <div className="flex items-center mb-2">
-        <textarea
-          value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
-          placeholder="Description of the expense"
-          className={`flex-1 px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-base shadow-sm transition-all duration-200 resize-y ${
+    <form onSubmit={onSubmit} className="space-y-4">
+      {/* Title Input */}
+      <div>
+        <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+          Expense Title
+        </label>
+        <Input
+          type="text"
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          placeholder="What did you spend on?"
+          className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
             theme === "dark"
-              ? "bg-gray-700 text-white border-gray-600 focus:ring-red-400"
-              : "bg-white text-gray-900 border-red-200 focus:ring-red-400"
+              ? "bg-gray-700 text-white border-gray-600 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+              : "bg-white text-gray-900 border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
           }`}
           required
-          rows={3}
-          disabled={loading || generatingDescription}
+          disabled={loading}
         />
-        <button
-          type="button"
-          className="ml-2 px-3 py-2 bg-primary text-white rounded-lg flex items-center font-semibold shadow hover:bg-primary-dark transition disabled:opacity-60"
-          onClick={handleGenerateDescription}
-          disabled={!title || generatingDescription}
-          title="Generate description from title"
-        >
-          {generatingDescription ? <FaSpinner className="animate-spin" /> : <FaMagic className="mr-1" />}
-          Generate
-        </button>
       </div>
-      {generatingDescription && (
-        <div className="flex items-center text-sm text-gray-500 mt-2">
-          <FaSpinner className="animate-spin mr-2" /> Generating description...
+
+      {/* Amount Input */}
+      <div>
+        <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+          Amount
+        </label>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+            $
+          </div>
+          <Input
+            type="number"
+            value={amount}
+            onChange={(e) => onAmountChange(e.target.value)}
+            placeholder="0.00"
+            className={`w-full pl-8 pr-4 py-3 rounded-xl border transition-all duration-200 ${
+              theme === "dark"
+                ? "bg-gray-700 text-white border-gray-600 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                : "bg-white text-gray-900 border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+            }`}
+            step="0.01"
+            required
+            disabled={loading}
+          />
         </div>
-      )}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <label className="block text-sm font-medium mb-1 text-gray-500 dark:text-gray-300">Date</label>
+      </div>
+
+      {/* Description with AI Generate */}
+      <div>
+        <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+          Description
+        </label>
+        <div className="flex gap-2">
+          <Textarea
+            value={description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            placeholder="Describe this expense..."
+            className={`flex-1 px-4 py-3 rounded-xl border transition-all duration-200 resize-none ${
+              theme === "dark"
+                ? "bg-gray-700 text-white border-gray-600 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                : "bg-white text-gray-900 border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+            }`}
+            required
+            disabled={loading || generatingDescription}
+            rows={3}
+          />
+          <Button
+            type="button"
+            onClick={handleGenerateDescription}
+            disabled={!title || generatingDescription || loading}
+            className={`px-3 py-2 rounded-xl font-medium transition-all duration-200 self-start ${
+              !title || generatingDescription || loading
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : theme === 'dark'
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+            }`}
+            title="Generate description with AI"
+          >
+            {generatingDescription ? (
+              <FaSpinner className="animate-spin w-4 h-4" />
+            ) : (
+              <FaMagic className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
+        {generatingDescription && (
+          <div className={`flex items-center gap-2 mt-2 text-sm ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+            <FaSpinner className="animate-spin w-3 h-3" />
+            <span>Generating description...</span>
+          </div>
+        )}
+      </div>
+
+      {/* Date and Category Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Date */}
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+            <FaCalendarAlt className="inline w-3 h-3 mr-1" />
+            Date
+          </label>
           <DatePicker
             selected={date}
             onChange={(d) => onDateChange(d)}
-            className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 shadow-sm transition-all duration-200 ${
+            className={`w-full px-4 py-2 h-[36px] rounded-xl border transition-all duration-200 ${
               theme === "dark"
-                ? "bg-gray-700 text-white border-gray-600 focus:ring-red-400"
-                : "bg-white text-gray-900 border-red-200 focus:ring-red-400"
+                ? "bg-gray-700 text-white border-gray-600 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                : "bg-white text-gray-900 border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
             }`}
             dateFormat="yyyy-MM-dd"
             required
+            disabled={loading}
           />
         </div>
-        <div className="flex-1">
-          <label className="block text-sm font-medium mb-1 text-gray-500 dark:text-gray-300">Category</label>
-          <select
-            value={category}
-            onChange={e => onCategoryChange(e.target.value)}
-            className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 shadow-sm transition-all duration-200 ${
-              theme === "dark"
-                ? "bg-gray-700 text-white border-gray-600 focus:ring-red-400"
-                : "bg-white text-gray-900 border-red-200 focus:ring-red-400"
-            }`}
-            required
+
+        {/* Category */}
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+            <FaTags className="inline w-3 h-3 mr-1" />
+            Category
+          </label>
+          <Select
+            value={category || categories[0]}
+            onValueChange={onCategoryChange}
+            disabled={loading}
           >
-            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
+            <SelectTrigger
+              className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                  : "bg-white text-gray-900 border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+              }`}
+              style={{ height: "36px" }}
+            >
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent
+              className={`rounded-xl border mt-1 ${
+                theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              {categories.map(cat => (
+                <SelectItem
+                  key={cat}
+                  value={cat}
+                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                >
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
-      <button
-        type="submit"
-        className={`w-full py-3 rounded-xl font-bold shadow-md transition-all duration-300 text-lg ${
-          theme === "dark"
-            ? "bg-red-600 text-white hover:bg-red-700"
-            : "bg-gradient-to-r from-red-500 to-red-700 text-white hover:from-red-600 hover:to-red-800"
-        }`}
-        disabled={loading}
-      >
-        {loading ? "Saving..." : "Add Expense"}
-      </button>
+      {/* Submit Button */}
+      <div className="pt-2">
+        <Button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-3 rounded-xl font-bold transition-all duration-200 ${
+            loading
+              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+              : theme === "dark"
+                ? "bg-red-600 text-white hover:bg-red-700"
+                : "bg-red-500 text-white hover:bg-red-600"
+          }`}
+        >
+          {loading ? (
+            <div className="flex items-center justify-center gap-2">
+              <FaSpinner className="animate-spin w-4 h-4" />
+              <span>Saving...</span>
+            </div>
+          ) : (
+            "Add Expense"
+          )}
+        </Button>
+      </div>
     </form>
   );
 };

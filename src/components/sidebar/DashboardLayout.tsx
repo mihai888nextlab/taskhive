@@ -7,10 +7,11 @@ import UserProfileModal from "@/components/modals/UserProfileModal";
 import AIWindow from "../AIWindow";
 import { FaBars } from "react-icons/fa";
 import { menu } from "@/components/menuConfig"; // Your menu config
-import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
-import TimerAndFormPanel from "@/components/time-tracking/TimerAndFormPanel";
+import PersistentTimer from "@/components/time-tracking/PersistentTimer";
 import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext";
 import { useAIWindow } from "@/contexts/AIWindowContext";
+import Link from "next/link";
+import HeaderNavBar from "@/components/header/HeaderNavBar";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -19,11 +20,21 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, loadingUser, isAuthenticated, logout } = useAuth();
   const router = useRouter();
-  const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } = useTimeTracking();
+  const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } =
+    useTimeTracking();
   const { isAIWindowOpen, setIsAIWindowOpen, toggleAIWindow } = useAIWindow();
-  const showPersistent =
-    (isRunning || pomodoroRunning) &&
-    router.pathname !== "/app/time-tracking";
+  const [showPersistentTimer, setShowPersistentTimer] = useState(false);
+  const [timerClosed, setTimerClosed] = useState(false);
+
+  // Show persistent timer only if time > 0, not on time-tracking page, and not closed
+  const shouldShowPersistentTimer =
+    !timerClosed &&
+    router.pathname !== "/app/time-tracking" &&
+    (
+      (pomodoroMode
+        ? timerContext.pomodoroTime > 0
+        : timerContext.elapsedTime > 0)
+    );
 
   // State to toggle AI window - now managed by context
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,8 +44,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     // Responsive check for desktop
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
     checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
   const [tasks, setTasks] = useState<any[]>([]);
@@ -85,17 +96,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   });
 
   return (
-    <div className="flex w-full min-h-screen bg-gradient-to-r from-gray-100 to-gray-200">
-      {/* Hamburger button for mobile */}
-      {!sidebarOpen && (
-        <button
-          className="fixed top-4 left-4 z-50 md:hidden bg-gray-800 text-white p-2 rounded-lg shadow-lg focus:outline-none"
-          onClick={() => setSidebarOpen(true)}
-          aria-label="Open sidebar"
-        >
-          <FaBars className="text-2xl" />
-        </button>
-      )}
+    <div className="flex w-full min-h-screen bg-gray-100">
+      {/* Header NavBar */}
+      <HeaderNavBar />
       {/* Sidebar for desktop */}
       <SidebarNav menu={menuWithNotifications} user={user} router={router} />
       {/* Sidebar drawer for mobile */}
@@ -109,75 +112,64 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Main Content */}
       <div
         className="flex-1 flex flex-col bg-gray-100"
-        style={isAIWindowOpen && isDesktop ? { marginRight: 420, transition: 'margin 0.3s' } : {}}
+        style={{
+          marginLeft: 300, // width of the fixed sidebar
+          marginTop: 42,   // height of the absolute header (14 * 4)
+          marginRight: isDesktop && isAIWindowOpen ? 420 : 0, // <-- Add this!
+        }}
       >
-        {/* Universal Search Bar at the top, centered between sidebar and right edge */}
-        <div className="w-full flex justify-center items-center mt-7">
-          <div className="w-full max-w-3xl px-2 pointer-events-auto">
-            <UniversalSearchBar />
-          </div>
-        </div>
         <main className="flex-1 bg-gray-100 rounded-tl-lg shadow-lg min-h-screen">
           {children}
         </main>
-        {showPersistent && (
-          <div 
-            className={`fixed top-6 z-[100] max-w-full transition-all duration-300 ${isAIWindowOpen && isDesktop ? 'w-64' : 'w-96'}`}
-            style={{
-              right: isAIWindowOpen && isDesktop ? '440px' : '24px'
-            }}
-          >
-            <TimerAndFormPanel
-              {...timerContext}
-              isRunning={pomodoroMode ? pomodoroRunning : isRunning}
-              onStart={timerContext.startTimer}
-              onStop={timerContext.stopTimer}
-              onReset={timerContext.resetTimer}
-              theme="light"
-              sessionName={timerContext.sessionName}
-              sessionDescription={timerContext.sessionDescription}
-              sessionTag={timerContext.sessionTag}
-              setSessionTag={timerContext.setSessionTag}
-              onNameChange={timerContext.setSessionName}
-              onDescriptionChange={timerContext.setSessionDescription}
-              onSave={timerContext.saveSession}
-              pomodoroMode={pomodoroMode}
-              pomodoroPhase={timerContext.pomodoroPhase}
-              pomodoroTime={timerContext.pomodoroTime}
-              pomodoroCycles={timerContext.pomodoroCycles}
-              workDuration={timerContext.WORK_DURATION}
-              breakDuration={timerContext.BREAK_DURATION}
-              persistent
-              isAIWindowOpen={isAIWindowOpen && isDesktop}
-            />
-          </div>
+        
+        {/* Persistent Timer - Only show timer, no form */}
+        {shouldShowPersistentTimer && (
+          <PersistentTimer
+            elapsedTime={timerContext.elapsedTime}
+            isRunning={pomodoroMode ? pomodoroRunning : isRunning}
+            onStart={timerContext.startTimer}
+            onStop={timerContext.stopTimer}
+            onReset={timerContext.resetTimer}
+            onClose={() => setTimerClosed(true)}
+            pomodoroMode={pomodoroMode}
+            pomodoroPhase={timerContext.pomodoroPhase}
+            pomodoroTime={timerContext.pomodoroTime}
+            pomodoroCycles={timerContext.pomodoroCycles}
+            workDuration={timerContext.WORK_DURATION}
+            breakDuration={timerContext.BREAK_DURATION}
+          />
         )}
       </div>
       {/* AI Button (hide on desktop if open) */}
-      {!(sidebarOpen && typeof window !== 'undefined' && window.innerWidth < 768) && (!isDesktop || !isAIWindowOpen) && (
-        <button
-          onClick={toggleAIWindow}
-          className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95 z-50"
-        >
-          <span className="text-lg font-semibold">AI</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-6 w-6 transform transition-transform duration-300 ${
-              isAIWindowOpen ? "rotate-45" : "rotate-0"
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+      {!(
+        sidebarOpen &&
+        typeof window !== "undefined" &&
+        window.innerWidth < 768
+      ) &&
+        (!isDesktop || !isAIWindowOpen) && (
+          <button
+            onClick={toggleAIWindow}
+            className="fixed bottom-4 right-4 w-auto h-16 px-6 bg-primary to-primary-dark text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-95 z-50"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-        </button>
-      )}
+            <span className="text-lg font-semibold">AI</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-6 w-6 transform transition-transform duration-300 ${
+                isAIWindowOpen ? "rotate-45" : "rotate-0"
+              }`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+          </button>
+        )}
       {/* AI Window: right panel on desktop, modal on mobile */}
       <AIWindow
         isOpen={isAIWindowOpen}

@@ -6,6 +6,8 @@ import Image from "next/image";
 import { FaTasks, FaCalendarAlt, FaBullhorn, FaComments, FaUserClock, FaMoneyBillWave, FaClock } from "react-icons/fa";
 import { MdSdStorage, MdSettings } from "react-icons/md";
 import React, { useRef, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const kanit = Kanit({
   subsets: ["latin"],
@@ -136,11 +138,11 @@ export default function Home() {
   }, []); // Empty dependency array means this effect runs once on mount and once on unmount.
 
   return (
-    <div className="min-w-full min-h-screen bg-background text-white flex flex-col items-center">
+    <div className="min-w-full min-h-screen bg-[#18181b] text-white flex flex-col items-center">
       <Header />
       <main className="w-full flex flex-col items-center justify-center">
         {/* Hero Section */}
-        <section className="w-full flex flex-col items-center justify-center text-center pt-32 md:pt-67 pb-24 md:pb-40 bg-background relative overflow-hidden">
+        <section className="w-full flex flex-col items-center justify-center text-center pt-32 md:pt-67 pb-24 md:pb-40 bg-[#18181b] relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
             <Image
               src="/hive-icon.png"
@@ -168,53 +170,49 @@ export default function Home() {
               Powered by advanced AI for smarter, faster teamwork.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8 w-full max-w-xs sm:max-w-none mx-auto">
-              <Link
-                href="/register"
-                className="bg-primary text-white py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold shadow-xl hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto"
-              >
-                Get Started
+              <Link href="/register" className="w-full sm:w-auto">
+                <Button className="bg-primary text-white py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold shadow-xl hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto">
+                  Get Started
+                </Button>
               </Link>
-              <Link
-                href="/features"
-                className="border border-primary text-primary py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold hover:bg-primary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto"
-              >
-                Learn More
+              <Link href="/features" className="w-full sm:w-auto">
+                <Button variant="outline" className="border border-primary text-primary py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold hover:bg-primary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto">
+                  Learn More
+                </Button>
               </Link>
             </div>
           </div>
         </section>
-
-        {/* Features Section - Now smoothly scrolling horizontally as the user scrolls vertically */}
-        {/* This container defines the visual space for the features.
-            It's no longer sticky, allowing the page to scroll continuously. */}
+        {/* Features Section */}
         <div
           className="relative w-full flex items-center justify-center overflow-hidden py-16 bg-transparent"
           style={{ height: '400px' }}
         >
-          {/* This is the actual horizontal content that moves via translateX. */}
           <div
             ref={horizontalContentRef}
             className="flex flex-row gap-8 whitespace-nowrap transition-transform duration-75 ease-out"
             style={{ transform: `translateX(${-horizontalOffset}px)` }}
           >
             {features.map((feature, idx) => (
-              <div
+              <Card
                 key={feature.title}
-                className="flex-shrink-0 min-w-[320px] max-w-xs flex flex-col items-center bg-dark/70 border border-accent/30 rounded-2xl p-10 min-h-[240px] hover:shadow-2xl hover:border-primary transition-all group snap-center shadow-lg mx-4 overflow-hidden w-full"
+                className="flex-shrink-0 min-w-[320px] max-w-xs flex flex-col items-center bg-[#23272f] border border-accent/30 rounded-2xl p-10 min-h-[240px] hover:shadow-2xl hover:border-primary transition-all group snap-center shadow-lg mx-4 overflow-hidden w-full"
                 style={{ scrollSnapAlign: 'center', height: 280 }}
               >
-                <div className="mb-5 rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition flex items-center justify-center">
-                  {feature.icon}
-                </div>
-                <div className="flex flex-col items-center w-full">
-                  <h3 className="text-xl font-semibold mb-2 text-white tracking-tight text-center break-words w-full">
+                <CardHeader className="mb-5 flex items-center justify-center">
+                  <div className="rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition flex items-center justify-center">
+                    {feature.icon}
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center w-full">
+                  <CardTitle className="text-xl font-semibold mb-2 text-white tracking-tight text-center break-words w-full">
                     {feature.title}
-                  </h3>
-                  <p className="text-gray-400 text-base font-light text-center break-words whitespace-normal w-full mt-1">
+                  </CardTitle>
+                  <CardDescription className="text-gray-400 text-base font-light text-center break-words whitespace-normal w-full mt-1">
                     {feature.desc}
-                  </p>
-                </div>
-              </div>
+                  </CardDescription>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

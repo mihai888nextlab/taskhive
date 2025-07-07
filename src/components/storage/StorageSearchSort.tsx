@@ -1,4 +1,13 @@
 import React from "react";
+import { FaSearch, FaSortAlphaDown } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface StorageSearchSortProps {
   search: string;
@@ -13,25 +22,39 @@ const StorageSearchSort: React.FC<StorageSearchSortProps> = ({
   sortBy,
   setSortBy,
 }) => (
-  <>
-    <div className="max-w-lg sm:max-w-2xl mx-auto mt-6 sm:mt-8 mb-2 sm:mb-4 flex flex-col sm:flex-row gap-2 sm:gap-4">
-      <input
+  <div className="flex flex-col lg:flex-row gap-4">
+    {/* Search Bar */}
+    <div className="flex-1 relative">
+      <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+      <Input
         type="text"
         placeholder="Search files..."
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full px-3 sm:px-4 py-2 sm:py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+        className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
       />
-      <select
-        value={sortBy}
-        onChange={e => setSortBy(e.target.value as "name" | "size")}
-        className="px-3 sm:px-4 py-2 sm:py-2 rounded-xl border border-gray-300 text-sm sm:text-base"
-      >
-        <option value="name">Sort by Name</option>
-        <option value="size">Sort by Size</option>
-      </select>
     </div>
-  </>
+    {/* Sort Dropdown */}
+    <div className="relative">
+      <FaSortAlphaDown className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+      <Select
+        value={sortBy}
+        onValueChange={v => setSortBy(v as "name" | "size")}
+      >
+        <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
+          <SelectValue placeholder="Sort By" />
+        </SelectTrigger>
+        <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+          <SelectItem value="name" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">
+            Sort by Name
+          </SelectItem>
+          <SelectItem value="size" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">
+            Sort by Size
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  </div>
 );
 
 export default StorageSearchSort;

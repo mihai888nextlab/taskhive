@@ -1,9 +1,14 @@
 export interface User {
+  companyId: any;
   _id: string;
   email: string;
   firstName: string;
   lastName: string;
   role: string;
+  profileImage?: { data?: string } | string | null;
+  companyId?: string;
+  companyName?: string;
+  companies?: { id: string; name: string; role: string }[];
   createdAt: Date;
   updatedAt: Date;
 }

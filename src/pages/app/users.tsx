@@ -1,212 +1,107 @@
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
+import { NextPageWithLayout } from "@/types";
+import { FaPlus, FaUsers, FaUserPlus, FaSitemap } from "react-icons/fa";
+import { useTheme } from "@/components/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
-import { NextPageWithLayout, TableColumn, TableDataItem } from "@/types";
 import Loading from "@/components/Loading";
-import Table from "@/components/dashboard/Table";
-import { useEffect, useState } from "react";
-import AddUsersModal from "@/components/modals/AddUserModal";
-import AddRoleModal from "@/components/modals/AddRoleModal"; // Import AddRoleModal
-import OrgChartModal from "@/components/modals/OrgChartModal"; // Import OrgChartModal
+import UserList from "@/components/users/UserList";
+import AddUserModal from "@/components/modals/AddUserModal";
+import AddRoleModal from "@/components/modals/AddRoleModal";
+import OrgChartModal from "@/components/modals/OrgChartModal";
 import UserProfileModal from "@/components/modals/UserProfileModal";
-import { useTheme } from "@/components/ThemeContext"; // Import the useTheme hook
+import { createPortal } from 'react-dom';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import UserCard from "@/components/users/UserCard";
+import {
+  Table as ShadcnTable,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
-interface Project extends TableDataItem {
-  user_id: string;
-  user_email: string;
-  user_firstName: string;
-  user_lastName: string;
+interface User {
+  _id: string;
+  userId: {
+    _id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    profileImage?: {
+      data: string;
+      contentType: string;
+      uploadedAt: string;
+      fileName?: string;
+    };
+    description?: string;
+    skills?: string[];
+  };
   companyId: string;
   role: string;
   permissions: string[];
 }
 
-const DashboardOverviewPage: NextPageWithLayout = () => {
+const UsersPage: NextPageWithLayout = () => {
+  const { theme } = useTheme();
   const { user } = useAuth();
-  const { theme } = useTheme(); // Get the current theme
-
-  const [users, setUsers] = useState<
-    {
-      _id: string;
-      userId: {
-        _id: string;
-        email: string;
-        firstName: string;
-        lastName: string;
-        profileImage?: {
-          data: string;
-          contentType: string;
-          uploadedAt: string;
-          fileName?: string;
-        };
-        description?: string;
-        skills?: string[]; // <-- Add this line
-      };
-      companyId: string;
-      role: string;
-      permissions: string[];
-    }[]
-  >([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
-
+  
+  // Data state
+  const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Modal state
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
-  const [addRoleModalOpen, setAddRoleModalOpen] = useState(false); // State for Add Role Modal
-  const [orgChartModalOpen, setOrgChartModalOpen] = useState(false); // State for Org Chart Modal
-  const [roles, setRoles] = useState<string[]>([]); // Store roles
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [addRoleModalOpen, setAddRoleModalOpen] = useState(false);
+  const [orgChartModalOpen, setOrgChartModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
+  // Filter state
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
-  const [sortBy, setSortBy] = useState<"firstNameAsc" | "lastNameAsc" | "roleAsc">("firstNameAsc");
+  const [sortBy, setSortBy] = useState<
+    "firstNameAsc" | "lastNameAsc" | "roleAsc"
+  >("firstNameAsc");
 
-  const projectColumns: TableColumn<Project>[] = [
-    {
-      key: "user_firstName",
-      header: "First Name",
-      render: (item) => <span>{item.user_firstName}</span>,
-    },
-    {
-      key: "user_lastName",
-      header: "Last Name",
-      render: (item) => <span>{item.user_lastName}</span>,
-    },
-    {
-      key: "user_email",
-      header: "Email",
-      render: (item) => <span>{item.user_email}</span>,
-    },
-    {
-      key: "role",
-      header: "Role",
-      render: (item) => {
-        let badgeClasses = "";
-        let textColor = "";
-        switch (item.role) {
-          case "admin":
-            badgeClasses = "bg-red-100";
-            textColor = "text-red-800";
-            break;
-          case "user":
-            badgeClasses = "bg-blue-100";
-            textColor = "text-blue-800";
-            break;
-          default:
-            badgeClasses = "bg-gray-100";
-            textColor = "text-gray-800";
-            break;
-        }
-        return (
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold ${badgeClasses} ${textColor}`}
-          >
-            {item.role}
-          </span>
-        );
-      },
-    },
-  ];
-
+  // Fetch data functions
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/get-users");
-      if (!response.ok) {
-        throw new Error("Failed to fetch users");
-      }
+      if (!response.ok) throw new Error("Failed to fetch users");
       const data = await response.json();
-      console.log("Fetched users:", data.users);
       setUsers(data.users);
-      setLoadingUsers(false);
     } catch (error) {
       console.error("Error fetching users:", error);
-      setLoadingUsers(false);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchRoles = async () => {
     try {
       const response = await fetch("/api/roles");
-      if (!response.ok) {
-        throw new Error("Failed to fetch roles");
-      }
+      if (!response.ok) throw new Error("Failed to fetch roles");
       const data = await response.json();
-      const fetchedRoles = data.map((role: { name: string }) => role.name);
-      setRoles(fetchedRoles);
+      setRoles(data.map((role: { name: string }) => role.name));
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
   };
 
-  const addRole = async (roleName: string) => {
-    try {
-      const response = await fetch("/api/roles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: roleName }),
+  // Handle functions
+  const handleUserClick = (userId: string) => {
+    const userObj = users.find((u) => u.userId._id === userId);
+    if (userObj) {
+      setSelectedUser({
+        ...userObj.userId,
+        role: userObj.role,
       });
-
-      if (!response.ok && response.status !== 409) {
-        // Only throw if it's not a "role already exists" error
-        throw new Error("Failed to add role");
-      }
-
-      // Fetch current org chart data
-      const orgChartResponse = await fetch("/api/org-chart");
-      if (!orgChartResponse.ok) {
-        throw new Error("Failed to fetch org chart");
-      }
-      const orgChartData = await orgChartResponse.json();
-
-      // ✅ New code (works with departments/levels structure)
-      const departments = orgChartData.departments || [];
-      const availableDept = departments.find(
-        (d: any) => d.id === "available-roles"
-      );
-
-      if (availableDept) {
-        // Add to first level of Available Roles department
-        if (
-          availableDept.levels.length > 0 &&
-          !availableDept.levels[0].roles.includes(roleName)
-        ) {
-          availableDept.levels[0].roles.push(roleName);
-        } else if (availableDept.levels.length === 0) {
-          availableDept.levels.push({
-            id: "available-roles-level",
-            roles: [roleName],
-          });
-        }
-      } else {
-        // If not found, create Available Roles department
-        departments.unshift({
-          id: "available-roles",
-          name: "Available Roles",
-          levels: [{ id: "available-roles-level", roles: [roleName] }],
-        });
-      }
-
-      // Save updated org chart data to the database
-      const saveOrgChartResponse = await fetch("/api/org-chart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          departments,
-        }),
-      });
-
-      if (!saveOrgChartResponse.ok) {
-        throw new Error("Failed to save org chart");
-      }
-
-      setRoles((prevRoles) => [...prevRoles, roleName]);
-      setOrgChartModalOpen(true);
-      try {
-        fetchRoles(); // Refresh the roles list
-      } catch (error) {
-        console.error("Error fetching roles after adding role:", error);
-      }
-    } catch (error) {
-      console.error("Error adding role:", error);
+      setProfileModalOpen(true);
     }
   };
 
@@ -220,67 +115,49 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
     try {
       const response = await fetch("/api/add-user", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          firstName,
-          lastName,
-          password,
-          role,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, firstName, lastName, password, role }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Failed to add user. Server responded with:", errorText);
         return `Failed to add user: ${errorText}`;
       }
 
-      const data = await response.json();
-      console.log("Add user response:", data);
-
-      setLoadingUsers(true); // Set loading state to true while fetching users
-      fetchUsers(); // Refresh the user list after adding a new user
-      setAddUserModalOpen(false); // Close the modal after adding the user
+      await fetchUsers();
+      setAddUserModalOpen(false);
       return undefined;
     } catch (error) {
       console.error("Error adding user:", error);
-      return `Error adding user: ${
-        error instanceof Error ? error.message : String(error)
-      }`;
+      return `Error adding user: ${error instanceof Error ? error.message : String(error)}`;
     }
   };
 
-  const handleUserClick = (userId: string) => {
-    const userObj = users.find((u) => u.userId._id === userId);
-    if (userObj) {
-      setSelectedUser({
-        ...userObj.userId, // This now includes skills
-        role: userObj.role,
-      });
-      setProfileModalOpen(true);
-    }
-  };
-
-  const handleRoleChange = async (userId: string, newRole: string) => {
+  const addRole = async (roleName: string) => {
     try {
-      const response = await fetch("/api/update-user-role", {
+      const response = await fetch("/api/roles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, role: newRole }),
+        body: JSON.stringify({ name: roleName }),
       });
-      if (!response.ok) throw new Error("Failed to update role");
-      await fetchUsers(); // Refresh users after update
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to add role: ${errorText}`);
+      }
+      await fetchRoles();
+      setAddRoleModalOpen(false);
     } catch (error) {
-      console.error("Error updating user role:", error);
+      console.error("Error adding role:", error);
     }
   };
 
   const filteredUsers = users
-    .filter(u => u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined))
-    .filter(u => {
+    .filter(
+      (u) =>
+        u.companyId ===
+        (user && "companyId" in user ? (user as any).companyId : undefined)
+    )
+    .filter((u) => {
       const q = search.trim().toLowerCase();
       if (!q) return true;
       return (
@@ -289,10 +166,12 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         u.userId.email.toLowerCase().includes(q)
       );
     })
-    .filter(u => (filterRole === "all" ? true : u.role === filterRole))
+    .filter((u) => (filterRole === "all" ? true : u.role === filterRole))
     .sort((a, b) => {
       if (sortBy === "firstNameAsc") {
-        return (a.userId.firstName || "").localeCompare(b.userId.firstName || "");
+        return (a.userId.firstName || "").localeCompare(
+          b.userId.firstName || ""
+        );
       }
       if (sortBy === "lastNameAsc") {
         return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
@@ -301,16 +180,30 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
         return (a.role || "").localeCompare(b.role || "");
       }
       return 0;
-    });
+    })
 
   // Only roles from users in your company
   const companyRoles = Array.from(
-    new Set(users.filter(u => u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined)).map(u => u.role))
+    new Set(
+      users
+        .filter(
+          (u) =>
+            u.companyId ===
+            (user && "companyId" in user ? (user as any).companyId : undefined)
+        )
+        .map((u) => u.role)
+    )
   );
 
+  // TESTE - DE STERS DUPA
+  const handleTestButtonClick = () => {};
+
+  //TERMINAT TEST
+        
+        //effects
   useEffect(() => {
     fetchUsers();
-    fetchRoles(); // Fetch roles when the component mounts
+    fetchRoles();
   }, [user]);
 
   useEffect(() => {
@@ -318,82 +211,154 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
       const userId = e.detail;
       const userObj = users.find((u) => u.userId._id === userId);
       if (userObj) {
-        setSelectedUser({
-          ...userObj.userId,
-          role: userObj.role,
-        });
+        setSelectedUser({ ...userObj.userId, role: userObj.role });
         setProfileModalOpen(true);
       }
     }
-    window.addEventListener(
-      "open-user-profile",
-      handleOpenUserProfile as EventListener
-    );
+    window.addEventListener("open-user-profile", handleOpenUserProfile as EventListener);
     return () => {
-      window.removeEventListener(
-        "open-user-profile",
-        handleOpenUserProfile as EventListener
-      );
+      window.removeEventListener("open-user-profile", handleOpenUserProfile as EventListener);
     };
   }, [users]);
+
+  // Prevent background scroll when any modal is open
+  useLayoutEffect(() => {
+    const modalOpen = addUserModalOpen || addRoleModalOpen || orgChartModalOpen || profileModalOpen;
+    if (modalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [addUserModalOpen, addRoleModalOpen, orgChartModalOpen, profileModalOpen]);
 
   if (!user) {
     return <Loading />;
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-2 sm:p-4 md:p-8 font-sans overflow-hidden">
-      {loadingUsers && <Loading />}
-      {addUserModalOpen && (
-        <AddUsersModal
+    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+      <div className="px-2 lg:px-4 pt-4 mt-4">
+        <div className="max-w-[100vw] mx-auto">
+          <Card className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
+            {/* Users Header with Action Buttons */}
+            <CardHeader className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"} border-b`}>
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
+                    <FaUsers className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                      Team Directory
+                    </h2>
+                    <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                      View and manage all team members in your organization
+                    </p>
+                  </div>
+                </div>
+                {/* Action Buttons */}
+                {user.role === "admin" && (
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      asChild
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
+                        theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
+                      }`}
+                    >
+                      <span onClick={() => setAddUserModalOpen(true)}>
+                        <FaUserPlus className="w-4 h-4" />
+                        <span>Add User</span>
+                      </span>
+                    </Button>
+                   <Button
+                      asChild
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
+                        theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
+                      }`}
+                    >
+                      <span onClick={() => setAddRoleModalOpen(true)}>
+                        <FaPlus className="w-4 h-4" />
+                        <span>Add Role</span>
+                      </span>
+                    </Button>
+                    <Button
+                      asChild
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
+                        theme === 'dark' ? 'bg-slate-600 hover:bg-slate-700 text-white' : 'bg-slate-500 hover:bg-slate-600 text-white'
+                      }`}
+                    >
+                      <span onClick={() => setOrgChartModalOpen(true)}>
+                        <FaSitemap className="w-4 h-4" />
+                        <span>Org Chart</span>
+                      </span>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            {/* Controls */}
+            <CardContent className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"} border-b`}>
+              <UserList
+                users={users}
+                loading={loading}
+                onUserClick={handleUserClick}
+                theme={theme}
+                currentUser={user}
+                controlsOnly
+                search={search}
+                onSearchChange={setSearch}
+                filterRole={filterRole}
+                onFilterRoleChange={setFilterRole}
+                sortBy={sortBy}
+                onSortByChange={setSortBy}
+              />
+            </CardContent>
+            {/* Users List */}
+            <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
+              <UserList
+                users={users}
+                loading={loading}
+                onUserClick={handleUserClick}
+                theme={theme}
+                currentUser={user}
+                cardsOnly
+                search={search}
+                filterRole={filterRole}
+                sortBy={sortBy}
+              />
+            </div>
+          </Card>
+        </div>
+      </div>
+      {/* Modals */}
+      {addUserModalOpen && typeof window !== 'undefined' && createPortal(
+        <AddUserModal
           onClose={() => setAddUserModalOpen(false)}
-          onUserAdded={async (
-            email: string,
-            firstName: string,
-            lastName: string,
-            password: string,
-            role: string
-          ) => {
-            try {
-              const result = await addUser(
-                email,
-                firstName,
-                lastName,
-                password,
-                role
-              );
-              if (result) {
-                console.error("Error adding user:", result);
-                return result;
-              } else {
-                fetchUsers();
-                setAddUserModalOpen(false);
-                return undefined;
-              }
-            } catch (error) {
-              console.error("Error adding user:", error);
-              return undefined;
-            }
-          }}
-        />
+          onUserAdded={addUser}
+        />,
+        document.body
       )}
-      {addRoleModalOpen && (
+      {addRoleModalOpen && typeof window !== 'undefined' && createPortal(
         <AddRoleModal
           onClose={() => setAddRoleModalOpen(false)}
-          onRoleAdded={(roleName: string) => {
-            addRole(roleName);
-          }}
-        />
+          onRoleAdded={addRole}
+        />,
+        document.body
       )}
-      {orgChartModalOpen && (
-        <OrgChartModal onClose={() => setOrgChartModalOpen(false)} />
+      {orgChartModalOpen && typeof window !== 'undefined' && createPortal(
+        <OrgChartModal onClose={() => setOrgChartModalOpen(false)} />,
+        document.body
       )}
-      {profileModalOpen && (
+      {profileModalOpen && typeof window !== 'undefined' && createPortal(
         <UserProfileModal
           open={profileModalOpen}
           onClose={() => setProfileModalOpen(false)}
           user={selectedUser}
-        />
+        />,
+        document.body
       )}
       <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-6 sm:mb-8 justify-center items-center z-10 relative w-full px-2 sm:px-0">
         {user && user.role === "admin" && (
@@ -431,7 +396,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
                 type="text"
                 placeholder="Search users..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 className="w-full sm:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary bg-inherit text-black"
               />
             </label>
@@ -441,18 +406,26 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
               <span className="mb-1 sm:mb-0 sm:mr-2">Role:</span>
               <select
                 value={filterRole}
-                onChange={e => setFilterRole(e.target.value)}
+                onChange={(e) => setFilterRole(e.target.value)}
                 className="w-full sm:w-40 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
               >
                 <option value="all">All</option>
                 {Array.from(
                   new Set(
-                    users.filter(u =>
-                      u.companyId === (user && "companyId" in user ? (user as any).companyId : undefined)
-                    ).map(u => u.role)
+                    users
+                      .filter(
+                        (u) =>
+                          u.companyId ===
+                          (user && "companyId" in user
+                            ? (user as any).companyId
+                            : undefined)
+                      )
+                      .map((u) => u.role)
                   )
-                ).map(role => (
-                  <option key={role} value={role}>{role}</option>
+                ).map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
                 ))}
               </select>
             </label>
@@ -460,7 +433,7 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
               <span className="mb-1 sm:mb-0 sm:mr-2">Sort by:</span>
               <select
                 value={sortBy}
-                onChange={e => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-full sm:w-48 rounded px-2 py-1 border border-gray-300 bg-inherit text-black"
               >
                 <option value="firstNameAsc">First Name (A-Z)</option>
@@ -481,35 +454,63 @@ const DashboardOverviewPage: NextPageWithLayout = () => {
             return 0;
           })
           .map((user) => (
-            <UserCard key={user._id} user={user} theme={theme} onClick={handleUserClick} />
+            <UserCard
+              key={user._id}
+              user={user}
+              theme={theme}
+              onClick={handleUserClick}
+            />
           ))}
       </div>
       {/* Table view for desktop only */}
-      <div className={`bg-white/90 shadow-2xl rounded-2xl overflow-x-auto hidden md:block border border-gray-200/60 backdrop-blur-lg z-10 relative`}>
-        <Table<Project>
-          title="Users List"
-          data={filteredUsers.map((user) => ({
-            id: user._id,
-            user_id: user.userId._id,
-            user_email: user.userId.email,
-            user_firstName: user.userId.firstName,
-            user_lastName: user.userId.lastName,
-            companyId: user.companyId,
-            role: user.role,
-            permissions: user.permissions,
-          }))}
-          columns={projectColumns}
-          emptyMessage="No users registered."
-          rowOnClick={(item) => handleUserClick(item.user_id)}
-        />
+      <div
+        className={`bg-white/90 shadow-2xl rounded-2xl overflow-x-auto hidden md:block border border-gray-200/60 backdrop-blur-lg z-10 relative`}
+      >
+        <ShadcnTable>
+          <TableHeader>
+            <TableRow>
+              <TableHead>First Name</TableHead>
+              <TableHead>Last Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Permissions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  No users registered.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredUsers.map((user) => (
+                <TableRow
+                  key={user._id}
+                  className="cursor-pointer hover:bg-blue-50"
+                  onClick={() => handleUserClick(user.userId._id)}
+                >
+                  <TableCell>{user.userId.firstName}</TableCell>
+                  <TableCell>{user.userId.lastName}</TableCell>
+                  <TableCell>{user.userId.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    {user.permissions && user.permissions.length > 0
+                      ? user.permissions.join(", ")
+                      : "-"}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </ShadcnTable>
       </div>
     </div>
   );
 };
 
-// Assign the layout to the page
-DashboardOverviewPage.getLayout = function getLayout(page: React.ReactElement) {
+UsersPage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default DashboardOverviewPage;
+export default UsersPage;

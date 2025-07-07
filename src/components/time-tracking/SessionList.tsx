@@ -1,21 +1,22 @@
 import React from "react";
-import { FaTrash } from "react-icons/fa";
+import { FaSearch, FaTrash, FaSpinner, FaClock } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
 interface Session {
   _id: string;
   name: string;
   description: string;
   duration: number;
-  createdAt?: string;
-  tag?: string;
-  cycles?: number; // <-- add this
+  tag: string;
+  createdAt: string;
 }
 
 interface SessionListProps {
   sessions: Session[];
-  onDelete: (id: string) => void;
+  onDelete: (sessionId: string) => void;
   theme: string;
-  // Add controls state and handlers
   sessionSearch: string;
   setSessionSearch: (v: string) => void;
   sessionTagFilter: string;
@@ -23,23 +24,6 @@ interface SessionListProps {
   sessionSort: string;
   setSessionSort: (v: string) => void;
 }
-
-const formatTime = (timeInSeconds: number) => {
-  const hours = Math.floor(timeInSeconds / 3600);
-  const minutes = Math.floor((timeInSeconds % 3600) / 60);
-  const seconds = timeInSeconds % 60;
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-};
-
-const tagColors: Record<string, string> = {
-  Pomodoro: "bg-red-500",
-  Tasks: "bg-blue-600", // Add Tasks tag color
-  "Deep Work": "bg-blue-500",
-  Meeting: "bg-green-500",
-  Break: "bg-yellow-500",
-  Learning: "bg-purple-500",
-  General: "bg-gray-400",
-};
 
 const SessionList: React.FC<SessionListProps> = ({
   sessions,
@@ -52,21 +36,27 @@ const SessionList: React.FC<SessionListProps> = ({
   sessionSort,
   setSessionSort,
 }) => {
-  // Filtering and sorting logic inside SessionList
-  const getDate = (d?: string) => d ? new Date(d).getTime() : 0;
-  const filteredSessions = sessions.filter(s => {
-    const matchesSearch =
-      sessionSearch.trim() === "" ||
-      s.name?.toLowerCase().includes(sessionSearch.toLowerCase()) ||
-      s.description?.toLowerCase().includes(sessionSearch.toLowerCase());
-    const matchesTag =
-      sessionTagFilter === "all" || (s.tag || "General") === sessionTagFilter;
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const tags = ["General", "Deep Work", "Meeting", "Break", "Learning"];
+
+  // Filter and sort sessions
+  const filteredSessions = sessions.filter(session => {
+    const matchesSearch = sessionSearch.trim() === "" ||
+      session.name?.toLowerCase().includes(sessionSearch.toLowerCase()) ||
+      session.description?.toLowerCase().includes(sessionSearch.toLowerCase());
+    const matchesTag = sessionTagFilter === "all" || session.tag === sessionTagFilter;
     return matchesSearch && matchesTag;
   }).sort((a, b) => {
     if (sessionSort === "dateDesc") {
-      return getDate(b.createdAt) - getDate(a.createdAt);
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     } else if (sessionSort === "dateAsc") {
-      return getDate(a.createdAt) - getDate(b.createdAt);
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     } else if (sessionSort === "durationDesc") {
       return b.duration - a.duration;
     } else if (sessionSort === "durationAsc") {
@@ -76,87 +66,151 @@ const SessionList: React.FC<SessionListProps> = ({
   });
 
   return (
-    <div className={`rounded-2xl shadow-xl p-6 sm:p-8 my-3 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-      <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'} mb-4 border-b-2 border-blue-200 pb-2`}>
-        Saved Sessions
-      </h2>
-      {/* Controls bar below title, above cards */}
-      <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between flex-wrap gap-4 mb-4 p-4 rounded-2xl shadow-sm bg-gray-50/80 border border-gray-100 box-border">
-        <input
-          type="text"
-          placeholder="Search sessions..."
-          value={sessionSearch}
-          onChange={e => setSessionSearch(e.target.value)}
-          className="flex-1 min-w-[120px] max-w-xs px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base placeholder-gray-400 outline-none"
-        />
-        <select
-          value={sessionTagFilter}
-          onChange={e => setSessionTagFilter(e.target.value)}
-          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
-        >
-          <option value="all">Tag: All</option>
-          <option value="Pomodoro">Pomodoro</option>
-          <option value="Tasks">Tasks</option>
-          <option value="Deep Work">Deep Work</option>
-          <option value="Meeting">Meeting</option>
-          <option value="Break">Break</option>
-          <option value="Learning">Learning</option>
-          <option value="General">General</option>
-        </select>
-        <select
-          value={sessionSort}
-          onChange={e => setSessionSort(e.target.value)}
-          className="w-full md:w-auto px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base outline-none"
-        >
-          <option value="dateDesc">Sort: Newest First</option>
-          <option value="dateAsc">Sort: Oldest First</option>
-          <option value="durationDesc">Sort: Longest Duration</option>
-          <option value="durationAsc">Sort: Shortest Duration</option>
-        </select>
-      </div>
-      <ul className="space-y-4 max-h-[580px] overflow-y-auto pr-2">
-        {filteredSessions.length === 0 ? (
-          <p className={`text-gray-600 italic text-center py-4 ${theme === 'dark' ? 'text-gray-400' : ''}`}>No sessions saved yet.</p>
-        ) : (
-          filteredSessions.map((session) => (
-            <li
-              key={session._id}
-              className={`p-4 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-100'} hover:border-blue-200 transition-transform transform hover:scale-101 hover:shadow-md transition-all duration-200`}
+    <div className="h-full flex flex-col">
+      {/* Controls */}
+      <div className="flex-shrink-0 p-3 space-y-3">
+        {/* Search */}
+        <div className="relative">
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            type="text"
+            placeholder="Search sessions..."
+            value={sessionSearch}
+            onChange={e => setSessionSearch(e.target.value)}
+            className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl h-[36px] border transition-all duration-200 ${
+              theme === 'dark' 
+                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20'
+            }`}
+          />
+        </div>
+
+        {/* Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Select
+            value={sessionTagFilter}
+            onValueChange={setSessionTagFilter}
+            disabled={false}
+          >
+            <SelectTrigger
+              className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
+              style={{ height: "36px" }}
             >
-              <div className="flex-1 mb-2 sm:mb-0">
-                <p className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{session.name}</p>
-                <p className={`text-md ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{session.description}</p>
-                {session.createdAt && (
-                  <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
-                    Saved on: {new Date(session.createdAt).toLocaleString()}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center">
-                {session.tag === "Pomodoro" ? (
-                  <span className="text-lg font-mono text-red-500 font-bold mr-4">
-                    {session.cycles ?? 1} cycle{(session.cycles ?? 1) > 1 ? "s" : ""}
-                  </span>
-                ) : (
-                  <span className={`text-2xl font-mono ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'} font-bold mr-4`}>
-                    {formatTime(session.duration)}
-                  </span>
-                )}
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white ${tagColors[session.tag ?? "General"] || 'bg-gray-400'}`}>
-                  {session.tag || "General"}
-                </span>
-                <button
-                  onClick={() => onDelete(session._id)}
-                  className={`text-red-500 hover:text-red-700 p-3 rounded-full hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors active:scale-95`}
-                  title="Delete Session"
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+              <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">All Categories</SelectItem>
+              {tags.map(tag => (
+                <SelectItem
+                  key={tag}
+                  value={tag}
+                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
                 >
-                  <FaTrash className="text-lg" />
-                </button>
+                  {tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={sessionSort}
+            onValueChange={setSessionSort}
+            disabled={false}
+          >
+            <SelectTrigger
+              className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
+              style={{ height: "36px" }}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+              <SelectItem value="dateDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Newest First</SelectItem>
+              <SelectItem value="dateAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Oldest First</SelectItem>
+              <SelectItem value="durationDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Longest Duration</SelectItem>
+              <SelectItem value="durationAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Shortest Duration</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Sessions List */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3">
+        {filteredSessions.length === 0 ? (
+          <div className="flex items-center justify-center min-h-[200px]">
+            <div className="text-center">
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-3 ${
+                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+              }`}>
+                <FaClock className="text-xl text-gray-400" />
               </div>
-            </li>
-          ))
+              <h3 className={`text-base font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {sessionSearch.trim() ? 'No matching sessions found' : 'No sessions yet'}
+              </h3>
+              <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                {sessionSearch.trim() 
+                  ? 'Try adjusting your search criteria or filters' 
+                  : 'Start your first time tracking session'
+                }
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredSessions.map(session => (
+              <div
+                key={session._id}
+                className={`p-4 rounded-xl border transition-all duration-200 ${
+                  theme === "dark"
+                    ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
+                    : "bg-white border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className={`font-semibold text-base truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {session.name}
+                      </h3>
+                      <span className="text-lg font-bold text-blue-500">
+                        {formatDuration(session.duration)}
+                      </span>
+                    </div>
+                    <p className={`text-sm mb-2 leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {session.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                        {new Date(session.createdAt).toLocaleDateString()}
+                      </span>
+                      {session.tag && (
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          theme === 'dark' 
+                            ? 'bg-blue-900/30 text-blue-400' 
+                            : 'bg-blue-50 text-blue-700'
+                        }`}>
+                          {session.tag}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => onDelete(session._id)}
+                    className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
+                      theme === 'dark' 
+                        ? 'text-red-400 hover:bg-red-900/20 hover:text-red-300' 
+                        : 'text-red-600 hover:bg-red-50'
+                    }`}
+                    title="Delete Session"
+                    variant="ghost"
+                  >
+                    <FaTrash size={16} />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
-      </ul>
+      </div>
     </div>
   );
 };

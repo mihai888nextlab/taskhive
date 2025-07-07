@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import FileCard from "./StorageFileCard";
+import { FaCloudUploadAlt, FaTimes, FaFile, FaImage } from "react-icons/fa";
 
 interface FileUploadModalProps {
   open: boolean;
@@ -19,7 +19,6 @@ export default function FileUploadModal({
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
-  // Use dropped file if present
   useEffect(() => {
     if (droppedFiles && droppedFiles.length > 0) {
       setFile(droppedFiles[0]);
@@ -38,7 +37,7 @@ export default function FileUploadModal({
   };
 
   const handleUpload = async () => {
-    if (!file) return alert("Selectează un fișier!");
+    if (!file) return alert("Please select a file!");
 
     setUploading(true);
     const reader = new FileReader();
@@ -48,7 +47,7 @@ export default function FileUploadModal({
       const base64 = reader.result?.toString().split(",")[1];
       if (!base64) {
         setUploading(false);
-        return alert("Eroare la citirea fișierului!");
+        return alert("Error reading file!");
       }
 
       const res = await fetch("/api/s3-upload", {
@@ -68,65 +67,142 @@ export default function FileUploadModal({
         setUploadedUrl(data.url);
         if (onUploadSuccess) onUploadSuccess();
       } else {
-        alert("Eroare la upload: " + data.error);
+        alert("Upload error: " + data.error);
       }
     };
   };
 
+  const handleClose = () => {
+    setFile(null);
+    setPreview(null);
+    setUploadedUrl(null);
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
-      <div className="bg-white p-6 max-w-md w-full rounded-lg shadow-lg relative">
-        <button
-          onClick={() => {
-            setFile(null);
-            setPreview(null);
-            setUploadedUrl(null);
-            onClose();
-          }}
-          className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl font-bold"
-          aria-label="Close"
-        >
-          &times;
-        </button>
-        <h2 className="text-xl font-bold mb-4">Upload File</h2>
-        <input
-          type="file"
-          accept="*"
-          onChange={handleFileChange}
-          className="block w-full border p-2 mb-2"
-        />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop with blur */}
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-md"
+        onClick={handleClose}
+      />
 
-        {preview && file && (
-          <div className="mb-2">
-            {file.type.startsWith("image/") ? (
-              <img
-                src={preview}
-                alt={file.name}
-                className="max-h-32 mx-auto rounded"
-              />
-            ) : (
-              <div className="text-center text-gray-500">{file.name}</div>
-            )}
+      {/* Modal */}
+      <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl max-w-md w-full border border-white/20">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-xl">
+              <FaCloudUploadAlt className="text-xl text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">Upload File</h2>
+              <p className="text-sm text-gray-600">
+                Choose a file to upload to your storage
+              </p>
+            </div>
           </div>
-        )}
+          <button
+            onClick={handleClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
+          >
+            <FaTimes className="text-lg" />
+          </button>
+        </div>
 
-        {preview && file && uploadedUrl && (
-          <FileCard
-            fileName={file.name}
-            fileSize={file.size}
-            downloadUrl={uploadedUrl}
-            theme="light"
-            fileIcon={null}
-          />
-        )}
+        {/* Content */}
+        <div className="p-6">
+          {/* File Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select File
+            </label>
+            <input
+              type="file"
+              accept="*"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all duration-200"
+            />
+          </div>
 
-        <button
-          onClick={handleUpload}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full mt-3"
-          disabled={uploading}
-        >
-          {uploading ? "Uploading..." : "Upload"}
-        </button>
+          {/* File Preview */}
+          {preview && file && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200/50">
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0">
+                  {file.type.startsWith("image/") ? (
+                    <img
+                      src={preview}
+                      alt={file.name}
+                      className="w-16 h-16 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <FaFile className="text-2xl text-blue-600" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-800 truncate">
+                    {file.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {uploadedUrl && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-4 h-4 text-green-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-green-800">
+                    Upload Successful!
+                  </p>
+                  <p className="text-xs text-green-600">
+                    Your file has been uploaded successfully.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Upload Button */}
+          <button
+            onClick={handleUpload}
+            disabled={!file || uploading}
+            className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
+              !file || uploading
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105"
+            }`}
+          >
+            {uploading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                Uploading...
+              </div>
+            ) : (
+              "Upload File"
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,10 @@
 // components/chat/NewDirectChatModal.tsx
 import React, { useState, useEffect } from "react";
-import Modal from "./Modal";
-import { useAuth } from "@/hooks/useAuth"; // Custom hook to get current user
+import { FaTimes, FaComments, FaSearch, FaSpinner, FaUser } from "react-icons/fa";
+import { useAuth } from "@/hooks/useAuth";
+import { createPortal } from 'react-dom';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface NewDirectChatModalProps {
   isOpen: boolean;
@@ -27,7 +30,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
   onClose,
   onChatCreated,
 }) => {
-  const { user } = useAuth(); // Current user
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [allUsers, setAllUsers] = useState<GetUsersResponse[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<GetUsersResponse[]>([]);
@@ -42,18 +45,20 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
       setLoadingUsers(true);
       setError(null);
       try {
-        const res = await fetch("/api/get-users"); // API to get all users
+        const res = await fetch("/api/get-users");
         if (!res.ok) throw new Error("Failed to fetch users");
         const data = await res.json();
-        // Filter out the current user
+        // Only users in the same company as me and not myself
         const users = data.users.filter(
-          (u: GetUsersResponse) => (u.userId._id as string) !== user._id
+          (u: GetUsersResponse) =>
+            (u.userId._id as string) !== user._id &&
+            u.companyId === user.companyId
         );
         setAllUsers(users);
         setFilteredUsers(users);
       } catch (err) {
         console.error("Error fetching users:", err);
-        setError("Nu s-au putut încărca utilizatorii.");
+        setError("Could not load users.");
       } finally {
         setLoadingUsers(false);
       }
@@ -62,7 +67,6 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
     fetchUsers();
   }, [isOpen, user]);
 
-  // Filter users based on search term
   useEffect(() => {
     if (searchTerm.trim() === "") {
       setFilteredUsers(allUsers);
@@ -86,14 +90,13 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
 
   const handleStartChat = async (targetUserId: string) => {
     if (!user) {
-      setError("Utilizatorul nu este autentificat.");
+      setError("User not authenticated.");
       return;
     }
     setCreatingChat(true);
     setError(null);
     try {
       const res = await fetch("/api/conversations", {
-        // API to create direct conversation
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,67 +113,173 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
       }
 
       const data = await res.json();
-      onChatCreated(data.conversationId); // Pass new conversation ID back to parent
-      onClose(); // Close modal
+      onChatCreated(data.conversationId);
+      
+      // Reset and close
+      setSearchTerm("");
+      setError(null);
+      onClose();
     } catch (err) {
       console.error("Error creating direct chat:", err);
       const errorMessage =
         err instanceof Error
           ? err.message
-          : "Eroare la crearea conversației directe.";
+          : "Error creating direct chat.";
       setError(errorMessage);
     } finally {
       setCreatingChat(false);
     }
   };
 
+  const handleClose = () => {
+    setSearchTerm("");
+    setError(null);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Nouă Conversație Directă">
-      <div className="p-4">
-        <input
-          type="text"
-          placeholder="Căută utilizatori după nume sau email..."
-          className="w-full p-2 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-        {loadingUsers ? (
-          <p className="text-gray-500 text-center">
-            Se încarcă utilizatorii...
-          </p>
-        ) : filteredUsers.length === 0 && searchTerm === "" ? (
-          <p className="text-gray-500 text-center">
-            Nu sunt alți utilizatori disponibili.
-          </p>
-        ) : filteredUsers.length === 0 && searchTerm !== "" ? (
-          <p className="text-gray-500 text-center">Niciun utilizator găsit.</p>
-        ) : (
-          <div className="max-h-60 overflow-y-auto custom-scrollbar">
-            {filteredUsers.map((u) => (
-              <div
-                key={u._id as string}
-                className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-md cursor-pointer transition-colors duration-150"
-              >
-                <div>
-                  <p className="font-semibold">
-                    {u.userId.firstName} {u.userId.lastName}
-                  </p>
-                  <p className="text-sm text-gray-600">{u.userId.email}</p>
+    <>
+      {typeof window !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-0 max-w-xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
+            {/* Close Button */}
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
+              onClick={handleClose}
+              aria-label="Close modal"
+            >
+              <FaTimes />
+            </button>
+
+            {/* Header */}
+            <div className="p-6 border-b border-gray-200 bg-blue-50">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600 rounded-xl">
+                  <FaComments className="text-xl text-white" />
                 </div>
-                <button
-                  onClick={() => handleStartChat(u.userId._id as string)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 disabled:opacity-50"
-                  disabled={creatingChat}
-                >
-                  {creatingChat ? "Se creează..." : "Start Chat"}
-                </button>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Start Direct Chat</h2>
+                  <p className="text-gray-600">Choose a team member to chat with</p>
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+              {/* Search Input */}
+              <div className="mb-6">
+                <label className="block text-gray-900 text-lg font-semibold mb-3">
+                  Find Team Member
+                </label>
+                <div className="relative">
+                  <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search users by name or email..."
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    disabled={creatingChat}
+                  />
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-red-700 font-medium">{error}</p>
+                </div>
+              )}
+
+              {/* Users List */}
+              {loadingUsers ? (
+                <div className="text-center py-12">
+                  <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">Loading team members...</p>
+                </div>
+              ) : filteredUsers.length === 0 && searchTerm === "" ? (
+                <div className="text-center py-12">
+                  <FaUser className="text-6xl text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No Team Members</h4>
+                  <p className="text-gray-500">No other users are available for chat</p>
+                </div>
+              ) : filteredUsers.length === 0 && searchTerm !== "" ? (
+                <div className="text-center py-12">
+                  <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No Results Found</h4>
+                  <p className="text-gray-500">Try searching with a different name or email</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FaUser className="text-blue-600" />
+                    Available Team Members ({filteredUsers.length})
+                  </h4>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {filteredUsers.map((u) => (
+                      <div
+                        key={u._id as string}
+                        className="flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-bold text-lg">
+                              {u.userId.firstName?.[0]}{u.userId.lastName?.[0]}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 text-lg">
+                              {u.userId.firstName} {u.userId.lastName}
+                            </p>
+                            <p className="text-gray-600">{u.userId.email}</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => handleStartChat(u.userId._id as string)}
+                          disabled={creatingChat}
+                          className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                            creatingChat
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-800'
+                          }`}
+                        >
+                          {creatingChat ? (
+                            <div className="flex items-center gap-2">
+                              <FaSpinner className="animate-spin" />
+                              Starting...
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <FaComments />
+                              Start Chat
+                            </div>
+                          )}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <Button
+                onClick={handleClose}
+                className="w-full py-3 px-6 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-semibold transition-all duration-200"
+                disabled={creatingChat}
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
-        )}
-      </div>
-    </Modal>
+        </div>,
+        document.body
+      )}
+    </>
   );
 };
 

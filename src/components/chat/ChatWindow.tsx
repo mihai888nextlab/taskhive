@@ -10,6 +10,9 @@ import FileCard from "@/components/storage/StorageFileCard";
 import { useTheme } from "@/components/ThemeContext";
 import { useRouter } from "next/router";
 import { FiSend, FiVideo, FiPhone, FiMoreVertical, FiUsers, FiMessageCircle } from "react-icons/fi";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "../ui/textarea";
 
 interface ChatMessage {
   _id?: string;
@@ -200,7 +203,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
   if (!selectedConversation) {
     return (
-      <div className={`flex flex-col items-center justify-center h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl shadow-lg border ${theme === "light" ? "border-gray-200" : "border-gray-700"}`}>
+      <div className={`flex flex-col items-center justify-center h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"}`}>
         <div className="text-center max-w-md px-6">
           <div className="mb-6">
             <div className={`w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
@@ -271,7 +274,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   };
 
   return (
-    <div className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl shadow-lg border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
+    <div className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
       {/* Chat Header */}
       <div className={`p-6 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
         <div className="flex items-center justify-between">
@@ -318,7 +321,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleVideoCall}
-              className={`p-3 rounded-xl transition-all duration-200 hover:shadow-lg transform hover:scale-105 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+              className={`p-3 rounded-xl transition-all duration-200 transform hover:scale-105 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
             >
               <FiVideo className="w-5 h-5" />
             </button>
@@ -394,7 +397,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                     )}
                     
                     <div
-                      className={`inline-block px-3 py-2 rounded-2xl shadow-sm transition-all duration-200 ${
+                      className={`inline-block px-3 py-2 rounded-2xl transition-all duration-200 ${
                         isSender
                           ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} text-white rounded-br-md`
                           : theme === "light"
@@ -464,7 +467,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
             
             {/* Files Dropdown */}
             {showFilesDropdown && (
-              <div className={`absolute bottom-16 left-0 border rounded-2xl shadow-2xl z-50 w-72 max-h-64 overflow-hidden ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-600"}`}>
+              <div className={`absolute bottom-16 left-0 border rounded-2xl z-50 w-72 max-h-64 overflow-hidden ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-600"}`}>
                 <div className={`p-4 border-b ${theme === "light" ? "border-gray-200 bg-gray-50" : "border-gray-600 bg-gray-700"}`}>
                   <h4 className={`font-semibold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
                     Your Files
@@ -505,7 +508,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
           {/* Message Input */}
           <div className="flex-1 relative">
-            <textarea
+            <Textarea
               value={newMessageContent}
               onChange={(e) => setNewMessageContent(e.target.value)}
               onKeyDown={(e) => {
@@ -524,15 +527,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
               disabled={!user || loadingMessages}
             />
           </div>
-
-          {/* Send Button */}
-          <button
+          <Button
             type="submit"
             disabled={!user || loadingMessages || !newMessageContent.trim()}
-            className={`p-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            className={`p-3 rounded-2xl font-semibold transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
           >
             <FiSend className="w-5 h-5" />
-          </button>
+          </Button>
         </form>
       </div>
     </div>

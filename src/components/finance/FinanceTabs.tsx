@@ -1,3 +1,6 @@
+import { useTheme } from '@/components/ThemeContext';
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+
 interface Props {
   activeTab: 'expenses' | 'incomes';
   setActiveTab: (tab: 'expenses' | 'incomes') => void;
@@ -5,35 +8,47 @@ interface Props {
 }
 
 export default function FinanceTabs({ activeTab, setActiveTab, loading }: Props) {
+  const { theme } = useTheme();
+
   return (
-    <div className="flex justify-center mb-6" role="tablist" aria-label="Finance Tabs">
+    <div
+      className={`flex rounded-xl p-1 gap-0 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} w-full`}
+    >
       <button
-        className={`px-6 py-2 rounded-t-lg font-semibold transition-all duration-200 ${activeTab === 'expenses'
-          ? 'bg-red-600 text-white shadow'
-          : 'bg-gray-200 text-gray-700 hover:bg-red-100'
-          }`}
+        type="button"
         onClick={() => setActiveTab('expenses')}
         disabled={loading}
-        aria-selected={activeTab === 'expenses'}
-        aria-controls="expenses-panel"
-        role="tab"
-        tabIndex={0}
+        className={`flex items-center gap-2 px-8 py-3 rounded-l-lg font-semibold transition-all duration-200 w-1/2 justify-center
+          ${activeTab === 'expenses'
+            ? theme === 'dark'
+              ? 'bg-red-600 text-white'
+              : 'bg-red-500 text-white'
+            : theme === 'dark'
+              ? 'text-gray-400 hover:text-white hover:bg-red-700'
+              : 'text-gray-600 hover:text-white hover:bg-red-500'
+          }`}
+        style={{ minWidth: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
       >
-        Expenses
+        <FaArrowDown className="w-4 h-4" />
+        <span>Expenses</span>
       </button>
       <button
-        className={`px-6 py-2 rounded-t-lg font-semibold transition-all duration-200 ml-2 ${activeTab === 'incomes'
-          ? 'bg-green-600 text-white shadow'
-          : 'bg-gray-200 text-gray-700 hover:bg-green-100'
-          }`}
+        type="button"
         onClick={() => setActiveTab('incomes')}
         disabled={loading}
-        aria-selected={activeTab === 'incomes'}
-        aria-controls="incomes-panel"
-        role="tab"
-        tabIndex={0}
+        className={`flex items-center gap-2 px-8 py-3 rounded-r-lg font-semibold transition-all duration-200 w-1/2 justify-center
+          ${activeTab === 'incomes'
+            ? theme === 'dark'
+              ? 'bg-green-600 text-white'
+              : 'bg-green-500 text-white'
+            : theme === 'dark'
+              ? 'text-gray-400 hover:text-white hover:bg-green-700'
+              : 'text-gray-600 hover:text-white hover:bg-green-500'
+          }`}
+        style={{ minWidth: 0, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
       >
-        Incomes
+        <FaArrowUp className="w-4 h-4" />
+        <span>Income</span>
       </button>
     </div>
   );

@@ -2,6 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import { Button } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
 
 export default function Header() {
   const pages = [
@@ -20,7 +27,9 @@ export default function Header() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "backdrop-blur-md bg-background/80 shadow-lg" : "bg-transparent"
+        isScrolled
+          ? "backdrop-blur-md bg-[#18181b]/90 shadow-lg"
+          : "bg-[#18181b]"
       }`}
     >
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-8 py-4 relative">
@@ -29,31 +38,39 @@ export default function Header() {
           <Image src="/logo.png" alt="TaskHive Logo" width={120} height={40} className="object-contain md:hidden" priority />
         </Link>
         {/* Desktop Nav */}
-        <ul className="hidden md:flex gap-8 text-base font-medium absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          {pages.map((page) => (
-            <li key={page.name}>
-              <Link
-                href={page.href}
-                className="text-white/90 hover:text-primary transition-colors px-2 py-1 rounded-md"
-              >
-                {page.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <NavigationMenu className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <NavigationMenuList className="flex gap-8 text-base font-medium">
+            {pages.map((page) => (
+              <NavigationMenuItem key={page.name}>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href={page.href}
+                    className="text-white/90 hover:text-primary transition-colors px-2 py-1 rounded-md hover:bg-transparent"
+                  >
+                    {page.name}
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
         {/* Desktop Buttons */}
         <div className="hidden sm:flex gap-2">
-          <Link
-            href="/login"
-            className="px-5 py-2 border border-white/30 rounded-full text-white/90 font-medium hover:bg-white/10 transition-colors"
-          >
-            Log in
+          <Link href="/login">
+            <Button
+              variant="outline"
+              className="border-white/30 text-white/90 font-medium hover:bg-white/10 rounded-full px-5 py-2"
+              style={{ borderColor: "rgba(255,255,255,0.3)" }}
+            >
+              Log in
+            </Button>
           </Link>
-          <Link
-            href="/register"
-            className="px-5 py-2 bg-primary text-white rounded-full font-semibold shadow hover:bg-primary-dark transition-colors"
-          >
-            Get started
+          <Link href="/register">
+            <Button
+              className="bg-primary text-white rounded-full font-semibold shadow hover:bg-primary-dark px-5 py-2"
+            >
+              Get started
+            </Button>
           </Link>
         </div>
         {/* Mobile Hamburger */}
@@ -66,7 +83,7 @@ export default function Header() {
         </button>
         {/* Mobile Menu Overlay */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 bg-background/95 z-40 flex flex-col items-center justify-center gap-8 animate-fade-in">
+          <div className="fixed inset-0 bg-[#18181b]/95 z-40 flex flex-col items-center justify-center gap-8 animate-fade-in">
             <ul className="flex flex-col gap-6 text-2xl font-semibold">
               {pages.map((page) => (
                 <li key={page.name}>
@@ -81,19 +98,21 @@ export default function Header() {
               ))}
             </ul>
             <div className="flex flex-col gap-4 mt-6 w-full items-center">
-              <Link
-                href="/login"
-                className="w-40 text-center px-5 py-2 border border-white/30 rounded-full text-white font-medium hover:bg-white/10 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Log in
+              <Link href="/login" className="w-40" onClick={() => setMobileMenuOpen(false)}>
+                <Button
+                  variant="outline"
+                  className="w-full text-center border-white/30 text-white font-medium hover:bg-white/10 rounded-full"
+                  style={{ borderColor: "rgba(255,255,255,0.3)" }}
+                >
+                  Log in
+                </Button>
               </Link>
-              <Link
-                href="/register"
-                className="w-40 text-center px-5 py-2 bg-primary text-white rounded-full font-semibold shadow hover:bg-primary-dark transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Get started
+              <Link href="/register" className="w-40" onClick={() => setMobileMenuOpen(false)}>
+                <Button
+                  className="w-full text-center bg-primary text-white rounded-full font-semibold shadow hover:bg-primary-dark"
+                >
+                  Get started
+                </Button>
               </Link>
             </div>
           </div>
