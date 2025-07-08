@@ -10,7 +10,7 @@ import AddUserModal from "@/components/modals/AddUserModal";
 import AddRoleModal from "@/components/modals/AddRoleModal";
 import OrgChartModal from "@/components/modals/OrgChartModal";
 import UserProfileModal from "@/components/modals/UserProfileModal";
-import { createPortal } from 'react-dom';
+import { createPortal } from "react-dom";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import UserCard from "@/components/users/UserCard";
@@ -47,12 +47,12 @@ interface User {
 const UsersPage: NextPageWithLayout = () => {
   const { theme } = useTheme();
   const { user } = useAuth();
-  
+
   // Data state
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Modal state
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
   const [addRoleModalOpen, setAddRoleModalOpen] = useState(false);
@@ -107,16 +107,13 @@ const UsersPage: NextPageWithLayout = () => {
 
   const addUser = async (
     email: string,
-    firstName: string,
-    lastName: string,
-    password: string,
     role: string
   ): Promise<string | undefined> => {
     try {
-      const response = await fetch("/api/add-user", {
+      const response = await fetch("/api/invitations/send/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, firstName, lastName, password, role }),
+        body: JSON.stringify({ email, role }),
       });
 
       if (!response.ok) {
@@ -180,7 +177,7 @@ const UsersPage: NextPageWithLayout = () => {
         return (a.role || "").localeCompare(b.role || "");
       }
       return 0;
-    })
+    });
 
   // Only roles from users in your company
   const companyRoles = Array.from(
@@ -199,8 +196,8 @@ const UsersPage: NextPageWithLayout = () => {
   const handleTestButtonClick = () => {};
 
   //TERMINAT TEST
-        
-        //effects
+
+  //effects
   useEffect(() => {
     fetchUsers();
     fetchRoles();
@@ -215,15 +212,25 @@ const UsersPage: NextPageWithLayout = () => {
         setProfileModalOpen(true);
       }
     }
-    window.addEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+    window.addEventListener(
+      "open-user-profile",
+      handleOpenUserProfile as EventListener
+    );
     return () => {
-      window.removeEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+      window.removeEventListener(
+        "open-user-profile",
+        handleOpenUserProfile as EventListener
+      );
     };
   }, [users]);
 
   // Prevent background scroll when any modal is open
   useLayoutEffect(() => {
-    const modalOpen = addUserModalOpen || addRoleModalOpen || orgChartModalOpen || profileModalOpen;
+    const modalOpen =
+      addUserModalOpen ||
+      addRoleModalOpen ||
+      orgChartModalOpen ||
+      profileModalOpen;
     if (modalOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -239,22 +246,34 @@ const UsersPage: NextPageWithLayout = () => {
   }
 
   return (
-    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+    <div
+      className={`relative min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}
+    >
       <div className="px-2 lg:px-4 pt-4 mt-4">
         <div className="max-w-[100vw] mx-auto">
-          <Card className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
+          <Card
+            className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}
+          >
             {/* Users Header with Action Buttons */}
-            <CardHeader className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"} border-b`}>
+            <CardHeader
+              className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"} border-b`}
+            >
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
+                  <div
+                    className={`p-3 rounded-xl ${theme === "dark" ? "bg-blue-600" : "bg-blue-500"}`}
+                  >
                     <FaUsers className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                    <h2
+                      className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                    >
                       Team Directory
                     </h2>
-                    <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                    <p
+                      className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}
+                    >
                       View and manage all team members in your organization
                     </p>
                   </div>
@@ -265,7 +284,9 @@ const UsersPage: NextPageWithLayout = () => {
                     <Button
                       asChild
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
-                        theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        theme === "dark"
+                          ? "bg-blue-600 hover:bg-blue-700 text-white"
+                          : "bg-blue-500 hover:bg-blue-600 text-white"
                       }`}
                     >
                       <span onClick={() => setAddUserModalOpen(true)}>
@@ -273,10 +294,12 @@ const UsersPage: NextPageWithLayout = () => {
                         <span>Add User</span>
                       </span>
                     </Button>
-                   <Button
+                    <Button
                       asChild
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
-                        theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        theme === "dark"
+                          ? "bg-blue-600 hover:bg-blue-700 text-white"
+                          : "bg-blue-500 hover:bg-blue-600 text-white"
                       }`}
                     >
                       <span onClick={() => setAddRoleModalOpen(true)}>
@@ -287,7 +310,9 @@ const UsersPage: NextPageWithLayout = () => {
                     <Button
                       asChild
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
-                        theme === 'dark' ? 'bg-slate-600 hover:bg-slate-700 text-white' : 'bg-slate-500 hover:bg-slate-600 text-white'
+                        theme === "dark"
+                          ? "bg-slate-600 hover:bg-slate-700 text-white"
+                          : "bg-slate-500 hover:bg-slate-600 text-white"
                       }`}
                     >
                       <span onClick={() => setOrgChartModalOpen(true)}>
@@ -300,7 +325,9 @@ const UsersPage: NextPageWithLayout = () => {
               </div>
             </CardHeader>
             {/* Controls */}
-            <CardContent className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"} border-b`}>
+            <CardContent
+              className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"} border-b`}
+            >
               <UserList
                 users={users}
                 loading={loading}
@@ -334,32 +361,40 @@ const UsersPage: NextPageWithLayout = () => {
         </div>
       </div>
       {/* Modals */}
-      {addUserModalOpen && typeof window !== 'undefined' && createPortal(
-        <AddUserModal
-          onClose={() => setAddUserModalOpen(false)}
-          onUserAdded={addUser}
-        />,
-        document.body
-      )}
-      {addRoleModalOpen && typeof window !== 'undefined' && createPortal(
-        <AddRoleModal
-          onClose={() => setAddRoleModalOpen(false)}
-          onRoleAdded={addRole}
-        />,
-        document.body
-      )}
-      {orgChartModalOpen && typeof window !== 'undefined' && createPortal(
-        <OrgChartModal onClose={() => setOrgChartModalOpen(false)} />,
-        document.body
-      )}
-      {profileModalOpen && typeof window !== 'undefined' && createPortal(
-        <UserProfileModal
-          open={profileModalOpen}
-          onClose={() => setProfileModalOpen(false)}
-          user={selectedUser}
-        />,
-        document.body
-      )}
+      {addUserModalOpen &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <AddUserModal
+            onClose={() => setAddUserModalOpen(false)}
+            onUserAdded={addUser}
+          />,
+          document.body
+        )}
+      {addRoleModalOpen &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <AddRoleModal
+            onClose={() => setAddRoleModalOpen(false)}
+            onRoleAdded={addRole}
+          />,
+          document.body
+        )}
+      {orgChartModalOpen &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <OrgChartModal onClose={() => setOrgChartModalOpen(false)} />,
+          document.body
+        )}
+      {profileModalOpen &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <UserProfileModal
+            open={profileModalOpen}
+            onClose={() => setProfileModalOpen(false)}
+            user={selectedUser}
+          />,
+          document.body
+        )}
       <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 mb-6 sm:mb-8 justify-center items-center z-10 relative w-full px-2 sm:px-0">
         {user && user.role === "admin" && (
           <>
