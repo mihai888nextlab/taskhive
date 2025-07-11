@@ -2,15 +2,15 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import type { NextPage } from "next";
 import { ReactElement, ReactNode } from "react";
-import { useRouter } from "next/router";
 import Head from "next/head";
 import { ThemeProvider } from "@/components/ThemeContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TimeTrackingProvider } from "@/components/time-tracking/TimeTrackingContext";
 import { AIWindowProvider } from "@/contexts/AIWindowContext";
 import { IntlProvider } from "next-intl";
-import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
+import DashboardLayout from "@/components/sidebar/DashboardLayout";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Import all messages
 import enMessages from "../../messages/en.json";
@@ -23,7 +23,6 @@ import zhMessages from "../../messages/zh.json";
 import hiMessages from "../../messages/hi.json";
 import arMessages from "../../messages/ar.json";
 import grMessages from "../../messages/gr.json";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Type for pages with custom layout
 export type NextPageWithLayout = NextPage & {
@@ -33,15 +32,15 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-export default function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
+export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   return (
     <LanguageProvider>
-      <LanguageConsumerApp Component={Component} pageProps={pageProps} router={router} />
+      <LanguageConsumerApp Component={Component} pageProps={pageProps} />
     </LanguageProvider>
   );
 }
 
-function LanguageConsumerApp({ Component, pageProps, router }: AppPropsWithLayout) {
+function LanguageConsumerApp({ Component, pageProps }: AppPropsWithLayout) {
   const { lang } = useLanguage();
 
   const messagesMap: Record<string, any> = {
@@ -61,10 +60,19 @@ function LanguageConsumerApp({ Component, pageProps, router }: AppPropsWithLayou
   // Pass locale to pageProps for layouts/pages that need it
   const mergedPageProps = { ...pageProps, locale: lang };
 
-  // Support for per-page layouts
+  // Detect if the route is under /app (authenticated area)
+  const isAppRoute =
+    typeof window !== "undefined"
+      ? window.location.pathname.startsWith("/app")
+      : (pageProps?.router?.pathname || "").startsWith("/app");
+
+  // Use getLayout if defined, else use DashboardLayout for /app/*, else render page directly
   const getLayout =
     Component.getLayout ||
-    ((page: ReactElement) => <DashboardLayout locale={lang}>{page}</DashboardLayout>);
+    ((page: ReactElement) =>
+      isAppRoute
+        ? <DashboardLayout locale={lang}>{page}</DashboardLayout>
+        : page);
 
   const content = getLayout(<Component {...mergedPageProps} />);
 
