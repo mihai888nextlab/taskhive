@@ -32,15 +32,15 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
+export default function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
   return (
     <LanguageProvider>
-      <LanguageConsumerApp Component={Component} pageProps={pageProps} />
+      <LanguageConsumerApp Component={Component} pageProps={pageProps} router={router} />
     </LanguageProvider>
   );
 }
 
-function LanguageConsumerApp({ Component, pageProps }: AppPropsWithLayout) {
+function LanguageConsumerApp({ Component, pageProps, router }: AppPropsWithLayout) {
   const { lang } = useLanguage();
 
   const messagesMap: Record<string, any> = {

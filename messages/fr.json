@@ -472,7 +472,9 @@
     "showExpense": "Afficher l'enregistrement de dépense",
     "showIncome": "Afficher l'enregistrement de revenu",
     "showProductivity": "Afficher les conseils de productivité",
-    "showTemplates": "Afficher les modèles d'entreprise"
+    "showTemplates": "Afficher les modèles d'entreprise",
+    "thinking": "Réflexion...",
+    "waitingResponse": "En attente de la réponse de l'IA..."
   },
   "HeaderNavBar": {
     "profile": "Profil",
@@ -537,6 +539,17 @@
     "netProfitLoss": "Profit / Perte net(te)",
     "loadingDeadlines": "Chargement des échéances...",
     "noUpcomingDeadlines": "Aucune échéance à venir",
-    "noScheduledTasksOrEvents": "Vous n'avez aucune tâche ou événement planifié"
+    "noScheduledTasksOrEvents": "Vous n'avez aucune tâche ou événement planifié",
+    "addCompany": "Ajouter une entreprise",
+    "registerNewCompany": "Enregistrer une nouvelle entreprise",
+    "companyName": "Nom de l'entreprise",
+    "companyNamePlaceholder": "ex. Acme Inc.",
+    "companyNameRequired": "Le nom de l'entreprise est requis.",
+    "registrationNumber": "Numéro d'enregistrement",
+    "registrationNumberPlaceholder": "Optionnel",
+    "failedToAddCompany": "Échec de l'ajout de l'entreprise.",
+    "unexpectedError": "Une erreur inattendue s'est produite.",
+    "adding": "Ajout...",
+    "cancel": "Annuler"
   }
 }

@@ -266,7 +266,7 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
               >
                 <div className="flex-1 pr-4">
                   <span
-                    className={`block leading-tight font-bold flex items-center gap-2 ${titleClass}`}
+                    className={`leading-tight font-bold flex items-center gap-2 ${titleClass}`}
                     style={{ fontSize: (isOverdue || showExclamation) ? '1.15rem' : undefined }}
                   >
                     {exclamation}

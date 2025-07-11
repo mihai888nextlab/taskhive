@@ -471,7 +471,9 @@
     "showExpense": "显示支出记录",
     "showIncome": "显示收入记录",
     "showProductivity": "显示生产力建议",
-    "showTemplates": "显示业务模板"
+    "showTemplates": "显示业务模板",
+    "thinking": "思考中...",
+    "waitingResponse": "正在等待AI回复..."
   },
   "HeaderNavBar": {
     "profile": "个人资料",
@@ -536,6 +538,17 @@
     "netProfitLoss": "净利润 / 损失",
     "loadingDeadlines": "正在加载截止日期...",
     "noUpcomingDeadlines": "暂无即将到来的截止日期",
-    "noScheduledTasksOrEvents": "您没有已安排的任务或事件"
+    "noScheduledTasksOrEvents": "您没有已安排的任务或事件",
+    "addCompany": "添加公司",
+    "registerNewCompany": "注册新公司",
+    "companyName": "公司名称",
+    "companyNamePlaceholder": "例如 Acme Inc.",
+    "companyNameRequired": "公司名称为必填项。",
+    "registrationNumber": "注册号",
+    "registrationNumberPlaceholder": "可选",
+    "failedToAddCompany": "添加公司失败。",
+    "unexpectedError": "发生了意外错误。",
+    "adding": "正在添加...",
+    "cancel": "取消"
   }
 }

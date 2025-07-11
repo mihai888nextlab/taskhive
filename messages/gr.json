@@ -328,7 +328,9 @@
     "showExpense": "Εμφάνιση καταγραφής εξόδου",
     "showIncome": "Εμφάνιση καταγραφής εσόδου",
     "showProductivity": "Εμφάνιση συμβουλών παραγωγικότητας",
-    "showTemplates": "Εμφάνιση επιχειρηματικών προτύπων"
+    "showTemplates": "Εμφάνιση επιχειρηματικών προτύπων",
+    "thinking": "Σκέφτεται...",
+    "waitingResponse": "Αναμονή για απάντηση από την AI..."
   },
   "HeaderNavBar": {
     "appName": "Η εφαρμογή μου",
@@ -397,7 +399,18 @@
     "netProfitLoss": "Καθαρό κέρδος / ζημία",
     "loadingDeadlines": "Φόρτωση προθεσμιών...",
     "noUpcomingDeadlines": "Δεν υπάρχουν επερχόμενες προθεσμίες",
-    "noScheduledTasksOrEvents": "Δεν έχετε προγραμματισμένες εργασίες ή γεγονότα"
+    "noScheduledTasksOrEvents": "Δεν έχετε προγραμματισμένες εργασίες ή γεγονότα",
+    "addCompany": "Προσθήκη εταιρείας",
+    "registerNewCompany": "Εγγραφή νέας εταιρείας",
+    "companyName": "Όνομα εταιρείας",
+    "companyNamePlaceholder": "π.χ. Acme Inc.",
+    "companyNameRequired": "Το όνομα της εταιρείας είναι υποχρεωτικό.",
+    "registrationNumber": "Αριθμός εγγραφής",
+    "registrationNumberPlaceholder": "Προαιρετικό",
+    "failedToAddCompany": "Η προσθήκη της εταιρείας απέτυχε.",
+    "unexpectedError": "Παρουσιάστηκε απρόσμενο σφάλμα.",
+    "adding": "Προσθήκη...",
+    "cancel": "Ακύρωση"
   },
   "InsightsPage": {
     "tasks": "Εργασίες",

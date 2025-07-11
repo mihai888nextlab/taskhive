@@ -471,7 +471,9 @@
     "showExpense": "Show expense recording",
     "showIncome": "Show income recording",
     "showProductivity": "Show productivity tips",
-    "showTemplates": "Show business templates"
+    "showTemplates": "Show business templates",
+    "thinking": "Thinking...",
+    "waitingResponse": "Waiting for AI response..."
   },
   "HeaderNavBar": {
     "profile": "Profile",
@@ -536,6 +538,17 @@
     "netProfitLoss": "Net Profit / Loss",
     "loadingDeadlines": "Loading deadlines...",
     "noUpcomingDeadlines": "No upcoming deadlines",
-    "noScheduledTasksOrEvents": "You have no scheduled tasks or events"
+    "noScheduledTasksOrEvents": "You have no scheduled tasks or events",
+    "addCompany": "Add Company",
+    "registerNewCompany": "Register a new company",
+    "companyName": "Company Name",
+    "companyNamePlaceholder": "e.g. Acme Inc.",
+    "companyNameRequired": "Company name is required.",
+    "registrationNumber": "Registration Number",
+    "registrationNumberPlaceholder": "Optional",
+    "failedToAddCompany": "Failed to add company.",
+    "unexpectedError": "An unexpected error occurred.",
+    "adding": "Adding...",
+    "cancel": "Cancel"
   }
 }

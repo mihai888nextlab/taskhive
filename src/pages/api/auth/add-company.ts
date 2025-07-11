@@ -31,8 +31,8 @@ export default async function handler(
   try {
     // 1. Check if the user already exists
     const existingUser = await userModel.findById(userId);
-    if (existingUser) {
-      return res.status(400).json({ message: "User dosen't exist" });
+    if (!existingUser) {
+      return res.status(400).json({ message: "User doesn't exist" });
     }
 
     const newCompany = new companyModel({

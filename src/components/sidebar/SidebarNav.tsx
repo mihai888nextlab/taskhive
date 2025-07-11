@@ -6,6 +6,7 @@ import { User } from "@/types"; // Adjust the import path as necessary
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useTranslations } from "next-intl";
+import AddCompanyModal from "@/components/modals/AddCompanyModal";
 
 type MenuItem = {
   name: string;
@@ -43,6 +44,7 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
       : { id: "", name: "No Company" }
   );
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [addCompanyOpen, setAddCompanyOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleCompanyChange = async (company: { id: string; name: string }) => {
@@ -188,7 +190,7 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
           </svg>
         </div>
         {dropdownOpen && (
-          <div className="absolute left-0 mt-2 w-full bg-white rounded-lg shadow-lg z-50 py-2">
+          <div className="absolute left-0 bottom-full mb-2 w-full bg-white rounded-lg shadow-lg z-50 py-2">
             {user.companies
               ?.sort((a, b) => {
                 return a.id == selectedCompany.id ? -1 : 1;
@@ -211,47 +213,28 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
                   {company.name}
                 </button>
               ))}
-
             <button
               className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition font-bold"
-              onClick={() => {}}
+              onClick={() => {
+                setDropdownOpen(false);
+                setAddCompanyOpen(true);
+              }}
             >
               ADD COMPANY
             </button>
           </div>
         )}
       </div>
-
-      <Link
-        href="/app/settings"
-        className="flex items-center space-x-3 px-3 py-2 mt-4 mb-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
-      >
-        <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-lg overflow-hidden">
-          {user.profileImage &&
-          typeof user.profileImage === "object" &&
-          user.profileImage.data ? (
-            <div className="relative w-10 h-10 object-cover rounded-full">
-              <Image src={user.profileImage.data} alt="Profile" fill={true} />
-            </div>
-          ) : user.firstName ? (
-            user.firstName[0].toUpperCase()
-          ) : (
-            "U"
-          )}
-        </div>
-        <div>
-          <p className="font-semibold text-white">
-            {user.firstName} {user.lastName}
-          </p>
-          <p className="text-xs text-gray-400">{user.email}</p>
-        </div>
-      </Link>
-      <button
-        onClick={auth.logout}
-        className="mt-5 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center"
-      >
-        <span className="text-center">Logout</span>
-      </button>
+      {/* AddCompanyModal */}
+      <AddCompanyModal
+        open={addCompanyOpen}
+        onClose={() => setAddCompanyOpen(false)}
+        userId={user._id}
+        onCompanyAdded={() => {
+          setAddCompanyOpen(false);
+          realRouter.reload();
+        }}
+      />
     </aside>
   );
 };

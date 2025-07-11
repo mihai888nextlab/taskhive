@@ -76,7 +76,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
 
   return (
     <header
-      className="absolute top-0 z-[100] h-14 bg-gray-100 flex items-center px-4"
+      className="absolute top-0 z-[20] h-14 bg-gray-100 flex items-center px-4"
       style={{
         left: SIDEBAR_WIDTH,
         width: `calc(100vw - ${SIDEBAR_WIDTH}px - ${isAIWindowOpen ? AI_WINDOW_WIDTH : 0}px)`,
@@ -85,6 +85,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
         transition: "width 0.3s, right 0.3s",
       }}
     >
+      
       {/* Center: Search Bar */}
       <div className="flex-1 flex justify-end">
         <div className="w-full max-w-xs">

@@ -471,7 +471,9 @@
     "showExpense": "Arată înregistrarea cheltuielii",
     "showIncome": "Arată înregistrarea venitului",
     "showProductivity": "Arată sfaturi de productivitate",
-    "showTemplates": "Arată șabloane de afaceri"
+    "showTemplates": "Arată șabloane de afaceri",
+    "thinking": "Se gândește...",
+    "waitingResponse": "Așteaptă răspunsul AI..."
   },
   "HeaderNavBar": {
     "profile": "Profil",
@@ -536,6 +538,17 @@
     "netProfitLoss": "Profit / Pierdere netă",
     "loadingDeadlines": "Se încarcă termenele limită...",
     "noUpcomingDeadlines": "Nu există termene limită viitoare",
-    "noScheduledTasksOrEvents": "Nu ai sarcini sau evenimente programate"
+    "noScheduledTasksOrEvents": "Nu ai sarcini sau evenimente programate",
+    "addCompany": "Adaugă companie",
+    "registerNewCompany": "Înregistrează o companie nouă",
+    "companyName": "Nume companie",
+    "companyNamePlaceholder": "ex. Acme Inc.",
+    "companyNameRequired": "Numele companiei este obligatoriu.",
+    "registrationNumber": "Număr de înregistrare",
+    "registrationNumberPlaceholder": "Opțional",
+    "failedToAddCompany": "Adăugarea companiei a eșuat.",
+    "unexpectedError": "A apărut o eroare neașteptată.",
+    "adding": "Se adaugă...",
+    "cancel": "Anulează"
   }
 }
