@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import "react-datepicker/dist/react-datepicker.css";
+import { useTranslations } from "next-intl";
 
 interface ExpenseFormProps {
   title: string;
@@ -42,6 +43,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   onSubmit,
 }) => {
   const { theme } = useTheme();
+  const t = useTranslations("FinancePage");
   const [generatingDescription, setGeneratingDescription] = useState(false);
 
   const handleGenerateDescription = async () => {
@@ -77,13 +79,13 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
       {/* Title Input */}
       <div>
         <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-          Expense Title
+          {t("expenseTitle")}
         </label>
         <Input
           type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          placeholder="What did you spend on?"
+          placeholder={t("expenseTitle")}
           className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
             theme === "dark"
               ? "bg-gray-700 text-white border-gray-600 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -97,7 +99,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
       {/* Amount Input */}
       <div>
         <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-          Amount
+          {t("amount")}
         </label>
         <div className="relative">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -123,7 +125,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
       {/* Description with AI Generate */}
       <div>
         <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-          Description
+          {t("description")}
         </label>
         <div className="flex gap-2">
           <Textarea
@@ -150,7 +152,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-blue-500 text-white hover:bg-blue-600'
             }`}
-            title="Generate description with AI"
+            title={t("generateDescription")}
           >
             {generatingDescription ? (
               <FaSpinner className="animate-spin w-4 h-4" />
@@ -162,7 +164,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
         {generatingDescription && (
           <div className={`flex items-center gap-2 mt-2 text-sm ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
             <FaSpinner className="animate-spin w-3 h-3" />
-            <span>Generating description...</span>
+            <span>{t("generatingDescription")}</span>
           </div>
         )}
       </div>
@@ -173,7 +175,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
         <div>
           <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
             <FaCalendarAlt className="inline w-3 h-3 mr-1" />
-            Date
+            {t("date")}
           </label>
           <DatePicker
             selected={date}
@@ -193,7 +195,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
         <div>
           <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
             <FaTags className="inline w-3 h-3 mr-1" />
-            Category
+            {t("category")}
           </label>
           <Select
             value={category || categories[0]}
@@ -208,7 +210,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
               }`}
               style={{ height: "36px" }}
             >
-              <SelectValue placeholder="Select category" />
+              <SelectValue placeholder={t("selectCategory")} />
             </SelectTrigger>
             <SelectContent
               className={`rounded-xl border mt-1 ${
@@ -246,10 +248,10 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           {loading ? (
             <div className="flex items-center justify-center gap-2">
               <FaSpinner className="animate-spin w-4 h-4" />
-              <span>Saving...</span>
+              <span>{t("saving")}</span>
             </div>
           ) : (
-            "Add Expense"
+            t("addExpense")
           )}
         </Button>
       </div>

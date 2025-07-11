@@ -8,6 +8,7 @@ import AnnouncementList from "@/components/announcements/AnnouncementList";
 import AnnouncementDetailsModal from "@/components/announcements/AnnouncementDetailsModal";
 import { createPortal } from 'react-dom';
 import { saveAs } from "file-saver";
+import { useTranslations } from "next-intl";
 
 interface Announcement {
   _id: string;
@@ -22,6 +23,7 @@ interface Announcement {
 
 const AnnouncementsPage: NextPageWithLayout = () => {
   const { theme } = useTheme();
+  const t = useTranslations("AnnouncementsPage");
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -215,7 +217,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
                 }`}
               >
                 <FaBullhorn className="w-4 h-4" />
-                <span>All Announcements</span>
+                <span>{t("allAnnouncements")}</span>
               </button>
               <button
                 onClick={() => setActiveTab('pinned')}
@@ -230,7 +232,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
                 }`}
               >
                 <FaThumbtack className="w-4 h-4" />
-                <span>Pinned ({pinnedAnnouncements.length})</span>
+                <span>{t("pinnedAnnouncements")} ({pinnedAnnouncements.length})</span>
               </button>
             </div>
 
@@ -244,7 +246,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
                   }`}
                 >
                   <FaPlus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
-                  <span>Create Announcement</span>
+                  <span>{t("createAnnouncement")}</span>
                 </button>
               )}
               <button
@@ -254,7 +256,7 @@ const AnnouncementsPage: NextPageWithLayout = () => {
                 }`}
               >
                 <FaDownload className="w-4 h-4" />
-                <span>Export</span>
+                <span>{t("export")}</span>
               </button>
             </div>
           </div>
@@ -285,12 +287,12 @@ const AnnouncementsPage: NextPageWithLayout = () => {
                 </div>
                 <div>
                   <h2 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                    {activeTab === 'all' ? 'All Announcements' : 'Pinned Announcements'}
+                    {activeTab === 'all' ? t("allAnnouncements") : t("pinnedAnnouncements")}
                   </h2>
                   <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                     {activeTab === 'all' 
-                      ? 'Stay updated with the latest company announcements and news'
-                      : 'Important announcements that are pinned for your attention'
+                      ? t("allAnnouncementsDesc")
+                      : t("pinnedAnnouncementsDesc")
                     }
                   </p>
                 </div>

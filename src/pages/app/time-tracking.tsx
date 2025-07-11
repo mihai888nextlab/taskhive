@@ -9,6 +9,7 @@ import { FaClock, FaChartLine } from 'react-icons/fa';
 import { saveAs } from "file-saver";
 import { useTimeTracking } from '@/components/time-tracking/TimeTrackingContext';
 import { useTheme } from '@/components/ThemeContext';
+import { useTranslations } from "next-intl";
 
 const TimeTrackingPage: NextPageWithLayout = () => {
   const { theme } = useTheme();
@@ -22,6 +23,7 @@ const TimeTrackingPage: NextPageWithLayout = () => {
     WORK_DURATION, BREAK_DURATION, 
     startTimer, stopTimer, resetTimer, resetAll, saveSession, user 
   } = useTimeTracking();
+  const t = useTranslations("TimeTrackingPage");
   
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,10 +118,10 @@ const TimeTrackingPage: NextPageWithLayout = () => {
                     </div>
                     <div>
                       <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                        Time Tracker
+                        {t("timeTracker")}
                       </h2>
                       <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                        Track your work sessions and productivity
+                        {t("trackWorkSessions")}
                       </p>
                     </div>
                   </div>
@@ -184,10 +186,10 @@ const TimeTrackingPage: NextPageWithLayout = () => {
                     </div>
                     <div>
                       <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                        Time Sessions
+                        {t("timeSessions")}
                       </h2>
                       <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                        View and manage your recorded time sessions
+                        {t("viewManageSessions")}
                       </p>
                     </div>
                   </div>

@@ -6,6 +6,7 @@ import styles from "@/styles/markdown.module.css";
 import { useTheme } from '@/components/ThemeContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
 interface Announcement {
   _id: string;
@@ -36,6 +37,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
   isAdmin,
 }) => {
   const { theme } = useTheme();
+  const t = useTranslations("AnnouncementsPage");
   
   // Local state to track pinned status for immediate UI updates
   const [localPinned, setLocalPinned] = useState(announcement?.pinned || false);
@@ -157,14 +159,14 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
               {/* Category and Meta Info */}
               <div className="flex flex-wrap items-center gap-3">
                 <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getCategoryColor(announcement.category)}`}>
-                  {announcement.category}
+                  {t(`category${announcement.category}`)}
                 </span>
                 <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   {new Date(announcement.createdAt).toLocaleDateString()} • {new Date(announcement.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
                 {announcement.expiresAt && (
                   <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Expires: {new Date(announcement.expiresAt).toLocaleDateString()}
+                    {t("expires", { date: new Date(announcement.expiresAt).toLocaleDateString() })}
                   </div>
                 )}
               </div>
@@ -243,7 +245,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                 aria-expanded={showComments}
               >
                 <FaRegCommentDots className="w-4 h-4" />
-                <span>Comments ({comments.length})</span>
+                <span>{t("comments", { count: comments.length })}</span>
                 {showComments ? (
                   <FaChevronDown className="w-3 h-3" />
                 ) : (
@@ -258,7 +260,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                     <div className="text-center py-8">
                       <FaSpinner className="animate-spin w-6 h-6 mx-auto mb-2 text-blue-600" />
                       <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Loading comments...
+                        {t("loadingComments")}
                       </p>
                     </div>
                   ) : error ? (
@@ -268,7 +270,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                   ) : comments.length === 0 ? (
                     <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       <FaRegCommentDots className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p>No comments yet. Be the first to comment!</p>
+                      <p>{t("noCommentsYet")}</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -316,7 +318,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                           <textarea
                             value={commentInput}
                             onChange={(e) => setCommentInput(e.target.value)}
-                            placeholder="Write a comment..."
+                            placeholder={t("writeComment")}
                             className={`w-full px-4 py-3 rounded-xl border resize-none transition-all duration-200 ${
                               theme === 'dark' 
                                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
@@ -328,7 +330,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                           />
                           <div className="flex items-center justify-between mt-3">
                             <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                              {commentInput.length}/500 characters
+                              {t("characters", { count: commentInput.length })}
                             </div>
                             <Button
                               type="submit"
@@ -342,12 +344,12 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
                               {posting ? (
                                 <>
                                   <FaSpinner className="animate-spin w-3 h-3" />
-                                  <span>Posting...</span>
+                                  <span>{t("posting")}</span>
                                 </>
                               ) : (
                                 <>
                                   <FaPaperPlane className="w-3 h-3" />
-                                  <span>Post Comment</span>
+                                  <span>{t("postComment")}</span>
                                 </>
                               )}
                             </Button>

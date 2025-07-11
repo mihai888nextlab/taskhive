@@ -13,6 +13,7 @@ import { FiSend, FiVideo, FiPhone, FiMoreVertical, FiUsers, FiMessageCircle } fr
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "../ui/textarea";
+import { useTranslations } from "next-intl";
 
 interface ChatMessage {
   _id?: string;
@@ -43,6 +44,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
     { fileName: string; fileLocation: string; fileSize: number }[]
   >([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("CommunicationPage");
 
   const conversationId = selectedConversation?._id?.toString();
 
@@ -211,15 +213,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
             </div>
           </div>
           <h3 className={`text-2xl font-bold mb-3 ${theme === "light" ? "text-gray-900" : "text-white"}`}>
-            Welcome to Messages
+            {t("welcomeMessages")}
           </h3>
           <p className={`text-lg ${theme === "light" ? "text-gray-600" : "text-gray-400"} mb-6`}>
-            Select a conversation or start a new chat to begin messaging
+            {t("selectOrStartChat")}
           </p>
           <div className="space-y-2 text-sm text-gray-500">
-            <p>💬 Connect with your team members</p>
-            <p>🔒 Secure and private messaging</p>
-            <p>📁 Share files and media</p>
+            <p>{t("connectWithTeam")}</p>
+            <p>{t("secureMessaging")}</p>
+            <p>{t("shareFilesMedia")}</p>
           </div>
         </div>
       </div>
@@ -312,7 +314,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                 {currentChatName}
               </h3>
               <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"}`}>
-                {selectedConversation.type === "direct" ? "Online" : `${selectedConversation.participants.length} members`}
+                {selectedConversation.type === "direct"
+                  ? t("online")
+                  : t("members", { count: selectedConversation.participants.length })}
               </p>
             </div>
           </div>
@@ -338,7 +342,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
           <div className="flex flex-col items-center justify-center h-full">
             <Loading />
             <p className={`mt-4 text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"}`}>
-              Loading messages...
+              {t("loadingMessages")}
             </p>
           </div>
         ) : error ? (
@@ -350,8 +354,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <FiMessageCircle className="w-16 h-16 mb-4 opacity-50" />
-            <p className="text-lg font-semibold mb-2">No messages yet</p>
-            <p className="text-sm opacity-75">Be the first to send a message!</p>
+            <p className="text-lg font-semibold mb-2">{t("noMessagesYet")}</p>
+            <p className="text-sm opacity-75">{t("beFirstToSend")}</p>
           </div>
         ) : (
           <div className="p-6 space-y-4">
@@ -363,12 +367,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
               const senderInfo =
                 typeof msg.senderId === "object" ? msg.senderId : null;
               const senderName = isSender
-                ? "You"
+                ? t("you")
                 : senderInfo
                 ? `${senderInfo.firstName || ""} ${
                     senderInfo.lastName || ""
                   }`.trim() || senderInfo.email
-                : "Unknown";
+                : t("unknown");
 
               const showAvatar = !isSender && (index === 0 || 
                 (typeof messages[index - 1]?.senderId === "object" 
@@ -517,7 +521,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                   handleSendMessage(e);
                 }
               }}
-              placeholder="Type a message..."
+              placeholder={t("typeMessage")}
               className={`w-full px-4 py-3 rounded-2xl resize-none border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
                 theme === "light" 
                   ? "bg-gray-100 border-gray-200 text-gray-900 placeholder-gray-500 focus:bg-white" 

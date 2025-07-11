@@ -3,6 +3,7 @@ import UserCard from "./UserCard";
 import { FaSearch, FaSpinner, FaUsers, FaFilter, FaSort } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 interface User {
   _id: string;
@@ -57,6 +58,8 @@ const UserList: React.FC<UserListProps> = ({
   sortBy = "firstNameAsc",
   onSortByChange,
 }) => {
+  const t = useTranslations("UsersPage");
+
   // Filter and sort users
   const filteredUsers = useMemo(() => {
     let result = users.filter(u => 
@@ -113,7 +116,7 @@ const UserList: React.FC<UserListProps> = ({
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder={t("searchUsersPlaceholder")}
             value={search}
             onChange={e => onSearchChange && onSearchChange(e.target.value)}
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
@@ -133,14 +136,14 @@ const UserList: React.FC<UserListProps> = ({
               onValueChange={onFilterRoleChange}
             >
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
-                <SelectValue placeholder="All Roles" />
+                <SelectValue placeholder={t("role")} />
               </SelectTrigger>
               <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
                 <SelectItem
                   value="all"
                   className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
                 >
-                  All Roles
+                  {t("all")}
                 </SelectItem>
                 {companyRoles.map(role => (
                   <SelectItem
@@ -162,12 +165,12 @@ const UserList: React.FC<UserListProps> = ({
               onValueChange={onSortByChange}
             >
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
-                <SelectValue placeholder="Sort By" />
+                <SelectValue placeholder={t("sortBy")} />
               </SelectTrigger>
               <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-                <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">First Name</SelectItem>
-                <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Last Name</SelectItem>
-                <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Role</SelectItem>
+                <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("firstName")}</SelectItem>
+                <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("lastName")}</SelectItem>
+                <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("role")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -178,7 +181,7 @@ const UserList: React.FC<UserListProps> = ({
 
   if (cardsOnly) {
     return (
-      <div className="px-4 py-6"> {/* Reduced from px-6 to px-4 for more horizontal space */}
+      <div className="px-4 py-6">
         {loading ? (
           <div className="text-center py-16">
             <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
@@ -187,10 +190,10 @@ const UserList: React.FC<UserListProps> = ({
               <FaSpinner className="animate-spin text-2xl text-blue-600" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Loading team members...
+              {t("loadingTeamMembers", { default: "Loading team members..." })}
             </h3>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Please wait while we fetch your team data
+              {t("pleaseWaitFetchTeam", { default: "Please wait while we fetch your team data" })}
             </p>
           </div>
         ) : filteredUsers.length === 0 ? (
@@ -201,12 +204,12 @@ const UserList: React.FC<UserListProps> = ({
               <FaUsers className="text-2xl text-gray-400" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {search.trim() ? 'No matching users found' : 'No team members yet'}
+              {search.trim() ? t("noMatchingUsersFound", { default: "No matching users found" }) : t("noTeamMembersYet", { default: "No team members yet" })}
             </h3>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
               {search.trim() 
-                ? 'Try adjusting your search criteria or filters' 
-                : 'Start by adding your first team member'
+                ? t("tryAdjustingSearch", { default: "Try adjusting your search criteria or filters" }) 
+                : t("startByAddingFirstMember", { default: "Start by adding your first team member" })
               }
             </p>
           </div>
@@ -221,11 +224,13 @@ const UserList: React.FC<UserListProps> = ({
                     : 'bg-blue-50 text-blue-700 border border-blue-200'
                 }`}>
                   <FaUsers className="w-3.5 h-3.5" />
-                  <span>{filteredUsers.length} member{filteredUsers.length !== 1 ? 's' : ''}</span>
+                  <span>
+                    {t("membersCount", { count: filteredUsers.length })}
+                  </span>
                 </div>
                 {search.trim() && (
                   <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Searching for "{search}"
+                    {t("searchingFor", { search, default: `Searching for "${search}"` })}
                   </div>
                 )}
               </div>
@@ -236,7 +241,7 @@ const UserList: React.FC<UserListProps> = ({
                     ? 'bg-gray-700 text-gray-300' 
                     : 'bg-gray-100 text-gray-600'
                 }`}>
-                  Filtered by: {filterRole}
+                  {t("filteredBy", { role: filterRole, default: `Filtered by: ${filterRole}` })}
                 </div>
               )}
             </div>
@@ -266,7 +271,7 @@ const UserList: React.FC<UserListProps> = ({
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder={t("searchUsersPlaceholder")}
             value={search}
             onChange={e => onSearchChange && onSearchChange(e.target.value)}
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
@@ -286,14 +291,14 @@ const UserList: React.FC<UserListProps> = ({
               onValueChange={onFilterRoleChange}
             >
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
-                <SelectValue placeholder="All Roles" />
+                <SelectValue placeholder={t("role")} />
               </SelectTrigger>
               <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
                 <SelectItem
                   value="all"
                   className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
                 >
-                  All Roles
+                  {t("all")}
                 </SelectItem>
                 {companyRoles.map(role => (
                   <SelectItem
@@ -315,12 +320,12 @@ const UserList: React.FC<UserListProps> = ({
               onValueChange={onSortByChange}
             >
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
-                <SelectValue placeholder="Sort By" />
+                <SelectValue placeholder={t("sortBy")} />
               </SelectTrigger>
               <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-                <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">First Name</SelectItem>
-                <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Last Name</SelectItem>
-                <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Role</SelectItem>
+                <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("firstName")}</SelectItem>
+                <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("lastName")}</SelectItem>
+                <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("role")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -336,10 +341,10 @@ const UserList: React.FC<UserListProps> = ({
               <FaSpinner className="animate-spin text-2xl text-blue-600" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Loading team members...
+              {t("loadingTeamMembers", { default: "Loading team members..." })}
             </h3>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Please wait while we fetch your team data
+              {t("pleaseWaitFetchTeam", { default: "Please wait while we fetch your team data" })}
             </p>
           </div>
         ) : filteredUsers.length === 0 ? (
@@ -350,12 +355,12 @@ const UserList: React.FC<UserListProps> = ({
               <FaUsers className="text-2xl text-gray-400" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {search.trim() ? 'No matching users found' : 'No team members yet'}
+              {search.trim() ? t("noMatchingUsersFound", { default: "No matching users found" }) : t("noTeamMembersYet", { default: "No team members yet" })}
             </h3>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
               {search.trim() 
-                ? 'Try adjusting your search criteria or filters' 
-                : 'Start by adding your first team member'
+                ? t("tryAdjustingSearch", { default: "Try adjusting your search criteria or filters" }) 
+                : t("startByAddingFirstMember", { default: "Start by adding your first team member" })
               }
             </p>
           </div>
@@ -370,11 +375,13 @@ const UserList: React.FC<UserListProps> = ({
                     : 'bg-blue-50 text-blue-700 border border-blue-200'
                 }`}>
                   <FaUsers className="w-3.5 h-3.5" />
-                  <span>{filteredUsers.length} member{filteredUsers.length !== 1 ? 's' : ''}</span>
+                  <span>
+                    {t("membersCount", { count: filteredUsers.length })}
+                  </span>
                 </div>
                 {search.trim() && (
                   <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Searching for "{search}"
+                    {t("searchingFor", { search, default: `Searching for "${search}"` })}
                   </div>
                 )}
               </div>
@@ -385,7 +392,7 @@ const UserList: React.FC<UserListProps> = ({
                     ? 'bg-gray-700 text-gray-300' 
                     : 'bg-gray-100 text-gray-600'
                 }`}>
-                  Filtered by: {filterRole}
+                  {t("filteredBy", { role: filterRole, default: `Filtered by: ${filterRole}` })}
                 </div>
               )}
             </div>

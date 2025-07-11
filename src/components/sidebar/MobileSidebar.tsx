@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FaTimes, FaSignOutAlt } from "react-icons/fa";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslations } from "next-intl";
 
 type MenuItem = {
   name: string;
@@ -10,21 +11,16 @@ type MenuItem = {
   notification?: number | string;
 };
 
-type User = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  profileImage?: { data?: string } | string | null;
-};
-
 type MobileSidebarProps = {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   menu: MenuItem[];
-  user: User;
-  router: { pathname: string };
-  searchInput?: React.ReactNode;
-  searchDropdown?: React.ReactNode;
+  user: any;
+  router: any;
+  t: ReturnType<typeof useTranslations>;
+  tasksCount?: number;
+  unreadAnnouncements?: number;
+  unreadMessages?: number;
 };
 
 const MobileSidebar: React.FC<MobileSidebarProps> = ({
@@ -33,8 +29,10 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
   menu,
   user,
   router,
-  searchInput,
-  searchDropdown,
+  t,
+  tasksCount = 0,
+  unreadAnnouncements = 0,
+  unreadMessages = 0,
 }) => {
   const auth = useAuth(); // Assuming you have a useAuth hook to get user data
 
@@ -69,8 +67,8 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
           </div>
         </Link>
         {/* Search Bar Mobile */}
-        {searchInput}
-        {searchDropdown}
+        {/* {searchInput}
+        {searchDropdown} */}
         {/* Navigation */}
         <nav>
           <p className="text-gray-400 font-semibold text-sm uppercase tracking-wider">
@@ -90,7 +88,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
                   {item.icon && (
                     <item.icon className="mr-3 text-xl text-primary-light" />
                   )}
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium">{t(item.name)}</span>
                   {item.notification && (
                     <span className="ml-auto bg-red-500 text-white rounded-full px-2 text-xs">
                       {item.notification}

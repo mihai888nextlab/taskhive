@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { User } from "@/types"; // Adjust the import path as necessary
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useTranslations } from "next-intl";
 
 type MenuItem = {
   name: string;
@@ -23,13 +24,14 @@ type SidebarNavProps = {
   unreadMessages?: number;
 };
 
-const SidebarNav: React.FC<SidebarNavProps> = ({
+const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslations> }> = ({
   menu,
   user,
   router,
   tasksCount = 0,
   unreadAnnouncements = 0,
   unreadMessages = 0,
+  t,
 }) => {
   const auth = useAuth();
   const realRouter = useRouter();
@@ -77,14 +79,15 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
     };
   }, [dropdownOpen]);
 
+  // menuWithNotifications should use the translation keys, not translated values
   const menuWithNotifications = menu.map((item) => {
-    if (item.name === "Tasks" && tasksCount > 0) {
+    if (item.name === "tasks" && tasksCount > 0) {
       return { ...item, notification: tasksCount };
     }
-    if (item.name === "Announcements" && unreadAnnouncements > 0) {
+    if (item.name === "announcements" && unreadAnnouncements > 0) {
       return { ...item, notification: unreadAnnouncements };
     }
-    if (item.name === "Communication" && unreadMessages > 0) {
+    if (item.name === "communication" && unreadMessages > 0) {
       return { ...item, notification: unreadMessages };
     }
     return { ...item, notification: item.notification };
@@ -140,7 +143,10 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
                 {item.icon && (
                   <item.icon className="mr-3 text-xl text-primary-light" />
                 )}
-                <span className="font-medium">{item.name}</span>
+                {/* Use translation key directly and fallback to capitalized key */}
+                <span className="font-medium">
+                  {t(item.name, { default: item.name.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()) })}
+                </span>
                 {item.notification && (
                   <span className="ml-auto bg-red-500 text-white rounded-full px-2 text-xs">
                     {item.notification}

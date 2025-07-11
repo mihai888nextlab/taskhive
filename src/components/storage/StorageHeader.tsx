@@ -1,6 +1,7 @@
 import React from "react";
 import { FaCloudUploadAlt, FaHdd, FaSignature } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface StorageHeaderProps {
   usedStorage: number;
@@ -8,6 +9,7 @@ interface StorageHeaderProps {
   onUploadClick: () => void;
   onSignatureClick: () => void;
   formatBytes: (bytes: number) => string;
+  t: ReturnType<typeof useTranslations>;
 }
 
 const StorageHeader: React.FC<StorageHeaderProps> = ({
@@ -16,6 +18,7 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
   onUploadClick,
   onSignatureClick,
   formatBytes,
+  t,
 }) => (
   <div className="bg-white/80 backdrop-blur-md rounded-2xl px-6 pt-6 pb-3 border border-gray-200/50">
     <div className="flex items-center gap-3 mb-4">
@@ -23,10 +26,10 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
         <FaHdd className="text-2xl text-blue-600" />
       </div>
       <div>
-        <h3 className="text-lg font-semibold text-gray-800">Storage Usage</h3>
-        <p className="text-sm text-gray-600">
-          Monitor your file storage consumption
-        </p>
+        <h3 className="text-lg font-semibold text-gray-800">
+          {t("storageUsage")}
+        </h3>
+        <p className="text-sm text-gray-600">{t("monitorStorage")}</p>
       </div>
       <div className="ml-auto flex gap-2">
         <Button
@@ -35,7 +38,7 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
           variant="default"
         >
           <FaSignature className="text-lg" />
-          <span className="font-medium">Manage Signatures</span>
+          <span className="font-medium">{t("manageSignatures")}</span>
         </Button>
         <Button
           onClick={onUploadClick}
@@ -43,7 +46,7 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
           variant="default"
         >
           <FaCloudUploadAlt className="text-lg" />
-          <span className="font-medium">Upload Files</span>
+          <span className="font-medium">{t("uploadFiles")}</span>
         </Button>
       </div>
     </div>
@@ -51,10 +54,10 @@ const StorageHeader: React.FC<StorageHeaderProps> = ({
     <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-medium text-gray-700">
-          {formatBytes(usedStorage)} used
+          {t("used", { used: formatBytes(usedStorage) })}
         </span>
         <span className="text-sm font-medium text-gray-700">
-          {percentUsed.toFixed(1)}% of 1 GB
+          {t("percentOfGB", { percent: percentUsed.toFixed(1) })}
         </span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">

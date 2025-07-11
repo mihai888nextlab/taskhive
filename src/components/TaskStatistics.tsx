@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { useTranslations } from "next-intl";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -14,6 +15,8 @@ interface TaskStatisticsProps {
 }
 
 const TaskStatistics: React.FC<TaskStatisticsProps> = ({ completed, total, last7Days, hideHeader, hideSummary, className }) => {
+  const t = useTranslations("InsightsPage");
+
   const data = {
     labels: ['6d ago', '5d ago', '4d ago', '3d ago', '2d ago', 'Yesterday', 'Today'],
     datasets: [
@@ -30,9 +33,9 @@ const TaskStatistics: React.FC<TaskStatisticsProps> = ({ completed, total, last7
 
   return (
     <div className={className ? className : ''}>
-      {!hideHeader && <h2 className="font-semibold mb-2">Task Statistics</h2>}
+      {!hideHeader && <h2 className="font-semibold mb-2">{t("taskStatistics")}</h2>}
       {!hideSummary && (
-        <div className="mb-2 text-sm">Total Tasks: <b>{total}</b> | Completed (7d): <b>{completed}</b></div>
+        <div className="mb-2 text-sm">{t("totalTasks")}: <b>{total}</b> | {t("completed")}: <b>{completed}</b></div>
       )}
       <div className="h-[320px]">
         <Bar data={data} options={{ responsive: true, plugins: { legend: { display: false } }, maintainAspectRatio: false }} />

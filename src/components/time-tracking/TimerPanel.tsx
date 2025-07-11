@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface TimerPanelProps {
   elapsedTime: number;
@@ -41,17 +42,19 @@ const TimerPanel: React.FC<TimerPanelProps> = ({
   const totalPhase = pomodoroPhase === 'work' ? workDuration : breakDuration;
   const progress = pomodoroMode ? ((totalPhase - (pomodoroTime || 0)) / totalPhase) * 100 : 0;
 
+  const t = useTranslations("TimeTrackingPage");
+
   return (
     <div className={`rounded-2xl p-6 sm:p-8 mb-2 hover:scale-[1.005] transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
       {pomodoroMode ? (
         <>
           <div className="mb-4 text-center">
             <div className={`text-lg font-bold mb-2 ${pomodoroPhase === 'work' ? 'text-red-600' : 'text-blue-600'}`}>
-              {pomodoroPhase === 'work' ? "Pomodoro: Work" : "Pomodoro: Break"}
+              {pomodoroPhase === 'work' ? t("workSession") : t("breakTime")}
             </div>
             <div className="mb-2">
               <span className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold text-sm">
-                Cycles: {pomodoroCycles}
+                {t("cycles", { count: pomodoroCycles })}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
@@ -80,24 +83,23 @@ const TimerPanel: React.FC<TimerPanelProps> = ({
           className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-green-600' : 'bg-gradient-to-r from-green-500 to-green-700'} text-white font-bold py-2 px-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
           disabled={isRunning}
         >
-          Start
+          {t("start")}
         </button>
         <button
           onClick={onStop}
           className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-red-600' : 'bg-gradient-to-r from-red-500 to-red-700'} text-white font-bold py-2 px-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
           disabled={!isRunning}
         >
-          Stop
+          {t("stop")}
         </button>
         <button
           onClick={onReset}
           className={`inline-flex items-center justify-center ${theme === 'dark' ? 'bg-gray-600' : 'bg-gradient-to-r from-gray-500 to-gray-700'} text-white font-bold py-2 px-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 active:scale-95`}
         >
-          Reset
+          {t("reset")}
         </button>
       </div>
     </div>
-    
   );
 };
 

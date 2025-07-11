@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import styles from "@/styles/markdown.module.css";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface Announcement {
   _id: string;
@@ -85,6 +86,8 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
     return words.slice(0, maxWords).join(' ') + '...';
   };
 
+  const t = useTranslations("AnnouncementsPage");
+
   return (
     <div
       className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer transform hover:scale-[1.01] ${
@@ -154,9 +157,8 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
             
             <div className="flex items-center gap-2">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border ${getCategoryColor(announcement.category, theme)}`}>
-                {announcement.category}
+                {t(`category${announcement.category}`)}
               </span>
-              
               {announcement.pinned && (
                 <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
                   theme === 'dark' 
@@ -164,7 +166,7 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
                     : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                 }`}>
                   <FaThumbtack className="w-2.5 h-2.5" />
-                  Pinned
+                  {t("pinned")}
                 </span>
               )}
               

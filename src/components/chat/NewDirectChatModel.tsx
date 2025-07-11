@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { createPortal } from 'react-dom';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface NewDirectChatModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
   onChatCreated,
 }) => {
   const { user } = useAuth();
+  const t = useTranslations("CommunicationPage");
   const [searchTerm, setSearchTerm] = useState("");
   const [allUsers, setAllUsers] = useState<GetUsersResponse[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<GetUsersResponse[]>([]);
@@ -160,8 +162,8 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
                   <FaComments className="text-xl text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Start Direct Chat</h2>
-                  <p className="text-gray-600">Choose a team member to chat with</p>
+                  <h2 className="text-2xl font-bold text-gray-900">{t("startDirectChat")}</h2>
+                  <p className="text-gray-600">{t("chooseMemberToChat")}</p>
                 </div>
               </div>
             </div>
@@ -171,13 +173,13 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
               {/* Search Input */}
               <div className="mb-6">
                 <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  Find Team Member
+                  {t("findTeamMember")}
                 </label>
                 <div className="relative">
                   <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <Input
                     type="text"
-                    placeholder="Search users by name or email..."
+                    placeholder={t("searchUsersPlaceholder")}
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -197,25 +199,25 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
               {loadingUsers ? (
                 <div className="text-center py-12">
                   <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg">Loading team members...</p>
+                  <p className="text-gray-500 text-lg">{t("loadingTeamMembersShort")}</p>
                 </div>
               ) : filteredUsers.length === 0 && searchTerm === "" ? (
                 <div className="text-center py-12">
                   <FaUser className="text-6xl text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No Team Members</h4>
-                  <p className="text-gray-500">No other users are available for chat</p>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noTeamMembers")}</h4>
+                  <p className="text-gray-500">{t("noOtherUsersForChat")}</p>
                 </div>
               ) : filteredUsers.length === 0 && searchTerm !== "" ? (
                 <div className="text-center py-12">
                   <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No Results Found</h4>
-                  <p className="text-gray-500">Try searching with a different name or email</p>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noResultsFound")}</h4>
+                  <p className="text-gray-500">{t("tryDifferentSearch")}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FaUser className="text-blue-600" />
-                    Available Team Members ({filteredUsers.length})
+                    {t("availableTeamMembersCount", { count: filteredUsers.length })}
                   </h4>
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {filteredUsers.map((u) => (
@@ -248,12 +250,12 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
                           {creatingChat ? (
                             <div className="flex items-center gap-2">
                               <FaSpinner className="animate-spin" />
-                              Starting...
+                              {t("starting")}
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
                               <FaComments />
-                              Start Chat
+                              {t("startChat")}
                             </div>
                           )}
                         </Button>
@@ -272,7 +274,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
                 disabled={creatingChat}
                 variant="ghost"
               >
-                Cancel
+                {t("cancel")}
               </Button>
             </div>
           </div>

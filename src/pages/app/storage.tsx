@@ -11,6 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom'; // Add this import
 import { FaFile, FaFileImage, FaFilePdf, FaFileArchive, FaFileAlt, FaSignature, FaCloudUploadAlt } from 'react-icons/fa';
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 const MAX_STORAGE_BYTES = 1024 * 1024 * 1024; // 1 GB
 
@@ -55,6 +56,7 @@ const Storage = () => {
   const [droppedFiles, setDroppedFiles] = useState<FileList | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const t = useTranslations("StoragePage");
 
   const percentUsed = Math.min((usedStorage / MAX_STORAGE_BYTES) * 100, 100);
 
@@ -115,7 +117,7 @@ const Storage = () => {
   });
 
   async function handleDelete(fileId: string) {
-    if (!window.confirm("Delete this file?")) return;
+    if (!window.confirm(t("deleteFileConfirm"))) return;
     try {
       const res = await fetch(`/api/getFiles?id=${fileId}`, { method: "DELETE" });
       if (res.ok) {
@@ -125,10 +127,10 @@ const Storage = () => {
           return updatedFiles;
         });
       } else {
-        alert("Failed to delete file.");
+        alert(t("deleteFileError"));
       }
     } catch {
-      alert("Failed to delete file.");
+      alert(t("deleteFileError"));
     }
   }
 
@@ -149,10 +151,10 @@ const Storage = () => {
         setRenamingId(null);
         setRenameValue("");
       } else {
-        alert("Failed to rename file.");
+        alert(t("renameFileError"));
       }
     } catch {
-      alert("Failed to rename file.");
+      alert(t("renameFileError"));
     }
   }
 
@@ -182,14 +184,13 @@ const Storage = () => {
       <div className="max-w-[100vw] mx-auto px-2 lg:px-4 py-8">
         {/* Header Section */}
         <div className="mb-4">
-
-          {/* Pass setSignatureModal to StorageHeader */}
           <StorageHeader
             usedStorage={usedStorage}
             percentUsed={percentUsed}
             onUploadClick={() => setUploadFileModal(true)}
             onSignatureClick={() => setSignatureModal(true)}
             formatBytes={formatBytes}
+            t={t}
           />
         </div>
 
@@ -200,22 +201,24 @@ const Storage = () => {
             setSearch={setSearch}
             sortBy={sortBy}
             setSortBy={setSortBy}
+            t={t}
           />
         </div>
 
-          <StorageFileList
-            files={sortedFiles}
-            loading={loading}
-            theme={theme}
-            renamingId={renamingId}
-            renameValue={renameValue}
-            setRenamingId={setRenamingId}
-            setRenameValue={setRenameValue}
-            handleDelete={handleDelete}
-            handleRename={handleRename}
-            getFileIcon={getFileIcon}
-            fetchFiles={fetchFiles}
-          />
+        <StorageFileList
+          files={sortedFiles}
+          loading={loading}
+          theme={theme}
+          renamingId={renamingId}
+          renameValue={renameValue}
+          setRenamingId={setRenamingId}
+          setRenameValue={setRenameValue}
+          handleDelete={handleDelete}
+          handleRename={handleRename}
+          getFileIcon={getFileIcon}
+          fetchFiles={fetchFiles}
+          t={t}
+        />
       </div>
 
       {dragActive && <StorageDragOverlay />}

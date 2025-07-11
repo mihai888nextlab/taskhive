@@ -3,6 +3,7 @@ import { FaTimes, FaPlus, FaTrash, FaPencilAlt, FaSignature, FaSpinner } from 'r
 import SignatureCanvas from './SignatureCanvas';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface Signature {
   _id: string;
@@ -26,6 +27,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   const [signatureName, setSignatureName] = useState('');
   const [activeTab, setActiveTab] = useState<'create' | 'select'>('select');
   const [loading, setLoading] = useState(false);
+  const t = useTranslations("Signature");
 
   useEffect(() => {
     if (isOpen) {
@@ -47,7 +49,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
 
   const saveSignature = async () => {
     if (!newSignature || !signatureName.trim()) {
-      alert('Please create a signature and enter a name');
+      alert(t("createFirstSignature"));
       return;
     }
 
@@ -80,7 +82,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   };
 
   const deleteSignature = async (id: string) => {
-    if (!confirm('Delete this signature?')) return;
+    if (!confirm(t("deleteSignatureConfirm"))) return;
 
     try {
       const res = await fetch(`/api/signatures?id=${id}`, { method: 'DELETE' });
@@ -103,8 +105,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
             <FaSignature className="text-white text-lg" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Signature Manager</h2>
-            <p className="text-gray-600 text-sm">Create and manage your digital signatures</p>
+            <h2 className="text-xl font-bold text-gray-900">{t("signatureManager")}</h2>
+            <p className="text-gray-600 text-sm">{t("createManageSignatures")}</p>
           </div>
         </div>
       </div>
@@ -122,7 +124,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
         >
           <div className="flex items-center justify-center gap-2">
             <FaSignature className="text-sm" />
-            Select Signature
+            {t("selectSignatureTab")}
           </div>
         </Button>
         <Button
@@ -136,7 +138,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
         >
           <div className="flex items-center justify-center gap-2">
             <FaPencilAlt className="text-sm" />
-            Create New
+            {t("createNewTab")}
           </div>
         </Button>
       </div>
@@ -146,9 +148,9 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
         {activeTab === 'select' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Your Signatures</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t("yourSignatures")}</h3>
               <span className="text-gray-500 bg-gray-100 px-2 py-1 rounded-full text-sm">
-                {signatures.length} signature{signatures.length !== 1 ? 's' : ''}
+                {t("signaturesCount", { count: signatures.length })}
               </span>
             </div>
             
@@ -157,14 +159,14 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                 <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
                   <FaPencilAlt className="text-2xl text-blue-600" />
                 </div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">No signatures found</h4>
-                <p className="text-gray-600 mb-6">Create your first signature to get started with document signing.</p>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noSignaturesFound")}</h4>
+                <p className="text-gray-600 mb-6">{t("createFirstSignature")}</p>
                 <Button
                   onClick={() => setActiveTab('create')}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transition-all duration-200 font-medium"
                 >
                   <FaPlus className="text-sm" />
-                  Create Your First Signature
+                  {t("createYourFirstSignature")}
                 </Button>
               </div>
             ) : (
@@ -199,7 +201,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                       }}
                       className="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 text-sm"
                     >
-                      Use This Signature
+                      {t("useThisSignature")}
                     </Button>
                   </div>
                 ))}
@@ -217,7 +219,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                   value={signatureName}
                   onChange={(e) => setSignatureName(e.target.value)}
                   className="w-full p-4 mb-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 text-lg"
-                  placeholder="Enter a name for your signature (e.g., 'John Doe - Formal')"
+                  placeholder={t("enterSignatureName")}
                 />
                 <SignatureCanvas onSignatureChange={setNewSignature} />
               </div>
@@ -232,7 +234,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                   className="flex-1 py-4 px-6 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-semibold transition-all duration-200 text-lg border-2 border-gray-200"
                   variant="ghost"
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button
                   onClick={saveSignature}
@@ -246,12 +248,12 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                   {loading ? (
                     <div className="flex items-center justify-center gap-3">
                       <FaSpinner className="animate-spin text-lg" />
-                      Saving Signature...
+                      {t("savingSignature")}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-3">
                       <FaSignature className="text-lg" />
-                      Save Signature
+                      {t("saveSignature")}
                     </div>
                   )}
                 </Button>

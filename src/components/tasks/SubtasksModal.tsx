@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaSpinner, FaRobot, FaPlus, FaTrash, FaTimes, FaTasks } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface Subtask {
   title: string;
@@ -25,6 +26,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
   onSave,
   onCancel,
 }) => {
+  const t = useTranslations("TasksPage");
   const [subtasks, setSubtasks] = useState<Subtask[]>(initialSubtasks);
   const [generatingSubtasks, setGeneratingSubtasks] = useState(false);
 
@@ -99,9 +101,9 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
               <FaTasks className="text-lg text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Break Down Task</h2>
+              <h2 className="text-xl font-bold text-gray-900">{t("breakDownTask")}</h2>
               <p className="text-sm text-gray-600 mt-1">
-                "{taskTitle}" - Create subtasks to organize your work
+                "{taskTitle}" - {t("subtasks")}
               </p>
             </div>
           </div>
@@ -111,7 +113,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
         <div className="flex-1 p-6 h-[calc(100%-180px)]">
           {/* Controls */}
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-semibold text-gray-800">Subtasks</h3>
+            <h3 className="text-lg font-semibold text-gray-800">{t("subtasks")}</h3>
             <div className="flex gap-3">
               <Button
                 type="button"
@@ -124,7 +126,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                 ) : (
                   <FaRobot className="mr-2 w-4 h-4" />
                 )}
-                AI Generate
+                {t("generateDescription")}
               </Button>
               <Button
                 type="button"
@@ -132,7 +134,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                 onClick={addManualSubtask}
               >
                 <FaPlus className="mr-2 w-4 h-4" />
-                Add Manual
+                {t("addTask")}
               </Button>
             </div>
           </div>
@@ -143,7 +145,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
               <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
                 <FaTasks className="text-4xl text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500 text-sm">
-                  No subtasks added yet. Generate with AI or add manually.
+                  {t("noSubtasksMessage")}
                 </p>
               </div>
             ) : (
@@ -153,13 +155,13 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                     <div className="flex-1 space-y-3">
                       <Input
                         type="text"
-                        placeholder="Subtask title"
+                        placeholder={t("subtaskTitle")}
                         value={subtask.title}
                         onChange={e => updateSubtask(index, 'title', e.target.value)}
                         className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                       />
                       <textarea
-                        placeholder="Subtask description (optional)"
+                        placeholder={t("subtaskDescription")}
                         value={subtask.description}
                         onChange={e => updateSubtask(index, 'description', e.target.value)}
                         rows={2}
@@ -185,7 +187,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
         <div className="p-6 border-t border-gray-200 bg-gray-50">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              {subtasks.filter(s => s.title.trim()).length} of {subtasks.length} subtasks ready
+              {t("subtasksReady", { count: subtasks.filter(s => s.title.trim()).length })}
             </p>
             <div className="flex gap-3">
               <Button
@@ -194,14 +196,14 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                 className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200"
                 variant="ghost"
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button
                 type="button"
                 onClick={handleSave}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm hover:shadow-md transition-all duration-200"
               >
-                Save Subtasks
+                {t("saveSubtasks")}
               </Button>
             </div>
           </div>

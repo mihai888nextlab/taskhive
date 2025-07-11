@@ -12,14 +12,19 @@ import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext"
 import { useAIWindow } from "@/contexts/AIWindowContext";
 import Link from "next/link";
 import HeaderNavBar from "@/components/header/HeaderNavBar";
+import { useTranslations, useLocale } from "next-intl";
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  locale?: string;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, locale }) => {
   const { user, loadingUser, isAuthenticated, logout } = useAuth();
   const router = useRouter();
+  const currentLocale = locale || useLocale() || "en";
+  const t = useTranslations("Navigation"); // This will use the correct locale automatically
+
   const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } =
     useTimeTracking();
   const { isAIWindowOpen, setIsAIWindowOpen, toggleAIWindow } = useAIWindow();
@@ -89,7 +94,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const incompleteTasksCount = incompleteTasks.length;
 
   const menuWithNotifications = menu.map((item) => {
-    if (item.name === "Tasks" && incompleteTasksCount > 0) {
+    if (item.name === t("tasks") && incompleteTasksCount > 0) {
       return { ...item, notification: incompleteTasksCount };
     }
     return { ...item, notification: undefined };
@@ -98,9 +103,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="flex w-full min-h-screen bg-gray-100">
       {/* Header NavBar */}
-      <HeaderNavBar />
+      <HeaderNavBar t={t} />
       {/* Sidebar for desktop */}
-      <SidebarNav menu={menuWithNotifications} user={user} router={router} />
+      <SidebarNav menu={menuWithNotifications} user={user} router={router} t={t} />
       {/* Sidebar drawer for mobile */}
       <MobileSidebar
         sidebarOpen={sidebarOpen}
@@ -108,6 +113,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         menu={menu}
         user={user}
         router={router}
+        t={t}
       />
       {/* Main Content */}
       <div
@@ -175,6 +181,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         isOpen={isAIWindowOpen}
         onClose={() => setIsAIWindowOpen(false)}
         isDesktop={isDesktop}
+        locale={currentLocale} // Pass locale to AIWindow
       />
       <UserProfileModal
         open={profileModalOpen}

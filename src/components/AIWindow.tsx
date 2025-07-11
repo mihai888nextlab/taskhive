@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useAIWindow } from "@/contexts/AIWindowContext";
+import { useTranslations } from "next-intl";
 
 // Define the type for handler parameters
 export type CommandHandlerParams = {
@@ -115,9 +116,18 @@ interface AIWindowProps {
   isOpen: boolean;
   onClose: () => void;
   isDesktop?: boolean; // New prop to control desktop mode
+  locale?: string; // Accept locale, but do not pass to useTranslations
 }
 
-const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false }) => {
+// Use the correct translation namespace and pass locale
+const AIWindow: React.FC<AIWindowProps> = ({
+  isOpen,
+  onClose,
+  isDesktop = false,
+  locale,
+}) => {
+  const t = useTranslations("AIWindow");
+
   const [inputPrompt, setInputPrompt] = useState("");
   const { chatHistory, setChatHistory, clearChatHistory } = useAIWindow(); // Add clearChatHistory
   const [isLoading, setIsLoading] = useState(false);
@@ -359,22 +369,22 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
         <div className="flex justify-between items-center px-5 pt-5 pb-3 border-b border-gray-100 bg-white/90 rounded-t-3xl shadow-sm">
           <div className="flex items-center gap-3">
             <img src="/hive-icon.png" alt="Hive Logo" className="w-8 h-8" />
-            <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">Hive Assistant</h3>
+            <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">{t("title")}</h3>
           </div>
           <div className="flex items-center gap-2">
             {chatHistory.length > 0 && (
               <button
                 onClick={clearChatHistory}
                 className="text-gray-400 hover:text-blue-500 transition-all text-sm font-medium px-2 py-1 rounded"
-                title="Clear chat history"
+                title={t("clearHistory")}
               >
-                Clear
+                {t("clear")}
               </button>
             )}
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-red-500 transition-all text-2xl font-bold"
-              aria-label="Close AI Assistant"
+              aria-label={t("closeLabel")}
             >
               ✕
             </button>
@@ -387,8 +397,16 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
           {chatHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
               <p className="text-gray-500 text-lg text-center font-medium opacity-80">
-                Welcome to the <span className='text-primary font-semibold'>Hive Assistant</span>!<br/>How can I help you today?
+                {t("welcomeMessageFirst")}
+                <span className="text-primary font-semibold">
+                  {t("welcomeMessageAssistant")}
+                </span>
+                {t("welcomeMessageExclamation")}
               </p>
+              <p className="text-gray-500 text-lg text-center font-medium opacity-80">
+                {t("welcomeMessageSecond")}
+              </p>
+              
               {/* Quick command buttons - Only show if chat is empty */}
               <div className="flex gap-2 mt-6 px-7 pt-2">
                 {[commands[0], commands[1], commands[3]].map((c) => (
@@ -418,7 +436,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
           )}
           {isLoading && (
             <div className="mb-2 px-4 py-2 rounded-2xl bg-white/95 border border-gray-100 text-gray-900 self-start mr-auto max-w-[90%] animate-pulse text-base shadow-sm">
-              Thinking...
+              {t("thinking")}
             </div>
           )}
         </div>
@@ -444,7 +462,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
               <textarea
                 className="w-full h-10 p-0 px-3 bg-transparent border-none focus:outline-none text-gray-900 text-base resize-none placeholder-gray-400 font-medium tracking-tight focus:placeholder-gray-300 transition-all rounded-full shadow-none min-h-[2.5rem] max-h-[5rem]"
                 style={{ boxShadow: 'none', background: 'none', border: 'none', fontFamily: 'inherit', letterSpacing: '0.01em', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
-                placeholder={isLoading ? "Waiting for response..." : "Type your message..."}
+                placeholder={isLoading ? t("waitingResponse") : t("typeMessage")}
                 value={inputPrompt}
                 onChange={(e) => setInputPrompt(e.target.value)}
                 onKeyDown={handleInputKeyDown}
@@ -458,7 +476,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
                 onClick={isInputEmpty ? handleVoiceInput : () => handleSubmit()}
                 className={`p-2 rounded-full border border-gray-200 bg-white hover:bg-blue-100 transition-all duration-200 flex items-center justify-center ${isRecording ? "animate-pulse border-blue-500" : ""} ${isInputEmpty ? '' : 'bg-gradient-to-br from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 shadow-md'}`}
                 disabled={isLoading}
-                title={isInputEmpty ? "Record voice" : "Send"}
+                title={isInputEmpty ? t("recordVoice") : t("send")}
                 style={{ minWidth: '40px', minHeight: '40px', transition: 'background 0.2s, color 0.2s' }}
               >
                 {/* Only show the active icon, not both at once, with a clean fade/scale animation */}
@@ -489,7 +507,7 @@ const AIWindow: React.FC<AIWindowProps> = ({ isOpen, onClose, isDesktop = false 
         <div className="mt-auto pt-4 pb-2 text-center text-xs text-gray-500 border-t border-gray-100 bg-gradient-to-r from-white/90 via-blue-50 to-white/90 rounded-b-2xl shadow-inner flex flex-col items-center">
           <div className="flex items-center gap-2 justify-center">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="inline-block align-middle text-blue-500"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#e0e7ef"/><path d="M8 12l2.5 2.5L16 9" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span className="font-semibold text-primary tracking-wide">Powered by Google Gemini API</span>
+            <span className="font-semibold text-primary tracking-wide">{t("poweredByGemini")}</span>
           </div>
         </div>
       </div>

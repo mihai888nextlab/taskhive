@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 // import { useRouter } from 'next/router';
 import { useTheme } from "@/components/ThemeContext";
+import { useTranslations } from "next-intl";
 
 interface Task {
   _id: string;
@@ -41,7 +42,8 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
   setHighlight,
 }) => {
   const { theme } = useTheme();
-  // const router = useRouter();
+  const t = useTranslations("DashboardPage");
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -171,18 +173,17 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
       {loading ? (
         <div className="flex flex-col justify-center items-center h-32 bg-primary-light/10 rounded-lg animate-pulse">
           <FaSpinner className="animate-spin text-primary text-4xl mb-3" />
-          <p className="text-sm font-medium">Loading your tasks...</p>
+          <p className="text-sm font-medium">{t("loadingTasks", { default: "Loading your tasks..." })}</p>
         </div>
       ) : error ? (
         <div className="bg-red-50 border-l-4 border-red-400 text-red-400 p-4 rounded-md shadow-sm text-center font-medium">
-          <p className="mb-1">Failed to load tasks:</p>
+          <p className="mb-1">{t("failedToLoadTasks", { default: "Failed to load tasks:" })}</p>
           <p className="text-sm italic">{error}</p>
           <button onClick={fetchTasks} className="mt-2 hover:underline text-sm">
-            Try again
+            {t("tryAgain", { default: "Try again" })}
           </button>
         </div>
       ) : tasks.length === 0 ? (
-        // Empty state: visually like announcements, content like tasks page
         <div className="text-center py-16">
           <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
             theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
@@ -190,10 +191,10 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
             <FaTasks className="text-2xl text-gray-400" />
           </div>
           <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            No Tasks Found
+            {t("noTasksFound", { default: "No Tasks Found" })}
           </h3>
           <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-            Create your first task to get started
+            {t("createFirstTask", { default: "Create your first task to get started" })}
           </p>
         </div>
       ) : (
@@ -256,7 +257,7 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
               <li
                 key={task._id}
                 className={`relative flex items-start justify-between p-5 rounded-xl border ${cardBgClass} shadow-sm group cursor-pointer transition-all duration-200`}
-                title={isOverdue ? "Task is overdue" : isToday ? "Task is due today" : "Click to mark as complete"}
+                title={isOverdue ? t("taskOverdue", { default: "Task is overdue" }) : isToday ? t("taskDueToday", { default: "Task is due today" }) : t("clickToMarkComplete", { default: "Click to mark as complete" })}
                 style={{ opacity: isOverdue ? 0.9 : 1 }}
                 onClick={e => {
                   e.stopPropagation();
@@ -277,19 +278,19 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
                     </p>
                   )}
                   <p className={`mt-3 text-xs flex items-center gap-2 ${deadlineClass}`}> 
-                    Due: {new Date(task.deadline).toLocaleDateString(undefined, {
+                    {t("due", { default: "Due:" })} {new Date(task.deadline).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
                     })}
                     {isOverdue && (
                       <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded font-extrabold tracking-wide shadow-sm border border-red-600">
-                        OVERDUE
+                        {t("overdue", { default: "OVERDUE" })}
                       </span>
                     )}
                     {isToday && !isOverdue && (
                       <span className="ml-2 px-2 py-0.5 bg-yellow-500 text-white text-xs rounded font-extrabold tracking-wide shadow-sm border border-yellow-600">
-                        TODAY
+                        {t("today", { default: "TODAY" })}
                       </span>
                     )}
                   </p>

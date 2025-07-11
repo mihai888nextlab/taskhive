@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { useTheme } from "@/components/ThemeContext";
 import { FiMessageCircle, FiUsers, FiPlus } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export interface PopulatedConversation extends mongoose.Document {
   _id: string;
@@ -34,6 +35,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const t = useTranslations("CommunicationPage");
 
   const getConversationName = (conversation: PopulatedConversation) => {
     if (conversation.type === "direct") {
@@ -85,7 +87,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
             <FiMessageCircle className="w-6 h-6 text-white" />
           </div>
           <h2 className={`text-2xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
-            Messages
+            {t("messages")}
           </h2>
         </div>
         
@@ -96,14 +98,14 @@ const ConversationList: React.FC<ConversationListProps> = ({
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
           >
             <FiPlus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
-            <span className="hidden sm:inline">New Chat</span>
+            <span className="hidden sm:inline">{t("newChat")}</span>
           </Button>
           <Button
             onClick={onNewGroupClick}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-500 hover:bg-gray-600 text-white'}`}
           >
             <FiUsers className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-            <span className="hidden sm:inline">New Group</span>
+            <span className="hidden sm:inline">{t("newGroup")}</span>
           </Button>
         </div>
       </div>
@@ -113,13 +115,13 @@ const ConversationList: React.FC<ConversationListProps> = ({
         {loadingConversations ? (
           <div className="flex flex-col items-center justify-center h-32 text-gray-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
-            <p className="text-sm font-medium">Loading conversations...</p>
+            <p className="text-sm font-medium">{t("loadingConversations")}</p>
           </div>
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-gray-500 px-6">
             <FiMessageCircle className="w-12 h-12 mb-4 opacity-50" />
-            <p className="text-center text-sm font-medium">No conversations yet</p>
-            <p className="text-center text-xs mt-1 opacity-75">Start a new chat to begin messaging</p>
+            <p className="text-center text-sm font-medium">{t("noConversations")}</p>
+            <p className="text-center text-xs mt-1 opacity-75">{t("startNewChat")}</p>
           </div>
         ) : (
           <div className="p-4 space-y-2">

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 interface TimerAndFormPanelProps {
   elapsedTime: number;
@@ -49,6 +50,8 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
   workDuration = 25 * 60,
   breakDuration = 5 * 60,
 }) => {
+  const t = useTranslations("TimeTrackingPage");
+
   const formatTime = (timeInSeconds: number) => {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
@@ -69,7 +72,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
         {pomodoroMode ? (
           <>
             <div className={`text-sm font-semibold mb-2 ${pomodoroPhase === 'work' ? 'text-red-600' : 'text-blue-600'}`}>
-              {pomodoroPhase === 'work' ? "Work Session" : "Break Time"} • Cycle {pomodoroCycles}
+              {pomodoroPhase === 'work' ? t("workSession") : t("breakTime")} • {t("cycles", { count: pomodoroCycles })}
             </div>
             <div className={`w-full rounded-full h-2 mb-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
               <div
@@ -101,7 +104,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
             }`}
           >
             <FaPlay className="w-3 h-3" />
-            Start
+            {t("start")}
           </Button>
           <Button
             onClick={onStop}
@@ -115,7 +118,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
             }`}
           >
             <FaPause className="w-3 h-3" />
-            Stop
+            {t("stop")}
           </Button>
           <Button
             onClick={onReset}
@@ -126,7 +129,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
             }`}
           >
             <FaStop className="w-3 h-3" />
-            Reset
+            {t("reset")}
           </Button>
         </div>
       </div>
@@ -141,13 +144,13 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
       >
         <div>
           <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-            Session Name
+            {t("sessionName")}
           </label>
           <Input
             type="text"
             value={sessionName}
             onChange={e => onNameChange(e.target.value)}
-            placeholder="What did you work on?"
+            placeholder={t("sessionName")}
             className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 ${
               theme === "dark"
                 ? "bg-gray-700 text-white border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
@@ -159,12 +162,12 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
 
         <div>
           <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-            Description
+            {t("sessionDescription")}
           </label>
           <Textarea
             value={sessionDescription}
             onChange={e => onDescriptionChange(e.target.value)}
-            placeholder="Add details about your work..."
+            placeholder={t("addNotesContext")}
             rows={3}
             className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 resize-none ${
               theme === "dark"
@@ -177,7 +180,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
 
         <div>
           <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-            Category
+            {t("tag")}
           </label>
           <Select
             value={sessionTag}
@@ -188,7 +191,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
             <SelectTrigger
               className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
             >
-              <SelectValue placeholder="Select category" />
+              <SelectValue placeholder={t("selectCategory")} />
             </SelectTrigger>
             <SelectContent
               className="bg-white border border-gray-300 rounded-lg p-0"
@@ -218,7 +221,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
           }`}
         >
           <FaSave className="w-4 h-4" />
-          Save Session
+          {t("saveSession")}
         </Button>
       </form>
     </div>
