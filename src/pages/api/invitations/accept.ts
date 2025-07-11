@@ -97,19 +97,24 @@ export default async function handler(
 
     // 2. Find the department containing the role
     let departmentId: string | null = null;
-    for (const dept of orgChart.departments) {
-      for (const level of dept.levels) {
-        if (
-          level.roles.some(
-            (r: string) =>
-              r.trim().toLowerCase() === invitation.role.trim().toLowerCase()
-          )
-        ) {
-          departmentId = dept.id;
-          break;
+    if (lowercaseRole == "admin") {
+      // If the role is admin, we can assign it to the default department
+      departmentId = "admin-department";
+    } else {
+      for (const dept of orgChart.departments) {
+        for (const level of dept.levels) {
+          if (
+            level.roles.some(
+              (r: string) =>
+                r.trim().toLowerCase() === invitation.role.trim().toLowerCase()
+            )
+          ) {
+            departmentId = dept.id;
+            break;
+          }
         }
+        if (departmentId) break;
       }
-      if (departmentId) break;
     }
 
     if (!departmentId) {
