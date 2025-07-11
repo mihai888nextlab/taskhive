@@ -4,6 +4,7 @@ import { FaSearch, FaSpinner, FaBullhorn, FaFilter, FaThumbtack } from "react-ic
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 interface Announcement {
   _id: string;
@@ -52,6 +53,8 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
   onCategoryFilterChange,
   categories = ["All", "Update", "Event", "Alert"],
 }) => {
+  const t = useTranslations("AnnouncementsPage");
+
   // Filter and sort announcements - pinned first, then by creation date
   const filteredAnnouncements = useMemo(() => {
     const filtered = announcements.filter(a => {
@@ -86,7 +89,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
           <Input
             type="text"
-            placeholder="Search announcements..."
+            placeholder={t("searchAnnouncementsPlaceholder")}
             value={search}
             onChange={e => onSearchChange && onSearchChange(e.target.value)}
             className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200 ${
@@ -107,7 +110,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
             <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
               style={{ height: "36px" }}
             >
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={t("categoryAll")} />
             </SelectTrigger>
             <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
               {categories.map(cat => (
@@ -116,7 +119,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
                   value={cat}
                   className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
                 >
-                  {cat === "All" ? "All Categories" : cat}
+                  {cat === "All" ? t("categoryAll") : t(`category${cat}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -137,10 +140,10 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
               <FaSpinner className="animate-spin text-2xl text-blue-600" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Loading announcements...
+              {t("loadingAnnouncements")}
             </h3>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Please wait while we fetch the latest updates
+              {t("pleaseWaitFetchAnnouncements")}
             </p>
           </div>
         ) : filteredAnnouncements.length === 0 ? (
@@ -151,12 +154,12 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
               <FaBullhorn className="text-2xl text-gray-400" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {search.trim() ? 'No matching announcements found' : 'No announcements yet'}
+              {search.trim() ? t("noMatchingAnnouncementsFound") : t("noAnnouncementsYet")}
             </h3>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
               {search.trim() 
-                ? 'Try adjusting your search criteria or filters' 
-                : 'Check back later for company updates and news'
+                ? t("tryAdjustingSearchOrFilters") 
+                : t("checkBackLater")
               }
             </p>
           </div>
@@ -171,12 +174,14 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
                     : 'bg-blue-50 text-blue-700 border border-blue-200'
                 }`}>
                   <FaBullhorn className="w-3.5 h-3.5" />
-                  <span>{filteredAnnouncements.length} announcement{filteredAnnouncements.length !== 1 ? 's' : ''}</span>
+                  <span>
+                    {filteredAnnouncements.length} {filteredAnnouncements.length === 1 ? t("announcement") : t("announcements")}
+                  </span>
                 </div>
                 
                 {search.trim() && (
                   <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Searching for "{search}"
+                    {t("searchingFor", { search })}
                   </div>
                 )}
               </div>
@@ -187,7 +192,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
                     ? 'bg-gray-700 text-gray-300' 
                     : 'bg-gray-100 text-gray-600'
                 }`}>
-                  Category: {categoryFilter}
+                  {t("categoryLabel", { category: categoryFilter })}
                 </div>
               )}
             </div>
@@ -221,7 +226,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" style={{ top: "50%" }} />
           <Input
             type="text"
-            placeholder="Search announcements..."
+            placeholder={t("searchAnnouncementsPlaceholder")}
             value={search}
             onChange={e => onSearchChange && onSearchChange(e.target.value)}
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 h-12
@@ -252,7 +257,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
             >
               {categories.map(cat => (
                 <option key={cat} value={cat}>
-                  {cat === "All" ? "All Categories" : cat}
+                  {cat === "All" ? t("categoryAll") : t(`category${cat}`)}
                 </option>
               ))}
             </select>
@@ -269,10 +274,10 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
               <FaSpinner className="animate-spin text-2xl text-blue-600" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Loading announcements...
+              {t("loadingAnnouncements")}
             </h3>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Please wait while we fetch the latest updates
+              {t("pleaseWaitFetchAnnouncements")}
             </p>
           </div>
         ) : filteredAnnouncements.length === 0 ? (
@@ -283,12 +288,12 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
               <FaBullhorn className="text-2xl text-gray-400" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {search.trim() ? 'No matching announcements found' : 'No announcements yet'}
+              {search.trim() ? t("noMatchingAnnouncementsFound") : t("noAnnouncementsYet")}
             </h3>
             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
               {search.trim() 
-                ? 'Try adjusting your search criteria or filters' 
-                : 'Check back later for company updates and news'
+                ? t("tryAdjustingSearchOrFilters") 
+                : t("checkBackLater")
               }
             </p>
           </div>
@@ -303,7 +308,9 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
                     : 'bg-blue-50 text-blue-700 border border-blue-200'
                 }`}>
                   <FaBullhorn className="w-3.5 h-3.5" />
-                  <span>{filteredAnnouncements.length} announcement{filteredAnnouncements.length !== 1 ? 's' : ''}</span>
+                  <span>
+                    {filteredAnnouncements.length} {filteredAnnouncements.length === 1 ? t("announcement") : t("announcements")}
+                  </span>
                 </div>
                 
                 {pinnedCount > 0 && (
@@ -319,7 +326,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
                 
                 {search.trim() && (
                   <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Searching for "{search}"
+                    {t("searchingFor", { search })}
                   </div>
                 )}
               </div>
@@ -330,7 +337,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
                     ? 'bg-gray-700 text-gray-300' 
                     : 'bg-gray-100 text-gray-600'
                 }`}>
-                  Category: {categoryFilter}
+                  {t("categoryLabel", { category: categoryFilter })}
                 </div>
               )}
             </div>

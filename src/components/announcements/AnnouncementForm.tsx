@@ -3,6 +3,7 @@ import { FaBullhorn, FaSpinner, FaMagic, FaTimes } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import { useTranslations } from "next-intl";
 
 interface AnnouncementFormProps {
   title: string;
@@ -50,6 +51,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const t = useTranslations("AnnouncementsPage");
   const [generatingContent, setGeneratingContent] = useState(false);
 
   const handleGenerateContent = async () => {
@@ -96,10 +98,10 @@ Write a clear, engaging, and informative announcement for all employees, based o
             </div>
             <div>
               <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Create Announcement
+                {t("createAnnouncement")}
               </h2>
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Share important updates with your team
+                {t("allAnnouncementsDesc")}
               </p>
             </div>
           </div>
@@ -128,11 +130,11 @@ Write a clear, engaging, and informative announcement for all employees, based o
             <label className={`block text-sm font-semibold mb-2 ${
               theme === 'dark' ? 'text-white' : 'text-gray-900'
             }`}>
-              Announcement Title *
+              {t("announcementTitle")} *
             </label>
             <Input
               type="text"
-              placeholder="Enter announcement title..."
+              placeholder={t("enterAnnouncementTitle")}
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               className="w-full py-3 px-4 text-base rounded-xl"
@@ -147,7 +149,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
               <label className={`block text-sm font-semibold ${
                 theme === 'dark' ? 'text-white' : 'text-gray-900'
               }`}>
-                Content *
+                {t("content")} *
               </label>
               <Button
                 type="button"
@@ -160,18 +162,18 @@ Write a clear, engaging, and informative announcement for all employees, based o
                 }`}
                 onClick={handleGenerateContent}
                 disabled={!title || generatingContent}
-                title="Generate content from title"
+                title={t("generateContentFromTitle")}
               >
                 {generatingContent ? (
                   <FaSpinner className="animate-spin w-3.5 h-3.5" />
                 ) : (
                   <FaMagic className="w-3.5 h-3.5" />
                 )}
-                Generate
+                {t("generate")}
               </Button>
             </div>
             <textarea
-              placeholder="Write your announcement content here... (Markdown supported)"
+              placeholder={t("writeAnnouncementContent")}
               value={content}
               onChange={e => onContentChange(e.target.value)}
               rows={6}
@@ -184,7 +186,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
               disabled={loading || generatingContent}
             />
             <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              You can use <a href="https://www.markdownguide.org/cheat-sheet/" target="_blank" rel="noopener noreferrer" className="underline">Markdown</a> for formatting.
+              {t("markdownSupported")}
             </p>
           </div>
 
@@ -195,7 +197,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
               <label className={`block text-sm font-semibold mb-2 ${
                 theme === 'dark' ? 'text-white' : 'text-gray-900'
               }`}>
-                Category *
+                {t("category")} *
               </label>
               <div className="space-y-2">
                 {categories.map((cat) => (
@@ -213,13 +215,13 @@ Write a clear, engaging, and informative announcement for all employees, based o
                     variant={category === cat ? "default" : "outline"}
                   >
                     <div>
-                      <div className="font-semibold">{cat}</div>
+                      <div className="font-semibold">{t(`category${cat}`)}</div>
                       <div className={`text-xs ${
                         category === cat ? 'text-white/80' : theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
                       }`}>
-                        {cat === 'Update' && 'General company updates'}
-                        {cat === 'Event' && 'Upcoming events & meetings'}
-                        {cat === 'Alert' && 'Urgent notifications'}
+                        {cat === 'Update' && t("categoryUpdateDesc")}
+                        {cat === 'Event' && t("categoryEventDesc")}
+                        {cat === 'Alert' && t("categoryAlertDesc")}
                       </div>
                     </div>
                   </Button>
@@ -232,7 +234,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
               <label className={`block text-sm font-semibold mb-2 ${
                 theme === 'dark' ? 'text-white' : 'text-gray-900'
               }`}>
-                Priority
+                {t("priority")}
               </label>
               <div className="space-y-2">
                 <Button
@@ -250,11 +252,11 @@ Write a clear, engaging, and informative announcement for all employees, based o
                   variant={!pinned ? "default" : "outline"}
                 >
                   <div>
-                    <div className="font-semibold">Normal</div>
+                    <div className="font-semibold">{t("priorityNormal")}</div>
                     <div className={`text-xs ${
                       !pinned ? 'text-white/80' : theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
                     }`}>
-                      Standard announcement
+                      {t("priorityNormalDesc")}
                     </div>
                   </div>
                 </Button>
@@ -271,11 +273,11 @@ Write a clear, engaging, and informative announcement for all employees, based o
                   variant={pinned ? "default" : "outline"}
                 >
                   <div>
-                    <div className="font-semibold">Pin to Top</div>
+                    <div className="font-semibold">{t("priorityPinToTop")}</div>
                     <div className={`text-xs ${
                       pinned ? 'text-white/80' : theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
                     }`}>
-                      High priority announcement
+                      {t("priorityPinToTopDesc")}
                     </div>
                   </div>
                 </Button>
@@ -287,7 +289,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
               <label className={`block text-sm font-semibold mb-2 ${
                 theme === 'dark' ? 'text-white' : 'text-gray-900'
               }`}>
-                Expiry Date
+                {t("expiryDate")}
               </label>
               <DatePicker
                 value={expiresAtDateObj}
@@ -300,11 +302,11 @@ Write a clear, engaging, and informative announcement for all employees, based o
                   }
                 }}
                 disabled={loading}
-                className="w-full h-10" // reduced height
+                className="w-full h-10"
                 placeholder="mm / dd / yyyy"
               />
               <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                Optional: When this announcement should stop being visible
+                {t("optionalExpiryDate")}
               </p>
             </div>
           </div>
@@ -325,7 +327,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
             disabled={loading}
             variant="ghost"
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             type="submit"
@@ -340,12 +342,12 @@ Write a clear, engaging, and informative announcement for all employees, based o
             {loading ? (
               <div className="flex items-center justify-center gap-2">
                 <FaSpinner className="animate-spin w-4 h-4" />
-                Publishing...
+                {t("publishing")}...
               </div>
             ) : (
               <div className="flex items-center justify-center gap-2">
                 <FaBullhorn className="w-4 h-4" />
-                Publish Announcement
+                {t("publishAnnouncement")}
               </div>
             )}
           </Button>

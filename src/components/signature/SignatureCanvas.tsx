@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { FaEraser, FaPencilAlt, FaUndo, FaPalette, FaExpandArrowsAlt } from 'react-icons/fa';
+import { useTranslations } from "next-intl";
 
 interface SignatureCanvasProps {
   onSignatureChange: (signature: string) => void;
@@ -17,6 +18,7 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
   const [lineWidth, setLineWidth] = useState(3);
   const [color, setColor] = useState('#000000');
   const [lastPath, setLastPath] = useState<ImageData | null>(null);
+  const t = useTranslations("Signature");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -145,7 +147,7 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <FaPencilAlt className="text-blue-600 text-sm" />
-            <span className="text-gray-700 font-medium text-sm">Size: {lineWidth}px</span>
+            <span className="text-gray-700 font-medium text-sm">{t("size")}: {lineWidth}px</span>
           </div>
           <input
             type="range"
@@ -164,14 +166,14 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <FaPalette className="text-purple-600 text-sm" />
-            <span className="text-gray-700 font-medium text-sm">Color:</span>
+            <span className="text-gray-700 font-medium text-sm">{t("color")}:</span>
           </div>
           <input
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
             className="w-8 h-8 border-2 border-gray-300 rounded-md cursor-pointer"
-            title="Pick pen color"
+            title={t("pickPenColor")}
           />
         </div>
       </div>
@@ -245,7 +247,7 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
           
           {/* Canvas Instructions */}
           <div className="absolute top-4 left-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-md pointer-events-none">
-            Draw your signature here
+            {t("drawSignatureHere")}
           </div>
         </div>
       </div>
@@ -258,7 +260,7 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
         >
           <div className="flex items-center justify-center gap-2">
             <FaEraser className="text-xs" />
-            Clear
+            {t("clear")}
           </div>
         </button>
         
@@ -268,7 +270,7 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
         >
           <div className="flex items-center justify-center gap-2">
             <FaUndo className="text-xs" />
-            Undo
+            {t("undo")}
           </div>
         </button>
       </div>
@@ -278,7 +280,7 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-blue-600 text-sm">💡</span>
           <span className="text-blue-800 text-sm font-medium">
-            Sign naturally as you would on paper. You can adjust size and color above.
+            {t("signNaturallyTip")}
           </span>
         </div>
       </div>

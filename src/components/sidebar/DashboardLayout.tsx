@@ -12,14 +12,20 @@ import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext"
 import { useAIWindow } from "@/contexts/AIWindowContext";
 import Link from "next/link";
 import HeaderNavBar from "@/components/header/HeaderNavBar";
+import { useTranslations, useLocale } from "next-intl";
 
 interface DashboardLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
+  locale?: string;
+  requireAuth?: boolean; // <-- Add this prop, default true
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, locale, requireAuth = true }) => {
   const { user, loadingUser, isAuthenticated, logout } = useAuth();
   const router = useRouter();
+  const currentLocale = locale || useLocale() || "en";
+  const t = useTranslations("Navigation"); // This will use the correct locale automatically
+
   const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } =
     useTimeTracking();
   const { isAIWindowOpen, setIsAIWindowOpen, toggleAIWindow } = useAIWindow();
@@ -52,14 +58,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
+  // Only redirect to login if requireAuth is true
   useEffect(() => {
-    if (!loadingUser && !isAuthenticated) {
-      // Asigură-te că nu redirecționezi la infinit dacă pagina curentă este deja pagina de login
+    if (requireAuth && !loadingUser && !isAuthenticated) {
       if (router.pathname !== "/login") {
         router.push("/login");
       }
     }
-  }, [loadingUser, isAuthenticated, router]);
+  }, [requireAuth, loadingUser, isAuthenticated, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -80,8 +86,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   };
 
-  // Ensure hooks are called consistently
-  if (!user) {
+  // Only block rendering if requireAuth and no user
+  if (requireAuth && !user) {
+    // Fix: Only pass user if not null, else pass a fallback user object or skip rendering SidebarNav
     return null; // Or a spinner
   }
 
@@ -89,7 +96,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const incompleteTasksCount = incompleteTasks.length;
 
   const menuWithNotifications = menu.map((item) => {
-    if (item.name === "Tasks" && incompleteTasksCount > 0) {
+    if (item.name === t("tasks") && incompleteTasksCount > 0) {
       return { ...item, notification: incompleteTasksCount };
     }
     return { ...item, notification: undefined };
@@ -98,30 +105,34 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="flex w-full min-h-screen bg-gray-100">
       {/* Header NavBar */}
-      <HeaderNavBar />
+      <HeaderNavBar t={t} />
       {/* Sidebar for desktop */}
-      <SidebarNav menu={menuWithNotifications} user={user} router={router} />
+      {user && (
+        <SidebarNav menu={menuWithNotifications} user={user} router={router} t={t} />
+      )}
       {/* Sidebar drawer for mobile */}
-      <MobileSidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        menu={menu}
-        user={user}
-        router={router}
-      />
+      {user && (
+        <MobileSidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          menu={menu}
+          user={user}
+          router={router}
+          t={t}
+        />
+      )}
       {/* Main Content */}
       <div
         className="flex-1 flex flex-col bg-gray-100"
         style={{
           marginLeft: 300, // width of the fixed sidebar
           marginTop: 42,   // height of the absolute header (14 * 4)
-          marginRight: isDesktop && isAIWindowOpen ? 420 : 0, // <-- Add this!
+          marginRight: isDesktop && isAIWindowOpen ? 420 : 0,
         }}
       >
         <main className="flex-1 bg-gray-100 rounded-tl-lg shadow-lg min-h-screen">
           {children}
         </main>
-        
         {/* Persistent Timer - Only show timer, no form */}
         {shouldShowPersistentTimer && (
           <PersistentTimer
@@ -175,6 +186,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         isOpen={isAIWindowOpen}
         onClose={() => setIsAIWindowOpen(false)}
         isDesktop={isDesktop}
+        locale={currentLocale}
       />
       <UserProfileModal
         open={profileModalOpen}

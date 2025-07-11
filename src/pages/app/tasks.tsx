@@ -9,6 +9,7 @@ import AssignedTasksList from "@/components/tasks/AssignedTasksList";
 import { createPortal } from 'react-dom';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface TaskUser {
   _id: string;
@@ -46,7 +47,7 @@ const isTaskOverdue = (task: Task): boolean => {
 
 type ActiveTab = 'my-tasks' | 'assigned-tasks';
 
-const TasksPage: NextPageWithLayout = () => {
+const TasksPage: NextPageWithLayout = (props) => {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<ActiveTab>('my-tasks');
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -80,6 +81,8 @@ const TasksPage: NextPageWithLayout = () => {
   const [assignedFilterStatus, setAssignedFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
   const [assignedFilterPriority, setAssignedFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all"); // Changed from filterImportant
   const [assignedSortBy, setAssignedSortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc"); // Changed default
+
+  const t = useTranslations("TasksPage");
 
   // Fetch tasks
   const fetchTasks = async () => {
@@ -340,7 +343,7 @@ const TasksPage: NextPageWithLayout = () => {
                 variant="ghost"
               >
                 <FaTasks className="w-4 h-4" />
-                <span>My Tasks</span>
+                <span>{t("myTasks")}</span>
               </Button>
               <Button
                 type="button"
@@ -357,7 +360,7 @@ const TasksPage: NextPageWithLayout = () => {
                 variant="ghost"
               >
                 <FaUserCheck className="w-4 h-4" />
-                <span>Assigned by Me</span>
+                <span>{t("assignedByMe")}</span>
               </Button>
             </div>
 
@@ -374,7 +377,7 @@ const TasksPage: NextPageWithLayout = () => {
               disabled={loading}
             >
               <FaPlus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
-              <span>Create Task</span>
+              <span>{t("createTask")}</span>
             </Button>
           </div>
         </div>
@@ -395,10 +398,10 @@ const TasksPage: NextPageWithLayout = () => {
                     </div>
                     <div>
                       <h2 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
-                        My Tasks
+                        {t("myTasks")}
                       </h2>
                       <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
-                        Tasks assigned to you and personal tasks you've created
+                        {t("myTasksDescription")}
                       </p>
                     </div>
                   </div>
@@ -456,10 +459,10 @@ const TasksPage: NextPageWithLayout = () => {
                     </div>
                     <div>
                       <h2 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
-                        Tasks Assigned by Me
+                        {t("tasksAssignedByMe")}
                       </h2>
                       <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
-                        Monitor and manage tasks you've assigned to team members
+                        {t("assignedTasksDescription")}
                       </p>
                     </div>
                   </div>
@@ -565,7 +568,9 @@ const TasksPage: NextPageWithLayout = () => {
 };
 
 TasksPage.getLayout = function getLayout(page: React.ReactElement) {
-  return <DashboardLayout>{page}</DashboardLayout>;
+  // Pass locale to DashboardLayout
+  const locale = (page.props as any)?.locale;
+  return <DashboardLayout locale={locale}>{page}</DashboardLayout>;
 };
 
 export default TasksPage;

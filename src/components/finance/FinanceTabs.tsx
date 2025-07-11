@@ -1,5 +1,6 @@
 import { useTheme } from '@/components/ThemeContext';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import { useTranslations } from 'next-intl';
 
 interface Props {
   activeTab: 'expenses' | 'incomes';
@@ -9,6 +10,7 @@ interface Props {
 
 export default function FinanceTabs({ activeTab, setActiveTab, loading }: Props) {
   const { theme } = useTheme();
+  const t = useTranslations('FinancePage');
 
   return (
     <div
@@ -30,7 +32,7 @@ export default function FinanceTabs({ activeTab, setActiveTab, loading }: Props)
         style={{ minWidth: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
       >
         <FaArrowDown className="w-4 h-4" />
-        <span>Expenses</span>
+        <span>{t('expenses')}</span>
       </button>
       <button
         type="button"
@@ -48,7 +50,7 @@ export default function FinanceTabs({ activeTab, setActiveTab, loading }: Props)
         style={{ minWidth: 0, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
       >
         <FaArrowUp className="w-4 h-4" />
-        <span>Income</span>
+        <span>{t('income')}</span>
       </button>
     </div>
   );

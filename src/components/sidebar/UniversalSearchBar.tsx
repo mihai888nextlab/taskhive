@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import UserProfileModal from "../modals/UserProfileModal";
+import { useTranslations } from "next-intl"; // <-- Add this import
 
 const LABELS: Record<string, { label: string; color: string }> = {
   user: { label: "User", color: "bg-secondary" },
@@ -62,6 +63,7 @@ const UniversalSearchBar: React.FC = () => {
 
   // Add a ref to the input
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations("UniversalSearchBar"); // <-- Use a dedicated namespace
 
   // Focus input on Cmd+K or Ctrl+K
   useEffect(() => {
@@ -145,7 +147,7 @@ const UniversalSearchBar: React.FC = () => {
         onChange={(e) => setSearch(e.target.value)}
         onFocus={() => search && setShowDropdown(true)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-        placeholder="Search tasks, users, files, etc..."
+        placeholder={t("placeholder", { default: "Search tasks, users, files, etc..." })} // <-- Use translation
         className="w-full px-5 py-2 rounded-3xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/60 border border-gray-200 text-base font-medium transition-all"
       />
       {loading && (
@@ -164,7 +166,7 @@ const UniversalSearchBar: React.FC = () => {
                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" />
               </svg>
-              <span className="text-base font-medium">Searching...</span>
+              <span className="text-base font-medium">{t("searching", { default: "Searching..." })}</span>
             </div>
           ) : (() => {
             // Define the categories you want to show
@@ -222,8 +224,8 @@ const UniversalSearchBar: React.FC = () => {
                     <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" />
                   </svg>
-                  <span className="text-base font-medium">No results found</span>
-                  <span className="text-xs text-gray-400 mt-1">Try a different search term</span>
+                  <span className="text-base font-medium">{t("noResults", { default: "No results found" })}</span>
+                  <span className="text-xs text-gray-400 mt-1">{t("tryDifferent", { default: "Try a different search term" })}</span>
                 </div>
               );
             }
@@ -260,7 +262,7 @@ const UniversalSearchBar: React.FC = () => {
                 {categoriesWithResults.map(cat => (
                   <div key={cat.key} className="mb-2">
                     <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary/80 bg-primary/5 border-b border-primary/10 rounded-t-lg">
-                      {cat.label}
+                      {t(`category.${cat.key}`, { default: cat.label })}
                     </div>
                     <ul>
                       {grouped[cat.key].map(renderResult)}

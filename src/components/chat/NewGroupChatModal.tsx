@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { createPortal } from 'react-dom';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface NewGroupChatModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("CommunicationPage");
 
   // Fetch all users (excluding current user)
   useEffect(() => {
@@ -195,8 +197,8 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                     <FaUsers className="text-xl text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Create New Group</h2>
-                    <p className="text-gray-600">Set up your team collaboration</p>
+                    <h2 className="text-2xl font-bold text-gray-900">{t("createNewGroup")}</h2>
+                    <p className="text-gray-600">{t("setUpTeamCollab")}</p>
                   </div>
                 </div>
               </div>
@@ -204,14 +206,14 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
               {/* Group Name Input */}
               <div className="p-6 border-b border-gray-200">
                 <label htmlFor="groupName" className="block text-gray-900 text-lg font-semibold mb-3">
-                  Group Name *
+                  {t("groupName")} *
                 </label>
                 <Input
                   type="text"
                   id="groupName"
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
-                  placeholder="Enter group name (e.g., Marketing Team)"
+                  placeholder={t("groupNamePlaceholder")}
                   className="w-full p-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 text-lg"
                   disabled={creatingGroup}
                 />
@@ -221,14 +223,14 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
               <div className="flex-1 p-6 overflow-y-auto">
                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <FaUsers className="text-blue-600" />
-                  Selected Members ({selectedUsers.length})
+                  {t("selectedMembers", { count: selectedUsers.length })}
                 </h4>
                 
                 {selectedUsers.length === 0 ? (
                   <div className="p-6 bg-white border-2 border-dashed border-gray-300 rounded-xl text-center">
                     <FaUsers className="text-4xl text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-500 font-medium">No members selected</p>
-                    <p className="text-gray-400 text-sm">Choose team members from the right panel</p>
+                    <p className="text-gray-500 font-medium">{t("noMembersSelected")}</p>
+                    <p className="text-gray-400 text-sm">{t("chooseMembersRightPanel")}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -282,7 +284,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                     disabled={creatingGroup}
                     variant="ghost"
                   >
-                    Cancel
+                    {t("cancel")}
                   </Button>
                   <Button
                     onClick={handleCreateGroup}
@@ -296,12 +298,12 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                     {creatingGroup ? (
                       <div className="flex items-center justify-center gap-2">
                         <FaSpinner className="animate-spin" />
-                        Creating...
+                        {t("creating")}
                       </div>
                     ) : (
                       <div className="flex items-center justify-center gap-2">
                         <FaUsers />
-                        Create Group
+                        {t("createGroup")}
                       </div>
                     )}
                   </Button>
@@ -314,13 +316,13 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
               {/* Search Header */}
               <div className="p-6 border-b border-gray-200">
                 <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  Add Team Members
+                  {t("addTeamMembers")}
                 </label>
                 <div className="relative">
                   <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <Input
                     type="text"
-                    placeholder="Search users by name or email..."
+                    placeholder={t("searchUsersPlaceholder")}
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -331,24 +333,24 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
 
               {/* Users List */}
               <div className="flex-1 p-6 overflow-y-auto">
-                <h4 className="font-semibold text-gray-900 mb-4">Available Team Members</h4>
+                <h4 className="font-semibold text-gray-900 mb-4">{t("availableTeamMembers")}</h4>
                 
                 {loadingUsers ? (
                   <div className="text-center py-12">
                     <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
-                    <p className="text-gray-500 text-lg">Loading team members...</p>
+                    <p className="text-gray-500 text-lg">{t("loadingTeamMembers")}</p>
                   </div>
                 ) : filteredUsers.length === 0 && searchTerm === "" ? (
                   <div className="text-center py-12">
                     <FaUsers className="text-6xl text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">No Team Members</h4>
-                    <p className="text-gray-500">No other users are available</p>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noTeamMembers")}</h4>
+                    <p className="text-gray-500">{t("noOtherUsersAvailable")}</p>
                   </div>
                 ) : filteredUsers.length === 0 && searchTerm !== "" ? (
                   <div className="text-center py-12">
                     <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">No Results Found</h4>
-                    <p className="text-gray-500">Try searching with a different name or email</p>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noResultsFound")}</h4>
+                    <p className="text-gray-500">{t("tryDifferentSearch")}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -384,7 +386,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                               <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
                                 <span className="text-white text-sm">✓</span>
                               </div>
-                              Added
+                              {t("added")}
                             </div>
                           ) : (
                             <Button 
@@ -393,7 +395,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                               disabled={creatingGroup}
                             >
                               <FaPlus className="text-sm" />
-                              Add
+                              {t("add")}
                             </Button>
                           )}
                         </div>

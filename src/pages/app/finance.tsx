@@ -13,10 +13,12 @@ import CategoryPieChart from '@/components/finance/CategoryPieChart';
 import UndoSnackbar from '@/components/finance/UndoSnackbar';
 import StatsRangeButtons from '@/components/finance/StatsRangeButtons';
 import { FaDollarSign, FaChartLine } from 'react-icons/fa';
+import { useTranslations } from "next-intl";
 
 const FinancePage = () => {
   const { theme } = useTheme();
   const logic = useFinancePageLogic();
+  const t = useTranslations("FinancePage");
 
   return (
     <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
@@ -67,12 +69,12 @@ const FinancePage = () => {
                     </div>
                     <div>
                       <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                        Add {logic.activeTab === 'expenses' ? 'Expense' : 'Income'}
+                        {t('addExpenseIncome', { type: logic.activeTab === 'expenses' ? t('expenses') : t('income') })}
                       </h2>
                       <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                         {logic.activeTab === 'expenses' 
-                          ? 'Track your spending and expenses'
-                          : 'Record your income and earnings'
+                          ? t('trackSpendingExpenses')
+                          : t('recordIncomeEarnings')
                         }
                       </p>
                     </div>
@@ -110,12 +112,12 @@ const FinancePage = () => {
                       </div>
                       <div>
                         <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                          Recent {logic.activeTab === 'expenses' ? 'Expenses' : 'Income'}
+                          {t('recent', { type: logic.activeTab === 'expenses' ? t('expenses') : t('income') })}
                         </h2>
                         <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                           {logic.activeTab === 'expenses' 
-                            ? 'View and manage your recent expenses'
-                            : 'View and manage your recent income'
+                            ? t('viewManageRecentExpenses')
+                            : t('viewManageRecentIncome')
                           }
                         </p>
                       </div>

@@ -3,6 +3,7 @@ import { FaSearch, FaTrash, FaSpinner, FaClock } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 interface Session {
   _id: string;
@@ -36,6 +37,8 @@ const SessionList: React.FC<SessionListProps> = ({
   sessionSort,
   setSessionSort,
 }) => {
+  const t = useTranslations("TimeTrackingPage");
+
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -74,7 +77,7 @@ const SessionList: React.FC<SessionListProps> = ({
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             type="text"
-            placeholder="Search sessions..."
+            placeholder={t("searchSessions")}
             value={sessionSearch}
             onChange={e => setSessionSearch(e.target.value)}
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl h-[36px] border transition-all duration-200 ${
@@ -96,10 +99,10 @@ const SessionList: React.FC<SessionListProps> = ({
               className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
               style={{ height: "36px" }}
             >
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={t("allCategories")} />
             </SelectTrigger>
             <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-              <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">All Categories</SelectItem>
+              <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("allCategories")}</SelectItem>
               {tags.map(tag => (
                 <SelectItem
                   key={tag}
@@ -124,10 +127,10 @@ const SessionList: React.FC<SessionListProps> = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-              <SelectItem value="dateDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Newest First</SelectItem>
-              <SelectItem value="dateAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Oldest First</SelectItem>
-              <SelectItem value="durationDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Longest Duration</SelectItem>
-              <SelectItem value="durationAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Shortest Duration</SelectItem>
+              <SelectItem value="dateDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("newestFirst")}</SelectItem>
+              <SelectItem value="dateAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("oldestFirst")}</SelectItem>
+              <SelectItem value="durationDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("longestDuration")}</SelectItem>
+              <SelectItem value="durationAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("shortestDuration")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -144,12 +147,12 @@ const SessionList: React.FC<SessionListProps> = ({
                 <FaClock className="text-xl text-gray-400" />
               </div>
               <h3 className={`text-base font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {sessionSearch.trim() ? 'No matching sessions found' : 'No sessions yet'}
+                {sessionSearch.trim() ? t("noMatchingSessionsFound") : t("noSessionsYet")}
               </h3>
               <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 {sessionSearch.trim() 
-                  ? 'Try adjusting your search criteria or filters' 
-                  : 'Start your first time tracking session'
+                  ? t("tryAdjustingSearch") 
+                  : t("startFirstSession")
                 }
               </p>
             </div>

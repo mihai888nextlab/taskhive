@@ -2,15 +2,15 @@ import { MdSpaceDashboard, MdSettings, MdSdStorage, MdInsights } from "react-ico
 import { FaUserClock, FaTasks, FaCalendarAlt, FaBullhorn, FaComments, FaMoneyBillWave, FaClock, FaProjectDiagram } from "react-icons/fa";
 
 export const menu = [
-  { name: "Home", path: "/app", icon: MdSpaceDashboard },
-  { name: "Users", path: "/app/users", icon: FaUserClock },
-  { name: "Tasks", path: "/app/tasks", icon: FaTasks },
-  { name: "Announcements", path: "/app/announcements", icon: FaBullhorn },
-  { name: "Communication", path: "/app/communication", icon: FaComments },
-  { name: "Finance", path: "/app/finance", icon: FaMoneyBillWave },
-  { name: "Time Tracking", path: "/app/time-tracking", icon: FaClock },
-  { name: "Storage", path: "/app/storage", icon: MdSdStorage },
-  { name: "Calendar", path: "/app/calendar", icon: FaCalendarAlt },
-  { name: "Insights", path: "/app/insights", icon: MdInsights },
-  { name: "Settings", path: "/app/settings", icon: MdSettings },
+  { name: "home", path: "/app", icon: MdSpaceDashboard },
+  { name: "users", path: "/app/users", icon: FaUserClock },
+  { name: "tasks", path: "/app/tasks", icon: FaTasks },
+  { name: "announcements", path: "/app/announcements", icon: FaBullhorn },
+  { name: "communication", path: "/app/communication", icon: FaComments },
+  { name: "finance", path: "/app/finance", icon: FaMoneyBillWave },
+  { name: "time-tracking", path: "/app/time-tracking", icon: FaClock },
+  { name: "storage", path: "/app/storage", icon: MdSdStorage },
+  { name: "calendar", path: "/app/calendar", icon: FaCalendarAlt },
+  { name: "insights", path: "/app/insights", icon: MdInsights },
+  { name: "settings", path: "/app/settings", icon: MdSettings },
 ];

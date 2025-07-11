@@ -3,6 +3,7 @@ import { FaUser, FaEnvelope, FaUserTag } from "react-icons/fa";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 
 interface User {
   _id: string;
@@ -32,6 +33,8 @@ interface UserCardProps {
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
+  const t = useTranslations("UsersPage");
+
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "admin":

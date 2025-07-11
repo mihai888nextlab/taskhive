@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaArrowRight, FaCalendarAlt } from "react-icons/fa";
 import { useTheme } from "@/components/ThemeContext";
+import { useTranslations } from "next-intl";
 
 interface Task {
   _id: string;
@@ -26,6 +27,7 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = ({
   userEmail,
 }) => {
   const { theme } = useTheme();
+  const t = useTranslations("DashboardPage");
   const [deadlines, setDeadlines] = useState<Date[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,12 +106,11 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = ({
       <div className="flex-grow">
         {loading ? (
           <p className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
-            Loading deadlines...
+            {t("loadingDeadlines", { default: "Loading deadlines..." })}
           </p>
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : deadlines.length === 0 ? (
-          // Empty state styled like announcement/task card
           <div className="text-center py-16">
             <div
               className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
@@ -123,14 +124,14 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = ({
                 theme === "dark" ? "text-white" : "text-gray-900"
               }`}
             >
-              No upcoming deadlines
+              {t("noUpcomingDeadlines", { default: "No upcoming deadlines" })}
             </h3>
             <p
               className={`text-sm ${
                 theme === "dark" ? "text-gray-400" : "text-gray-500"
               }`}
             >
-              You have no scheduled tasks or events
+              {t("noScheduledTasksOrEvents", { default: "You have no scheduled tasks or events" })}
             </p>
           </div>
         ) : (

@@ -4,6 +4,7 @@ import SubtasksModal from "./SubtasksModal";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface Subtask {
   title: string;
@@ -51,6 +52,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const t = useTranslations("TasksPage");
   const [localPriority, setLocalPriority] = useState<'critical' | 'high' | 'medium' | 'low'>(priority);
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [generatingSubtasks, setGeneratingSubtasks] = useState(false);
@@ -209,10 +211,10 @@ Please enhance and expand this existing description while keeping the original i
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {editingTaskId ? "Edit Task" : "Create New Task"}
+                  {editingTaskId ? t("editTask") : t("createTask")}
                 </h2>
                 <p className="text-gray-600">
-                  {editingTaskId ? "Update task details" : "Add a new task to your workflow"}
+                  {editingTaskId ? t("updateTask") : t("addTask")}
                 </p>
               </div>
             </div>
@@ -231,12 +233,12 @@ Please enhance and expand this existing description while keeping the original i
             <div className="space-y-6">
               <div>
                 <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  Task Title *
+                  {t("taskTitle")} *
                 </label>
                 <Input
                   type="text"
                   className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
-                  placeholder="Enter task title..."
+                  placeholder={t("enterTaskTitle")}
                   value={taskTitle}
                   onChange={e => onTitleChange(e.target.value)}
                   required
@@ -246,7 +248,7 @@ Please enhance and expand this existing description while keeping the original i
 
               <div>
                 <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  Deadline *
+                  {t("deadline")} *
                 </label>
                 <DatePicker
                   value={deadlineDateObj}
@@ -266,7 +268,7 @@ Please enhance and expand this existing description while keeping the original i
 
               <div>
                 <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  Assign To
+                  {t("assignTo")}
                 </label>
                 <select
                   className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
@@ -274,7 +276,7 @@ Please enhance and expand this existing description while keeping the original i
                   onChange={e => onAssignedToChange(e.target.value)}
                   disabled={loading}
                 >
-                  <option value="">Assign to myself</option>
+                  <option value="">{t("assignToMyself")}</option>
                   {usersBelowMe.map(u => (
                     <option key={u.userId} value={u.userId}>
                       {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
@@ -285,7 +287,7 @@ Please enhance and expand this existing description while keeping the original i
 
               <div>
                 <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  Priority Level
+                  {t("priorityLevel")}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {['critical', 'high', 'medium', 'low'].map((level) => (
@@ -303,12 +305,12 @@ Please enhance and expand this existing description while keeping the original i
                       <div className="flex items-center gap-3">
                         {getPriorityIcon(level)}
                         <div>
-                          <div className="font-semibold capitalize">{level}</div>
+                          <div className="font-semibold capitalize">{t(level)}</div>
                           <div className="text-xs opacity-75">
-                            {level === 'critical' && 'Urgent'}
-                            {level === 'high' && 'Important'}
-                            {level === 'medium' && 'Normal'}
-                            {level === 'low' && 'Nice to have'}
+                            {level === 'critical' && t("priorityCriticalSubtitle")}
+                            {level === 'high' && t("priorityHighSubtitle")}
+                            {level === 'medium' && t("priorityMediumSubtitle")}
+                            {level === 'low' && t("priorityLowSubtitle")}
                           </div>
                         </div>
                       </div>
@@ -326,21 +328,21 @@ Please enhance and expand this existing description while keeping the original i
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <label className="block text-gray-900 text-lg font-semibold">
-                Task Description
+                {t("taskDescription")}
               </label>
               <Button
                 type="button"
                 className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center font-semibold shadow-sm hover:bg-purple-600 transition disabled:opacity-60"
                 onClick={handleGenerateDescription}
                 disabled={!taskTitle || generatingDescription}
-                title="Generate description from title"
+                title={t("generateDescriptionFromTitle")}
               >
                 {generatingDescription ? <FaSpinner className="animate-spin mr-2" /> : <FaMagic className="mr-2" />}
-                AI Generate
+                {t("aiGenerate")}
               </Button>
             </div>
             <p className="text-sm text-gray-600 mt-1">
-              Provide detailed information about the task (optional)
+              {t("provideDetailedInformationAboutTheTask")}
             </p>
           </div>
 
@@ -349,7 +351,7 @@ Please enhance and expand this existing description while keeping the original i
             <textarea
               rows={6}
               className="w-full h-auto min-h-[144px] max-h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200 text-lg"
-              placeholder="Describe the task in detail. What needs to be accomplished? What are the key requirements? Any specific instructions or context..."
+              placeholder={t("describeTheTaskInDetail")}
               value={taskDescription}
               onChange={e => onDescriptionChange(e.target.value)}
               disabled={loading || generatingDescription}
@@ -360,7 +362,7 @@ Please enhance and expand this existing description while keeping the original i
               <div className="mt-8">
                 <div className="flex items-center justify-between mb-4">
                   <label className="text-gray-900 text-lg font-semibold">
-                    Subtasks
+                    {t("subtasks")}
                   </label>
                   <Button
                     type="button"
@@ -369,7 +371,7 @@ Please enhance and expand this existing description while keeping the original i
                     disabled={loading || !taskTitle.trim()}
                   >
                     <FaList className="mr-2 w-4 h-4" />
-                    {subtasks.length > 0 ? `Manage (${subtasks.length})` : 'Break Down Task'}
+                    {subtasks.length > 0 ? `${t("manage")} (${subtasks.length})` : t("breakDownTask")}
                   </Button>
                 </div>
 
@@ -378,7 +380,7 @@ Please enhance and expand this existing description while keeping the original i
                     <div className="flex items-center gap-2 mb-3">
                       <FaTasks className="w-4 h-4 text-indigo-600" />
                       <span className="text-sm font-medium text-gray-700">
-                        {subtasks.length} subtask{subtasks.length > 1 ? 's' : ''} ready
+                        {subtasks.length} subtask{subtasks.length > 1 ? 's' : ''} {t("ready")}
                       </span>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -405,12 +407,12 @@ Please enhance and expand this existing description while keeping the original i
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
-                <span className="text-sm font-medium">Editing Task with Subtasks</span>
+                <span className="text-sm font-medium">{t("editingTaskWithSubtasks")}</span>
               </div>
               <ul className="text-xs text-blue-700 space-y-1 ml-6">
-                <li>• Subtasks are preserved and can be edited individually</li>
-                <li>• Deadline changes will update all subtask deadlines</li>
-                <li>• Description changes only affect this main task</li>
+                <li>• {t("subtasksPreservedAndCanBeEdited")}</li>
+                <li>• {t("deadlineChangesUpdateAllSubtaskDeadlines")}</li>
+                <li>• {t("descriptionChangesAffectMainTaskOnly")}</li>
               </ul>
             </div>
           )}
@@ -437,7 +439,7 @@ Please enhance and expand this existing description while keeping the original i
             disabled={loading}
             variant="ghost"
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             type="button"
@@ -452,12 +454,12 @@ Please enhance and expand this existing description while keeping the original i
             {loading ? (
               <>
                 <FaSpinner className="animate-spin" />
-                {editingTaskId ? "Updating..." : "Creating..."}
+                {editingTaskId ? t("updating") : t("creating")}
               </>
             ) : (
               <>
                 <FaTasks />
-                {editingTaskId ? "Update Task" : "Create Task"}
+                {editingTaskId ? t("updateTask") : t("createTask")}
               </>
             )}
           </Button>

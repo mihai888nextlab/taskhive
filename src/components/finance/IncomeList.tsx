@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 interface Income {
   _id: string;
@@ -55,6 +56,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
   onExportPDF,
 }) => {
   const { theme } = useTheme();
+  const t = useTranslations("FinancePage");
 
   return (
     <div className="flex flex-col h-full">
@@ -66,7 +68,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
             <Input
               type="text"
-              placeholder="Search income..."
+              placeholder={t("searchIncome")}
               value={search}
               onChange={e => onSearchChange(e.target.value)}
               className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200
@@ -90,7 +92,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
                     : 'bg-blue-500 text-white hover:bg-blue-600'
                 }`}
               style={{ height: "36px", width: "36px", minWidth: "36px", minHeight: "36px" }}
-              title="Export CSV"
+              title={t("exportCSV")}
               variant="ghost"
             >
               <FaFileCsv className="w-4 h-4" />
@@ -106,14 +108,13 @@ const IncomeList: React.FC<IncomeListProps> = ({
                     : 'bg-red-500 text-white hover:bg-red-600'
                 }`}
               style={{ height: "36px", width: "36px", minWidth: "36px", minHeight: "36px" }}
-              title="Export PDF"
+              title={t("exportPDF")}
               variant="ghost"
             >
               <FaFilePdf className="w-4 h-4" />
             </Button>
           </div>
         </div>
-
         {/* Filters Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
           {/* Category Filter */}
@@ -126,7 +127,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
               className={`w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 min-w-[140px]`}
               style={{ height: "36px" }}
             >
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={t("allCategories")} />
             </SelectTrigger>
             <SelectContent
               className={`rounded-xl border mt-1 ${
@@ -172,10 +173,10 @@ const IncomeList: React.FC<IncomeListProps> = ({
                   : "bg-white text-gray-900 border-gray-200"
               }`}
             >
-              <SelectItem value="date-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Newest First</SelectItem>
-              <SelectItem value="date-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Oldest First</SelectItem>
-              <SelectItem value="amount-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Highest Amount</SelectItem>
-              <SelectItem value="amount-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">Lowest Amount</SelectItem>
+              <SelectItem value="date-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("newestFirst")}</SelectItem>
+              <SelectItem value="date-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("oldestFirst")}</SelectItem>
+              <SelectItem value="amount-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("highestAmount")}</SelectItem>
+              <SelectItem value="amount-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("lowestAmount")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -186,7 +187,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
             selectsStart
             startDate={dateRange[0]}
             endDate={dateRange[1]}
-            placeholderText="Start Date"
+            placeholderText={t("startDate")}
             className={`w-full px-4 py-2 text-sm rounded-xl border transition-all duration-200 h-[36px]
               ${theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
@@ -202,7 +203,7 @@ const IncomeList: React.FC<IncomeListProps> = ({
             selectsEnd
             startDate={dateRange[0]}
             endDate={dateRange[1]}
-            placeholderText="End Date"
+            placeholderText={t("endDate")}
             className={`w-full px-4 py-2 text-sm rounded-xl border transition-all duration-200 h-[36px]
               ${theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
@@ -224,10 +225,10 @@ const IncomeList: React.FC<IncomeListProps> = ({
                 <FaSpinner className="animate-spin text-xl text-green-600" />
               </div>
               <h3 className={`text-base font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Loading income...
+                {t("loadingIncome")}
               </h3>
               <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                Please wait while we fetch your income data
+                {t("pleaseWaitIncome")}
               </p>
             </div>
           </div>
@@ -240,12 +241,12 @@ const IncomeList: React.FC<IncomeListProps> = ({
                 <FaCoins className="text-xl text-gray-400" />
               </div>
               <h3 className={`text-base font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {search.trim() ? 'No matching income found' : 'No income yet'}
+                {search.trim() ? t("noMatchingIncome") : t("noIncomeYet")}
               </h3>
               <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 {search.trim() 
-                  ? 'Try adjusting your search criteria or filters' 
-                  : 'Add your first income using the form on the left'
+                  ? t("tryAdjustingSearch") 
+                  : t("addFirstIncome")
                 }
               </p>
             </div>

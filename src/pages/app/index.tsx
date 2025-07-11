@@ -13,6 +13,8 @@ import { MdSettings } from 'react-icons/md';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Head from 'next/head';
+import { useTranslations } from "next-intl";
+
 
 // Generic card wrapper for consistent UI
 const DashboardCard: React.FC<{
@@ -64,6 +66,7 @@ const DashboardCard: React.FC<{
 
 const DashboardPage: NextPageWithLayout = () => {
   const { theme } = useTheme();
+  const t = useTranslations("DashboardPage");
   const [users, setUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [stats, setStats] = useState<any>(null);
@@ -79,7 +82,7 @@ const DashboardPage: NextPageWithLayout = () => {
   const [announcementError, setAnnouncementError] = useState<string | null>(null);
 
   // Add state for the Tasks card title
-  const [tasksCardTitle, setTasksCardTitle] = useState('Tasks');
+  const [tasksCardTitle, setTasksCardTitle] = useState(t("tasks", { default: "Tasks" }));
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -158,7 +161,7 @@ const DashboardPage: NextPageWithLayout = () => {
   }, []);
 
   if (!currentUser) {
-    return <p className="text-center text-gray-600 mb-8">Loading your dashboard...</p>;
+    return <p className="text-center text-gray-600 mb-8">{t("loadingDashboard", { default: "Loading your dashboard..." })}</p>;
   }
 
   return (
@@ -182,12 +185,12 @@ const DashboardPage: NextPageWithLayout = () => {
           onClick={() => { window.location.href = '/app/tasks'; }}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/app/tasks'; }}
           style={{ cursor: 'pointer' }}
-          aria-label="Go to tasks page"
+          aria-label={t("goToTasksPage", { default: "Go to tasks page" })}
         >
           <DashboardCard
             icon={<FaTasks />}
-            title={tasksCardTitle}
-            description="Organize and track your team's assignments and progress."
+            title={t("tasks")}
+            description={t("tasksDescription", { default: "Organize and track your team's assignments and progress." })}
             headerBg={theme === "dark" ? "bg-blue-900 border-blue-800" : "bg-blue-50 border-blue-200"}
             iconBg={theme === "dark" ? "bg-blue-600" : "bg-blue-500"}
             iconColor="text-white"
@@ -223,12 +226,12 @@ const DashboardPage: NextPageWithLayout = () => {
           onClick={() => { window.location.href = '/app/announcements'; }}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/app/announcements'; }}
           style={{ cursor: 'pointer' }}
-          aria-label="Go to announcements page"
+          aria-label={t("goToAnnouncementsPage", { default: "Go to announcements page" })}
         >
           <DashboardCard
             icon={<FaBullhorn />}
-            title="Announcement"
-            description="Stay up to date with the latest company news and updates."
+            title={t("announcement", { default: "Announcement" })}
+            description={t("announcementDescription", { default: "Stay up to date with the latest company news and updates." })}
             headerBg={theme === "dark" ? "bg-yellow-900 border-yellow-800" : "bg-yellow-50 border-yellow-200"}
             iconBg={theme === "dark" ? "bg-yellow-600" : "bg-yellow-500"}
             iconColor="text-white"
@@ -237,15 +240,14 @@ const DashboardPage: NextPageWithLayout = () => {
             {loadingAnnouncement ? (
               <div className="flex flex-col justify-center items-center h-32 bg-primary-light/10 rounded-lg animate-pulse">
                 <FaBullhorn className="animate-bounce text-primary text-4xl mb-3" />
-                <span className="text-sm font-medium">Loading announcement...</span>
+                <span className="text-sm font-medium">{t("loadingAnnouncement", { default: "Loading announcement..." })}</span>
               </div>
             ) : announcementError ? (
               <div className="bg-red-50 border-l-4 border-red-400 text-red-400 p-4 rounded-md shadow-sm text-center font-medium">
-                <p className="mb-1">Failed to load announcement:</p>
+                <p className="mb-1">{t("failedToLoadAnnouncement", { default: "Failed to load announcement:" })}</p>
                 <p className="text-sm italic">{announcementError}</p>
               </div>
             ) : !announcementPreview ? (
-              // Empty state for announcements (copied from AnnouncementList)
               <div className="text-center py-16">
                 <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
                   theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
@@ -253,10 +255,10 @@ const DashboardPage: NextPageWithLayout = () => {
                   <FaBullhorn className="text-2xl text-gray-400" />
                 </div>
                 <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  No announcements yet
+                  {t("noAnnouncementsYet", { default: "No announcements yet" })}
                 </h3>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Check back later for company updates and news
+                  {t("checkBackLater", { default: "Check back later for company updates and news" })}
                 </p>
               </div>
             ) : (
@@ -295,17 +297,16 @@ const DashboardPage: NextPageWithLayout = () => {
           onClick={() => { window.location.href = '/app/finance'; }}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/app/finance'; }}
           style={{ cursor: 'pointer' }}
-          aria-label="Go to finance page"
+          aria-label={t("goToFinancePage", { default: "Go to finance page" })}
         >
           <DashboardCard
             icon={<FaMoneyBillWave />}
-            title="Finance"
-            description="Keep track of your income, expenses, and overall financial health."
+            title={t("finance", { default: "Finance" })}
+            description={t("financeDescription", { default: "Keep track of your income, expenses, and overall financial health." })}
             headerBg={theme === "dark" ? "bg-green-900 border-green-800" : "bg-green-50 border-green-200"}
             iconBg={theme === "dark" ? "bg-green-600" : "bg-green-500"}
             iconColor="text-white"
           >
-            {/* You can add a similar empty state for finance if needed */}
             <DashboardFinancePreview
               totalExpenses={totalExpenses}
               totalIncomes={totalIncomes}
@@ -320,19 +321,19 @@ const DashboardPage: NextPageWithLayout = () => {
           onClick={() => { window.location.href = '/app/users'; }}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = '/app/users'; }}
           style={{ cursor: 'pointer' }}
-          aria-label="Go to users page"
+          aria-label={t("goToUsersPage", { default: "Go to users page" })}
         >
           <DashboardCard
             icon={<FaUserClock />}
-            title="Users"
-            description="Manage user accounts, roles, and permissions within your team."
+            title={t("users", { default: "Users" })}
+            description={t("usersDescription", { default: "Manage user accounts, roles, and permissions within your team." })}
             headerBg={theme === "dark" ? "bg-blue-900 border-blue-800" : "bg-blue-50 border-blue-200"}
             iconBg={theme === "dark" ? "bg-blue-600" : "bg-blue-500"}
             iconColor="text-white"
           >
             <div className="flex flex-col h-full">
               {loadingUsers ? (
-                <p className="text-gray-600">Loading users...</p>
+                <p className="text-gray-600">{t("loadingUsers", { default: "Loading users..." })}</p>
               ) : users.length > 0 ? (
                 <>
                   <Table
@@ -347,11 +348,11 @@ const DashboardPage: NextPageWithLayout = () => {
                       }))
                     }
                     columns={[
-                      { key: "firstName", header: "First Name" },
-                      { key: "lastName", header: "Last Name" },
-                      { key: "email", header: "Email" },
+                      { key: "firstName", header: t("firstName", { default: "First Name" }) },
+                      { key: "lastName", header: t("lastName", { default: "Last Name" }) },
+                      { key: "email", header: t("email", { default: "Email" }) },
                     ]}
-                    emptyMessage=""
+                    emptyMessage={t("noTeamMembersYet", { default: "No team members yet" })}
                   />
                 </>
               ) : (
@@ -363,10 +364,10 @@ const DashboardPage: NextPageWithLayout = () => {
                     <FaUserClock className="text-2xl text-gray-400" />
                   </div>
                   <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    No team members yet
+                    {t("noTeamMembersYet", { default: "No team members yet" })}
                   </h3>
                   <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Start by adding your first team member
+                    {t("startByAddingFirstMember", { default: "Start by adding your first team member" })}
                   </p>
                 </div>
               )}
@@ -377,14 +378,13 @@ const DashboardPage: NextPageWithLayout = () => {
         <div className="w-full px-2 flex md:block md:px-0">
           <DashboardCard
             icon={<FaCalendarAlt />}
-            title="Calendar"
-            description="View deadlines, scheduled meetings, and project milestones."
+            title={t("calendar", { default: "Calendar" })}
+            description={t("calendarDescription", { default: "View deadlines, scheduled meetings, and project milestones." })}
             headerBg={theme === "dark" ? "bg-purple-900 border-purple-800" : "bg-purple-50 border-purple-200"}
             iconBg={theme === "dark" ? "bg-purple-600" : "bg-purple-500"}
             iconColor="text-white"
           >
             <DashboardCalendarPreview userId={currentUser?._id} userEmail={currentUser?.email} />
-            {/* Optionally add an empty state for calendar if needed */}
           </DashboardCard>
         </div>
       </div>

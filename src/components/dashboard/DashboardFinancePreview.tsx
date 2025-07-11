@@ -3,6 +3,7 @@ import React from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import Link from 'next/link';
 import { useTheme } from '@/components/ThemeContext';
+import { useTranslations } from "next-intl";
 
 interface FinancePreviewProps {
   totalExpenses: number;
@@ -12,6 +13,7 @@ interface FinancePreviewProps {
 
 const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalIncomes, profit }) => {
   const { theme } = useTheme();
+  const t = useTranslations("DashboardPage");
 
   // Total Income block conditional classes (even smaller version)
   const incomeBlockClass =
@@ -78,25 +80,23 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
       : "inline-flex items-center justify-center text-primary-dark hover:text-white font-bold text-base transition-all duration-300 px-6 py-3 rounded-full bg-primary-light/20 hover:bg-gradient-to-r hover:from-primary hover:to-secondary shadow-xl hover:shadow-xl transform hover:-translate-y-1 group";
 
   return (
-    // Add h-full to force the Finance card to fill the container height like the Task Preview
     <div className="space-y-4 h-full">
       {/* Total Income Block */}
       <div className={incomeBlockClass}>
-        <h4 className={incomeTitleClass}>Total Income</h4>
+        <h4 className={incomeTitleClass}>{t("totalIncome", { default: "Total Income" })}</h4>
         <p className={incomeValueClass}>${totalIncomes.toFixed(2)}</p>
       </div>
 
       {/* Total Expenses Block */}
       <div className={expenseBlockClass}>
-        <h4 className={expenseTitleClass}>Total Expenses</h4>
+        <h4 className={expenseTitleClass}>{t("totalExpenses", { default: "Total Expenses" })}</h4>
         <p className={expenseValueClass}>${totalExpenses.toFixed(2)}</p>
       </div>
       {/* Profit Block */}
       <div className={profitBlockClass}>
-        <h4 className={profitTitleClass}>Net Profit / Loss</h4>
+        <h4 className={profitTitleClass}>{t("netProfitLoss", { default: "Net Profit / Loss" })}</h4>
         <p className={profitValueClass}>${profit.toFixed(2)}</p>
       </div>
-
     </div>
   );
 };

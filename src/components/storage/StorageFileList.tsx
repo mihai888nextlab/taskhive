@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaPen, FaTrash, FaCheck, FaTimes, FaSignature, FaEye, FaDownload } from "react-icons/fa";
 import FileSigningModal from "@/components/signature/FileSigningModal";
+import { useTranslations } from "next-intl";
 
 type FileType = {
   _id: string;
@@ -32,7 +33,7 @@ function formatBytes(bytes: number) {
   return bytes + " B";
 }
 
-const StorageFileList: React.FC<StorageFileListProps> = ({
+const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof useTranslations> }> = ({
   files,
   loading,
   theme,
@@ -44,6 +45,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
   handleRename,
   getFileIcon,
   fetchFiles,
+  t,
 }) => {
   const [signingFile, setSigningFile] = useState<FileType | null>(null);
 
@@ -66,7 +68,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
         </div>
         <p className={`mt-6 text-lg font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-          Loading your files...
+          {t("uploading")}
         </p>
       </div>
     );
@@ -81,10 +83,10 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
           </svg>
         </div>
         <h3 className={`text-xl font-semibold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
-          No files found
+          {t("noFilesFound")}
         </h3>
         <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-          Upload some files to get started
+          {t("uploadToGetStarted")}
         </p>
       </div>
     );
@@ -113,7 +115,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
                 <button
                   onClick={() => handleSignFile(file)}
                   className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                  title="Sign file"
+                  title={t("signFile")}
                 >
                   <FaSignature size={14} />
                 </button>
@@ -123,14 +125,14 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
                     setRenameValue(file.fileName);
                   }}
                   className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                  title="Rename"
+                  title={t("rename")}
                 >
                   <FaPen size={14} />
                 </button>
                 <button
                   onClick={() => handleDelete(file._id)}
                   className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
-                  title="Delete"
+                  title={t("delete")}
                 >
                   <FaTrash size={14} />
                 </button>
@@ -195,7 +197,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-all duration-200"
                 >
                   <FaEye size={12} />
-                  View
+                  {t("view")}
                 </a>
                 <a
                   href={file.fileLocation}
@@ -203,6 +205,7 @@ const StorageFileList: React.FC<StorageFileListProps> = ({
                   className="flex items-center justify-center px-3 py-2 bg-gray-500 text-white text-xs rounded-lg hover:bg-gray-600 transition-all duration-200"
                 >
                   <FaDownload size={12} />
+                  {t("download")}
                 </a>
               </div>
             )}

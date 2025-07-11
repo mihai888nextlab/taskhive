@@ -1,6 +1,7 @@
 import { FaArrowUp, FaArrowDown, FaMoneyBill, FaChartLine } from 'react-icons/fa';
 import { useTheme } from '@/components/ThemeContext';
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 
 interface Props {
   totalExpenses: number;
@@ -20,6 +21,7 @@ export default function FinanceSummaryCards({
   profitTrend,
 }: Props) {
   const { theme } = useTheme();
+  const t = useTranslations("FinancePage");
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -30,7 +32,7 @@ export default function FinanceSummaryCards({
             <div className="flex items-center">
               <FaArrowDown className="text-red-500 text-lg mr-3" />
               <div>
-                <p className={`text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>EXPENSES</p>
+                <p className={`text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t("expensesCard")}</p>
                 <p className="text-4xl font-bold text-red-500 mt-1">${totalExpenses.toFixed(2)}</p>
               </div>
             </div>
@@ -49,7 +51,7 @@ export default function FinanceSummaryCards({
             <div className="flex items-center">
               <FaArrowUp className="text-green-500 text-lg mr-3" />
               <div>
-                <p className={`text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>INCOME</p>
+                <p className={`text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t("incomeCard")}</p>
                 <p className="text-4xl font-bold text-green-500 mt-1">${totalIncomes.toFixed(2)}</p>
               </div>
             </div>
@@ -72,7 +74,7 @@ export default function FinanceSummaryCards({
             <div className="flex items-center">
               <FaChartLine className={`text-lg mr-3 ${profit >= 0 ? 'text-green-500' : 'text-red-500'}`} />
               <div>
-                <p className={`text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Profit</p>
+                <p className={`text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t("profitCard")}</p>
                 <p className={`text-4xl font-bold mt-1 ${profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {profit >= 0 ? '+' : '-'}${Math.abs(profit).toFixed(2)}
                 </p>
