@@ -5,6 +5,20 @@ import UserModel from "@/db/models/userModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
 import * as cookie from "cookie";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  apiKey: GEMINI_API_KEY,
+  model: "text-embedding-004",
+});
+
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 500,
+  chunkOverlap: 100,
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -83,6 +97,26 @@ export default async function handler(
         createdBy: user._id,
         companyId: decoded.companyId,
       });
+
+      // RAG (Retrieval-Augmented Generation) Fields
+      const rawPageContent = `Announcement Title: ${announcement.title}. Content: ${announcement.description}. Category: ${announcement.category}. Pinned: ${announcement.pinned}. Expires at: ${announcement.expiresAt?.toLocaleDateString() || "N/A"}.`;
+      const chunks = await splitter.createDocuments([rawPageContent]);
+      const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+      const newEmbedding = await embeddings.embedQuery(contentToEmbed);
+      const newMetadata = {
+        source: "announcement",
+        originalId: announcement._id,
+        title: announcement.title,
+        category: announcement.category,
+        // Add any other relevant fields for the AI or linking
+      };
+
+      announcement.pageContent = contentToEmbed;
+      announcement.embedding = newEmbedding;
+      announcement.metadata = newMetadata;
+
+      await announcement.save(); // Save the updated task with RAG fields
+
       await announcement.populate("createdBy", "firstName lastName email");
       return res.status(201).json(announcement);
     } catch (err: any) {

@@ -13,11 +13,22 @@ export interface ITask extends Document {
   createdAt: Date;
   updatedAt: Date;
   createdBy: Types.ObjectId;
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  priority: "critical" | "high" | "medium" | "low";
   // Subtask fields
   parentTask?: Types.ObjectId;
   isSubtask: boolean;
   subtasks?: Types.ObjectId[];
+  // RAG specific fields
+  pageContent?: string; // The text that will be embedded
+  embedding?: number[]; // The vector embedding
+  metadata?: {
+    // Additional info for the LLM/UI
+    source: string; // e.g., 'task'
+    originalId: mongoose.Types.ObjectId; // The _id of this task
+    title?: string;
+    status?: string;
+    // ... any other relevant task-specific info
+  };
 }
 
 const TaskSchema: Schema = new Schema(
@@ -56,8 +67,8 @@ const TaskSchema: Schema = new Schema(
     },
     priority: {
       type: String,
-      enum: ['critical', 'high', 'medium', 'low'],
-      default: 'medium',
+      enum: ["critical", "high", "medium", "low"],
+      default: "medium",
     },
     // Subtask fields
     parentTask: {
@@ -75,6 +86,10 @@ const TaskSchema: Schema = new Schema(
         ref: "Task",
       },
     ],
+    // RAG specific fields
+    pageContent: { type: String },
+    embedding: { type: [Number] },
+    metadata: { type: mongoose.Schema.Types.Mixed },
   },
   {
     timestamps: true,

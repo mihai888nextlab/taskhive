@@ -7,6 +7,20 @@ import { JWTPayload } from "@/types";
 import jwt from "jsonwebtoken";
 import * as cookie from "cookie";
 import { Types } from "mongoose";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  apiKey: GEMINI_API_KEY,
+  model: "text-embedding-004",
+});
+
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 500,
+  chunkOverlap: 100,
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -60,15 +74,14 @@ export default async function handler(
       res.status(200).json(tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch tasks.",
-          error: (error as Error).message,
-        });
+      res.status(500).json({
+        message: "Failed to fetch tasks.",
+        error: (error as Error).message,
+      });
     }
   } else if (req.method === "POST") {
-    const { title, description, deadline, assignedTo, priority, subtasks } = req.body;
+    const { title, description, deadline, assignedTo, priority, subtasks } =
+      req.body;
 
     if (!title || !deadline) {
       return res
@@ -90,10 +103,29 @@ export default async function handler(
         userId: assignedUserId,
         createdBy: userId,
         companyId: decodedToken.companyId,
-        priority: priority || 'medium',
+        priority: priority || "medium",
         isSubtask: false,
         subtasks: [],
       });
+
+      // RAG (Retrieval-Augmented Generation) Fields
+      const rawPageContent = `Task Title: ${newTask.title}. Description: ${newTask.description}. Priority: ${newTask.priority}. Completed: ${newTask.completed}. Due Date: ${newTask.deadline?.toLocaleDateString() || "N/A"}.`;
+      const chunks = await splitter.createDocuments([rawPageContent]);
+      const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+      const newEmbedding = await embeddings.embedQuery(contentToEmbed);
+      const newMetadata = {
+        source: "task",
+        originalId: newTask._id,
+        title: newTask.title,
+        completed: newTask.completed,
+        // Add any other relevant fields for the AI or linking
+      };
+
+      newTask.pageContent = contentToEmbed;
+      newTask.embedding = newEmbedding;
+      newTask.metadata = newMetadata;
+
+      await newTask.save(); // Save the updated task with RAG fields
 
       // Create subtasks if provided
       if (subtasks && Array.isArray(subtasks) && subtasks.length > 0) {
@@ -108,10 +140,32 @@ export default async function handler(
               userId: assignedUserId,
               createdBy: userId,
               companyId: decodedToken.companyId,
-              priority: priority || 'medium',
+              priority: priority || "medium",
               isSubtask: true,
               parentTask: newTask._id,
             });
+
+            // RAG Fields for subtask
+            const subtaskRawPageContent = `Subtask Title: ${createdSubtask.title}. Description: ${createdSubtask.description}. Priority: ${createdSubtask.priority}. Completed: ${createdSubtask.completed}. Due Date: ${createdSubtask.deadline?.toLocaleDateString() || "N/A"}.`;
+            const subtaskChunks = await splitter.createDocuments([
+              subtaskRawPageContent,
+            ]);
+            const subtaskContentToEmbed = subtaskChunks[0].pageContent;
+            const subtaskEmbedding = await embeddings.embedQuery(
+              subtaskContentToEmbed
+            );
+            const subtaskMetadata = {
+              source: "subtask",
+              originalId: createdSubtask._id,
+              title: createdSubtask.title,
+              completed: createdSubtask.completed,
+              // Add any other relevant fields for the AI or linking
+            };
+
+            createdSubtask.pageContent = subtaskContentToEmbed;
+            createdSubtask.embedding = subtaskEmbedding;
+            createdSubtask.metadata = subtaskMetadata;
+            await createdSubtask.save(); // Save the subtask with RAG fields
             subtaskIds.push(createdSubtask._id);
           }
         }

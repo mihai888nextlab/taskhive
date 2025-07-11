@@ -1,38 +1,51 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import mongoose from 'mongoose';
-import Task from '@/db/models/taskModel';
+import type { NextApiRequest, NextApiResponse } from "next";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import mongoose from "mongoose";
+import Task from "@/db/models/taskModel";
+import Announcement from "@/db/models/announcementModel";
 import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@/types";
-import { addYears } from 'date-fns'; // Ensure this is imported
 import userModel from "@/db/models/userModel"; // <-- Add this import
-import AnnouncementModel from '@/db/models/announcementModel';
-import ExpenseModel from '@/db/models/expensesModel';
-import dbConnect from '@/db/dbConfig'; // Add this import
+import AnnouncementModel from "@/db/models/announcementModel";
+import ExpenseModel from "@/db/models/expensesModel";
+import dbConnect from "@/db/dbConfig"; // Add this import
+import {
+  ChatGoogleGenerativeAI,
+  GoogleGenerativeAIEmbeddings,
+} from "@langchain/google-genai";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { RunnableSequence } from "@langchain/core/runnables";
+import { PromptTemplate } from "@langchain/core/prompts";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  await dbConnect();
-  
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+const RAG_SOURCES = [
+  { model: Task, name: "task", indexName: "tasks_vector_index" }, // Match index names with Atlas config
+  {
+    model: Announcement,
+    name: "announcement",
+    indexName: "announcements_vector_index",
+  },
+  // { model: User, name: 'user', indexName: 'users_vector_index' },
+  // Add other sources/models here
+];
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const { prompt } = req.body;
+
   // Ensure JSON response header is set
-  res.setHeader('Content-Type', 'application/json');
+  res.setHeader("Content-Type", "application/json");
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method Not Allowed" });
   }
 
-  const API_KEY = process.env.GEMINI_API_KEY;
   const JWT_SECRET = process.env.JWT_SECRET || ""; // Ensure JWT_SECRET is defined
 
-  // Check if API key is defined
-  if (!API_KEY) {
-    return res.status(500).json({ message: 'Server configuration error: Gemini API key is missing.' });
-  }
-
-  // Initialize the Google Generative AI client
-  const genAI = new GoogleGenerativeAI(API_KEY);
-
-  // Verify user authentication
   const cookies = cookie.parse(req.headers.cookie || "");
   const token = cookies.auth_token;
 
@@ -42,10 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let decodedToken: JWTPayload | null = null;
   try {
-    decodedToken = jwt.verify(
-      token,
-      JWT_SECRET
-    ) as JWTPayload;
+    decodedToken = jwt.verify(token, JWT_SECRET) as JWTPayload;
   } catch (error) {
     console.error("JWT verification error:", error);
     res.setHeader(
@@ -61,7 +71,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 
-  if (!decodedToken || !decodedToken.userId) { // Ensure userId is present in decoded token
+  if (!decodedToken || !decodedToken.userId || !decodedToken.companyId) {
+    // Ensure userId is present in decoded token
     res.setHeader(
       "Set-Cookie",
       cookie.serialize("auth_token", "", {
@@ -75,20 +86,208 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 
-
-  const { prompt } = req.body;
-
-  if (typeof prompt !== 'string' || !prompt.trim()) {
-    return res.status(400).json({ message: 'Prompt is required and must be a non-empty string.' });
+  // Check if API key is defined
+  if (!GEMINI_API_KEY) {
+    return res.status(500).json({
+      message: "Server configuration error: Gemini API key is missing.",
+    });
   }
 
+  try {
+    await dbConnect();
+
+    const embeddings = new GoogleGenerativeAIEmbeddings({
+      apiKey: GEMINI_API_KEY,
+      model: "text-embedding-004",
+    });
+    const queryEmbedding = await embeddings.embedQuery(prompt);
+
+    let userCompanyObjectId = new mongoose.Types.ObjectId(
+      decodedToken.companyId
+    );
+
+    console.log("Comp id:", userCompanyObjectId);
+
+    const searchPromises = RAG_SOURCES.map(
+      async ({ model, name, indexName }) => {
+        try {
+          const results = await model.collection
+            .aggregate([
+              {
+                $vectorSearch: {
+                  index: indexName, // Use the specific index name for this collection
+                  queryVector: queryEmbedding,
+                  path: "embedding", // This field must exist and be indexed in each collection
+                  numCandidates: 20, // Consider more candidates for better recall
+                  limit: 3, // Get top 3 from each source (adjust as needed)
+                  filter: {
+                    companyId: userCompanyObjectId, // Ensure we filter by company ID
+                  },
+                },
+              },
+              {
+                $project: {
+                  pageContent: 1, // The RAG-specific content field
+                  score: { $meta: "vectorSearchScore" }, // Similarity score
+                  metadata: 1, // Include the metadata to know the source and original ID
+                },
+              },
+            ])
+            .toArray();
+          // Add source information to each result for better context in LLM prompt
+          return results.map((r) => ({ ...r, source: name }));
+        } catch (err) {
+          console.error(
+            `Error searching in ${name} collection with index ${indexName}:`,
+            err
+          );
+          return []; // Return empty array if search fails for a specific collection
+        }
+      }
+    );
+
+    const allResults = (await Promise.all(searchPromises)).flat(); // Flatten the array of arrays of results
+
+    // Sort all results by score (highest score = most relevant) and take the top N overall
+    allResults.sort((a: any, b: any) => b.score - a.score);
+    const topNResults = allResults.slice(0, 5); // Get top 5 overall most relevant results
+
+    // Format the retrieved context for the LLM prompt
+    const retrievedContext = topNResults
+      .map((r: any) => {
+        const sourceName =
+          r.metadata?.source || r.source || "unknown application data";
+        const originalTitle =
+          r.metadata?.title ||
+          r.metadata?.taskTitle ||
+          r.metadata?.announcementTitle ||
+          r.metadata?.userName ||
+          "N/A";
+        const originalId = r.metadata?.originalId || "N/A";
+
+        // Provide clear structure and source attribution in the context
+        return `--- Source: ${sourceName} (ID: ${originalId}, Title: ${originalTitle}) ---\n${r.pageContent}`;
+      })
+      .join("\n\n");
+
+    console.log("Retrieved Context (combined):", retrievedContext);
+
+    const chatModel = new ChatGoogleGenerativeAI({
+      apiKey: GEMINI_API_KEY,
+      model: "gemini-2.0-flash",
+      maxOutputTokens: 500, // Adjust as needed
+      temperature: 0.7, // Adjust for creativity vs. accuracy
+    });
+
+    const promptTemplate = PromptTemplate.fromTemplate(`
+      You are Hive, an advanced AI assistant specialized in business, organization, and association management. 
+      Your main goals are to help users:
+      1. Organize and prioritize tasks, projects, and deadlines efficiently.
+      2. Suggest best practices for team collaboration and communication.
+      3. Provide actionable advice for role assignment and responsibility delegation.
+      4. Offer insights on workflow optimization and productivity improvement.
+      5. Answer questions about organizational structure, policies, and management strategies.
+      6. Give clear, concise, and professional responses tailored to business and organizational contexts.
+      7. When appropriate, provide examples, templates, or step-by-step guides.
+      8. Always maintain a helpful, supportive, and proactive tone.
+
+      IMPORTANT: Keep responses concise and focused. Aim for 3-6 sentences maximum unless the user specifically requests detailed explanations. Use bullet points for lists and be direct and actionable.
+
+      You are a helpful AI assistant that answers questions based on provided context.
+      The context comes from various parts of an application like tasks, announcements, or user profiles.
+      Always try to identify the source of the information you use in your answer (e.g., "According to the task titled '...", "From an announcement about...", "Based on a user's profile...").
+      If you cannot find the answer in the provided context, clearly state that you don't know. Do not invent information.
+
+      Context:
+      ${retrievedContext}
+
+      Question:
+      ${prompt}
+
+      Answer:
+    `);
+
+    const chain = RunnableSequence.from([
+      {
+        context: (input: { question: string; context: string }) =>
+          input.context,
+        question: (input: { question: string; context: string }) =>
+          input.question,
+      },
+      promptTemplate,
+      chatModel,
+      new StringOutputParser(),
+    ]);
+
+    const response = await chain.invoke({
+      question: prompt,
+      context: retrievedContext,
+    });
+
+    res.status(200).json({ response });
+  } catch (error) {}
+
+  // Verify user authentication
+  // const cookies = cookie.parse(req.headers.cookie || "");
+  // const token = cookies.auth_token;
+
+  // if (!token) {
+  //   return res.status(401).json({ message: "No token provided" });
+  // }
+
+  // let decodedToken: JWTPayload | null = null;
+  // try {
+  //   decodedToken = jwt.verify(
+  //     token,
+  //     JWT_SECRET
+  //   ) as JWTPayload;
+  // } catch (error) {
+  //   console.error("JWT verification error:", error);
+  //   res.setHeader(
+  //     "Set-Cookie",
+  //     cookie.serialize("auth_token", "", {
+  //       httpOnly: true,
+  //       secure: process.env.NODE_ENV === "production",
+  //       sameSite: "lax",
+  //       maxAge: -1,
+  //       path: "/",
+  //     })
+  //   );
+  //   return res.status(401).json({ message: "Invalid or expired token" });
+  // }
+
+  // if (!decodedToken || !decodedToken.userId) { // Ensure userId is present in decoded token
+  //   res.setHeader(
+  //     "Set-Cookie",
+  //     cookie.serialize("auth_token", "", {
+  //       httpOnly: true,
+  //       secure: process.env.NODE_ENV === "production",
+  //       sameSite: "lax",
+  //       maxAge: -1,
+  //       path: "/",
+  //     })
+  //   );
+  //   return res.status(401).json({ message: "Invalid or expired token" });
+  // }
+
+  // if (typeof prompt !== 'string' || !prompt.trim()) {
+  //   return res.status(400).json({ message: 'Prompt is required and must be a non-empty string.' });
+  // }
+
+  /*
   // --- ANNOUNCEMENT CREATION FIRST ---
-  const announcementCreationRegex = /^(create|add|make)( an)? (announcement|anunț|anunt|anunț|anunțare|anuntare)\b/i;
+  const announcementCreationRegex =
+    /^(create|add|make)( an)? (announcement|anunț|anunt|anunț|anunțare|anuntare)\b/i;
 
   if (announcementCreationRegex.test(prompt.trim())) {
     // --- ADMIN CHECK ---
-    if (!decodedToken.role || decodedToken.role.trim().toLowerCase() !== "admin") {
-      return res.status(403).json({ message: "Only admins can create announcements." });
+    if (
+      !decodedToken.role ||
+      decodedToken.role.trim().toLowerCase() !== "admin"
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Only admins can create announcements." });
     }
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -104,24 +303,47 @@ Return ONLY a valid JSON object with keys: 'title', 'content', 'category', 'pinn
 User request: "${prompt}"`;
 
       const extractionResult = await model.generateContent(extractionPrompt);
-      let extractionResponseText = (await extractionResult.response.text()).trim();
+      let extractionResponseText = (
+        await extractionResult.response.text()
+      ).trim();
 
       // Remove code block markers if present
-      if (extractionResponseText.startsWith('```')) {
-        extractionResponseText = extractionResponseText.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+      if (extractionResponseText.startsWith("```")) {
+        extractionResponseText = extractionResponseText
+          .replace(/^```[a-zA-Z]*\n?/, "")
+          .replace(/```$/, "")
+          .trim();
       }
 
-      let extractedData: { title?: string; content?: string; category?: string; pinned?: boolean; expiresAt?: string | null } | null = null;
+      let extractedData: {
+        title?: string;
+        content?: string;
+        category?: string;
+        pinned?: boolean;
+        expiresAt?: string | null;
+      } | null = null;
       try {
         extractedData = JSON.parse(extractionResponseText);
-        if (!extractedData || typeof extractedData.title !== 'string' || typeof extractedData.content !== 'string') {
-          throw new Error('Invalid or incomplete JSON structure from AI. Missing title or content.');
+        if (
+          !extractedData ||
+          typeof extractedData.title !== "string" ||
+          typeof extractedData.content !== "string"
+        ) {
+          throw new Error(
+            "Invalid or incomplete JSON structure from AI. Missing title or content."
+          );
         }
       } catch (jsonError) {
-        console.error('AI did not return valid JSON for announcement extraction:', extractionResponseText, jsonError);
+        console.error(
+          "AI did not return valid JSON for announcement extraction:",
+          extractionResponseText,
+          jsonError
+        );
         return res.status(500).json({
-          message: 'AI failed to extract announcement details correctly. Please try rephrasing or be more explicit. AI response: ' + extractionResponseText,
-          aiRawResponse: extractionResponseText
+          message:
+            "AI failed to extract announcement details correctly. Please try rephrasing or be more explicit. AI response: " +
+            extractionResponseText,
+          aiRawResponse: extractionResponseText,
         });
       }
 
@@ -129,7 +351,10 @@ User request: "${prompt}"`;
       const title = extractedData.title.trim();
       const content = extractedData.content.trim();
       const category = (extractedData.category || "Update").trim();
-      const pinned = typeof extractedData.pinned === "boolean" ? extractedData.pinned : false;
+      const pinned =
+        typeof extractedData.pinned === "boolean"
+          ? extractedData.pinned
+          : false;
       let expiresAt: Date | undefined = undefined;
       if (extractedData.expiresAt && extractedData.expiresAt !== "null") {
         const dateOnly = extractedData.expiresAt.split("T")[0];
@@ -142,7 +367,11 @@ User request: "${prompt}"`;
       if (
         expiresAt &&
         promptLower.includes("tomorrow") &&
-        Math.abs(expiresAt.getTime() - (new Date().setHours(23,59,59,999) + 24*60*60*1000)) > 12*60*60*1000 // more than 12h off
+        Math.abs(
+          expiresAt.getTime() -
+            (new Date().setHours(23, 59, 59, 999) + 24 * 60 * 60 * 1000)
+        ) >
+          12 * 60 * 60 * 1000 // more than 12h off
       ) {
         // Force expiresAt to tomorrow at end of day
         const tomorrow = new Date();
@@ -163,32 +392,40 @@ User request: "${prompt}"`;
         });
 
         const createdAnnouncement = newAnnouncement.toObject();
-        if (createdAnnouncement._id) createdAnnouncement._id = createdAnnouncement._id.toString();
-        if (createdAnnouncement.createdBy) createdAnnouncement.createdBy = createdAnnouncement.createdBy.toString();
+        if (createdAnnouncement._id)
+          createdAnnouncement._id = createdAnnouncement._id.toString();
+        if (createdAnnouncement.createdBy)
+          createdAnnouncement.createdBy =
+            createdAnnouncement.createdBy.toString();
 
         return res.status(201).json({
           response: `Announcement created with title "${title}" in category "${category}".`,
-          createdAnnouncement
+          createdAnnouncement,
         });
       } catch (dbError: any) {
-        console.error('Database error creating announcement:', dbError);
+        console.error("Database error creating announcement:", dbError);
         return res.status(500).json({
-          message: 'Failed to create announcement. Please try again.',
-          error: dbError.message
+          message: "Failed to create announcement. Please try again.",
+          error: dbError.message,
         });
       }
     } catch (error: any) {
-      console.error('Error in announcement creation process (AI extraction/parsing):', error);
+      console.error(
+        "Error in announcement creation process (AI extraction/parsing):",
+        error
+      );
       return res.status(500).json({
-        message: 'Failed to process your request for announcement creation. Please try again.',
-        error: (error as Error).message
+        message:
+          "Failed to process your request for announcement creation. Please try again.",
+        error: (error as Error).message,
       });
     }
     return; // Prevent further processing
   }
 
   // --- ENHANCED TASK CREATION LOGIC WITH SUBTASKS ---
-  const taskCreationRegex = /^(create( a)? task|make( a)? task|add( a)? task)\b/i;
+  const taskCreationRegex =
+    /^(create( a)? task|make( a)? task|add( a)? task)\b/i;
 
   if (taskCreationRegex.test(prompt.trim())) {
     try {
@@ -221,28 +458,43 @@ User request: "${prompt}"`;
       let trimmedExtractionResponseText = extractionResponseText.trim();
 
       // Remove code block markers and language tags if present
-      if (trimmedExtractionResponseText.startsWith('```')) {
-        trimmedExtractionResponseText = trimmedExtractionResponseText.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+      if (trimmedExtractionResponseText.startsWith("```")) {
+        trimmedExtractionResponseText = trimmedExtractionResponseText
+          .replace(/^```[a-zA-Z]*\n?/, "")
+          .replace(/```$/, "")
+          .trim();
       }
 
-      let extractedData: { 
-        title?: string; 
-        deadline?: string; 
-        assignee?: string; 
-        description?: string; 
+      let extractedData: {
+        title?: string;
+        deadline?: string;
+        assignee?: string;
+        description?: string;
         generateSubtasks?: boolean;
       } | null = null;
 
       try {
         extractedData = JSON.parse(trimmedExtractionResponseText);
-        if (!extractedData || typeof extractedData.title !== 'string' || !extractedData.deadline) {
-          throw new Error('Invalid or incomplete JSON structure from AI. Missing title or deadline.');
+        if (
+          !extractedData ||
+          typeof extractedData.title !== "string" ||
+          !extractedData.deadline
+        ) {
+          throw new Error(
+            "Invalid or incomplete JSON structure from AI. Missing title or deadline."
+          );
         }
       } catch (jsonError) {
-        console.error('AI did not return valid JSON for task extraction:', trimmedExtractionResponseText, jsonError);
+        console.error(
+          "AI did not return valid JSON for task extraction:",
+          trimmedExtractionResponseText,
+          jsonError
+        );
         return res.status(500).json({
-          message: 'AI failed to extract task details correctly. Please try rephrasing or be more explicit. AI response: ' + trimmedExtractionResponseText,
-          aiRawResponse: trimmedExtractionResponseText
+          message:
+            "AI failed to extract task details correctly. Please try rephrasing or be more explicit. AI response: " +
+            trimmedExtractionResponseText,
+          aiRawResponse: trimmedExtractionResponseText,
         });
       }
 
@@ -277,28 +529,36 @@ User request: "${prompt}"`;
       let assigneeUserId = decodedToken.userId; // default to self
       let assigneeName = extractedData.assignee?.trim().toLowerCase() || "self";
 
-      if (assigneeName !== "self" && assigneeName !== "me" && assigneeName !== "myself") {
+      if (
+        assigneeName !== "self" &&
+        assigneeName !== "me" &&
+        assigneeName !== "myself"
+      ) {
         // Try to split the assigneeName for first/last name matching
         const nameParts = assigneeName.split(" ").filter(Boolean);
         let userDoc = null;
 
         if (nameParts.length >= 2) {
           // Try to match both first and last name
-          userDoc = await userModel.findOne({
-            firstName: new RegExp(nameParts[0], "i"),
-            lastName: new RegExp(nameParts.slice(1).join(" "), "i"),
-          }).lean();
+          userDoc = await userModel
+            .findOne({
+              firstName: new RegExp(nameParts[0], "i"),
+              lastName: new RegExp(nameParts.slice(1).join(" "), "i"),
+            })
+            .lean();
         }
 
         // If not found, try matching firstName or lastName or email
         if (!userDoc) {
-          userDoc = await userModel.findOne({
-            $or: [
-              { firstName: new RegExp(assigneeName, "i") },
-              { lastName: new RegExp(assigneeName, "i") },
-              { email: new RegExp(assigneeName, "i") }
-            ]
-          }).lean();
+          userDoc = await userModel
+            .findOne({
+              $or: [
+                { firstName: new RegExp(assigneeName, "i") },
+                { lastName: new RegExp(assigneeName, "i") },
+                { email: new RegExp(assigneeName, "i") },
+              ],
+            })
+            .lean();
         }
 
         if (!userDoc) {
@@ -308,17 +568,22 @@ User request: "${prompt}"`;
         }
 
         // 2. Fetch users-below-me (by id)
-        const rolesBelowRes = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/roles-below-me`, {
-          headers: {
-            cookie: req.headers.cookie || "",
-          },
-        });
+        const rolesBelowRes = await fetch(
+          `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/roles-below-me`,
+          {
+            headers: {
+              cookie: req.headers.cookie || "",
+            },
+          }
+        );
         const rolesBelowData = await rolesBelowRes.json();
         const usersBelow = rolesBelowData.usersBelow || [];
 
         // 3. Check if userDoc._id is in usersBelow
         const assigneeId = (userDoc as any)._id?.toString?.() || "";
-        const isBelow = usersBelow.some((u: any) => u.userId?.toString() === assigneeId);
+        const isBelow = usersBelow.some(
+          (u: any) => u.userId?.toString() === assigneeId
+        );
 
         if (!isBelow) {
           return res.status(400).json({
@@ -333,14 +598,14 @@ User request: "${prompt}"`;
 
       // --- Generate subtasks if requested ---
       let subtasks: Array<{ title: string; description: string }> = [];
-      
+
       if (shouldGenerateSubtasks) {
         try {
           const subtaskPrompt = `Analyze this task and break it down into 3-5 logical, actionable subtasks:
 
 **Main Task:** ${title}
 **Description:** ${description}
-**Context:** This is a ${title.split(' ').length > 4 ? 'complex' : 'standard'} task that needs to be broken into manageable steps.
+**Context:** This is a ${title.split(" ").length > 4 ? "complex" : "standard"} task that needs to be broken into manageable steps.
 
 Create subtasks that:
 - Follow a logical sequence (planning → execution → completion)
@@ -364,11 +629,16 @@ Example format:
 Return ONLY the JSON array, no explanations.`;
 
           const subtaskResult = await model.generateContent(subtaskPrompt);
-          let subtaskResponseText = (await subtaskResult.response.text()).trim();
+          let subtaskResponseText = (
+            await subtaskResult.response.text()
+          ).trim();
 
           // Clean the response
-          if (subtaskResponseText.startsWith('```')) {
-            subtaskResponseText = subtaskResponseText.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+          if (subtaskResponseText.startsWith("```")) {
+            subtaskResponseText = subtaskResponseText
+              .replace(/^```[a-zA-Z]*\n?/, "")
+              .replace(/```$/, "")
+              .trim();
           }
 
           // Try to extract JSON array from the response
@@ -378,7 +648,9 @@ Return ONLY the JSON array, no explanations.`;
           try {
             const parsedSubtasks = JSON.parse(jsonString);
             if (Array.isArray(parsedSubtasks) && parsedSubtasks.length > 0) {
-              subtasks = parsedSubtasks.filter(st => st.title && st.description);
+              subtasks = parsedSubtasks.filter(
+                (st) => st.title && st.description
+              );
             }
           } catch (parseError) {
             console.error("Failed to parse generated subtasks:", parseError);
@@ -405,13 +677,13 @@ Return ONLY the JSON array, no explanations.`;
         let createdSubtasks: any[] = [];
 
         // Prepare response message before any usage
-        let responseMessage = `Task created with title "${title}" and deadline "${deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}" for ${assigneeName === "self" ? "yourself" : extractedData.assignee}`;
+        let responseMessage = `Task created with title "${title}" and deadline "${deadline.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}" for ${assigneeName === "self" ? "yourself" : extractedData.assignee}`;
 
         // --- Create subtasks if any were generated ---
         if (subtasks.length > 0) {
           try {
             const createdSubtasks = [];
-            
+
             for (const subtask of subtasks) {
               const newSubtask = await Task.create({
                 title: subtask.title,
@@ -428,11 +700,11 @@ Return ONLY the JSON array, no explanations.`;
 
             // Update parent task with subtask IDs for bidirectional reference
             await Task.findByIdAndUpdate(mainTaskId, {
-              subtasks: createdSubtasks.map(st => st._id)
+              subtasks: createdSubtasks.map((st) => st._id),
             });
 
             // Convert to plain objects for response
-            const subtaskObjects = createdSubtasks.map(st => {
+            const subtaskObjects = createdSubtasks.map((st) => {
               const obj = st.toObject();
               if (obj._id) obj._id = obj._id.toString();
               if (obj.userId) obj.userId = obj.userId.toString();
@@ -444,33 +716,39 @@ Return ONLY the JSON array, no explanations.`;
             // Declare and assign createdTask before using it
             const createdTask = newTask.toObject();
             if (createdTask._id) createdTask._id = createdTask._id.toString();
-            if (createdTask.userId) createdTask.userId = createdTask.userId.toString();
-            if (createdTask.createdBy) createdTask.createdBy = createdTask.createdBy.toString();
+            if (createdTask.userId)
+              createdTask.userId = createdTask.userId.toString();
+            if (createdTask.createdBy)
+              createdTask.createdBy = createdTask.createdBy.toString();
 
             return res.status(201).json({
               response: `${responseMessage} with ${createdSubtasks.length} subtasks`,
               createdTask: createdTask,
-              createdSubtasks: subtaskObjects
+              createdSubtasks: subtaskObjects,
             });
           } catch (subtaskError) {
             console.error("Error creating subtasks:", subtaskError);
             // Declare and assign createdTask before using it in the error response
             const createdTask = newTask.toObject();
             if (createdTask._id) createdTask._id = createdTask._id.toString();
-            if (createdTask.userId) createdTask.userId = createdTask.userId.toString();
-            if (createdTask.createdBy) createdTask.createdBy = createdTask.createdBy.toString();
+            if (createdTask.userId)
+              createdTask.userId = createdTask.userId.toString();
+            if (createdTask.createdBy)
+              createdTask.createdBy = createdTask.createdBy.toString();
             // Return the main task even if subtasks fail
             return res.status(201).json({
               response: responseMessage + " (subtasks failed to create)",
-              createdTask
+              createdTask,
             });
           }
         }
 
         const createdTask = newTask.toObject();
         if (createdTask._id) createdTask._id = createdTask._id.toString();
-        if (createdTask.userId) createdTask.userId = createdTask.userId.toString();
-        if (createdTask.createdBy) createdTask.createdBy = createdTask.createdBy.toString();
+        if (createdTask.userId)
+          createdTask.userId = createdTask.userId.toString();
+        if (createdTask.createdBy)
+          createdTask.createdBy = createdTask.createdBy.toString();
 
         if (createdSubtasks.length > 0) {
           responseMessage += ` with ${createdSubtasks.length} subtasks`;
@@ -479,26 +757,33 @@ Return ONLY the JSON array, no explanations.`;
         return res.status(201).json({
           response: responseMessage,
           createdTask,
-          createdSubtasks: createdSubtasks.length > 0 ? createdSubtasks : undefined
+          createdSubtasks:
+            createdSubtasks.length > 0 ? createdSubtasks : undefined,
         });
       } catch (dbError: any) {
-        console.error('Database error creating task:', dbError);
+        console.error("Database error creating task:", dbError);
         return res.status(500).json({
-          message: 'Failed to process your request for task creation. Please try again.',
-          error: dbError.message
+          message:
+            "Failed to process your request for task creation. Please try again.",
+          error: dbError.message,
         });
       }
     } catch (error: any) {
-      console.error('Error in task creation process (AI extraction/parsing):', error);
+      console.error(
+        "Error in task creation process (AI extraction/parsing):",
+        error
+      );
       return res.status(500).json({
-        message: 'Failed to process your request for task creation. Please try again.',
-        error: (error as Error).message
+        message:
+          "Failed to process your request for task creation. Please try again.",
+        error: (error as Error).message,
       });
     }
   }
 
   // --- EXPENSE/INCOME CREATION LOGIC ---
-  const expenseCreationRegex = /^(add|create|record|log|register)\s+(an?\s+)?(expense|income)\b/i;
+  const expenseCreationRegex =
+    /^(add|create|record|log|register)\s+(an?\s+)?(expense|income)\b/i;
 
   if (expenseCreationRegex.test(prompt.trim())) {
     try {
@@ -517,29 +802,49 @@ Return ONLY a valid JSON object with keys: 'title', 'amount', 'description', 'ty
 User request: "${prompt}"`;
 
       const extractionResult = await model.generateContent(extractionPrompt);
-      let extractionResponseText = (await extractionResult.response.text()).trim();
+      let extractionResponseText = (
+        await extractionResult.response.text()
+      ).trim();
 
       // Remove code block markers if present
-      if (extractionResponseText.startsWith('```')) {
-        extractionResponseText = extractionResponseText.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+      if (extractionResponseText.startsWith("```")) {
+        extractionResponseText = extractionResponseText
+          .replace(/^```[a-zA-Z]*\n?/, "")
+          .replace(/```$/, "")
+          .trim();
       }
 
-      let extractedData: { title?: string; amount?: number; description?: string; type?: string; category?: string; date?: string } | null = null;
+      let extractedData: {
+        title?: string;
+        amount?: number;
+        description?: string;
+        type?: string;
+        category?: string;
+        date?: string;
+      } | null = null;
       try {
         extractedData = JSON.parse(extractionResponseText);
         if (
           !extractedData ||
-          typeof extractedData.title !== 'string' ||
-          typeof extractedData.amount !== 'number' ||
-          typeof extractedData.type !== 'string'
+          typeof extractedData.title !== "string" ||
+          typeof extractedData.amount !== "number" ||
+          typeof extractedData.type !== "string"
         ) {
-          throw new Error('Invalid or incomplete JSON structure from AI. Missing title, amount, or type.');
+          throw new Error(
+            "Invalid or incomplete JSON structure from AI. Missing title, amount, or type."
+          );
         }
       } catch (jsonError) {
-        console.error('AI did not return valid JSON for expense/income extraction:', extractionResponseText, jsonError);
+        console.error(
+          "AI did not return valid JSON for expense/income extraction:",
+          extractionResponseText,
+          jsonError
+        );
         return res.status(500).json({
-          message: 'AI failed to extract expense/income details correctly. Please try rephrasing or be more explicit. AI response: ' + extractionResponseText,
-          aiRawResponse: extractionResponseText
+          message:
+            "AI failed to extract expense/income details correctly. Please try rephrasing or be more explicit. AI response: " +
+            extractionResponseText,
+          aiRawResponse: extractionResponseText,
         });
       }
 
@@ -547,7 +852,10 @@ User request: "${prompt}"`;
       const title = extractedData.title.trim();
       const amount = extractedData.amount;
       const description = (extractedData.description || "").trim();
-      const type = extractedData.type.trim().toLowerCase() === "income" ? "income" : "expense";
+      const type =
+        extractedData.type.trim().toLowerCase() === "income"
+          ? "income"
+          : "expense";
       const category = (extractedData.category || "General").trim();
       let date = new Date();
       if (extractedData.date) {
@@ -570,25 +878,31 @@ User request: "${prompt}"`;
 
         const createdItem = newItem.toObject();
         if (createdItem._id) createdItem._id = createdItem._id.toString();
-        if (createdItem.userId) createdItem.userId = createdItem.userId.toString();
-        if (createdItem.companyId) createdItem.companyId = createdItem.companyId.toString();
+        if (createdItem.userId)
+          createdItem.userId = createdItem.userId.toString();
+        if (createdItem.companyId)
+          createdItem.companyId = createdItem.companyId.toString();
 
         return res.status(201).json({
           response: `${type === "income" ? "Income" : "Expense"} recorded: "${title}" for amount ${amount}.`,
-          createdItem
+          createdItem,
         });
       } catch (dbError: any) {
-        console.error('Database error creating expense/income:', dbError);
+        console.error("Database error creating expense/income:", dbError);
         return res.status(500).json({
-          message: 'Failed to save expense/income. Please try again.',
-          error: dbError.message
+          message: "Failed to save expense/income. Please try again.",
+          error: dbError.message,
         });
       }
     } catch (error: any) {
-      console.error('Error in expense/income creation process (AI extraction/parsing):', error);
+      console.error(
+        "Error in expense/income creation process (AI extraction/parsing):",
+        error
+      );
       return res.status(500).json({
-        message: 'Failed to process your request for expense/income creation. Please try again.',
-        error: (error as Error).message
+        message:
+          "Failed to process your request for expense/income creation. Please try again.",
+        error: (error as Error).message,
       });
     }
     return; // Prevent further processing
@@ -596,10 +910,11 @@ User request: "${prompt}"`;
 
   // --- SUBTASK GENERATION LOGIC ---
   // Check if this is a subtask generation request
-  const isSubtaskGeneration = prompt.includes("break it down into") || 
-                            prompt.includes("Generate subtasks") || 
-                            prompt.includes("actionable subtasks") ||
-                            prompt.includes("logical steps");
+  const isSubtaskGeneration =
+    prompt.includes("break it down into") ||
+    prompt.includes("Generate subtasks") ||
+    prompt.includes("actionable subtasks") ||
+    prompt.includes("logical steps");
 
   if (isSubtaskGeneration) {
     try {
@@ -621,13 +936,16 @@ Return ONLY the JSON array, no explanations or additional text.`;
 
       const result = await model.generateContent(subtaskPrompt);
       const responseText = await result.response.text();
-      
+
       // Clean the response
       let cleanResponse = responseText.trim();
-      
+
       // Remove code block markers if present
-      if (cleanResponse.startsWith('```')) {
-        cleanResponse = cleanResponse.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
+      if (cleanResponse.startsWith("```")) {
+        cleanResponse = cleanResponse
+          .replace(/^```[a-zA-Z]*\n?/, "")
+          .replace(/```$/, "")
+          .trim();
       }
 
       // Try to extract JSON array from the response
@@ -646,56 +964,71 @@ Return ONLY the JSON array, no explanations or additional text.`;
         console.error("Failed to parse subtasks JSON:", parseError);
         // Return fallback subtasks
         const fallbackSubtasks = [
-          { title: "Plan and research", description: "Define requirements and gather necessary resources" },
-          { title: "Design approach", description: "Create a detailed plan and strategy" },
-          { title: "Execute main work", description: "Perform the core activities and implementation" },
-          { title: "Review and finalize", description: "Check quality and complete final steps" }
+          {
+            title: "Plan and research",
+            description: "Define requirements and gather necessary resources",
+          },
+          {
+            title: "Design approach",
+            description: "Create a detailed plan and strategy",
+          },
+          {
+            title: "Execute main work",
+            description: "Perform the core activities and implementation",
+          },
+          {
+            title: "Review and finalize",
+            description: "Check quality and complete final steps",
+          },
         ];
-        return res.status(200).json({ response: JSON.stringify(fallbackSubtasks) });
+        return res
+          .status(200)
+          .json({ response: JSON.stringify(fallbackSubtasks) });
       }
     } catch (error) {
-      console.error('Error generating subtasks:', error);
+      console.error("Error generating subtasks:", error);
       // Return fallback subtasks on error
       const fallbackSubtasks = [
-        { title: "Plan approach", description: "Define the strategy and approach for the task" },
-        { title: "Gather resources", description: "Collect all necessary materials and information" },
-        { title: "Execute work", description: "Perform the core activities of the task" },
-        { title: "Review and finalize", description: "Check quality and complete final steps" }
+        {
+          title: "Plan approach",
+          description: "Define the strategy and approach for the task",
+        },
+        {
+          title: "Gather resources",
+          description: "Collect all necessary materials and information",
+        },
+        {
+          title: "Execute work",
+          description: "Perform the core activities of the task",
+        },
+        {
+          title: "Review and finalize",
+          description: "Check quality and complete final steps",
+        },
       ];
-      return res.status(200).json({ response: JSON.stringify(fallbackSubtasks) });
+      return res
+        .status(200)
+        .json({ response: JSON.stringify(fallbackSubtasks) });
     }
   }
 
   // --- FALLBACK: GENERAL GEMINI CHAT ---
   else {
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-      // Prompt engineering: system message for business/organization assistant
-      const systemPrompt = `
-You are Hive, an advanced AI assistant specialized in business, organization, and association management. 
-Your main goals are to help users:
-1. Organize and prioritize tasks, projects, and deadlines efficiently.
-2. Suggest best practices for team collaboration and communication.
-3. Provide actionable advice for role assignment and responsibility delegation.
-4. Offer insights on workflow optimization and productivity improvement.
-5. Answer questions about organizational structure, policies, and management strategies.
-6. Give clear, concise, and professional responses tailored to business and organizational contexts.
-7. When appropriate, provide examples, templates, or step-by-step guides.
-8. Always maintain a helpful, supportive, and proactive tone.
-
-IMPORTANT: Keep responses concise and focused. Aim for 3-6 sentences maximum unless the user specifically requests detailed explanations. Use bullet points for lists and be direct and actionable.
-
-User request: ${prompt}
-      `.trim();
-
       const result = await model.generateContent(systemPrompt);
       const responseGen = await result.response;
       const text = await responseGen.text();
       res.status(200).json({ response: text });
     } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      res.status(500).json({ message: 'Failed to get response from AI.', error: (error as Error).message });
+      console.error("Error calling Gemini API:", error);
+      res
+        .status(500)
+        .json({
+          message: "Failed to get response from AI.",
+          error: (error as Error).message,
+        });
     }
   }
+
+  */
 }
