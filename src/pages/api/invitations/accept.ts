@@ -6,6 +6,21 @@ import { JWTPayload } from "@/types";
 import { Invitation } from "@/db/models/invitationModel";
 import OrgChart from "@/db/models/orgChartModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import companyModel from "@/db/models/companyModel";
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  apiKey: GEMINI_API_KEY,
+  model: "text-embedding-004",
+});
+
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 500,
+  chunkOverlap: 100,
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -45,7 +60,7 @@ export default async function handler(
       return res.status(400).json({ message: "Invite ID is required" });
     }
 
-    let invitation = await Invitation.findById(inviteId);
+    let invitation = await Invitation.findOne({ token: inviteId });
 
     if (!invitation) {
       return res.status(404).json({ message: "Invitation not found" });
@@ -72,7 +87,9 @@ export default async function handler(
     }
 
     invitation.status = "accepted";
-    await Invitation.findByIdAndUpdate(inviteId, invitation, { new: true });
+    await Invitation.findByIdAndUpdate(invitation._id, invitation, {
+      new: true,
+    });
 
     const lowercaseRole = invitation.role.toLowerCase();
 
@@ -115,6 +132,27 @@ export default async function handler(
       departmentId, // <-- THIS MUST BE PRESENT!
       permissions: ["all"],
     });
+    await newUserCompany.save();
+
+    const company = await companyModel.findById(invitation.companyId);
+
+    // RAG (Retrieval-Augmented Generation) Fields
+    const rawPageContent = `User First Name: ${decodedToken.firstName}. User Last Name: ${decodedToken.lastName}. User Email: ${decodedToken.email}. Company Name: ${company.name}. Role: ${lowercaseRole}.`;
+    const chunks = await splitter.createDocuments([rawPageContent]);
+    const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+    const newEmbedding = await embeddings.embedQuery(contentToEmbed);
+    const newMetadata = {
+      source: "user",
+      originalId: decodedToken.userId,
+      firstName: decodedToken.firstName,
+      lastName: decodedToken.lastName,
+      email: decodedToken.email,
+    };
+
+    newUserCompany.pageContent = contentToEmbed;
+    newUserCompany.embedding = newEmbedding;
+    newUserCompany.metadata = newMetadata;
+
     await newUserCompany.save();
 
     return res.status(200).json({
