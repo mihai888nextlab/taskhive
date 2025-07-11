@@ -66,12 +66,6 @@ export default async function handler(
       return res.status(404).json({ message: "Invitation not found" });
     }
 
-    if (decodedToken.companyId != invitation.companyId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to accept this invitation" });
-    }
-
     if (decodedToken.email !== invitation.email) {
       return res
         .status(403)
