@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -106,10 +105,6 @@ const InvitePage: NextPageWithLayout = () => {
       </div>
     </div>
   );
-};
-
-InvitePage.getLayout = function getLayout(page: React.ReactElement) {
-  return <DashboardLayout requireAuth={false}>{page}</DashboardLayout>;
 };
 
 export default InvitePage;

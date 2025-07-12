@@ -30,6 +30,7 @@
     "myTasks": "Moji zadaci",
     "myTasksDescription": "Zadaci dodeljeni vama i lični zadaci koje ste kreirali",
     "assignedByMe": "Zadaci koje sam dodelio",
+    "tasksAssignedByMe": "Zadaci koje sam dodelio",
     "assignedTasksDescription": "Pratite i upravljajte zadacima koje ste dodelili članovima tima",
     "createTask": "Kreiraj zadatak",
     "editTask": "Izmeni zadatak",
@@ -209,7 +210,9 @@
     "chatNotConnected": "Chat nije povezan. Pokušajte ponovo.",
     "yourFiles": "Vaši fajlovi",
     "noFilesUploaded": "Još nema otpremljenih fajlova",
-    "typeMessage": "Upišite poruku..."
+    "typeMessage": "Upišite poruku...",
+    "noConversations": "Još nema razgovora",
+    "startNewChat": "Započnite novi razgovor da biste se povezali sa svojim timom"
   },
   "FinancePage": {
     "expenses": "Troškovi",
@@ -550,5 +553,42 @@
     "unexpectedError": "Došlo je do neočekivane greške.",
     "adding": "Dodavanje...",
     "cancel": "Otkaži"
+  },
+  "AddUserModal": {
+    "addNewUser": "Dodaj novog korisnika",
+    "inviteNewTeamMember": "Pozovi novog člana tima",
+    "emailAddress": "Email adresa *",
+    "role": "Uloga *",
+    "selectRole": "Izaberi ulogu",
+    "cancel": "Otkaži",
+    "inviteUser": "Pozovi korisnika",
+    "inviting": "Pozivanje...",
+    "allFieldsRequired": "Sva polja su obavezna.",
+    "errorFetchingRoles": "Greška pri preuzimanju uloga",
+    "inviteSuccess": "Korisnik je uspešno pozvan!"
+  },
+  "AddRoleModal": {
+    "addNewRole": "Dodaj novu ulogu",
+    "createNewRole": "Kreiraj novu ulogu za svoju organizaciju",
+    "roleName": "Naziv uloge *",
+    "roleNamePlaceholder": "npr: Menadžer projekta, Programer, Dizajner",
+    "enterRoleName": "Unesite opisni naziv za novu ulogu",
+    "cancel": "Otkaži",
+    "addRole": "Dodaj ulogu",
+    "creating": "Kreiranje..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "Organizaciona šema",
+    "manageTeamStructure": "Upravljajte strukturom tima i hijerarhijom uloga",
+    "administratorLevel": "Nivo administratora",
+    "addLevel": "Dodaj nivo",
+    "addNewRole": "Dodaj novu ulogu",
+    "addDepartment": "Dodaj odeljenje",
+    "enterDepartmentName": "Unesite naziv odeljenja...",
+    "close": "Zatvori",
+    "saveChanges": "Sačuvaj izmene",
+    "saving": "Čuvanje...",
+    "roles": "uloge",
+    "dropRolesHere": "Prevucite uloge ovde"
   }
 }

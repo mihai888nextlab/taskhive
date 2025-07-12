@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { FaSpinner, FaTimes, FaUserPlus } from "react-icons/fa";
-import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,6 +9,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 interface AddUserModalProps {
   onClose: () => void;
@@ -20,6 +20,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   onClose,
   onUserAdded,
 }) => {
+  const t = useTranslations("AddUserModal");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [roles, setRoles] = useState<string[]>([]);
@@ -30,7 +31,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     const fetchRoles = async () => {
       try {
         const response = await fetch("/api/roles");
-        if (!response.ok) throw new Error("Failed to fetch roles");
+        if (!response.ok) throw new Error(t("errorFetchingRoles"));
         const data = await response.json();
         const uniqueRoles = data
           .map((role: { name: string }) => role.name)
@@ -42,16 +43,17 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           .sort();
         setRoles(uniqueRoles);
       } catch (error) {
+        setError(t("errorFetchingRoles"));
         console.error("Error fetching roles:", error);
       }
     };
     fetchRoles();
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !role) {
-      setError("All fields are required.");
+      setError(t("allFieldsRequired"));
       return;
     }
     setLoading(true);
@@ -65,7 +67,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       }
     } catch (error: unknown) {
       setError(
-        error instanceof Error ? error.message : "An unexpected error occurred."
+        error instanceof Error ? error.message : t("errorFetchingRoles")
       );
     } finally {
       setLoading(false);
@@ -79,7 +81,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
           onClick={onClose}
-          aria-label="Close modal"
+          aria-label={t("cancel")}
         >
           <FaTimes />
         </button>
@@ -91,8 +93,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               <FaUserPlus className="text-xl text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Add New User</h2>
-              <p className="text-gray-600">Invite a new team member</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {t("addNewUser")}
+              </h2>
+              <p className="text-gray-600">{t("inviteNewTeamMember")}</p>
             </div>
           </div>
         </div>
@@ -110,7 +114,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-gray-900 font-semibold mb-2 text-sm">
-                Email Address *
+                {t("emailAddress")}
               </label>
               <Input
                 type="email"
@@ -125,7 +129,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
             <div>
               <label className="block text-gray-900 font-semibold mb-2 text-sm">
-                Role *
+                {t("role")}
               </label>
               <Select
                 value={role}
@@ -134,7 +138,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 required
               >
                 <SelectTrigger className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm bg-white">
-                  <SelectValue placeholder="Select a role" />
+                  <SelectValue placeholder={t("selectRole")} />
                 </SelectTrigger>
                 <SelectContent
                   className="bg-white border border-gray-300 rounded-lg shadow-lg p-0 z-[250]"
@@ -165,7 +169,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               className="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300"
               disabled={loading}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="submit"
@@ -180,12 +184,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <FaSpinner className="animate-spin w-3 h-3" />
-                  Inviting...
+                  {t("inviting")}
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2">
                   <FaUserPlus className="w-3 h-3" />
-                  Invite User
+                  {t("inviteUser")}
                 </div>
               )}
             </Button>

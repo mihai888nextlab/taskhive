@@ -5,11 +5,13 @@ import Loading from "@/components/Loading";
 import TimerAndFormPanel from '@/components/time-tracking/TimerAndFormPanel';
 import SessionList from '@/components/time-tracking/SessionList';
 import TimeTrackingHeader from '@/components/time-tracking/TimeTrackingHeader';
-import { FaClock, FaChartLine } from 'react-icons/fa';
+import { FaClock, FaChartLine, FaPlus } from 'react-icons/fa';
 import { saveAs } from "file-saver";
 import { useTimeTracking } from '@/components/time-tracking/TimeTrackingContext';
 import { useTheme } from '@/components/ThemeContext';
 import { useTranslations } from "next-intl";
+import AddManualSessionModal from '@/components/time-tracking/AddManualSessionModal';
+import { Button } from '@/components/ui/button';
 
 const TimeTrackingPage: NextPageWithLayout = () => {
   const { theme } = useTheme();
@@ -30,6 +32,7 @@ const TimeTrackingPage: NextPageWithLayout = () => {
   const [sessionSearch, setSessionSearch] = useState("");
   const [sessionTagFilter, setSessionTagFilter] = useState("all");
   const [sessionSort, setSessionSort] = useState("dateDesc");
+  const [manualModalOpen, setManualModalOpen] = useState(false);
 
   // Fetch sessions
   const fetchSessions = useCallback(async () => {
@@ -92,6 +95,12 @@ const TimeTrackingPage: NextPageWithLayout = () => {
     fetchSessions();
   };
 
+  // Get userId for manual session modal
+  const userId =
+    user?._id ||
+    (typeof window !== "undefined" && localStorage.getItem("userId")) ||
+    undefined;
+
   if (loading) {
     return <Loading />;
   }
@@ -99,7 +108,7 @@ const TimeTrackingPage: NextPageWithLayout = () => {
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       {/* Main Content */}
-      <div className="px-2 lg:px-4 py-4">
+      <div className="px-2 lg:px-4 py-4 mt-3">
         <div className="max-w-[100vw] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
             
@@ -109,7 +118,7 @@ const TimeTrackingPage: NextPageWithLayout = () => {
                 {/* Timer Header */}
                 <div className={`px-4 py-3 ${
                   theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"
-                } border-b`}>
+                } border-b flex items-center justify-between`}>
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${
                       theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'
@@ -125,6 +134,14 @@ const TimeTrackingPage: NextPageWithLayout = () => {
                       </p>
                     </div>
                   </div>
+                  <Button
+                    type="button"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
+                    onClick={() => setManualModalOpen(true)}
+                    title={t("logNewSession", { default: "Log New Session" })}
+                  >
+                    <FaPlus className="w-4 h-4" />
+                  </Button>
                 </div>
 
                 {/* Timer Content */}
@@ -214,6 +231,15 @@ const TimeTrackingPage: NextPageWithLayout = () => {
           </div>
         </div>
       </div>
+      {/* Manual Add Modal */}
+      {manualModalOpen && userId && (
+        <AddManualSessionModal
+          open={manualModalOpen}
+          onClose={() => setManualModalOpen(false)}
+          userId={userId}
+          onAdded={fetchSessions}
+        />
+      )}
     </div>
   );
 };

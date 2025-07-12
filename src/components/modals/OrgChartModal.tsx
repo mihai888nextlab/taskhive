@@ -5,6 +5,7 @@ import { FaPlus, FaSave, FaTimes, FaGripVertical, FaBuilding, FaUserTie, FaSitem
 import AddRoleModal from "./AddRoleModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
 interface Level {
   id: string;
@@ -26,6 +27,7 @@ const AVAILABLE_DEPT_NAME = "Available Roles";
 const fixedAdminRole = "admin";
 
 const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
+  const t = useTranslations("OrgChartModal");
   const [departments, setDepartments] = useState<Department[]>([]);
   const [newDeptName, setNewDeptName] = useState("");
   const [showAddRoleModal, setShowAddRoleModal] = useState(false);
@@ -172,7 +174,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
         <button
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
           onClick={onClose}
-          aria-label="Close modal"
+          aria-label={t("close")}
         >
           <FaTimes />
         </button>
@@ -184,8 +186,8 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
               <FaSitemap className="text-xl text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Organization Chart</h2>
-              <p className="text-gray-600">Manage your team structure and role hierarchy</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t("organizationChart")}</h2>
+              <p className="text-gray-600">{t("manageTeamStructure")}</p>
             </div>
           </div>
         </div>
@@ -197,11 +199,11 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
             <div className="max-w-6xl mx-auto">
               <div className="flex items-center gap-3 mb-4">
                 <FaUserTie className="w-5 h-5 text-red-600" />
-                <h3 className="text-lg font-semibold text-red-800">Administrator Level</h3>
+                <h3 className="text-lg font-semibold text-red-800">{t("administratorLevel")}</h3>
               </div>
               <div className="flex justify-center">
                 <div className="bg-red-100 border-2 border-red-300 text-red-700 px-6 py-2 rounded-xl font-semibold shadow-lg text-lg min-w-full text-center">
-                  {fixedAdminRole}
+                  admin
                 </div>
               </div>
             </div>
@@ -248,9 +250,9 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                               {/* Level Header */}
                               <div className="px-3 py-2 bg-gray-100 border-b border-gray-200">
                                 <h4 className="font-semibold text-sm text-gray-700">
-                                  Level {idx + 1}
+                                  {t("addLevel")} {idx + 1}
                                   <span className="ml-2 text-xs text-gray-500">
-                                    ({level.roles.length} roles)
+                                    ({level.roles.length} {t("roles")})
                                   </span>
                                 </h4>
                               </div>
@@ -269,7 +271,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                                   >
                                     {level.roles.length === 0 ? (
                                       <div className="text-center py-4 text-gray-400 text-sm">
-                                        Drop roles here
+                                        {t("dropRolesHere")}
                                       </div>
                                     ) : (
                                       <div className="space-y-2">
@@ -317,7 +319,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                           className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-all duration-200 text-sm"
                         >
                           <FaPlus className="w-3 h-3" />
-                          Add Level
+                          {t("addLevel")}
                         </Button>
                         {dept.id === AVAILABLE_DEPT_ID && (
                           <Button
@@ -326,7 +328,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                             className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 text-sm"
                           >
                             <FaPlus className="w-3 h-3" />
-                            Add New Role
+                            {t("addNewRole")}
                           </Button>
                         )}
                       </div>
@@ -344,7 +346,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
           <div className="flex gap-3 mb-4">
             <Input
               type="text"
-              placeholder="Enter department name..."
+              placeholder={t("enterDepartmentName")}
               value={newDeptName}
               onChange={(e) => setNewDeptName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddDepartment()}
@@ -361,7 +363,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
               }`}
             >
               <FaPlus className="w-3 h-3 inline mr-1" />
-              Add Department
+              {t("addDepartment")}
             </Button>
           </div>
 
@@ -373,7 +375,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
               className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
               disabled={saving}
             >
-              Close
+              {t("close")}
             </Button>
             <Button
               type="button"
@@ -388,12 +390,12 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
               {saving ? (
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                  Saving...
+                  {t("saving")}
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <FaSave className="w-3 h-3" />
-                  Save Changes
+                  {t("saveChanges")}
                 </div>
               )}
             </Button>

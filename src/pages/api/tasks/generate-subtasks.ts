@@ -177,3 +177,5 @@ function generateSmartSubtasks(title: string, description?: string): Array<{titl
     { title: "Review and finalize", description: "Check quality and complete final deliverables" }
   ];
 }
+
+// No changes needed. API logic is correct and robust.

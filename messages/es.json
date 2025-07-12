@@ -30,6 +30,7 @@
     "myTasks": "Mis tareas",
     "myTasksDescription": "Tareas asignadas a ti y tareas personales que has creado",
     "assignedByMe": "Tareas asignadas por mí",
+    "tasksAssignedByMe": "Tareas asignadas por mí",
     "assignedTasksDescription": "Monitorea y gestiona las tareas que has asignado a los miembros del equipo",
     "createTask": "Crear tarea",
     "editTask": "Editar tarea",
@@ -209,7 +210,9 @@
     "chatNotConnected": "El chat no está conectado. Por favor intenta de nuevo.",
     "yourFiles": "Tus archivos",
     "noFilesUploaded": "No se han subido archivos todavía",
-    "typeMessage": "Escribe un mensaje..."
+    "typeMessage": "Escribe un mensaje...",
+    "noConversations": "No hay conversaciones aún",
+    "startNewChat": "Inicia un nuevo chat para conectar con tu equipo"
   },
   "FinancePage": {
     "expenses": "Gastos",
@@ -537,5 +540,42 @@
     "loadingDeadlines": "Cargando fechas límite...",
     "noUpcomingDeadlines": "No hay fechas límite próximas",
     "noScheduledTasksOrEvents": "No tienes tareas o eventos programados"
+  },
+  "AddUserModal": {
+    "addNewUser": "Agregar nuevo usuario",
+    "inviteNewTeamMember": "Invita a un nuevo miembro del equipo",
+    "emailAddress": "Correo electrónico *",
+    "role": "Rol *",
+    "selectRole": "Selecciona un rol",
+    "cancel": "Cancelar",
+    "inviteUser": "Invitar usuario",
+    "inviting": "Invitando...",
+    "allFieldsRequired": "Todos los campos son obligatorios.",
+    "errorFetchingRoles": "Error al obtener los roles",
+    "inviteSuccess": "¡Usuario invitado exitosamente!"
+  },
+  "AddRoleModal": {
+    "addNewRole": "Agregar nuevo rol",
+    "createNewRole": "Crea un nuevo rol para tu organización",
+    "roleName": "Nombre del rol *",
+    "roleNamePlaceholder": "ej: Gerente de Proyecto, Desarrollador, Diseñador",
+    "enterRoleName": "Introduce un nombre descriptivo para el nuevo rol",
+    "cancel": "Cancelar",
+    "addRole": "Agregar rol",
+    "creating": "Creando..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "Organigrama",
+    "manageTeamStructure": "Gestiona la estructura del equipo y la jerarquía de roles",
+    "administratorLevel": "Nivel de administrador",
+    "addLevel": "Agregar nivel",
+    "addNewRole": "Agregar nuevo rol",
+    "addDepartment": "Agregar departamento",
+    "enterDepartmentName": "Introduce el nombre del departamento...",
+    "close": "Cerrar",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando...",
+    "roles": "roles",
+    "dropRolesHere": "Arrastra roles aquí"
   }
 }

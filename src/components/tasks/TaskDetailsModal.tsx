@@ -3,27 +3,7 @@ import { FaEdit, FaTrash, FaCheckCircle, FaRegCircle, FaCalendarAlt, FaFlag, FaT
 import { FiCalendar, FiUser, FiClock } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  deadline: string;
-  completed: boolean;
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  userId: any;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: { firstName: string; lastName: string; email: string };
-  status?: string;
-  tags?: string[];
-  assignees?: Array<{ firstName?: string; lastName?: string; email?: string; avatarUrl?: string }>;
-  dueEndDate?: string;
-  subtasks?: Task[];
-  isSubtask?: boolean;
-  parentTask?: string;
-  important?: boolean;
-}
+import { Task } from "@/types/task";
 
 interface TaskDetailsModalProps {
   open: boolean;
@@ -32,9 +12,9 @@ interface TaskDetailsModalProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onToggleComplete: (task: Task) => void;
-  onToggleSubtask?: (subtask: Task) => void;
+  onToggleSubtask?: (task: Task) => void;
   theme?: string;
-  currentUserEmail?: string;
+  currentUserEmail: string;
 }
 
 const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ 
@@ -63,6 +43,9 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
   // Show creator info if the task was not created by the current user
   const showCreatorInfo = localTask.createdBy && localTask.createdBy.email !== currentUserEmail;
+
+  // Show parent task info if this is a subtask
+  const showParentTaskInfo = localTask.isSubtask && localTask.parentTask && typeof localTask.parentTask === 'object';
 
   // Use localTask instead of task for all calculations
   const completedSubtasks = localTask.subtasks?.filter(subtask => subtask.completed).length || 0;
@@ -106,7 +89,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
       const initials = (firstName[0] || '') + (lastName[0] || '');
       return (
         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-          theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
+          theme === 'dark'
         }`}>
           {initials || 'U'}
         </div>
@@ -235,7 +218,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                   </Badge>
                 )}
                 {/* Tags as badges */}
-                {localTask.tags && localTask.tags.map((tag, idx) => (
+                {localTask.tags && localTask.tags.map((tag: string, idx: number) => (
                   <Badge
                     key={idx}
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200"
@@ -335,6 +318,19 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
             )}
           </div>
 
+          {/* Parent Task Info */}
+          {showParentTaskInfo && typeof localTask.parentTask === 'object' && (
+            <div className={`p-3 mb-2 rounded-lg border ${
+              theme === 'dark' ? 'bg-blue-900/20 border-blue-700' : 'bg-blue-50 border-blue-200'
+            }`}>
+              <div className="text-xs font-semibold text-blue-700 mb-1">Parent Task:</div>
+              <div className="font-medium">{localTask.parentTask?.title}</div>
+              <div className="text-xs text-blue-600">
+                Assigned to: {localTask.parentTask?.createdBy?.firstName} {localTask.parentTask?.createdBy?.lastName}
+              </div>
+            </div>
+          )}
+
           {/* Subtasks Progress */}
           {totalSubtasks > 0 && (
             <div className={`p-3 rounded-lg border ${
@@ -412,6 +408,12 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                               : theme === 'dark' ? 'text-white' : 'text-gray-900'
                           }`}>
                             {subtask.title}
+                            {/* Show assignee if not me */}
+                            {subtask.userId && typeof subtask.userId === 'object' && subtask.userId.email !== currentUserEmail && (
+                              <span className="ml-2 text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                {subtask.userId.firstName} {subtask.userId.lastName}
+                              </span>
+                            )}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`text-xs ${
@@ -425,9 +427,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                                 day: 'numeric',
                               })}
                             </span>
-                            {subtask.important && (
-                              <FaFlag className="w-2.5 h-2.5 text-orange-500" />
-                            )}
+                            {/* Removed subtask.important as it does not exist on type Task */}
                             {subtask.priority === 'critical' && (
                               <span className="text-xs">🔥</span>
                             )}

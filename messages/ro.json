@@ -30,6 +30,7 @@
     "myTasks": "Sarcinile mele",
     "myTasksDescription": "Sarcini atribuite ție și sarcini personale create de tine",
     "assignedByMe": "Sarcini atribuite de mine",
+    "tasksAssignedByMe": "Sarcini atribuite de mine",
     "assignedTasksDescription": "Monitorizează și gestionează sarcinile pe care le-ai atribuit membrilor echipei",
     "createTask": "Creează sarcină",
     "editTask": "Editează sarcina",
@@ -209,7 +210,9 @@
     "chatNotConnected": "Chatul nu este conectat. Te rugăm să încerci din nou.",
     "yourFiles": "Fișierele tale",
     "noFilesUploaded": "Niciun fișier încărcat",
-    "typeMessage": "Scrie un mesaj..."
+    "typeMessage": "Scrie un mesaj...",
+    "noConversations": "Nicio conversație încă",
+    "startNewChat": "Începe un chat nou pentru a comunica cu echipa ta"
   },
   "FinancePage": {
     "expenses": "Cheltuieli",
@@ -550,5 +553,42 @@
     "unexpectedError": "A apărut o eroare neașteptată.",
     "adding": "Se adaugă...",
     "cancel": "Anulează"
+  },
+  "AddUserModal": {
+    "addNewUser": "Adaugă utilizator nou",
+    "inviteNewTeamMember": "Invită un nou membru în echipă",
+    "emailAddress": "Adresă de email *",
+    "role": "Rol *",
+    "selectRole": "Selectează un rol",
+    "cancel": "Anulează",
+    "inviteUser": "Invită utilizator",
+    "inviting": "Se invită...",
+    "allFieldsRequired": "Toate câmpurile sunt obligatorii.",
+    "errorFetchingRoles": "Eroare la preluarea rolurilor",
+    "inviteSuccess": "Utilizator invitat cu succes!"
+  },
+  "AddRoleModal": {
+    "addNewRole": "Adaugă rol nou",
+    "createNewRole": "Creează un rol nou pentru organizația ta",
+    "roleName": "Nume rol *",
+    "roleNamePlaceholder": "ex: Manager Proiect, Dezvoltator, Designer",
+    "enterRoleName": "Introdu un nume descriptiv pentru noul rol",
+    "cancel": "Anulează",
+    "addRole": "Adaugă rol",
+    "creating": "Se creează..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "Organigramă",
+    "manageTeamStructure": "Gestionează structura echipei și ierarhia rolurilor",
+    "administratorLevel": "Nivel administrator",
+    "addLevel": "Adaugă nivel",
+    "addNewRole": "Adaugă rol nou",
+    "addDepartment": "Adaugă departament",
+    "enterDepartmentName": "Introdu numele departamentului...",
+    "close": "Închide",
+    "saveChanges": "Salvează modificările",
+    "saving": "Se salvează...",
+    "roles": "roluri",
+    "dropRolesHere": "Trage rolurile aici"
   }
 }

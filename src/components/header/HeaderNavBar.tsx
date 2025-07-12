@@ -20,12 +20,19 @@ const profileTabs = [
 ];
 
 const LANGUAGES = [
-  { code: "en", label: "EN" },
-  { code: "fr", label: "FR" },
-  { code: "ro", label: "RO" },
-  { code: "zh", label: "ZH" },
-  { code: "sr", label: "SR" },
-  { code: "gr", label: "GR" },
+  { code: "en", label: "EN", flag: "🇬🇧" },
+  { code: "fr", label: "FR", flag: "🇫🇷" },
+  { code: "es", label: "ES", flag: "🇪🇸" },
+  { code: "pt", label: "PT", flag: "🇵🇹" },
+  { code: "ro", label: "RO", flag: "🇷🇴" },
+  { code: "sr", label: "SR", flag: "🇷🇸" }, // Serbian is present here
+  { code: "zh", label: "ZH", flag: "🇨🇳" },
+  { code: "hi", label: "HI", flag: "🇮🇳" },
+  { code: "ar", label: "AR", flag: "🇸🇦" },
+  { code: "gr", label: "GR", flag: "🇬🇷" },
+  { code: "de", label: "DE", flag: "🇩🇪" },
+  { code: "da", label: "DA", flag: "🇩🇰" },
+  { code: "it", label: "IT", flag: "🇮🇹" },
   // Add more as needed
 ];
 
@@ -76,7 +83,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
 
   return (
     <header
-      className="absolute top-0 z-[20] h-14 bg-gray-100 flex items-center px-4"
+      className="absolute top-0 z-[200] h-14 bg-gray-100 flex items-center px-4"
       style={{
         left: SIDEBAR_WIDTH,
         width: `calc(100vw - ${SIDEBAR_WIDTH}px - ${isAIWindowOpen ? AI_WINDOW_WIDTH : 0}px)`,
@@ -85,7 +92,6 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
         transition: "width 0.3s, right 0.3s",
       }}
     >
-      
       {/* Center: Search Bar */}
       <div className="flex-1 flex justify-end">
         <div className="w-full max-w-xs">
@@ -104,16 +110,23 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
             <span className="font-bold">{lang.toUpperCase()}</span>
           </button>
           {langDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-28 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-2">
+            <div
+              className="absolute right-0 mt-2 w-22 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
+              style={{
+                maxHeight: "260px", // Limit height for scroll
+                overflowY: "auto",
+              }}
+            >
               {LANGUAGES.map(language => (
                 <button
                   key={language.code}
-                  className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center ${
+                  className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between ${
                     language.code === lang ? "font-bold bg-gray-100" : ""
                   }`}
                   onClick={() => handleLangChange(language.code)}
                 >
-                  {language.label}
+                  <span>{language.label}</span>
+                  <span>{language.flag}</span>
                 </button>
               ))}
             </div>

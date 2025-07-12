@@ -6,22 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  deadline: string;
-  completed: boolean;
-  priority: "critical" | "high" | "medium" | "low";
-  userId: any;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: { firstName: string; lastName: string; email: string };
-  isSubtask?: boolean;
-  parentTask?: string;
-  subtasks?: Task[];
-}
+import { Task } from "@/types/task";
 
 interface TaskListProps {
   tasks: Task[];
@@ -104,7 +89,68 @@ const TaskList: React.FC<TaskListProps> = ({
 
   // Filtering, searching, sorting logic
   const filteredTasks = useMemo(() => {
-    let result = [...tasks];
+    let result: Task[] = [];
+
+    // 1. Include main tasks assigned to me
+    result = tasks.filter(task => {
+      if (!task.userId) return false;
+      // Accept both _id and email for userId
+      if (typeof task.userId === "object" && (task.userId._id || task.userId.email)) {
+        if (task.userId._id && String(task.userId._id) === String(currentUserEmail)) return true;
+        if (task.userId.email && task.userId.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()) return true;
+      }
+      if (typeof task.userId === "string") {
+        // Accept both userId and email as string
+        return (
+          task.userId === currentUserEmail ||
+          task.userId.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()
+        );
+      }
+      return false;
+    });
+
+    // 2. Also include subtasks assigned to me, but only if main task is NOT created/assigned by me
+    const subtasksAssignedToMe: Task[] = [];
+    tasks.forEach(task => {
+      // Check if main task is NOT created/assigned by me
+      const isCreatedByMe =
+        task.createdBy &&
+        typeof task.createdBy.email === "string" &&
+        task.createdBy.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase();
+
+      const isAssignedByMe =
+        task.userId &&
+        (
+          (typeof task.userId === "object" && task.userId.email && task.userId.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()) ||
+          (typeof task.userId === "string" && (task.userId === currentUserEmail || task.userId.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()))
+        );
+
+      if (!isCreatedByMe && !isAssignedByMe && task.subtasks && Array.isArray(task.subtasks)) {
+        task.subtasks.forEach(subtask => {
+          if (
+            subtask.userId &&
+            (
+              (typeof subtask.userId === "object" && (subtask.userId._id && String(subtask.userId._id) === String(currentUserEmail)) ||
+                (subtask.userId.email && subtask.userId.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase())) ||
+              (typeof subtask.userId === "string" && (subtask.userId === currentUserEmail || subtask.userId.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()))
+            )
+          ) {
+            subtasksAssignedToMe.push({
+              ...subtask,
+              createdBy: task.createdBy,
+              priority: subtask.priority || task.priority,
+              tags: subtask.tags || task.tags,
+              parentTask: typeof task._id === "string" ? task._id : undefined,
+              subtasks: undefined,
+              isSubtask: true,
+            });
+          }
+        });
+      }
+    });
+
+    // Combine main tasks and filtered subtasks assigned to me
+    result = [...result, ...subtasksAssignedToMe];
 
     // Search
     if (searchValue.trim()) {
@@ -130,7 +176,7 @@ const TaskList: React.FC<TaskListProps> = ({
     result = result.filter(task => {
       if (filterPriorityValue === "critical") return task.priority === "critical";
       if (filterPriorityValue === "high") return task.priority === "high";
-      if (filterPriorityValue === "medium") return task.priority === "medium";
+      if (filterPriorityValue === "medium" ) return task.priority === "medium";
       if (filterPriorityValue === "low") return task.priority === "low";
       return true;
     });
@@ -169,7 +215,7 @@ const TaskList: React.FC<TaskListProps> = ({
     });
 
     return result;
-  }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue]);
+  }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue, currentUserEmail]);
 
   if (controlsOnly) {
     return (
@@ -275,7 +321,27 @@ const TaskList: React.FC<TaskListProps> = ({
               {filteredTasks.map(task => (
                 <TaskCard
                   key={task._id}
-                  task={task}
+                  task={{
+                    ...task,
+                    parentTask:
+                      typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
+                        ? task.parentTask._id
+                        : typeof task.parentTask === "string"
+                          ? task.parentTask
+                          : undefined,
+                    subtasks: Array.isArray(task.subtasks)
+                      ? task.subtasks.map(st => ({
+                          ...st,
+                          parentTask:
+                            typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
+                              ? st.parentTask._id
+                              : typeof st.parentTask === "string"
+                                ? st.parentTask
+                                : undefined,
+                          subtasks: undefined // Prevent nested subtasks for type compatibility
+                        }))
+                      : undefined
+                  }}
                   currentUserEmail={currentUserEmail}
                   loading={loading}
                   onEdit={onEdit}
@@ -289,17 +355,20 @@ const TaskList: React.FC<TaskListProps> = ({
             </div>
           )}
         </div>
-        <TaskDetailsModal
-          open={modalOpen}
-          task={detailsTask}
-          onClose={handleCloseModal}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onToggleComplete={onToggleComplete || (() => {})}
-          onToggleSubtask={handleSubtaskToggle}
-          theme={theme}
-          currentUserEmail={currentUserEmail}
-        />
+        {/* Only render TaskDetailsModal if detailsTask is not null */}
+        {detailsTask && (
+          <TaskDetailsModal
+            open={modalOpen}
+            task={detailsTask}
+            onClose={handleCloseModal}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onToggleComplete={onToggleComplete || (() => {})}
+            onToggleSubtask={handleSubtaskToggle}
+            theme={theme}
+            currentUserEmail={currentUserEmail}
+          />
+        )}
       </>
     );
   }
@@ -403,7 +472,27 @@ const TaskList: React.FC<TaskListProps> = ({
             {filteredTasks.map(task => (
               <TaskCard
                 key={task._id}
-                task={task}
+                task={{
+                  ...task,
+                  parentTask:
+                    typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
+                      ? task.parentTask._id
+                      : typeof task.parentTask === "string"
+                        ? task.parentTask
+                        : undefined,
+                  subtasks: Array.isArray(task.subtasks)
+                    ? task.subtasks.map(st => ({
+                        ...st,
+                        parentTask:
+                          typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
+                            ? st.parentTask._id
+                            : typeof st.parentTask === "string"
+                              ? st.parentTask
+                              : undefined,
+                        subtasks: undefined // Prevent nested subtasks for type compatibility
+                      }))
+                    : undefined
+                }}
                 currentUserEmail={currentUserEmail}
                 loading={loading}
                 onEdit={onEdit}
@@ -417,17 +506,20 @@ const TaskList: React.FC<TaskListProps> = ({
           </div>
         )}
       </div>
-      <TaskDetailsModal
-        open={modalOpen}
-        task={detailsTask}
-        onClose={handleCloseModal}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onToggleComplete={onToggleComplete || (() => {})}
-        onToggleSubtask={handleSubtaskToggle}
-        theme={theme}
-        currentUserEmail={currentUserEmail}
-      />
+      {/* Only render TaskDetailsModal if detailsTask is not null */}
+      {detailsTask && (
+        <TaskDetailsModal
+          open={modalOpen}
+          task={detailsTask}
+          onClose={handleCloseModal}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onToggleComplete={onToggleComplete || (() => {})}
+          onToggleSubtask={handleSubtaskToggle}
+          theme={theme}
+          currentUserEmail={currentUserEmail}
+        />
+      )}
     </>
   );
 };

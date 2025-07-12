@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FaTimes, FaEnvelope, FaUser, FaUserTag } from "react-icons/fa";
+import { FiChevronDown } from "react-icons/fi";
 import { createPortal } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/useAuth";
+import { uniqBy } from "lodash";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -22,6 +26,69 @@ interface UserProfileModalProps {
 
 const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user }) => {
   const router = useRouter();
+  const { user: currentUser } = useAuth();
+  const [roles, setRoles] = useState<string[]>([]);
+  const [selectedRole, setSelectedRole] = useState(user?.role || "");
+  const [roleLoading, setRoleLoading] = useState(false);
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    // Fetch available roles (unique, lowercase-insensitive)
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch("/api/roles");
+        if (!response.ok) return;
+        const data = await response.json();
+        const uniqueRoles = Array.from(
+          new Set(data.map((r: { name: string }) => r.name.toLowerCase()))
+        ).map(name =>
+          data.find((r: { name: string }) => r.name.toLowerCase() === name)?.name || name
+        );
+        setRoles(uniqueRoles);
+      } catch {}
+    };
+    fetchRoles();
+  }, []);
+
+  // Always sync selectedRole with user.role when modal opens or user changes
+  useEffect(() => {
+    setSelectedRole(user?.role || "");
+  }, [user, open]);
+
+  const handleRoleBadgeClick = () => {
+    if (currentUser?.role === "admin") {
+      setRoleDropdownOpen((v) => !v);
+    }
+  };
+
+  const handleRoleChange = async (newRole: string) => {
+    setRoleLoading(true);
+    try {
+      const res = await fetch("/api/update-user-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?._id, role: newRole }),
+      });
+      if (res.ok) {
+        setSelectedRole(newRole);
+        if (user) user.role = newRole;
+      }
+      setRoleDropdownOpen(false);
+    } catch (error) {
+      // Handle error
+    } finally {
+      setRoleLoading(false);
+    }
+  };
+
+  // When modal closes, refresh page if role was changed
+  useEffect(() => {
+    if (!open && selectedRole !== (user?.role || "")) {
+      router.reload();
+    }
+    // Only run when modal closes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   if (!open || !user) return null;
 
@@ -48,6 +115,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
         return "bg-gray-100 text-gray-700 border-gray-200";
     }
   };
+
+  // Only allow role change if currentUser is admin AND not editing own profile
+  const canChangeRole = currentUser?.role === "admin" && currentUser?._id !== user?._id;
 
   return (
     <>
@@ -87,11 +157,41 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">
                     {user.firstName} {user.lastName}
                   </h2>
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getRoleBadgeColor(user.role)}`}>
+                  <div className="flex items-center gap-3 mb-2 relative">
+                    {/* Role badge with dropdown arrow and click handler */}
+                    <button
+                      type="button"
+                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border transition-colors duration-150 focus:outline-none ${
+                        getRoleBadgeColor(selectedRole)
+                      } ${canChangeRole ? "cursor-pointer hover:bg-blue-100" : ""}`}
+                      onClick={canChangeRole ? handleRoleBadgeClick : undefined}
+                      aria-haspopup={canChangeRole}
+                      aria-expanded={roleDropdownOpen}
+                      tabIndex={0}
+                    >
                       <FaUserTag className="w-3 h-3" />
-                      {user.role}
-                    </span>
+                      {selectedRole}
+                      {canChangeRole && (
+                        <FiChevronDown className={`ml-1 w-4 h-4 transition-transform ${roleDropdownOpen ? "rotate-180" : ""}`} />
+                      )}
+                    </button>
+                    {/* Dropdown */}
+                    {canChangeRole && roleDropdownOpen && (
+                      <div className="absolute left-0 top-full mt-2 min-w-[140px] bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                        {roles.map((role) => (
+                          <button
+                            key={role}
+                            className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 flex items-center ${
+                              role === selectedRole ? "font-bold bg-blue-100" : ""
+                            }`}
+                            onClick={() => handleRoleChange(role)}
+                            disabled={roleLoading || role === selectedRole}
+                          >
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <FaEnvelope className="w-4 h-4" />

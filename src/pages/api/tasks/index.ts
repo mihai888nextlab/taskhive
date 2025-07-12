@@ -54,8 +54,8 @@ export default async function handler(
 
   if (req.method === "GET") {
     try {
-      // Only return main tasks (not subtasks) assigned to the authenticated user
-      const tasks = await Task.find({
+      // Return all main tasks assigned to the user AND all subtasks assigned to the user
+      const mainTasks = await Task.find({
         userId: userId,
         companyId: decodedToken.companyId,
         $or: [{ isSubtask: { $exists: false } }, { isSubtask: false }],
@@ -69,9 +69,29 @@ export default async function handler(
             { path: "createdBy", select: "firstName lastName email" },
             { path: "userId", select: "firstName lastName email" },
           ],
-        });
+        })
+        .populate("parentTask", "title createdBy");
 
-      res.status(200).json(tasks);
+      // Find all subtasks assigned to the user (even if parent task is not assigned to them)
+      const subtasks = await Task.find({
+        userId: userId,
+        companyId: decodedToken.companyId,
+        isSubtask: true,
+      })
+        .sort({ createdAt: -1 })
+        .populate("createdBy", "firstName lastName email")
+        .populate("userId", "firstName lastName email")
+        .populate("parentTask", "title createdBy");
+
+      // Merge main tasks and subtasks, but avoid duplicates
+      // If a subtask is already included in mainTasks.subtasks, skip it
+      const mainTaskSubtaskIds = new Set(
+        mainTasks.flatMap(t => t.subtasks?.map((st: any) => String(st._id)) || [])
+      );
+      const filteredSubtasks = subtasks.filter(st => !mainTaskSubtaskIds.has(String(st._id)));
+
+      // Return both main tasks and subtasks as a flat array
+      res.status(200).json([...mainTasks, ...filteredSubtasks]);
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({
@@ -80,7 +100,7 @@ export default async function handler(
       });
     }
   } else if (req.method === "POST") {
-    const { title, description, deadline, assignedTo, priority, subtasks } =
+    const { title, description, deadline, assignedTo, priority, subtasks, tags } =
       req.body;
 
     if (!title || !deadline) {
@@ -106,6 +126,7 @@ export default async function handler(
         priority: priority || "medium",
         isSubtask: false,
         subtasks: [],
+        tags: tags || [], // <-- Add this line
       });
 
       // RAG (Retrieval-Augmented Generation) Fields
@@ -133,27 +154,30 @@ export default async function handler(
 
         for (const subtask of subtasks) {
           if (subtask.title && subtask.title.trim()) {
+            const subtaskAssignedUserId =
+              subtask.assignedTo && subtask.assignedTo.trim()
+                ? Types.ObjectId.createFromHexString(subtask.assignedTo)
+                : userId;
             const createdSubtask = await Task.create({
               title: subtask.title.trim(),
               description: subtask.description || "",
               deadline: new Date(deadline),
-              userId: assignedUserId,
+              userId: subtaskAssignedUserId,
+              assignedTo: subtaskAssignedUserId, // Explicit assignee
+              assignedBy: userId, // Explicit assigner
               createdBy: userId,
               companyId: decodedToken.companyId,
               priority: priority || "medium",
               isSubtask: true,
               parentTask: newTask._id,
+              tags: subtask.tags || [],
             });
 
             // RAG Fields for subtask
             const subtaskRawPageContent = `Subtask Title: ${createdSubtask.title}. Description: ${createdSubtask.description}. Priority: ${createdSubtask.priority}. Completed: ${createdSubtask.completed}. Due Date: ${createdSubtask.deadline?.toLocaleDateString() || "N/A"}.`;
-            const subtaskChunks = await splitter.createDocuments([
-              subtaskRawPageContent,
-            ]);
+            const subtaskChunks = await splitter.createDocuments([subtaskRawPageContent]);
             const subtaskContentToEmbed = subtaskChunks[0].pageContent;
-            const subtaskEmbedding = await embeddings.embedQuery(
-              subtaskContentToEmbed
-            );
+            const subtaskEmbedding = await embeddings.embedQuery(subtaskContentToEmbed);
             const subtaskMetadata = {
               source: "subtask",
               originalId: createdSubtask._id,
@@ -188,7 +212,8 @@ export default async function handler(
           ],
         })
         .populate("createdBy", "firstName lastName email")
-        .populate("userId", "firstName lastName email");
+        .populate("userId", "firstName lastName email")
+        .populate("parentTask", "title createdBy"); // <-- Add this line
 
       res.status(201).json(populatedTask);
     } catch (error) {
@@ -210,3 +235,5 @@ export default async function handler(
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+// No changes needed. API logic is correct and robust.

@@ -152,7 +152,6 @@ const InsightsPage = () => {
   }, []);
 
   return (
-    <DashboardLayout>
       <div className="p-6 md:p-8 bg-gray-100 min-h-screen font-sans">
         {/* Executive Summary Card */}
         {loading ? (
@@ -370,7 +369,6 @@ const InsightsPage = () => {
           </div>
         )}
       </div>
-    </DashboardLayout>
   );
 };
 

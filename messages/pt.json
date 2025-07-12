@@ -30,6 +30,7 @@
     "myTasks": "Minhas tarefas",
     "myTasksDescription": "Tarefas atribuídas a você e tarefas pessoais que você criou",
     "assignedByMe": "Tarefas atribuídas por mim",
+    "tasksAssignedByMe": "Tarefas atribuídas por mim",
     "assignedTasksDescription": "Monitore e gerencie as tarefas que você atribuiu aos membros da equipe",
     "createTask": "Criar tarefa",
     "editTask": "Editar tarefa",
@@ -209,7 +210,9 @@
     "chatNotConnected": "O chat não está conectado. Por favor, tente novamente.",
     "yourFiles": "Seus arquivos",
     "noFilesUploaded": "Nenhum arquivo enviado ainda",
-    "typeMessage": "Digite uma mensagem..."
+    "typeMessage": "Digite uma mensagem...",
+    "noConversations": "Nenhuma conversa ainda",
+    "startNewChat": "Inicie um novo chat para se conectar com sua equipe"
   },
   "FinancePage": {
     "expenses": "Despesas",
@@ -537,5 +540,42 @@
     "loadingDeadlines": "Carregando prazos...",
     "noUpcomingDeadlines": "Nenhum prazo próximo",
     "noScheduledTasksOrEvents": "Você não tem tarefas ou eventos agendados"
+  },
+  "AddUserModal": {
+    "addNewUser": "Adicionar novo usuário",
+    "inviteNewTeamMember": "Convide um novo membro da equipe",
+    "emailAddress": "Endereço de e-mail *",
+    "role": "Função *",
+    "selectRole": "Selecione uma função",
+    "cancel": "Cancelar",
+    "inviteUser": "Convidar usuário",
+    "inviting": "Convidando...",
+    "allFieldsRequired": "Todos os campos são obrigatórios.",
+    "errorFetchingRoles": "Erro ao buscar funções",
+    "inviteSuccess": "Usuário convidado com sucesso!"
+  },
+  "AddRoleModal": {
+    "addNewRole": "Adicionar nova função",
+    "createNewRole": "Crie uma nova função para sua organização",
+    "roleName": "Nome da função *",
+    "roleNamePlaceholder": "ex: Gerente de Projeto, Desenvolvedor, Designer",
+    "enterRoleName": "Digite um nome descritivo para a nova função",
+    "cancel": "Cancelar",
+    "addRole": "Adicionar função",
+    "creating": "Criando..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "Organograma",
+    "manageTeamStructure": "Gerencie a estrutura da equipe e a hierarquia de funções",
+    "administratorLevel": "Nível de administrador",
+    "addLevel": "Adicionar nível",
+    "addNewRole": "Adicionar nova função",
+    "addDepartment": "Adicionar departamento",
+    "enterDepartmentName": "Digite o nome do departamento...",
+    "close": "Fechar",
+    "saveChanges": "Salvar alterações",
+    "saving": "Salvando...",
+    "roles": "funções",
+    "dropRolesHere": "Arraste funções aqui"
   }
 }

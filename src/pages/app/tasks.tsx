@@ -10,6 +10,7 @@ import { createPortal } from 'react-dom';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { Task as TaskType } from "@/types/task";
 
 interface TaskUser {
   _id: string;
@@ -36,7 +37,7 @@ interface Task {
   subtasks?: Task[];
 }
 
-const isTaskOverdue = (task: Task): boolean => {
+const isTaskOverdue = (task: TaskType): boolean => {
   if (task.completed) return false;
   const deadlineDate = new Date(task.deadline);
   const now = new Date();
@@ -50,8 +51,8 @@ type ActiveTab = 'my-tasks' | 'assigned-tasks';
 const TasksPage: NextPageWithLayout = (props) => {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<ActiveTab>('my-tasks');
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [assignedTasks, setAssignedTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [assignedTasks, setAssignedTasks] = useState<TaskType[]>([]);
   const [usersBelowMe, setUsersBelowMe] = useState<any[]>([]);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string>("");
@@ -63,24 +64,24 @@ const TasksPage: NextPageWithLayout = (props) => {
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDeadline, setTaskDeadline] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
-  const [priority, setPriority] = useState<'critical' | 'high' | 'medium' | 'low'>('medium'); // Changed from important
+  const [priority, setPriority] = useState<'critical' | 'high' | 'medium' | 'low'>('medium');
   const [formError, setFormError] = useState<string | null>(null);
 
   // UI state
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
 
-  // --- Controlled state for My Task List ---
+  // Controlled state for My Task List
   const [mySearch, setMySearch] = useState("");
   const [myFilterStatus, setMyFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
-  const [myFilterPriority, setMyFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all"); // Changed from filterImportant
-  const [mySortBy, setMySortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc"); // Changed default
+  const [myFilterPriority, setMyFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all");
+  const [mySortBy, setMySortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc");
 
-  // --- Controlled state for Assigned Tasks List ---
+  // Controlled state for Assigned Tasks List
   const [assignedSearch, setAssignedSearch] = useState("");
   const [assignedFilterStatus, setAssignedFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
-  const [assignedFilterPriority, setAssignedFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all"); // Changed from filterImportant
-  const [assignedSortBy, setAssignedSortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc"); // Changed default
+  const [assignedFilterPriority, setAssignedFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all");
+  const [assignedSortBy, setAssignedSortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc");
 
   const t = useTranslations("TasksPage");
 
@@ -94,17 +95,20 @@ const TasksPage: NextPageWithLayout = (props) => {
         headers: { "Content-Type": "application/json" },
       });
       if (!response.ok) throw new Error("Failed to fetch tasks.");
-      const data: Task[] = await response.json();
+      const data: TaskType[] = await response.json();
 
-      // Only tasks assigned to me
+      // Only tasks assigned to me (by id or email)
       const myTasks = data.filter((task) => {
         if (!task.userId) return false;
         if (typeof task.userId === "string") {
-          return task.userId === currentUserId;
+          return (
+            task.userId === currentUserId ||
+            task.userId.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()
+          );
         }
         if (typeof task.userId === "object") {
           if (task.userId._id && String(task.userId._id) === String(currentUserId)) return true;
-          if (task.userId.email && task.userId.email.trim().toLowerCase() === currentUserEmail) return true;
+          if (task.userId.email && task.userId.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()) return true;
         }
         return false;
       });
@@ -116,10 +120,10 @@ const TasksPage: NextPageWithLayout = (props) => {
 
         if (isAOverdue && !a.completed && (!isBOverdue || b.completed)) return -1;
         if (isBOverdue && !b.completed && (!isAOverdue || a.completed)) return 1;
-        if (a.priority === 'critical' && !a.completed && !isAOverdue && (!b.priority || b.completed || isBOverdue)) return -1;
-        if (b.priority === 'critical' && !b.completed && !isBOverdue && (!a.priority || a.completed || isAOverdue)) return 1;
-        if (a.priority === 'high' && !a.completed && !isAOverdue && (!b.priority || b.completed || isBOverdue)) return -1;
-        if (b.priority === 'high' && !b.completed && !isBOverdue && (!a.priority || a.completed || isAOverdue)) return 1;
+        const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+        const aPriority = priorityOrder[a.priority];
+        const bPriority = priorityOrder[b.priority];
+        if (aPriority !== bPriority) return bPriority - aPriority;
         if (a.completed && !b.completed) return 1;
         if (!a.completed && b.completed) return -1;
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
@@ -140,7 +144,7 @@ const TasksPage: NextPageWithLayout = (props) => {
         headers: { "Content-Type": "application/json" },
       });
       if (!response.ok) throw new Error("Failed to fetch assigned tasks.");
-      const data = await response.json();
+      const data: TaskType[] = await response.json();
       setAssignedTasks(data);
     } catch (err) {
       // Optionally handle error
@@ -173,10 +177,10 @@ const TasksPage: NextPageWithLayout = (props) => {
 
   // Fetch tasks on mount and when sortBy changes
   useEffect(() => {
-    if (currentUserId) {
+    if (currentUserId || currentUserEmail) {
       fetchTasks();
     }
-  }, [currentUserId, mySortBy]);
+  }, [currentUserId, currentUserEmail, mySortBy]);
 
   useEffect(() => {
     fetchAssignedTasks();
@@ -190,27 +194,27 @@ const TasksPage: NextPageWithLayout = (props) => {
     setEditingTaskId(null);
     setFormError(null);
     setAssignedTo("");
-    setPriority('medium'); // Changed from setImportant(false)
+    setPriority('medium');
   };
 
   const handleAddTask = async (e: React.FormEvent, subtasks?: any[]) => {
     e.preventDefault();
     if (!taskTitle.trim() || !taskDeadline.trim()) {
-      setFormError("Task title and deadline are required!");
+      setFormError(t("taskTitle") + " and " + t("deadline") + " are required!");
       return;
     }
     setLoading(true);
     setFormError(null);
-    
-    const taskData = {
+
+    const taskData: any = {
       title: taskTitle.trim(),
       description: taskDescription.trim(),
       deadline: taskDeadline,
       ...(assignedTo && { assignedTo }),
-      priority, // Changed from important
+      priority,
       subtasks: subtasks || [],
     };
-    
+
     try {
       let response;
       if (editingTaskId) {
@@ -226,26 +230,23 @@ const TasksPage: NextPageWithLayout = (props) => {
           body: JSON.stringify(taskData),
         });
       }
-      
+
       const responseText = await response.text();
-      
+
       if (!response.ok) {
         let errorMessage = "Failed to save task.";
         try {
           const errorData = JSON.parse(responseText);
           errorMessage = errorData.message || errorMessage;
-        } catch (e) {
-          // Response is not JSON
-        }
+        } catch (e) {}
         throw new Error(errorMessage);
       }
-      
+
       await fetchTasks();
       await fetchAssignedTasks();
       resetForm();
       setShowForm(false);
     } catch (err) {
-      console.error("Error creating task:", err);
       setFormError((err as Error).message);
     } finally {
       setLoading(false);
@@ -253,7 +254,7 @@ const TasksPage: NextPageWithLayout = (props) => {
   };
 
   const handleDeleteTask = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this task?")) return;
+    if (!window.confirm(t("deleteAnnouncementConfirm", { default: "Are you sure you want to delete this task?" }))) return;
     setLoading(true);
     setListError(null);
     try {
@@ -268,14 +269,12 @@ const TasksPage: NextPageWithLayout = (props) => {
     }
   };
 
-  const handleToggleComplete = async (task: Task) => {
+  const handleToggleComplete = async (task: TaskType) => {
     if (loading) return;
-    
     if (task.subtasks && task.subtasks.length > 0 && !task.isSubtask) {
-      alert("This task has subtasks. Complete all subtasks to automatically complete this task.");
+      alert(t("editingTaskWithSubtasks", { default: "This task has subtasks. Complete all subtasks to automatically complete this task." }));
       return;
     }
-
     setLoading(true);
     try {
       const response = await fetch(`/api/tasks/${task._id}`, {
@@ -292,24 +291,21 @@ const TasksPage: NextPageWithLayout = (props) => {
       await fetchTasks();
       await fetchAssignedTasks();
     } catch (err) {
-      console.error("Error toggling task completion:", err);
       alert((err as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditClick = (task: Task) => {
+  const handleEditClick = (task: TaskType) => {
     setEditingTaskId(task._id);
     setTaskTitle(task.title);
     setTaskDescription(task.description || "");
-    
     const deadlineDate = new Date(task.deadline);
     const formattedDeadline = deadlineDate.toISOString().split('T')[0];
     setTaskDeadline(formattedDeadline);
-    
     setAssignedTo(typeof task.userId === "object" && task.userId ? task.userId._id : (task.userId as string) || "");
-    setPriority(task.priority || 'medium'); // Changed from setImportant(task.important || false)
+    setPriority(task.priority || 'medium');
     setFormError(null);
     setShowForm(true);
   };
@@ -473,19 +469,7 @@ const TasksPage: NextPageWithLayout = (props) => {
                   <AssignedTasksList
                     tasks={assignedTasks}
                     loading={loading}
-                    onEdit={(task: Task) => {
-                      setEditingTaskId(task._id);
-                      setTaskTitle(task.title);
-                      setTaskDescription(task.description || "");
-                      setTaskDeadline(task.deadline);
-                      setAssignedTo(
-                        typeof task.userId === "string"
-                          ? task.userId
-                          : (task.userId && task.userId._id) || ""
-                      );
-                      setPriority(task.priority || 'medium');
-                      setShowForm(true);
-                    }}
+                    onEdit={handleEditClick}
                     onDelete={handleDeleteTask}
                     isTaskOverdue={isTaskOverdue}
                     currentUserEmail={currentUserEmail}
@@ -506,19 +490,7 @@ const TasksPage: NextPageWithLayout = (props) => {
                   <AssignedTasksList
                     tasks={assignedTasks}
                     loading={loading}
-                    onEdit={(task: Task) => {
-                      setEditingTaskId(task._id);
-                      setTaskTitle(task.title);
-                      setTaskDescription(task.description || "");
-                      setTaskDeadline(task.deadline);
-                      setAssignedTo(
-                        typeof task.userId === "string"
-                          ? task.userId
-                          : (task.userId && task.userId._id) || ""
-                      );
-                      setPriority(task.priority || 'medium');
-                      setShowForm(true);
-                    }}
+                    onEdit={handleEditClick}
                     onDelete={handleDeleteTask}
                     isTaskOverdue={isTaskOverdue}
                     currentUserEmail={currentUserEmail}
@@ -568,7 +540,6 @@ const TasksPage: NextPageWithLayout = (props) => {
 };
 
 TasksPage.getLayout = function getLayout(page: React.ReactElement) {
-  // Pass locale to DashboardLayout
   const locale = (page.props as any)?.locale;
   return <DashboardLayout locale={locale}>{page}</DashboardLayout>;
 };

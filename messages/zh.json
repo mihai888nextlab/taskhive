@@ -30,6 +30,7 @@
     "myTasks": "我的任务",
     "myTasksDescription": "分配给您的任务和您创建的个人任务",
     "assignedByMe": "我分配的任务",
+    "tasksAssignedByMe": "我分配的任务",
     "assignedTasksDescription": "监控和管理您分配给团队成员的任务",
     "createTask": "创建任务",
     "editTask": "编辑任务",
@@ -209,7 +210,9 @@
     "chatNotConnected": "聊天未连接。请重试。",
     "yourFiles": "你的文件",
     "noFilesUploaded": "尚未上传文件",
-    "typeMessage": "输入消息..."
+    "typeMessage": "输入消息...",
+    "noConversations": "还没有会话",
+    "startNewChat": "开始新的聊天，与您的团队沟通"
   },
   "FinancePage": {
     "expenses": "支出",
@@ -550,5 +553,42 @@
     "unexpectedError": "发生了意外错误。",
     "adding": "正在添加...",
     "cancel": "取消"
+  },
+  "AddUserModal": {
+    "addNewUser": "添加新用户",
+    "inviteNewTeamMember": "邀请新团队成员",
+    "emailAddress": "电子邮件地址 *",
+    "role": "角色 *",
+    "selectRole": "选择角色",
+    "cancel": "取消",
+    "inviteUser": "邀请用户",
+    "inviting": "正在邀请...",
+    "allFieldsRequired": "所有字段均为必填项。",
+    "errorFetchingRoles": "获取角色时出错",
+    "inviteSuccess": "用户邀请成功！"
+  },
+  "AddRoleModal": {
+    "addNewRole": "添加新角色",
+    "createNewRole": "为您的组织创建新角色",
+    "roleName": "角色名称 *",
+    "roleNamePlaceholder": "例如：项目经理、开发者、设计师",
+    "enterRoleName": "为新角色输入描述性名称",
+    "cancel": "取消",
+    "addRole": "添加角色",
+    "creating": "正在创建..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "组织结构图",
+    "manageTeamStructure": "管理您的团队结构和角色层级",
+    "administratorLevel": "管理员级别",
+    "addLevel": "添加层级",
+    "addNewRole": "添加新角色",
+    "addDepartment": "添加部门",
+    "enterDepartmentName": "输入部门名称...",
+    "close": "关闭",
+    "saveChanges": "保存更改",
+    "saving": "正在保存...",
+    "roles": "角色",
+    "dropRolesHere": "拖放角色到此处"
   }
 }

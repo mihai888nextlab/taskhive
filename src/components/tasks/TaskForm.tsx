@@ -425,6 +425,8 @@ Please enhance and expand this existing description while keeping the original i
         taskTitle={taskTitle}
         taskDescription={taskDescription}
         initialSubtasks={subtasks}
+        usersBelowMe={usersBelowMe}
+        currentUserId={typeof window !== "undefined" ? window?.__NEXT_DATA__?.props?.pageProps?.currentUserId || "" : ""}
         onSave={handleSaveSubtasks}
         onCancel={() => setShowSubtasksModal(false)}
       />

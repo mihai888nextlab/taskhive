@@ -29,7 +29,7 @@
   "TasksPage": {
     "myTasks": "مهامي",
     "myTasksDescription": "المهام المخصصة لك والمهام الشخصية التي أنشأتها",
-    "assignedByMe": "مهام قمت بتعيينها",
+    "assignedByMe": "المهام التي كلفتها أنا",
     "assignedTasksDescription": "راقب وأدر المهام التي قمت بتعيينها لأعضاء الفريق",
     "createTask": "إنشاء مهمة",
     "editTask": "تعديل المهمة",
@@ -209,7 +209,9 @@
     "chatNotConnected": "الدردشة غير متصلة. يرجى المحاولة مرة أخرى.",
     "yourFiles": "ملفاتك",
     "noFilesUploaded": "لم يتم تحميل أي ملفات بعد",
-    "typeMessage": "اكتب رسالة..."
+    "typeMessage": "اكتب رسالة...",
+    "noConversations": "لا توجد محادثات بعد",
+    "startNewChat": "ابدأ محادثة جديدة للتواصل مع فريقك"
   },
   "FinancePage": {
     "expenses": "المصروفات",
@@ -537,5 +539,42 @@
     "loadingDeadlines": "جارٍ تحميل المواعيد النهائية...",
     "noUpcomingDeadlines": "لا توجد مواعيد نهائية قادمة",
     "noScheduledTasksOrEvents": "لا توجد مهام أو أحداث مجدولة"
+  },
+  "AddUserModal": {
+    "addNewUser": "إضافة مستخدم جديد",
+    "inviteNewTeamMember": "دعوة عضو جديد للفريق",
+    "emailAddress": "البريد الإلكتروني *",
+    "role": "الدور *",
+    "selectRole": "اختر دورًا",
+    "cancel": "إلغاء",
+    "inviteUser": "دعوة مستخدم",
+    "inviting": "جارٍ الدعوة...",
+    "allFieldsRequired": "جميع الحقول مطلوبة.",
+    "errorFetchingRoles": "حدث خطأ أثناء جلب الأدوار",
+    "inviteSuccess": "تمت دعوة المستخدم بنجاح!"
+  },
+  "AddRoleModal": {
+    "addNewRole": "إضافة دور جديد",
+    "createNewRole": "أنشئ دورًا جديدًا لمنظمتك",
+    "roleName": "اسم الدور *",
+    "roleNamePlaceholder": "مثال: مدير مشروع، مطور، مصمم",
+    "enterRoleName": "أدخل اسمًا وصفيًا للدور الجديد",
+    "cancel": "إلغاء",
+    "addRole": "إضافة دور",
+    "creating": "جارٍ الإنشاء..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "الهيكل التنظيمي",
+    "manageTeamStructure": "إدارة هيكل الفريق وتسلسل الأدوار",
+    "administratorLevel": "مستوى المدير",
+    "addLevel": "إضافة مستوى",
+    "addNewRole": "إضافة دور جديد",
+    "addDepartment": "إضافة قسم",
+    "enterDepartmentName": "أدخل اسم القسم...",
+    "close": "إغلاق",
+    "saveChanges": "حفظ التغييرات",
+    "saving": "جارٍ الحفظ...",
+    "roles": "الأدوار",
+    "dropRolesHere": "اسحب الأدوار هنا"
   }
 }

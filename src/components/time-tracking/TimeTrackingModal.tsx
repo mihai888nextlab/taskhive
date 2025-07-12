@@ -52,7 +52,7 @@ const TimeTrackingModal: React.FC<TimeTrackingModalProps> = ({ show, onClose, on
 
   if (!show) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm">
+    <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/10 backdrop-blur-sm">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-0 relative border border-gray-200 animate-fadeIn">
         <form onSubmit={handleSubmit} className="p-4 sm:p-8 rounded-2xl">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 text-center">{t("logTimeForTask")}</h2>

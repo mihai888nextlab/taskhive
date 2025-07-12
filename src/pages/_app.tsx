@@ -23,6 +23,9 @@ import zhMessages from "../../messages/zh.json";
 import hiMessages from "../../messages/hi.json";
 import arMessages from "../../messages/ar.json";
 import grMessages from "../../messages/gr.json";
+import deMessages from "../../messages/de.json";
+import daMessages from "../../messages/da.json";
+import itMessages from "../../messages/it.json";
 
 // Type for pages with custom layout
 export type NextPageWithLayout = NextPage & {
@@ -54,6 +57,9 @@ function LanguageConsumerApp({ Component, pageProps, router }: AppPropsWithLayou
     hi: hiMessages,
     ar: arMessages,
     gr: grMessages,
+    de: deMessages,
+    da: daMessages,
+    it: itMessages,
   };
   const messages = messagesMap[lang] || enMessages;
 

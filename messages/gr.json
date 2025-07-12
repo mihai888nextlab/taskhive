@@ -30,6 +30,7 @@
     "myTasks": "Οι εργασίες μου",
     "myTasksDescription": "Εργασίες που σας έχουν ανατεθεί και προσωπικές εργασίες που δημιουργήσατε",
     "assignedByMe": "Εργασίες που ανέθεσα εγώ",
+    "tasksAssignedByMe": "Εργασίες που ανέθεσα εγώ",
     "assignedTasksDescription": "Παρακολουθήστε και διαχειριστείτε εργασίες που αναθέσατε στα μέλη της ομάδας",
     "createTask": "Δημιουργία εργασίας",
     "editTask": "Επεξεργασία εργασίας",
@@ -143,7 +144,9 @@
     "fileUploaded": "Το αρχείο ανέβηκε επιτυχώς",
     "fileDownloaded": "Το αρχείο κατέβηκε επιτυχώς",
     "errorUploadingFile": "Σφάλμα κατά την ανέβασμα του αρχείου",
-    "errorDownloadingFile": "Σφάλμα κατά την κατέβασμα του αρχείου"
+    "errorDownloadingFile": "Σφάλμα κατά την κατέβασμα του αρχείου",
+    "noConversations": "Δεν υπάρχουν συνομιλίες ακόμα",
+    "startNewChat": "Ξεκινήστε μια νέα συνομιλία για να επικοινωνήσετε με την ομάδα σας"
   },
   "FinancePage": {
     "invoices": "Τιμολόγια",
@@ -507,5 +510,42 @@
     "total": "Σύνολο",
     "exportCSV": "Εξαγωγή CSV",
     "exportPDF": "Εξαγωγή PDF"
+  },
+  "AddUserModal": {
+    "addNewUser": "Προσθήκη νέου χρήστη",
+    "inviteNewTeamMember": "Προσκαλέστε νέο μέλος ομάδας",
+    "emailAddress": "Διεύθυνση email *",
+    "role": "Ρόλος *",
+    "selectRole": "Επιλέξτε ρόλο",
+    "cancel": "Ακύρωση",
+    "inviteUser": "Προσκαλέστε χρήστη",
+    "inviting": "Πρόσκληση...",
+    "allFieldsRequired": "Όλα τα πεδία είναι υποχρεωτικά.",
+    "errorFetchingRoles": "Σφάλμα κατά την ανάκτηση των ρόλων",
+    "inviteSuccess": "Ο χρήστης προσκλήθηκε με επιτυχία!"
+  },
+  "AddRoleModal": {
+    "addNewRole": "Προσθήκη νέου ρόλου",
+    "createNewRole": "Δημιουργήστε νέο ρόλο για τον οργανισμό σας",
+    "roleName": "Όνομα ρόλου *",
+    "roleNamePlaceholder": "π.χ. Project Manager, Developer, Designer",
+    "enterRoleName": "Εισάγετε περιγραφικό όνομα για τον νέο ρόλο",
+    "cancel": "Ακύρωση",
+    "addRole": "Προσθήκη ρόλου",
+    "creating": "Δημιουργία..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "Οργανόγραμμα",
+    "manageTeamStructure": "Διαχειριστείτε τη δομή της ομάδας και την ιεραρχία των ρόλων",
+    "administratorLevel": "Επίπεδο διαχειριστή",
+    "addLevel": "Προσθήκη επιπέδου",
+    "addNewRole": "Προσθήκη νέου ρόλου",
+    "addDepartment": "Προσθήκη τμήματος",
+    "enterDepartmentName": "Εισάγετε όνομα τμήματος...",
+    "close": "Κλείσιμο",
+    "saveChanges": "Αποθήκευση αλλαγών",
+    "saving": "Αποθήκευση...",
+    "roles": "ρόλοι",
+    "dropRolesHere": "Σύρετε τους ρόλους εδώ"
   }
 }

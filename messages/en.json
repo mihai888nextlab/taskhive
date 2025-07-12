@@ -68,6 +68,7 @@
     "tryAdjustingSearch": "Try adjusting your search or filters",
     "createFirstTask": "Create your first task to get started",
     "noAssignedTasks": "No assigned tasks found",
+    "tasksAssignedByMe": "Tasks Assigned By Me",
     "edit": "Edit",
     "delete": "Delete",
     "completed": "Completed",
@@ -161,6 +162,8 @@
     "expiresAt": "Expires At"
   },
   "CommunicationPage": {
+    "noConversations": "No conversations",
+    "startNewChat": "Begin a new conversation to communicate with your team",
     "messages": "Messages",
     "newChat": "New Chat",
     "newGroup": "New Group",
@@ -550,5 +553,42 @@
     "unexpectedError": "An unexpected error occurred.",
     "adding": "Adding...",
     "cancel": "Cancel"
+  },
+  "AddUserModal": {
+    "addNewUser": "Add New User",
+    "inviteNewTeamMember": "Invite a new team member",
+    "emailAddress": "Email Address *",
+    "role": "Role *",
+    "selectRole": "Select a role",
+    "cancel": "Cancel",
+    "inviteUser": "Invite User",
+    "inviting": "Inviting...",
+    "allFieldsRequired": "All fields are required.",
+    "errorFetchingRoles": "Error fetching roles",
+    "inviteSuccess": "User invited successfully!"
+  },
+  "AddRoleModal": {
+    "addNewRole": "Add New Role",
+    "createNewRole": "Create a new role for your organization",
+    "roleName": "Role Name *",
+    "roleNamePlaceholder": "e.g., Project Manager, Developer, Designer",
+    "enterRoleName": "Enter a descriptive name for the new role",
+    "cancel": "Cancel",
+    "addRole": "Add Role",
+    "creating": "Creating..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "Organization Chart",
+    "manageTeamStructure": "Manage your team structure and role hierarchy",
+    "administratorLevel": "Administrator Level",
+    "addLevel": "Add Level",
+    "addNewRole": "Add New Role",
+    "addDepartment": "Add Department",
+    "enterDepartmentName": "Enter department name...",
+    "close": "Close",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "roles": "roles",
+    "dropRolesHere": "Drop roles here"
   }
 }

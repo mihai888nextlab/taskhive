@@ -8,11 +8,11 @@ export interface ITask extends Document {
   description?: string;
   deadline: Date;
   completed: boolean;
-  userId: Types.ObjectId; // Link to the User model
-  companyId: Types.ObjectId; // Optional link to the Company model
+  userId: Types.ObjectId; // Link to the User model (assignee)
+  companyId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
-  createdBy: Types.ObjectId;
+  createdBy: Types.ObjectId; // Assigner
   priority: "critical" | "high" | "medium" | "low";
   // Subtask fields
   parentTask?: Types.ObjectId;
@@ -29,6 +29,9 @@ export interface ITask extends Document {
     status?: string;
     // ... any other relevant task-specific info
   };
+  tags?: string[]; // <-- Add this line
+  assignedTo?: Types.ObjectId; // Assignee (for both main tasks and subtasks)
+  assignedBy?: Types.ObjectId; // Assigner (for both main tasks and subtasks)
 }
 
 const TaskSchema: Schema = new Schema(
@@ -90,6 +93,19 @@ const TaskSchema: Schema = new Schema(
     pageContent: { type: String },
     embedding: { type: [Number] },
     metadata: { type: mongoose.Schema.Types.Mixed },
+    tags: [{ type: String }], // <-- Add this line
+    assignedTo: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+      // Used for both main tasks and subtasks
+    },
+    assignedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+      // Used for both main tasks and subtasks
+    },
   },
   {
     timestamps: true,

@@ -6,23 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-
-interface Task {
-  _id: string;
-  title: string;
-  description?: string;
-  deadline: string;
-  completed: boolean;
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  userId: any;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: { firstName: string; lastName: string; email: string };
-  // Add subtask fields
-  isSubtask?: boolean;
-  parentTask?: string;
-  subtasks?: Task[];
-}
+import { Task } from "@/types/task";
 
 interface AssignedTasksListProps {
   tasks: Task[];
@@ -106,6 +90,28 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
   const filteredTasks = useMemo(() => {
     let result = [...tasks];
 
+    // Show subtasks assigned to other users
+    result = result.flatMap(task => {
+      if (task.subtasks && Array.isArray(task.subtasks)) {
+        // Only include subtasks assigned to other users
+        return task.subtasks
+          .filter(st => st.userId && typeof st.userId === 'object' && st.userId.email !== currentUserEmail)
+          .map(st => ({
+            ...st,
+            isSubtask: true,
+            parentTask: typeof task._id === 'string' ? task._id : undefined,
+            // Ensure parentTask is string or undefined for type compatibility
+          }));
+      }
+      // Also include the main task, but ensure parentTask is string or undefined
+      return [{
+        ...task,
+        parentTask: typeof task.parentTask === 'object' && task.parentTask && 'title' in task.parentTask
+          ? (task.parentTask._id || undefined)
+          : (typeof task.parentTask === 'string' ? task.parentTask : undefined),
+      }];
+    });
+
     // Search
     if (searchValue.trim()) {
       const q = searchValue.trim().toLowerCase();
@@ -169,7 +175,7 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
     });
 
     return result;
-  }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue]);
+  }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue, currentUserEmail]);
 
   if (controlsOnly) {
     return (
@@ -275,7 +281,28 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
               {filteredTasks.map(task => (
                 <TaskCard
                   key={task._id}
-                  task={task}
+                  task={{
+                    ...task,
+                    parentTask:
+                      typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
+                        ? task.parentTask._id
+                        : typeof task.parentTask === "string"
+                          ? task.parentTask
+                          : undefined,
+                    subtasks: Array.isArray(task.subtasks)
+                      ? task.subtasks.map(st => ({
+                          ...st,
+                          parentTask:
+                            typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
+                              ? st.parentTask._id
+                              : typeof st.parentTask === "string"
+                                ? st.parentTask
+                                : undefined,
+                          // Ensure subtasks do not have nested subtasks to match Task type
+                          subtasks: undefined
+                        }))
+                      : undefined
+                  }}
                   currentUserEmail={currentUserEmail}
                   loading={loading}
                   onEdit={onEdit}
@@ -403,7 +430,28 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             {filteredTasks.map(task => (
               <TaskCard
                 key={task._id}
-                task={task}
+                task={{
+                  ...task,
+                  parentTask:
+                    typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
+                      ? task.parentTask._id
+                      : typeof task.parentTask === "string"
+                        ? task.parentTask
+                        : undefined,
+                  subtasks: Array.isArray(task.subtasks)
+                    ? task.subtasks.map(st => ({
+                        ...st,
+                        parentTask:
+                          typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
+                            ? st.parentTask._id
+                            : typeof st.parentTask === "string"
+                              ? st.parentTask
+                              : undefined,
+                        // Ensure subtasks do not have nested subtasks to match Task type
+                        subtasks: undefined
+                      }))
+                    : undefined
+                }}
                 currentUserEmail={currentUserEmail}
                 loading={loading}
                 onEdit={onEdit}

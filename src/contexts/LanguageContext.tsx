@@ -15,53 +15,27 @@ const LanguageContext = createContext<LanguageContextType>({
   setLang: () => {},
 });
 
-export const useLanguage = () => useContext(LanguageContext);
-
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [lang, setLang] = useState<string>("en");
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    if (initialized) return;
-    // Only run once on mount
-    setInitialized(true);
-
-    // Try to detect language from browser first
-    let browserLang = navigator.language?.split("-")[0]?.toLowerCase();
-    if (browserLang && SUPPORTED_LANGUAGES.includes(browserLang)) {
-      setLang(browserLang);
-      return;
+  // Load language from localStorage, default to 'en'
+  const [lang, setLangState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("lang") || "en";
     }
+    return "en";
+  });
 
-    // Fallback: Detect country from IP and map to language
-    fetch("https://ipapi.co/json/")
-      .then(res => res.json())
-      .then(data => {
-        // Map country code to language code
-        const countryLangMap: Record<string, string> = {
-          FR: "fr",
-          RO: "ro",
-          CN: "zh",
-          SR: "sr",
-          GR: "gr",
-          ES: "es",
-          PT: "pt",
-          IN: "hi",
-          AE: "ar",
-          // Add more mappings as needed
-        };
-        const countryCode = data.country_code;
-        const detectedLang = countryLangMap[countryCode];
-        if (detectedLang && SUPPORTED_LANGUAGES.includes(detectedLang)) {
-          setLang(detectedLang);
-        } else {
-          setLang("en");
-        }
-      })
-      .catch(() => {
-        setLang("en");
-      });
-  }, [initialized]);
+  // Persist language to localStorage on change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lang", lang);
+    }
+  }, [lang]);
+
+  // Provide setLang that updates state and localStorage
+  const setLang = (newLang: string) => {
+    setLangState(newLang);
+    // localStorage is updated by useEffect
+  };
 
   return (
     <LanguageContext.Provider value={{ lang, setLang }}>
@@ -69,3 +43,5 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     </LanguageContext.Provider>
   );
 };
+
+export const useLanguage = () => useContext(LanguageContext);

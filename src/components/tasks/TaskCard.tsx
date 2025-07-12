@@ -21,6 +21,7 @@ interface Task {
   parentTask?: string;
   subtasks?: Task[];
   important?: boolean; // Keep for backward compatibility
+  assignedTo?: string | { _id: string; firstName?: string; lastName?: string; email?: string }; // Add assignedTo for subtasks
 }
 
 interface TaskCardProps {
@@ -370,81 +371,107 @@ const TaskCard: React.FC<TaskCardProps> = ({
             {/* Subtasks List */}
             {hasSubtasks && showSubtasks && (
               <div className="mt-2 ml-8 space-y-2">
-                {task.subtasks?.map((subtask) => (
-                  <div 
-                    key={subtask._id} 
-                    className={`relative p-3 rounded-md border transition-all duration-200 hover:shadow-sm ${
-                      theme === 'dark' 
-                        ? 'bg-gray-800 border-gray-700 hover:bg-gray-750' 
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                    }`}
-                  >
-                    {/* Connecting Line */}
-                    <div className={`absolute -left-8 top-1/2 w-6 h-px ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`} />
-                    <div className={`absolute -left-8 top-1/2 w-1.5 h-1.5 rounded-full transform -translate-y-1/2 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`} />
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5 flex-1">
-                        <button
-                          type="button"
-                          onClick={() => onToggleComplete && onToggleComplete(subtask)}
-                          className="transition-transform hover:scale-110"
-                          disabled={loading}
-                        >
-                          {subtask.completed ? 
-                            <FaCheckCircle className="w-4 h-4 text-green-500" /> : 
-                            <FaRegCircle className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-400 hover:text-blue-500'}`} />
-                          }
-                        </button>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium ${
-                            subtask.completed 
-                              ? 'line-through text-gray-500' 
-                              : theme === 'dark' ? 'text-white' : 'text-gray-800'
-                          }`}>
-                            {subtask.title}
-                          </p>
-                          {subtask.description && (
-                            <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
-                              {subtask.description.length > 60 
-                                ? `${subtask.description.substring(0, 60)}...`
-                                : subtask.description
-                              }
+                {task.subtasks?.map((subtask) => {
+                  // Only allow completion if subtask is assigned to me
+                  const subtaskAssigneeEmail =
+                    typeof subtask.userId === "object" && subtask.userId?.email
+                      ? subtask.userId.email.trim().toLowerCase()
+                      : typeof subtask.userId === "string"
+                        ? subtask.userId.trim().toLowerCase()
+                        : "";
+                  const isSubtaskMine =
+                    subtaskAssigneeEmail === currentUserEmail.trim().toLowerCase();
+
+                  return (
+                    <div 
+                      key={subtask._id} 
+                      className={`relative p-3 rounded-md border transition-all duration-200 hover:shadow-sm ${
+                        theme === 'dark' 
+                          ? 'bg-gray-800 border-gray-700 hover:bg-gray-750' 
+                          : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      {/* Connecting Line */}
+                      <div className={`absolute -left-8 top-1/2 w-6 h-px ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`} />
+                      <div className={`absolute -left-8 top-1/2 w-1.5 h-1.5 rounded-full transform -translate-y-1/2 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`} />
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 flex-1">
+                          <button
+                            type="button"
+                            onClick={() => onToggleComplete && isSubtaskMine && onToggleComplete(subtask)}
+                            className={`transition-transform hover:scale-110 ${
+                              !isSubtaskMine ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                            disabled={loading || !isSubtaskMine}
+                          >
+                            {subtask.completed ? 
+                              <FaCheckCircle className="w-4 h-4 text-green-500" /> : 
+                              <FaRegCircle className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-400' : 'text-gray-400 hover:text-blue-500'}`} />
+                            }
+                          </button>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-medium ${
+                              subtask.completed 
+                                ? 'line-through text-gray-500' 
+                                : theme === 'dark' ? 'text-white' : 'text-gray-800'
+                            }`}>
+                              {subtask.title}
+                              {/* Show assignee if not me */}
+                              {subtask.userId && typeof subtask.userId === 'object' && subtask.userId.email !== currentUserEmail && (
+                                <span className="ml-2 text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                  {subtask.userId.firstName} {subtask.userId.lastName}
+                                </span>
+                              )}
+                              {/* If assigned to me, show "Me" badge */}
+                              {isSubtaskMine && (
+                                <span className="ml-2 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                  Me
+                                </span>
+                              )}
                             </p>
-                          )}
+                            {subtask.description && (
+                              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
+                                {subtask.description.length > 60 
+                                  ? `${subtask.description.substring(0, 60)}...`
+                                  : subtask.description
+                                }
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => onEdit(subtask)}
+                            className={`p-1 rounded transition-colors ${
+                              theme === 'dark' 
+                                ? 'hover:bg-gray-700 text-gray-500 hover:text-blue-400' 
+                                : 'hover:bg-gray-200 text-gray-500 hover:text-blue-600'
+                            }`}
+                            disabled={loading || !canEditOrDelete}
+                            title="Edit subtask"
+                          >
+                            <FaEdit className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDelete(subtask._id)}
+                            className={`p-1 rounded transition-colors ${
+                              theme === 'dark' 
+                                ? 'hover:bg-gray-700 text-gray-500 hover:text-red-400' 
+                                : 'hover:bg-gray-200 text-gray-500 hover:text-red-600'
+                            }`}
+                            disabled={loading || !canEditOrDelete}
+                            title="Delete subtask"
+                          >
+                            <FaTrash className="w-3 h-3" />
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          onClick={() => onEdit(subtask)}
-                          className={`p-1 rounded transition-colors ${
-                            theme === 'dark' 
-                              ? 'hover:bg-gray-700 text-gray-500 hover:text-blue-400' 
-                              : 'hover:bg-gray-200 text-gray-500 hover:text-blue-600'
-                          }`}
-                          disabled={loading || !canEditOrDelete}
-                          title="Edit subtask"
-                        >
-                          <FaEdit className="w-3 h-3" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onDelete(subtask._id)}
-                          className={`p-1 rounded transition-colors ${
-                            theme === 'dark' 
-                              ? 'hover:bg-gray-700 text-gray-500 hover:text-red-400' 
-                              : 'hover:bg-gray-200 text-gray-500 hover:text-red-600'
-                          }`}
-                          disabled={loading || !canEditOrDelete}
-                          title="Delete subtask"
-                        >
-                          <FaTrash className="w-3 h-3" />
-                        </button>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

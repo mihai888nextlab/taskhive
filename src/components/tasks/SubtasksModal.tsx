@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 interface Subtask {
   title: string;
   description: string;
+  assignedTo?: string; // Add assignedTo field
 }
 
 interface SubtasksModalProps {
@@ -16,6 +17,8 @@ interface SubtasksModalProps {
   initialSubtasks: Subtask[];
   onSave: (subtasks: Subtask[]) => void;
   onCancel: () => void;
+  usersBelowMe: { userId: string; user?: { firstName?: string; lastName?: string; email?: string } }[];
+  currentUserId?: string; // <-- Add this prop for filtering
 }
 
 const SubtasksModal: React.FC<SubtasksModalProps> = ({
@@ -25,6 +28,8 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
   initialSubtasks,
   onSave,
   onCancel,
+  usersBelowMe,
+  currentUserId, // <-- Add this prop
 }) => {
   const t = useTranslations("TasksPage");
   const [subtasks, setSubtasks] = useState<Subtask[]>(initialSubtasks);
@@ -67,7 +72,7 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
     setSubtasks(subtasks.filter((_, i) => i !== index));
   };
 
-  const updateSubtask = (index: number, field: 'title' | 'description', value: string) => {
+  const updateSubtask = (index: number, field: 'title' | 'description' | 'assignedTo', value: string) => {
     const updated = [...subtasks];
     updated[index][field] = value;
     setSubtasks(updated);
@@ -167,6 +172,24 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                         rows={2}
                         className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200"
                       />
+                      <select
+                        value={subtask.assignedTo || ""}
+                        onChange={e => updateSubtask(index, 'assignedTo', e.target.value)}
+                        className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                      >
+                        <option value="">{t("assignToMyself")}</option>
+                        {(usersBelowMe || [])
+                          .filter(u =>
+                            u.user &&
+                            u.userId &&
+                            (!currentUserId || u.userId !== currentUserId)
+                          )
+                          .map(u => (
+                            <option key={u.userId} value={u.userId}>
+                              {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
+                            </option>
+                          ))}
+                      </select>
                     </div>
                     <Button
                       type="button"

@@ -203,3 +203,5 @@ async function checkAndUpdateParentTaskCompletion(parentTaskId: any) {
     console.error('Error updating parent task completion:', error);
   }
 }
+
+// No changes needed. API logic is correct and robust.

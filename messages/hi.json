@@ -30,6 +30,7 @@
     "myTasks": "मेरी कार्य",
     "myTasksDescription": "आपको सौंपे गए कार्य और आपके द्वारा बनाए गए व्यक्तिगत कार्य",
     "assignedByMe": "मेरे द्वारा सौंपे गए कार्य",
+    "tasksAssignedByMe": "मेरे द्वारा सौंपे गए कार्य",
     "assignedTasksDescription": "टीम सदस्यों को सौंपे गए कार्यों की निगरानी और प्रबंधन करें",
     "createTask": "कार्य बनाएं",
     "editTask": "कार्य संपादित करें",
@@ -209,7 +210,9 @@
     "chatNotConnected": "चैट कनेक्ट नहीं है। कृपया पुनः प्रयास करें।",
     "yourFiles": "आपकी फ़ाइलें",
     "noFilesUploaded": "कोई फ़ाइल अपलोड नहीं हुई है",
-    "typeMessage": "संदेश लिखें..."
+    "typeMessage": "संदेश लिखें...",
+    "noConversations": "अभी कोई बातचीत नहीं है",
+    "startNewChat": "अपनी टीम से जुड़ने के लिए नई चैट शुरू करें"
   },
   "FinancePage": {
     "expenses": "खर्च",
@@ -537,5 +540,42 @@
     "loadingDeadlines": "समय सीमाएँ लोड हो रही हैं...",
     "noUpcomingDeadlines": "कोई आगामी समय सीमा नहीं है",
     "noScheduledTasksOrEvents": "आपके पास कोई निर्धारित कार्य या इवेंट नहीं है"
+  },
+  "AddUserModal": {
+    "addNewUser": "नया उपयोगकर्ता जोड़ें",
+    "inviteNewTeamMember": "नए टीम सदस्य को आमंत्रित करें",
+    "emailAddress": "ईमेल पता *",
+    "role": "भूमिका *",
+    "selectRole": "भूमिका चुनें",
+    "cancel": "रद्द करें",
+    "inviteUser": "उपयोगकर्ता को आमंत्रित करें",
+    "inviting": "आमंत्रित किया जा रहा है...",
+    "allFieldsRequired": "सभी फ़ील्ड आवश्यक हैं।",
+    "errorFetchingRoles": "भूमिकाएँ प्राप्त करने में त्रुटि",
+    "inviteSuccess": "उपयोगकर्ता सफलतापूर्वक आमंत्रित किया गया!"
+  },
+  "AddRoleModal": {
+    "addNewRole": "नई भूमिका जोड़ें",
+    "createNewRole": "अपने संगठन के लिए नई भूमिका बनाएं",
+    "roleName": "भूमिका का नाम *",
+    "roleNamePlaceholder": "जैसे: प्रोजेक्ट मैनेजर, डेवलपर, डिज़ाइनर",
+    "enterRoleName": "नई भूमिका के लिए एक वर्णनात्मक नाम दर्ज करें",
+    "cancel": "रद्द करें",
+    "addRole": "भूमिका जोड़ें",
+    "creating": "बनाया जा रहा है..."
+  },
+  "OrgChartModal": {
+    "organizationChart": "संगठन चार्ट",
+    "manageTeamStructure": "अपनी टीम संरचना और भूमिका पदानुक्रम प्रबंधित करें",
+    "administratorLevel": "प्रशासक स्तर",
+    "addLevel": "स्तर जोड़ें",
+    "addNewRole": "नई भूमिका जोड़ें",
+    "addDepartment": "विभाग जोड़ें",
+    "enterDepartmentName": "विभाग का नाम दर्ज करें...",
+    "close": "बंद करें",
+    "saveChanges": "परिवर्तन सहेजें",
+    "saving": "सहेजा जा रहा है...",
+    "roles": "भूमिकाएँ",
+    "dropRolesHere": "यहाँ भूमिकाएँ डालें"
   }
 }

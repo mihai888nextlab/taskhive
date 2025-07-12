@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useTranslations } from "next-intl";
 import AddCompanyModal from "@/components/modals/AddCompanyModal";
+import { FiPlus } from "react-icons/fi";
 
 type MenuItem = {
   name: string;
@@ -166,60 +167,56 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
       {/* Dropdown pentru companii */}
       <div className="relative mt-4 mb-2" ref={dropdownRef}>
         <div
-          className="flex items-center justify-between space-x-3 px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
+          className="flex items-center justify-between space-x-3 px-3 py-2 rounded-xl bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer shadow-sm border border-gray-600"
           onClick={() => setDropdownOpen((v) => !v)}
+          style={{ minHeight: 56 }}
         >
           <div>
             <p className="font-semibold text-white">{selectedCompany.name}</p>
             <p className="text-xs text-gray-400">{user.role}</p>
           </div>
           <svg
-            className={`ml-2 w-4 h-4 transition-transform ${
-              dropdownOpen ? "rotate-180" : ""
-            }`}
+            className={`ml-2 w-4 h-4 transition-transform ${dropdownOpen ? "rotate-180" : ""} text-gray-300`}
             fill="none"
             stroke="currentColor"
             strokeWidth={2}
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M19 9l-7 7-7-7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
         {dropdownOpen && (
-          <div className="absolute left-0 bottom-full mb-2 w-full bg-white rounded-lg shadow-lg z-50 py-2">
+          <div className="absolute left-0 bottom-full mb-2 w-full bg-white rounded-xl shadow-xl z-50 border border-gray-200">
             {user.companies
-              ?.sort((a, b) => {
-                return a.id == selectedCompany.id ? -1 : 1;
-              })
+              ?.sort((a, b) => (a.id == selectedCompany.id ? -1 : 1))
               .map((company) => (
                 <button
                   key={company.id}
-                  className={`block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition ${
-                    selectedCompany.id === company.id
-                      ? "font-bold bg-gray-100"
-                      : ""
-                  }`}
+                  className={`w-full text-left px-4 py-2 rounded-lg transition font-medium flex items-center gap-2
+              ${
+                selectedCompany.id === company.id
+                  ? "bg-blue-50 text-blue-700 font-bold"
+                  : "text-gray-700 hover:bg-gray-100"
+              }
+            `}
                   onClick={() => {
                     setSelectedCompany(company);
                     setDropdownOpen(false);
-
                     handleCompanyChange(company);
                   }}
                 >
-                  {company.name}
+                  {/* Optionally add a company icon here */}
+                  <span>{company.name}</span>
                 </button>
               ))}
             <button
-              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition font-bold"
+              className="w-full text-left px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-blue-600 hover:bg-blue-50 transition"
               onClick={() => {
                 setDropdownOpen(false);
                 setAddCompanyOpen(true);
               }}
             >
+              <FiPlus className="text-blue-500 text-lg" />
               ADD COMPANY
             </button>
           </div>

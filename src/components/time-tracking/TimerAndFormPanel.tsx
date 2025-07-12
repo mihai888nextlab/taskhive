@@ -49,6 +49,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
   pomodoroCycles = 0,
   workDuration = 25 * 60,
   breakDuration = 5 * 60,
+  ...props
 }) => {
   const t = useTranslations("TimeTrackingPage");
 
