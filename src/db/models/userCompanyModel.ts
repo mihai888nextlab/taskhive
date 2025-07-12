@@ -1,4 +1,4 @@
-import Company from './companyModel';
+import Company from "./companyModel";
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
@@ -17,14 +17,15 @@ const userCompanySchema = new Schema(
     role: { type: String, required: true },
     departmentId: { type: String, required: true },
     permissions: [{ type: String }],
+    // RAG specific fields
+    pageContent: { type: String },
+    embedding: { type: [Number] },
+    metadata: { type: mongoose.Schema.Types.Mixed },
   },
   { timestamps: true }
 );
 
 userCompanySchema.index({ userId: 1, companyId: 1 }, { unique: true });
-
-// **Force model refresh**
-delete mongoose.models.UserCompany;
 
 export default mongoose.models.UserCompany ||
   mongoose.model("UserCompany", userCompanySchema);

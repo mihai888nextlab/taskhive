@@ -6,6 +6,20 @@ import dbConnect from "@/db/dbConfig";
 import userModel from "@/db/models/userModel";
 import companyModel from "@/db/models/companyModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  apiKey: GEMINI_API_KEY,
+  model: "text-embedding-004",
+});
+
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 500,
+  chunkOverlap: 100,
+});
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
@@ -71,13 +85,24 @@ export default async function handler(
     });
     await newUserCompany.save();
 
-    // 6.  Populate the userCompany object so we can return the company info.
-    const populatedUserCompany = await userCompanyModel
-      .findOne({
-        userId: savedUser._id,
-        companyId: savedCompany._id,
-      })
-      .populate("companyId");
+    // RAG (Retrieval-Augmented Generation) Fields
+    const rawPageContent = `User First Name: ${firstName}. User Last Name: ${lastName}. User Email: ${email}. Company Name: ${companyName}. Role: admin.`;
+    const chunks = await splitter.createDocuments([rawPageContent]);
+    const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+    const newEmbedding = await embeddings.embedQuery(contentToEmbed);
+    const newMetadata = {
+      source: "user",
+      originalId: newUser._id,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      email: newUser.email,
+    };
+
+    newUserCompany.pageContent = contentToEmbed;
+    newUserCompany.embedding = newEmbedding;
+    newUserCompany.metadata = newMetadata;
+
+    await newUserCompany.save(); // Save the updated task with RAG fields
 
     const token = sign(
       {

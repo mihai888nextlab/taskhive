@@ -17,6 +17,7 @@ import {
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { PromptTemplate } from "@langchain/core/prompts";
+import UserCompany from "@/db/models/userCompanyModel";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -27,7 +28,11 @@ const RAG_SOURCES = [
     name: "announcement",
     indexName: "announcements_vector_index",
   },
-  // { model: User, name: 'user', indexName: 'users_vector_index' },
+  {
+    model: UserCompany,
+    name: "userCompany",
+    indexName: "userCompanies_vector_index",
+  },
   // Add other sources/models here
 ];
 

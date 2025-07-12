@@ -72,7 +72,7 @@ export default async function handler(
         .json({ message: "This invittaion wasn't send on your email!" });
     }
 
-    if (invitation.status !== "pending") {
+    if (invitation.status != "pending") {
       return res.status(400).json({ message: "Invitation is not pending" });
     }
 
