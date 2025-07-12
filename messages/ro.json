@@ -449,7 +449,8 @@
     "profile": "Profil",
     "security": "Securitate",
     "appearance": "Aspect",
-    "time-tracking": "Urmărire timp"
+    "time-tracking": "Urmărire timp",
+    "addCompany": "Adaugă companie"
   },
   "AIWindow": {
     "title": "Asistent Hive",

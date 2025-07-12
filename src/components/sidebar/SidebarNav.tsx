@@ -217,7 +217,7 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
               }}
             >
               <FiPlus className="text-blue-500 text-lg" />
-              ADD COMPANY
+              {t("addCompany", { default: "Add Company" })}
             </button>
           </div>
         )}

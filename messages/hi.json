@@ -449,7 +449,8 @@
     "profile": "प्रोफ़ाइल",
     "security": "सुरक्षा",
     "appearance": "रूप",
-    "time-tracking": "समय ट्रैकिंग"
+    "time-tracking": "समय ट्रैकिंग",
+    "addCompany": "कंपनी जोड़ें"
   },
   "AIWindow": {
     "title": "Hive सहायक",
@@ -539,7 +540,8 @@
     "netProfitLoss": "शुद्ध लाभ / हानि",
     "loadingDeadlines": "समय सीमाएँ लोड हो रही हैं...",
     "noUpcomingDeadlines": "कोई आगामी समय सीमा नहीं है",
-    "noScheduledTasksOrEvents": "आपके पास कोई निर्धारित कार्य या इवेंट नहीं है"
+    "noScheduledTasksOrEvents": "आपके पास कोई निर्धारित कार्य या इवेंट नहीं है",
+    "addCompany": "कंपनी जोड़ें"
   },
   "AddUserModal": {
     "addNewUser": "नया उपयोगकर्ता जोड़ें",

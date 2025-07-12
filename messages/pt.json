@@ -449,7 +449,8 @@
     "profile": "Perfil",
     "security": "Segurança",
     "appearance": "Aparência",
-    "time-tracking": "Acompanhamento de tempo"
+    "time-tracking": "Acompanhamento de tempo",
+    "addCompany": "Adicionar empresa"
   },
   "AIWindow": {
     "title": "Assistente Hive",
@@ -539,7 +540,8 @@
     "netProfitLoss": "Lucro / prejuízo líquido",
     "loadingDeadlines": "Carregando prazos...",
     "noUpcomingDeadlines": "Nenhum prazo próximo",
-    "noScheduledTasksOrEvents": "Você não tem tarefas ou eventos agendados"
+    "noScheduledTasksOrEvents": "Você não tem tarefas ou eventos agendados",
+    "addCompany": "Adicionar empresa"
   },
   "AddUserModal": {
     "addNewUser": "Adicionar novo usuário",

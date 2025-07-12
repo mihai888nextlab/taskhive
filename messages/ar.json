@@ -448,7 +448,8 @@
     "profile": "الملف الشخصي",
     "security": "الأمان",
     "appearance": "المظهر",
-    "time-tracking": "تتبع الوقت"
+    "time-tracking": "تتبع الوقت",
+    "addCompany": "إضافة شركة"
   },
   "AIWindow": {
     "title": "مساعد Hive",

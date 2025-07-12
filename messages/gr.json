@@ -292,7 +292,8 @@
     "profile": "Προφίλ",
     "security": "Ασφάλεια",
     "appearance": "Εμφάνιση",
-    "time-tracking": "Παρακολούθηση χρόνου"
+    "time-tracking": "Παρακολούθηση χρόνου",
+    "addCompany": "Προσθήκη εταιρείας"
   },
   "UniversalSearchBar": {
     "placeholder": "Αναζήτηση εργασιών, χρηστών, αρχείων, κ.λπ...",

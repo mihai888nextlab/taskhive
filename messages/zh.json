@@ -449,7 +449,8 @@
     "profile": "个人资料",
     "security": "安全",
     "appearance": "外观",
-    "time-tracking": "时间跟踪"
+    "time-tracking": "时间跟踪",
+    "addCompany": "添加公司"
   },
   "AIWindow": {
     "title": "Hive助手",

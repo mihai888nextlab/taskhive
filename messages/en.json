@@ -449,7 +449,8 @@
     "profile": "Profile",
     "security": "Security",
     "appearance": "Appearance",
-    "time-tracking": "Time Tracking"
+    "time-tracking": "Time Tracking",
+    "addCompany": "Add Company"
   },
   "AIWindow": {
     "title": "Hive Assistant",

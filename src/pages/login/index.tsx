@@ -64,22 +64,11 @@ export default function Login() {
       </div>
       <Header />
       <main className="w-full min-h-[80vh] flex flex-col items-center justify-center px-2 sm:px-4 py-4 sm:py-8 relative z-10 mt-6 sm:mt-16">
-        <div className="flex w-full max-w-sm flex-col gap-6">
-          <a
-            href="#"
-            className="flex items-center gap-2 self-center font-medium"
-          >
-            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-4" />
-            </div>
-            Acme Inc.
-          </a>
           <LoginForm
             handleLogin={handleLogin}
             values={values}
             setValues={setValues}
           />
-        </div>
       </main>
       <Footer />
     </div>

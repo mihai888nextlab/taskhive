@@ -455,7 +455,8 @@
     "profile": "Profil",
     "security": "Sikkerhed",
     "appearance": "Udseende",
-    "time-tracking": "Tidssporing"
+    "time-tracking": "Tidssporing",
+    "addCompany": "Tilføj virksomhed"
   },
   "AIWindow": {
     "title": "Hive Assistent",

@@ -455,7 +455,8 @@
     "profile": "Profil",
     "security": "Sicherheit",
     "appearance": "Aussehen",
-    "time-tracking": "Zeiterfassung"
+    "time-tracking": "Zeiterfassung",
+    "addCompany": "Firma hinzufügen"
   },
   "AIWindow": {
     "title": "Hive-Assistent",

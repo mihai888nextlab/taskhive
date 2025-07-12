@@ -8,8 +8,10 @@ import companyModel from "@/db/models/companyModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { OAuth2Client } from "google-auth-library";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 
 const embeddings = new GoogleGenerativeAIEmbeddings({
   apiKey: GEMINI_API_KEY,
@@ -20,6 +22,8 @@ const splitter = new RecursiveCharacterTextSplitter({
   chunkSize: 500,
   chunkOverlap: 100,
 });
+
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
@@ -40,7 +44,115 @@ export default async function handler(
     lastName,
     companyName,
     companyRegistrationNumber,
+    googleToken,
   } = req.body;
+
+  // If googleToken is present, handle Google registration
+  if (googleToken) {
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: googleToken,
+        audience: GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        return res.status(400).json({ message: "Invalid Google token." });
+      }
+
+      // Check if user already exists
+      const existingUser = await userModel.findOne({ email: payload.email });
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already in use." });
+      }
+
+      // Create user with Google info
+      const newUser = new userModel({
+        email: payload.email,
+        password: "", // No password for Google users
+        firstName: payload.given_name || "",
+        lastName: payload.family_name || "",
+        googleId: payload.sub,
+      });
+      const savedUser = await newUser.save();
+
+      // Create company (use default if not provided)
+      const newCompany = new companyModel({
+        name: companyName || "Default Company",
+        registrationNumber: companyRegistrationNumber || "",
+      });
+      const savedCompany = await newCompany.save();
+
+      // Create user_company entry
+      const newUserCompany = new userCompanyModel({
+        userId: savedUser._id,
+        companyId: savedCompany._id,
+        role: "admin",
+        departmentId: "admin-department",
+        permissions: ["all"],
+      });
+      await newUserCompany.save();
+
+      // RAG (Retrieval-Augmented Generation) Fields
+      const rawPageContent = `User First Name: ${firstName}. User Last Name: ${lastName}. User Email: ${email}. Company Name: ${companyName}. Role: admin.`;
+      const chunks = await splitter.createDocuments([rawPageContent]);
+      const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+      const newEmbedding = await embeddings.embedQuery(contentToEmbed);
+      const newMetadata = {
+        source: "user",
+        originalId: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+      };
+
+      newUserCompany.pageContent = contentToEmbed;
+      newUserCompany.embedding = newEmbedding;
+      newUserCompany.metadata = newMetadata;
+
+      await newUserCompany.save(); // Save the updated task with RAG fields
+
+      const token = sign(
+        {
+          userId: savedUser._id,
+          email: savedUser.email,
+          role: newUserCompany.role,
+          companyId: savedCompany._id,
+          firstName: savedUser.firstName,
+          lastName: savedUser.lastName,
+        },
+        JWT_SECRET,
+        { expiresIn: "1d" }
+      );
+
+      res.setHeader(
+        "Set-Cookie",
+        serialize("auth_token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 5 * 60 * 60 * 24,
+          path: "/",
+        })
+      );
+
+      return res.status(201).json({
+        message: "User and company registered successfully (Google).",
+        token,
+        user: {
+          _id: savedUser._id,
+          email: savedUser.email,
+          firstName: savedUser.firstName,
+          lastName: savedUser.lastName,
+        },
+        company: savedCompany,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: "Google registration failed.",
+        error: error.message,
+      });
+    }
+  }
 
   // Basic validation
   if (!email || !password || !firstName || !lastName || !companyName) {

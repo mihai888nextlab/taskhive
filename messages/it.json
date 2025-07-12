@@ -449,7 +449,8 @@
     "profile": "Profilo",
     "security": "Sicurezza",
     "appearance": "Aspetto",
-    "time-tracking": "Tracciamento tempo"
+    "time-tracking": "Tracciamento tempo",
+    "addCompany": "Aggiungi azienda"
   },
   "AIWindow": {
     "title": "Assistente Hive",

@@ -449,7 +449,8 @@
     "profile": "Profil",
     "security": "Sécurité",
     "appearance": "Apparence",
-    "time-tracking": "Suivi du temps"
+    "time-tracking": "Suivi du temps",
+    "addCompany": "Ajouter une entreprise"
   },
   "AIWindow": {
     "title": "Assistant Hive",

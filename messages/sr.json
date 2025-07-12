@@ -449,7 +449,8 @@
     "profile": "Profil",
     "security": "Bezbednost",
     "appearance": "Izgled",
-    "time-tracking": "Praćenje vremena"
+    "time-tracking": "Praćenje vremena",
+    "addCompany": "Dodaj kompaniju"
   },
   "AIWindow": {
     "title": "Hive Asistent",
