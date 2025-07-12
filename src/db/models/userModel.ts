@@ -9,11 +9,12 @@ export interface IUser extends mongoose.Document {
   createdAt: Date;
   updatedAt: Date;
   profileImage?: {
-    data: string; // base64 or Buffer if you want
+    data: string;
     contentType: string;
     uploadedAt: Date;
     fileName?: string;
   };
+  googleId?: string; // <-- Add this line
 }
 
 const profileImageSchema = new Schema(
@@ -33,8 +34,9 @@ const userSchema = new Schema(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     profileImage: { type: profileImageSchema, default: null },
-    skills: { type: [String], default: [] }, // <-- Add this line
+    skills: { type: [String], default: [] },
     description: { type: String, default: "" },
+    googleId: { type: String, default: null }, // <-- Add this line
   },
   { timestamps: true }
 );

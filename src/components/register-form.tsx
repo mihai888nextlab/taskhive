@@ -13,8 +13,9 @@ import { FormEvent, useEffect, useState } from "react";
 
 export function RegisterForm({
   className,
+  googleClientId,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { googleClientId?: string }) {
   const [values, setValues] = useState({
     firstName: "",
     lastName: "",
@@ -96,7 +97,7 @@ export function RegisterForm({
       script.async = true;
       script.onload = () => {
         (window as any).google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          client_id: googleClientId,
           callback: async (response: any) => {
             // Send token to backend
             const res = await fetch("/api/auth/register", {
@@ -115,7 +116,7 @@ export function RegisterForm({
       };
       document.body.appendChild(script);
     }
-  }, []);
+  }, [googleClientId]);
 
   return (
     <div

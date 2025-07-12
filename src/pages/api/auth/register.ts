@@ -12,6 +12,7 @@ import { OAuth2Client } from "google-auth-library";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const embeddings = new GoogleGenerativeAIEmbeddings({
   apiKey: GEMINI_API_KEY,
@@ -22,8 +23,6 @@ const splitter = new RecursiveCharacterTextSplitter({
   chunkSize: 500,
   chunkOverlap: 100,
 });
-
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
@@ -60,27 +59,33 @@ export default async function handler(
       }
 
       // Check if user already exists
-      const existingUser = await userModel.findOne({ email: payload.email });
+      let existingUser = await userModel.findOne({ email: payload.email });
       if (existingUser) {
         return res.status(400).json({ message: "Email already in use." });
       }
 
-      // Create user with Google info
+      // --- Ensure user is created with userModel ---
       const newUser = new userModel({
         email: payload.email,
         password: "", // No password for Google users
-        firstName: payload.given_name || "",
-        lastName: payload.family_name || "",
-        googleId: payload.sub,
+        firstName: payload.given_name || payload.name?.split(" ")[0] || "",
+        lastName: payload.family_name || payload.name?.split(" ").slice(1).join(" ") || "",
+        googleId: payload.sub, // Save Google ID for future reference
       });
       const savedUser = await newUser.save();
 
       // Create company (use default if not provided)
-      const newCompany = new companyModel({
-        name: companyName || "Default Company",
-        registrationNumber: companyRegistrationNumber || "",
-      });
-      const savedCompany = await newCompany.save();
+      const companyNameFinal = companyName || "Default Company";
+      const companyRegistrationNumberFinal = companyRegistrationNumber || "";
+
+      let savedCompany = await companyModel.findOne({ name: companyNameFinal });
+      if (!savedCompany) {
+        const newCompany = new companyModel({
+          name: companyNameFinal,
+          registrationNumber: companyRegistrationNumberFinal,
+        });
+        savedCompany = await newCompany.save();
+      }
 
       // Create user_company entry
       const newUserCompany = new userCompanyModel({
@@ -93,9 +98,9 @@ export default async function handler(
       await newUserCompany.save();
 
       // RAG (Retrieval-Augmented Generation) Fields
-      const rawPageContent = `User First Name: ${firstName}. User Last Name: ${lastName}. User Email: ${email}. Company Name: ${companyName}. Role: admin.`;
+      const rawPageContent = `User First Name: ${newUser.firstName}. User Last Name: ${newUser.lastName}. User Email: ${newUser.email}. Company Name: ${companyNameFinal}. Role: admin.`;
       const chunks = await splitter.createDocuments([rawPageContent]);
-      const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+      const contentToEmbed = chunks[0].pageContent;
       const newEmbedding = await embeddings.embedQuery(contentToEmbed);
       const newMetadata = {
         source: "user",
@@ -109,7 +114,7 @@ export default async function handler(
       newUserCompany.embedding = newEmbedding;
       newUserCompany.metadata = newMetadata;
 
-      await newUserCompany.save(); // Save the updated task with RAG fields
+      await newUserCompany.save();
 
       const token = sign(
         {
@@ -147,6 +152,7 @@ export default async function handler(
         company: savedCompany,
       });
     } catch (error: any) {
+      console.error("Google registration error", error);
       return res.status(500).json({
         message: "Google registration failed.",
         error: error.message,
