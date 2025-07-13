@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 export interface IUser extends mongoose.Document {
+  type: "google" | "credentials";
   email: string;
   password: string;
   firstName: string;
@@ -29,6 +30,7 @@ const profileImageSchema = new Schema(
 
 const userSchema = new Schema(
   {
+    type: { type: String, enum: ["google", "credentials"], required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     firstName: { type: String, required: true },
