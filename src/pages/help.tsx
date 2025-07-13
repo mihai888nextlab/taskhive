@@ -1,3 +1,4 @@
+import React, { useMemo } from "react";
 import { Kanit } from "next/font/google";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -10,9 +11,38 @@ import {
   FaComments,
 } from "react-icons/fa";
 
-const kanit = Kanit({
-  subsets: ["latin"],
-  weight: ["400", "700"],
+const kanit = useMemo(
+  () =>
+    Kanit({
+      subsets: ["latin"],
+      weight: ["400", "700"],
+    }),
+  []
+);
+
+const HelpSection = React.memo(function HelpSection({
+  icon,
+  title,
+  desc,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
+      {icon}
+      <h2
+        className={
+          kanit.className +
+          " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
+        }
+      >
+        {title}
+      </h2>
+      <p className="text-base leading-7 text-gray-300">{desc}</p>
+    </div>
+  );
 });
 
 export default function Help() {
@@ -41,90 +71,35 @@ export default function Help() {
             How TaskHive Works
           </h1>
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 w-full">
-            {/* Section 1 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
-              <FaUserShield className="text-4xl text-primary mb-5 drop-shadow" />
-              <h2
-                className={
-                  kanit.className +
-                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
-                }
-              >
-                1. Admin Account
-              </h2>
-              <p className="text-base leading-7 text-gray-300">
-                TaskHive allows you to create an admin account for your
-                organization. As an admin, you can manage the structure of your
-                organization and oversee all operations.
-              </p>
-            </div>
-            {/* Section 2 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
-              <FaUsers className="text-4xl text-primary mb-5 drop-shadow" />
-              <h2
-                className={
-                  kanit.className +
-                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
-                }
-              >
-                2. Adding Collaborators
-              </h2>
-              <p className="text-base leading-7 text-gray-300">
-                You can add multiple collaborators or staff members to your
-                organization. Each collaborator can be assigned specific roles
-                and responsibilities.
-              </p>
-            </div>
-            {/* Section 3 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
-              <FaTasks className="text-4xl text-primary mb-5 drop-shadow" />
-              <h2
-                className={
-                  kanit.className +
-                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
-                }
-              >
-                3. Task Assignment
-              </h2>
-              <p className="text-base leading-7 text-gray-300">
-                Tasks can be assigned to collaborators based on the
-                company&apos;s hierarchy. The hierarchy is defined using a
-                dynamic organizational chart created by the admin.
-              </p>
-            </div>
-            {/* Section 4 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
-              <FaCalendarAlt className="text-4xl text-primary mb-5 drop-shadow" />
-              <h2
-                className={
-                  kanit.className +
-                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
-                }
-              >
-                4. Calendar Integration
-              </h2>
-              <p className="text-base leading-7 text-gray-300">
-                TaskHive includes an integrated calendar to help you track
-                deadlines and manage schedules effectively.
-              </p>
-            </div>
-            {/* Section 5 */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
-              <FaComments className="text-4xl text-primary mb-5 drop-shadow" />
-              <h2
-                className={
-                  kanit.className +
-                  " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
-                }
-              >
-                5. Communication Channels
-              </h2>
-              <p className="text-base leading-7 text-gray-300">
-                TaskHive provides communication channels for employees, enabling
-                seamless collaboration and effective communication within the
-                team.
-              </p>
-            </div>
+            <HelpSection
+              icon={
+                <FaUserShield className="text-4xl text-primary mb-5 drop-shadow" />
+              }
+              title="1. Admin Account"
+              desc="TaskHive allows you to create an admin account for your organization. As an admin, you can manage the structure of your organization and oversee all operations."
+            />
+            <HelpSection
+              icon={<FaUsers className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="2. Adding Collaborators"
+              desc="You can add multiple collaborators or staff members to your organization. Each collaborator can be assigned specific roles and responsibilities."
+            />
+            <HelpSection
+              icon={<FaTasks className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="3. Task Assignment"
+              desc="Tasks can be assigned to collaborators based on the company&apos;s hierarchy. The hierarchy is defined using a dynamic organizational chart created by the admin."
+            />
+            <HelpSection
+              icon={
+                <FaCalendarAlt className="text-4xl text-primary mb-5 drop-shadow" />
+              }
+              title="4. Calendar Integration"
+              desc="TaskHive includes an integrated calendar to help you track deadlines and manage schedules effectively."
+            />
+            <HelpSection
+              icon={<FaComments className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="5. Communication Channels"
+              desc="TaskHive provides communication channels for employees, enabling seamless collaboration and effective communication within the team."
+            />
           </section>
         </div>
       </main>

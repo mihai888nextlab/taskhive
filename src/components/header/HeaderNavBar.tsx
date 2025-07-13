@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
@@ -71,19 +71,78 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React
     return () => document.removeEventListener("mousedown", handle);
   }, [dropdownOpen]);
 
-  const handleTabClick = (tabId: string) => {
+  // Memoize tab click handler
+  const handleTabClick = useCallback((tabId: string) => {
     setDropdownOpen(false);
     router.push(`/app/settings#${tabId}`);
-  };
+  }, [router]);
 
-  const handleLangChange = (newLang: string) => {
+  // Memoize language change handler
+  const handleLangChange = useCallback((newLang: string) => {
     setLangDropdownOpen(false);
-    setLang(newLang); // Only update context, not URL
-  };
+    setLang(newLang);
+  }, [setLang]);
 
   // Memoize LANGUAGES and profileTabs
   const memoLanguages = useMemo(() => LANGUAGES, []);
   const memoProfileTabs = useMemo(() => profileTabs, []);
+
+  // Memoize dropdown rendering
+  const languageDropdown = useMemo(() => (
+    langDropdownOpen && (
+      <div
+        className="absolute right-0 mt-2 w-22 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
+        style={{
+          maxHeight: "260px",
+          overflowY: "auto",
+        }}
+      >
+        {memoLanguages.map(language => (
+          <button
+            key={language.code}
+            className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between ${
+              language.code === lang ? "font-bold bg-gray-100" : ""
+            }`}
+            onClick={() => handleLangChange(language.code)}
+          >
+            <span>{language.label}</span>
+            <span>{language.flag}</span>
+          </button>
+        ))}
+      </div>
+    )
+  ), [langDropdownOpen, memoLanguages, lang, handleLangChange]);
+
+  const profileDropdown = useMemo(() => (
+    dropdownOpen && (
+      <div
+        id="profile-dropdown-menu"
+        className="absolute right-4 top-14 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-2"
+      >
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+          <div className="font-semibold text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
+        </div>
+        <button
+          className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+          onClick={() => { setDropdownOpen(false); logout(); }}
+        >
+          <FiLogOut className="mr-2" /> {t("logout")}
+        </button>
+        <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
+        {memoProfileTabs.map(tab => (
+          <button
+            key={tab.id}
+            className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+            onClick={() => handleTabClick(tab.id)}
+          >
+            {tab.icon}
+            {t(tab.label)}
+          </button>
+        ))}
+      </div>
+    )
+  ), [dropdownOpen, user, t, memoProfileTabs, handleTabClick, logout]);
 
   return (
     <header
@@ -113,28 +172,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React
           >
             <span className="font-bold">{lang.toUpperCase()}</span>
           </button>
-          {langDropdownOpen && (
-            <div
-              className="absolute right-0 mt-2 w-22 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
-              style={{
-                maxHeight: "260px", // Limit height for scroll
-                overflowY: "auto",
-              }}
-            >
-              {memoLanguages.map(language => (
-                <button
-                  key={language.code}
-                  className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between ${
-                    language.code === lang ? "font-bold bg-gray-100" : ""
-                  }`}
-                  onClick={() => handleLangChange(language.code)}
-                >
-                  <span>{language.label}</span>
-                  <span>{language.flag}</span>
-                </button>
-              ))}
-            </div>
-          )}
+          {languageDropdown}
         </div>
         <button className="p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-white transition-colors" title={t("notifications")}>
           <FiBell className="w-5 h-5" />
@@ -160,37 +198,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React
           </div>
         </button>
         {/* Dropdown */}
-        {dropdownOpen && (
-          <div
-            id="profile-dropdown-menu"
-            className="absolute right-4 top-14 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-2"
-          >
-            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-              <div className="font-semibold text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
-            </div>
-            <button
-              className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-              onClick={() => { setDropdownOpen(false); logout(); }}
-            >
-              <FiLogOut className="mr-2" /> {t("logout")}
-            </button>
-            <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
-            {memoProfileTabs.map(tab => (
-              <button
-                key={tab.id}
-                className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                onClick={() => {
-                  setDropdownOpen(false);
-                  router.push(`/app/settings#${tab.id}`);
-                }}
-              >
-                {tab.icon}
-                {t(tab.label)}
-              </button>
-            ))}
-          </div>
-        )}
+        {profileDropdown}
       </div>
     </header>
   );

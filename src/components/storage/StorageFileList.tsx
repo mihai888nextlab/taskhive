@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { FaPen, FaTrash, FaCheck, FaTimes, FaSignature, FaEye, FaDownload } from "react-icons/fa";
 import FileSigningModal from "@/components/signature/FileSigningModal";
 import { useTranslations } from "next-intl";
@@ -49,17 +49,20 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
 }) => {
   const [signingFile, setSigningFile] = useState<FileType | null>(null);
 
-  const handleSignFile = (file: FileType) => {
+  // Memoize sign file handler
+  const handleSignFile = useCallback((file: FileType) => {
     setSigningFile(file);
-  };
+  }, []);
 
-  const handleSigningComplete = () => {
+  // Memoize signing complete handler
+  const handleSigningComplete = useCallback(() => {
     if (typeof fetchFiles === 'function') {
       fetchFiles();
     }
     setSigningFile(null);
-  };
+  }, [fetchFiles]);
 
+  // Memoize rendered files
   const renderedFiles = useMemo(
     () => files.map((file) => (
       <div
@@ -177,7 +180,7 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
         )}
       </div>
     )),
-    [files, theme, renamingId, renameValue, setRenamingId, setRenameValue, handleDelete, handleRename, getFileIcon, t]
+    [files, theme, renamingId, renameValue, setRenamingId, setRenameValue, handleDelete, handleRename, getFileIcon, t, handleSignFile]
   );
 
   if (loading) {

@@ -13,7 +13,7 @@ interface TimeStatisticsProps {
     className?: string;
 }
 
-const TimeStatistics: React.FC<TimeStatisticsProps> = React.memo(({ last7DaysHours, hideHeader, hideSummary, className }) => {
+const TimeStatistics: React.FC<TimeStatisticsProps> = ({ last7DaysHours, hideHeader, hideSummary, className }) => {
     const t = useTranslations("InsightsPage");
 
     // Memoize chart data
@@ -52,6 +52,6 @@ const TimeStatistics: React.FC<TimeStatisticsProps> = React.memo(({ last7DaysHou
             </div>
         </div>
     );
-});
+};
 
 export default React.memo(TimeStatistics);

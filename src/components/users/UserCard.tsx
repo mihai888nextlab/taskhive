@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { FaUser, FaEnvelope, FaUserTag } from "react-icons/fa";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -32,10 +32,11 @@ interface UserCardProps {
   onClick: (userId: string) => void; // <-- Fix: expects userId argument
 }
 
-const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
+const UserCard: React.FC<UserCardProps> = React.memo(({ user, theme, onClick }) => {
   const t = useTranslations("UsersPage");
 
-  const getRoleBadgeColor = (role: string) => {
+  // Memoize getRoleBadgeColor
+  const getRoleBadgeColor = useCallback((role: string) => {
     switch (role) {
       case "admin":
         return "bg-red-100 text-red-700 border-red-200";
@@ -46,20 +47,24 @@ const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
       default:
         return "bg-gray-100 text-gray-700 border-gray-200";
     }
-  };
+  }, []);
 
-  const getInitials = () => {
+  // Memoize initials
+  const initials = useMemo(() => {
     const firstName = user.userId.firstName || "";
     const lastName = user.userId.lastName || "";
     return (firstName[0] || "") + (lastName[0] || "");
-  };
+  }, [user.userId.firstName, user.userId.lastName]);
 
-  const initials = getInitials();
+  // Memoize click handler
+  const handleClick = useCallback(() => {
+    onClick(user.userId._id);
+  }, [onClick, user.userId._id]);
 
   return (
     <Card
       className={`relative p-6 rounded-2xl border border-[#e5e7eb] transition-all duration-150 cursor-pointer group bg-white`}
-      onClick={() => onClick(user.userId._id)} // <-- Pass userId to onClick
+      onClick={handleClick}
     >
       <CardContent className="p-0">
         <div className="flex items-start gap-4">
@@ -73,7 +78,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
               />
             ) : (
               <AvatarFallback>
-                {getInitials() || <FaUser className="w-5 h-5" />}
+                {initials || <FaUser className="w-5 h-5" />}
               </AvatarFallback>
             )}
           </Avatar>
@@ -139,6 +144,6 @@ const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
       </CardContent>
     </Card>
   );
-};
+});
 
 export default React.memo(UserCard);

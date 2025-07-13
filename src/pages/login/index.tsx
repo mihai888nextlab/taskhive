@@ -1,16 +1,20 @@
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { useAuth } from "@/hooks/useAuth";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { Kanit } from "next/font/google";
 import { GalleryVerticalEnd } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
 
-const kanit = Kanit({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+const kanit = useMemo(
+  () =>
+    Kanit({
+      subsets: ["latin"],
+      weight: ["400", "700"],
+    }),
+  []
+);
 
 export default function Login() {
   const auth = useAuth();
@@ -22,34 +26,37 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const handleLogin = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setLoading(true);
+      setError(null);
 
-    // Basic client-side validation
-    if (!values.userEmail || !values.userPassword) {
-      setError("Both fields are required.");
-      setLoading(false);
-      return;
-    }
+      // Basic client-side validation
+      if (!values.userEmail || !values.userPassword) {
+        setError("Both fields are required.");
+        setLoading(false);
+        return;
+      }
 
-    try {
-      const res = await auth.login(values.userEmail, values.userPassword);
-      if (!res) {
-        throw new Error("Login failed. Please check your credentials.");
+      try {
+        const res = await auth.login(values.userEmail, values.userPassword);
+        if (!res) {
+          throw new Error("Login failed. Please check your credentials.");
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An error occurred during login.");
+        }
+        console.log(err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An error occurred during login.");
-      }
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [auth, values.userEmail, values.userPassword]
+  );
 
   return (
     <div className="min-w-full min-h-screen flex flex-col items-center bg-[#18181b] text-white relative overflow-hidden">

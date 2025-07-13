@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { FaSpinner, FaTimes, FaBuilding } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,19 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
 
   if (!open) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Memoize input handlers
+  const handleCompanyNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCompanyName(e.target.value);
+  }, []);
+  const handleCompanyRegNrChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCompanyRegNr(e.target.value);
+  }, []);
+  const handleFormClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  // Memoize submit handler
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!companyName.trim()) {
@@ -56,7 +68,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [companyName, companyRegNr, userId, onCompanyAdded, onClose, t]);
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
@@ -100,7 +112,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
               type="text"
               placeholder={t("companyNamePlaceholder", { default: "e.g. Acme Inc." })}
               value={companyName}
-              onChange={e => setCompanyName(e.target.value)}
+              onChange={handleCompanyNameChange}
               required
               disabled={loading}
               className="text-black w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
@@ -114,7 +126,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
               type="text"
               placeholder={t("registrationNumberPlaceholder", { default: "Optional" })}
               value={companyRegNr}
-              onChange={e => setCompanyRegNr(e.target.value)}
+              onChange={handleCompanyRegNrChange}
               disabled={loading}
               className="text-black w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
             />
@@ -126,7 +138,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={onClose}
+              onClick={handleFormClose}
               className="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300"
               disabled={loading}
             >

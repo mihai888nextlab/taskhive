@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FormEvent, useEffect } from "react";
+import React, { FormEvent, useEffect, useCallback } from "react";
 
 // Extend the Window interface to include 'google'
 declare global {
@@ -18,33 +18,50 @@ declare global {
   }
 }
 
-export function LoginForm({
+export const LoginForm: React.FC<
+  React.ComponentProps<"div"> & {
+    handleLogin: (e: FormEvent<HTMLFormElement>) => void;
+    values: {
+      userEmail: string;
+      userPassword: string;
+    };
+    setValues: ({
+      userEmail,
+      userPassword,
+    }: {
+      userEmail: string;
+      userPassword: string;
+    }) => void;
+  }
+> = React.memo(function LoginForm({
   className,
   handleLogin,
   values,
   setValues,
   ...props
-}: React.ComponentProps<"div"> & {
-  handleLogin: (e: FormEvent<HTMLFormElement>) => void;
-  values: {
-    userEmail: string;
-    userPassword: string;
-  };
-  setValues: ({
-    userEmail,
-    userPassword,
-  }: {
-    userEmail: string;
-    userPassword: string;
-  }) => void;
 }) {
-  const handleGoogleLogin = async () => {
+  // Memoize Google login handler
+  const handleGoogleLogin = useCallback(async () => {
     // @ts-ignore
     if (window.google && window.google.accounts) {
       // @ts-ignore
       window.google.accounts.id.prompt();
     }
-  };
+  }, []);
+
+  // Memoize input change handlers
+  const handleEmailChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValues({ ...values, userEmail: e.target.value });
+    },
+    [setValues, values]
+  );
+  const handlePasswordChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValues({ ...values, userPassword: e.target.value });
+    },
+    [setValues, values]
+  );
 
   useEffect(() => {
     // Load Google Identity Services script
@@ -132,9 +149,7 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   value={values.userEmail}
-                  onChange={(e) =>
-                    setValues({ ...values, userEmail: e.target.value })
-                  }
+                  onChange={handleEmailChange}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="email"
@@ -156,9 +171,7 @@ export function LoginForm({
                   id="password"
                   type="password"
                   value={values.userPassword}
-                  onChange={(e) =>
-                    setValues({ ...values, userPassword: e.target.value })
-                  }
+                  onChange={handlePasswordChange}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="current-password"
@@ -193,4 +206,4 @@ export function LoginForm({
       </Card>
     </div>
   );
-}
+});

@@ -3,6 +3,7 @@ import { FaTimes, FaSignOutAlt } from "react-icons/fa";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
+import React, { useCallback } from "react";
 
 type MenuItem = {
   name: string;
@@ -34,7 +35,18 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
   unreadAnnouncements = 0,
   unreadMessages = 0,
 }) => {
-  const auth = useAuth(); // Assuming you have a useAuth hook to get user data
+  const auth = useAuth();
+
+  // Memoize sidebar close handler
+  const handleSidebarClose = useCallback(() => {
+    setSidebarOpen(false);
+  }, [setSidebarOpen]);
+
+  // Memoize logout handler
+  const handleLogout = useCallback(() => {
+    setSidebarOpen(false);
+    auth.logout();
+  }, [setSidebarOpen, auth]);
 
   if (!sidebarOpen) return null;
   return (
@@ -42,14 +54,14 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black bg-opacity-40"
-        onClick={() => setSidebarOpen(false)}
+        onClick={handleSidebarClose}
         aria-label="Close sidebar overlay"
       ></div>
       {/* Drawer */}
       <aside className="relative w-full max-w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 py-6 flex flex-col shadow-lg animate-slideInLeft overflow-y-auto">
         <button
           className="absolute top-4 right-4 text-white text-2xl focus:outline-none"
-          onClick={() => setSidebarOpen(false)}
+          onClick={handleSidebarClose}
           aria-label="Close sidebar"
         >
           <FaTimes />
@@ -129,10 +141,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
           </div>
         </Link>
         <button
-          onClick={() => {
-            setSidebarOpen(false);
-            auth.logout(); // Assuming logout is an async function
-          }}
+          onClick={handleLogout}
           className="mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-red-500 hover:bg-red-600 text-white text-lg font-bold shadow-xl transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300"
         >
           <FaSignOutAlt className="text-xl" />
@@ -143,4 +152,4 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
   );
 };
 
-export default MobileSidebar;
+export default React.memo(MobileSidebar);

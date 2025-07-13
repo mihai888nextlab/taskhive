@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,8 +9,9 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
+import React from "react";
 
-export default function Header() {
+const Header: React.FC = React.memo(() => {
   const pages = [
     { name: "Product", href: "/" },
     { name: "Customers", href: "/customers" },
@@ -19,11 +20,23 @@ export default function Header() {
   ];
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 30);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Memoize mobile menu toggle
+  const handleMobileMenuToggle = useCallback(() => {
+    setMobileMenuOpen((v) => !v);
+  }, []);
+
+  // Memoize close menu handler
+  const handleCloseMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -76,7 +89,7 @@ export default function Header() {
         {/* Mobile Hamburger */}
         <button
           className="md:hidden flex items-center justify-center text-white text-3xl ml-2 z-50"
-          onClick={() => setMobileMenuOpen((v) => !v)}
+          onClick={handleMobileMenuToggle}
           aria-label="Open menu"
         >
           {mobileMenuOpen ? <FiX /> : <FiMenu />}
@@ -90,7 +103,7 @@ export default function Header() {
                   <Link
                     href={page.href}
                     className="text-white hover:text-primary transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={handleCloseMobileMenu}
                   >
                     {page.name}
                   </Link>
@@ -98,7 +111,7 @@ export default function Header() {
               ))}
             </ul>
             <div className="flex flex-col gap-4 mt-6 w-full items-center">
-              <Link href="/login" className="w-40" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/login" className="w-40" onClick={handleCloseMobileMenu}>
                 <Button
                   variant="outline"
                   className="w-full text-center border-white/30 text-white font-medium hover:bg-white/10 rounded-full"
@@ -107,7 +120,7 @@ export default function Header() {
                   Log in
                 </Button>
               </Link>
-              <Link href="/register" className="w-40" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/register" className="w-40" onClick={handleCloseMobileMenu}>
                 <Button
                   className="w-full text-center bg-primary text-white rounded-full font-semibold shadow hover:bg-primary-dark"
                 >
@@ -120,4 +133,6 @@ export default function Header() {
       </nav>
     </header>
   );
-}
+});
+
+export default Header;

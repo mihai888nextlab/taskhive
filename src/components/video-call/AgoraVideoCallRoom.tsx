@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import AgoraRTC, {
   AgoraRTCProvider,
@@ -23,7 +23,7 @@ interface VideoCallRoomProps {
   onLeave: () => void;
 }
 
-const VideoCallContent: React.FC<VideoCallRoomProps> = ({
+const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
   credentials,
   onLeave,
 }) => {
@@ -61,7 +61,9 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
 
   const isConnected = useIsConnected();
   const remoteUsers = useRemoteUsers();
-  const totalParticipants = remoteUsers.length + 1;
+
+  // Memoize totalParticipants
+  const totalParticipants = useMemo(() => remoteUsers.length + 1, [remoteUsers]);
 
   useEffect(() => {
     if (isConnected) {
@@ -69,6 +71,7 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
     }
   }, [isConnected]);
 
+  // Memoize handleLeave
   const handleLeave = useCallback(async () => {
     setIsJoining(false);
     if (localCameraTrack) {
@@ -80,7 +83,8 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
     onLeave();
   }, [localCameraTrack, localMicrophoneTrack, onLeave]);
 
-  const toggleFullscreen = () => {
+  // Memoize toggleFullscreen
+  const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
       setIsFullscreen(true);
@@ -88,23 +92,26 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
       document.exitFullscreen();
       setIsFullscreen(false);
     }
-  };
+  }, []);
 
-  // Dynamic grid layout based on participant count
-  const getGridLayout = () => {
+  // Memoize grid layout calculations
+  const getGridLayout = useCallback(() => {
     if (totalParticipants === 1) return "grid-cols-1";
     if (totalParticipants === 2) return "grid-cols-2";
     if (totalParticipants <= 4) return "grid-cols-2";
     if (totalParticipants <= 6) return "grid-cols-3";
     return "grid-cols-4";
-  };
-
-  const getGridRows = () => {
+  }, [totalParticipants]);
+  const getGridRows = useCallback(() => {
     if (totalParticipants <= 2) return "grid-rows-1";
     if (totalParticipants <= 4) return "grid-rows-2";
     if (totalParticipants <= 6) return "grid-rows-2";
     return "grid-rows-3";
-  };
+  }, [totalParticipants]);
+
+  // Memoize mic/camera toggle handlers
+  const handleMicToggle = useCallback(() => setMicEnabled(m => !m), []);
+  const handleCameraToggle = useCallback(() => setCameraEnabled(c => !c), []);
 
   if (!isConnected) {
     return (
@@ -348,7 +355,7 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
       <div className="bg-black/20 backdrop-blur-sm border-t border-slate-700/50 p-6">
         <div className="flex justify-center items-center space-x-4 max-w-md mx-auto">
           <button
-            onClick={() => setMicEnabled(!micEnabled)}
+            onClick={handleMicToggle}
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
               micEnabled
                 ? "bg-slate-700/80 hover:bg-slate-600/80 text-white"
@@ -369,7 +376,7 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
           </button>
 
           <button
-            onClick={() => setCameraEnabled(!cameraEnabled)}
+            onClick={handleCameraToggle}
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
               cameraEnabled
                 ? "bg-slate-700/80 hover:bg-slate-600/80 text-white"
@@ -414,9 +421,9 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
       `}</style>
     </div>
   );
-};
+});
 
-const VideoCallRoom: React.FC<VideoCallRoomProps> = ({
+const VideoCallRoom: React.FC<VideoCallRoomProps> = React.memo(({
   credentials,
   onLeave,
 }) => {
@@ -429,6 +436,6 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({
       <VideoCallContent credentials={credentials} onLeave={onLeave} />
     </AgoraRTCProvider>
   );
-};
+});
 
-export default VideoCallRoom;
+export default React.memo(VideoCallRoom);

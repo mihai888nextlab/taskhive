@@ -1,15 +1,20 @@
+import React, { useMemo } from "react";
 import { Kanit } from "next/font/google";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { FaGithub } from "react-icons/fa";
 import Image from "next/image";
 
-const kanit = Kanit({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+const kanit = useMemo(
+  () =>
+    Kanit({
+      subsets: ["latin"],
+      weight: ["400", "700"],
+    }),
+  []
+);
 
-export default function Contact() {
+function Contact() {
   return (
     <div className="min-w-full min-h-screen bg-background text-white flex flex-col items-center relative overflow-hidden">
       {/* Subtle, full-page hive icon background */}
@@ -35,59 +40,8 @@ export default function Contact() {
             Contact Us
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 w-full">
-            {/* Contact Info Card */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-center justify-center shadow-xl min-h-[240px] sm:min-h-[340px] text-center">
-              <div className="flex flex-col items-center w-full">
-                <p className="text-base sm:text-[1.35rem] md:text-2xl mb-3 sm:mb-5 text-gray-200">
-                  We are from Timișoara, attending Liceul Teoretic Grigore Moisil.
-                </p>
-                <p className="text-base sm:text-[1.35rem] md:text-2xl mb-3 sm:mb-5 text-gray-200">
-                  Address: Ghirlandei nr. 4, Timișoara
-                </p>
-                <div className="flex flex-col gap-2 sm:gap-3 w-full items-center">
-                  <div className="flex flex-wrap items-center justify-center gap-2 text-base sm:text-lg">
-                    <FaGithub className="text-primary text-xl sm:text-2xl" />
-                    Mihai Gorunescu |
-                    <a
-                      href="https://github.com/mihai888nextlab"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline hover:text-accent transition-colors duration-300"
-                    >
-                      GitHub
-                    </a>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center gap-2 text-base sm:text-lg">
-                    <FaGithub className="text-primary text-xl sm:text-2xl" />
-                    Cristi Stiegelbauer |
-                    <a
-                      href="https://github.com/crististg"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline hover:text-accent transition-colors duration-300"
-                    >
-                      GitHub
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Map Card */}
-            <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-2 sm:p-4 flex flex-col items-center shadow-xl min-h-[240px] sm:min-h-[340px]">
-              <div className="rounded-xl overflow-hidden w-full h-[220px] sm:h-full shadow-lg border border-gray-700 flex items-center justify-center">
-                <iframe
-                  src="https://maps.google.com/maps?q=Liceul%20Teoretic%20Grigore%20Moisil%2C%20Timi%C8%99oara&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, minHeight: 180 }}
-                  loading="lazy"
-                  className="rounded-xl min-h-[180px] sm:min-h-[320px] w-full"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Liceul Teoretic Grigore Moisil, Timișoara Map"
-                ></iframe>
-              </div>
-            </div>
+            <ContactInfoCard />
+            <MapCard />
           </div>
         </div>
       </main>
@@ -95,3 +49,66 @@ export default function Contact() {
     </div>
   );
 }
+
+const ContactInfoCard = React.memo(function ContactInfoCard() {
+  return (
+    <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-center justify-center shadow-xl min-h-[240px] sm:min-h-[340px] text-center">
+      <div className="flex flex-col items-center w-full">
+        <p className="text-base sm:text-[1.35rem] md:text-2xl mb-3 sm:mb-5 text-gray-200">
+          We are from Timișoara, attending Liceul Teoretic Grigore Moisil.
+        </p>
+        <p className="text-base sm:text-[1.35rem] md:text-2xl mb-3 sm:mb-5 text-gray-200">
+          Address: Ghirlandei nr. 4, Timișoara
+        </p>
+        <div className="flex flex-col gap-2 sm:gap-3 w-full items-center">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-base sm:text-lg">
+            <FaGithub className="text-primary text-xl sm:text-2xl" />
+            Mihai Gorunescu |
+            <a
+              href="https://github.com/mihai888nextlab"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:text-accent transition-colors duration-300"
+            >
+              GitHub
+            </a>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-base sm:text-lg">
+            <FaGithub className="text-primary text-xl sm:text-2xl" />
+            Cristi Stiegelbauer |
+            <a
+              href="https://github.com/crististg"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:text-accent transition-colors duration-300"
+            >
+              GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+const MapCard = React.memo(function MapCard() {
+  return (
+    <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-2 sm:p-4 flex flex-col items-center shadow-xl min-h-[240px] sm:min-h-[340px]">
+      <div className="rounded-xl overflow-hidden w-full h-[220px] sm:h-full shadow-lg border border-gray-700 flex items-center justify-center">
+        <iframe
+          src="https://maps.google.com/maps?q=Liceul%20Teoretic%20Grigore%20Moisil%2C%20Timi%C8%99oara&t=&z=15&ie=UTF8&iwloc=&output=embed"
+          width="100%"
+          height="100%"
+          style={{ border: 0, minHeight: 180 }}
+          loading="lazy"
+          className="rounded-xl min-h-[180px] sm:min-h-[320px] w-full"
+          allowFullScreen
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Liceul Teoretic Grigore Moisil, Timișoara Map"
+        ></iframe>
+      </div>
+    </div>
+  );
+});
+
+export default Contact;

@@ -81,6 +81,17 @@ export default async function handler(
 
     const savedCompany = await companyModel.findOne({
       _id: decodedToken.companyId,
+    }).lean();
+
+    // If savedCompany is an array, get the first element
+    const company = Array.isArray(savedCompany) ? savedCompany[0] : savedCompany;
+
+    if (!company || !company._id) {
+      console.error("Company not found for ID:", decodedToken.companyId);
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+      _id: decodedToken.companyId,
     });
 
     if (!savedCompany) {
@@ -90,6 +101,11 @@ export default async function handler(
 
     // Convert role to lowercase before saving
     const lowercaseRole = role.toLowerCase();
+
+    if (!savedCompany || !savedCompany._id) {
+      console.error("Company not found for ID:", decodedToken.companyId);
+      return res.status(404).json({ message: "Company not found" });
+    }
 
     // 1. Fetch the org chart for the company
     const orgChart = await OrgChart.findOne({

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { FaEdit, FaTrash, FaCheckCircle, FaRegCircle, FaExclamationTriangle, FaFlag, FaTasks } from "react-icons/fa";
 import { FiCalendar, FiUser, FiChevronDown, FiChevronRight } from "react-icons/fi";
 import TimeTrackingModal from "../time-tracking/TimeTrackingModal";
@@ -79,7 +79,8 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
 
   const canComplete = isAssignedToMe && !hasSubtasks;
 
-  const handleCompleteClick = React.useCallback((task: Task) => {
+  // Memoize event handlers
+  const handleCompleteClick = useCallback((task: Task) => {
     if (!task.completed) {
       setPendingComplete(task);
       setShowTimeModal(true);
@@ -88,7 +89,7 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
     }
   }, [onToggleComplete, pendingComplete]);
 
-  const handleTimeModalSubmit = React.useCallback(async (data: { title: string; duration: number; description: string; tag: string }) => {
+  const handleTimeModalSubmit = useCallback(async (data: { title: string; duration: number; description: string; tag: string }) => {
     setShowTimeModal(false);
     if (pendingComplete) {
       try {
@@ -113,7 +114,7 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
     setPendingComplete(null);
   }, [pendingComplete, onToggleComplete]);
 
-  const handleTimeModalClose = React.useCallback(() => {
+  const handleTimeModalClose = useCallback(() => {
     setShowTimeModal(false);
     if (pendingComplete && onToggleComplete) {
       onToggleComplete(pendingComplete);

@@ -5,20 +5,6 @@ import UserModel from "@/db/models/userModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
 import * as cookie from "cookie";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
-
-const embeddings = new GoogleGenerativeAIEmbeddings({
-  apiKey: GEMINI_API_KEY,
-  model: "text-embedding-004",
-});
-
-const splitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 500,
-  chunkOverlap: 100,
-});
 
 export default async function handler(
   req: NextApiRequest,
@@ -46,19 +32,12 @@ export default async function handler(
 
   let user = await UserModel.findById(decoded.userId);
   let userCompany = null;
-  if (user) {
+  if (user && !Array.isArray(user)) {
     userCompany = await userCompanyModel.findOne({
       userId: user._id,
       companyId: decoded.companyId,
-    });
+    }).lean();
   }
-
-  // const companyUserRecords = await userCompanyModel
-  //   .find({ companyId: decoded.companyId })
-  //   .select("userId")
-  //   .lean();
-
-  // const companyUserIds = companyUserRecords.map((record) => record.userId);
 
   if (req.method === "GET") {
     // Anyone can view announcements
@@ -94,12 +73,25 @@ export default async function handler(
         category,
         pinned: !!pinned,
         expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-        createdBy: user._id,
+        createdBy: !Array.isArray(user) ? user._id : undefined,
         companyId: decoded.companyId,
       });
 
+      // Only require Gemini for POST
+      const { GoogleGenerativeAIEmbeddings } = await import("@langchain/google-genai");
+      const { RecursiveCharacterTextSplitter } = await import("langchain/text_splitter");
+      const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+      const embeddings = new GoogleGenerativeAIEmbeddings({
+        apiKey: GEMINI_API_KEY,
+        model: "text-embedding-004",
+      });
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 500,
+        chunkOverlap: 100,
+      });
+
       // RAG (Retrieval-Augmented Generation) Fields
-      const rawPageContent = `Announcement Title: ${announcement.title}. Content: ${announcement.description}. Category: ${announcement.category}. Pinned: ${announcement.pinned}. Expires at: ${announcement.expiresAt?.toLocaleDateString() || "N/A"}.`;
+      const rawPageContent = `Announcement Title: ${announcement.title}. Content: ${announcement.content}. Category: ${announcement.category}. Pinned: ${announcement.pinned}. Expires at: ${announcement.expiresAt?.toLocaleDateString() || "N/A"}.`;
       const chunks = await splitter.createDocuments([rawPageContent]);
       const contentToEmbed = chunks[0].pageContent; // Take the first chunk
       const newEmbedding = await embeddings.embedQuery(contentToEmbed);
@@ -108,14 +100,13 @@ export default async function handler(
         originalId: announcement._id,
         title: announcement.title,
         category: announcement.category,
-        // Add any other relevant fields for the AI or linking
       };
 
       announcement.pageContent = contentToEmbed;
       announcement.embedding = newEmbedding;
       announcement.metadata = newMetadata;
 
-      await announcement.save(); // Save the updated task with RAG fields
+      await announcement.save(); // Save the updated announcement with RAG fields
 
       await announcement.populate("createdBy", "firstName lastName email");
       return res.status(201).json(announcement);

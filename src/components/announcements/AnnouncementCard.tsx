@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FaBullhorn, FaThumbtack, FaTrash, FaCalendarAlt, FaUser, FaChevronRight } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -92,6 +92,22 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
 
   const t = useTranslations("AnnouncementsPage");
 
+  // Memoize event handlers
+  const handlePinToggle = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onPinToggle && onPinToggle(announcement._id, !announcement.pinned);
+  }, [onPinToggle, announcement]);
+
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete && onDelete(announcement._id);
+  }, [onDelete, announcement]);
+
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.admin-action-btn')) return;
+    onCardClick && onCardClick(announcement);
+  }, [onCardClick, announcement]);
+
   return (
     <div
       className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer transform hover:scale-[1.01] ${
@@ -99,10 +115,7 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
           ? "bg-gray-800 border-gray-700 hover:border-gray-600 hover:bg-gray-750"
           : "bg-white border-gray-200 hover:border-gray-300"
       }`}
-      onClick={e => {
-        if ((e.target as HTMLElement).closest('.admin-action-btn')) return;
-        onCardClick && onCardClick(announcement);
-      }}
+      onClick={handleCardClick}
     >
       {/* Admin Actions */}
       {isAdmin && (
@@ -115,10 +128,7 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
                   ? theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300 hover:bg-yellow-800' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
                   : theme === 'dark' ? 'bg-gray-700 text-gray-400 hover:bg-yellow-800 hover:text-yellow-300' : 'bg-gray-100 text-gray-500 hover:bg-yellow-100 hover:text-yellow-700'
               }`}
-              onClick={e => { 
-                e.stopPropagation(); 
-                onPinToggle(announcement._id, !announcement.pinned); 
-              }}
+              onClick={handlePinToggle}
               title={announcement.pinned ? "Unpin" : "Pin"}
               variant="ghost"
             >
@@ -133,10 +143,7 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
                   ? 'bg-gray-700 text-gray-400 hover:bg-red-800 hover:text-red-300' 
                   : 'bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-700'
               }`}
-              onClick={e => { 
-                e.stopPropagation(); 
-                onDelete && onDelete(announcement._id); 
-              }}
+              onClick={handleDelete}
               title="Delete"
               variant="ghost"
             >

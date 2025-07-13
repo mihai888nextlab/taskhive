@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import UserProfileModal from "../modals/UserProfileModal";
 import { useTranslations } from "next-intl"; // <-- Add this import
@@ -79,7 +79,8 @@ const UniversalSearchBar: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleResultClick = (result: any) => {
+  // Memoize result click handler
+  const handleResultClick = useCallback((result: any) => {
     if (result.type === "user") {
       setSelectedUser(result);
       setUserProfileModalOpen(true);
@@ -91,8 +92,36 @@ const UniversalSearchBar: React.FC = () => {
       }
       setShowDropdown(false);
     }
-  };
+  }, []);
 
+  // Memoize renderResult
+  const renderResult = useCallback((result: any, idx: number) => {
+    let preview = "";
+    if (result.description) {
+      const words = result.description.split(/\s+/).slice(0, 8);
+      preview = words.join(" ");
+      if (result.description.split(/\s+/).length > 8) preview += "...";
+    }
+    return (
+      <li
+        key={result._id || result.id || idx}
+        className="px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors rounded"
+        onMouseDown={() => handleResultClick(result)}
+      >
+        <span className="font-medium">{result.title || result.name || result.fullName}</span>
+        {/* Show email for users */}
+        {result.type === "user" && result.email && (
+          <span className="ml-2 text-xs text-gray-500">{result.email}</span>
+        )}
+        {/* Show preview for other types if description exists */}
+        {preview && result.type !== "user" && (
+          <span className="ml-2 text-xs text-gray-500">{preview}</span>
+        )}
+      </li>
+    );
+  }, [handleResultClick]);
+
+  // Fetch search results
   useEffect(() => {
     if (!search.trim()) {
       setSearchResults([]);
@@ -229,33 +258,6 @@ const UniversalSearchBar: React.FC = () => {
                 </div>
               );
             }
-
-            // Helper to render each result (show preview of first 8 words of description if present, and email for users)
-            const renderResult = (result: any, idx: number) => {
-              let preview = "";
-              if (result.description) {
-                const words = result.description.split(/\s+/).slice(0, 8);
-                preview = words.join(" ");
-                if (result.description.split(/\s+/).length > 8) preview += "...";
-              }
-              return (
-                <li
-                  key={result._id || result.id || idx}
-                  className="px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors rounded"
-                  onMouseDown={() => handleResultClick(result)}
-                >
-                  <span className="font-medium">{result.title || result.name || result.fullName}</span>
-                  {/* Show email for users */}
-                  {result.type === "user" && result.email && (
-                    <span className="ml-2 text-xs text-gray-500">{result.email}</span>
-                  )}
-                  {/* Show preview for other types if description exists */}
-                  {preview && result.type !== "user" && (
-                    <span className="ml-2 text-xs text-gray-500">{preview}</span>
-                  )}
-                </li>
-              );
-            };
 
             return (
               <div>

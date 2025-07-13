@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import AnnouncementCard from "./AnnouncementCard";
 import { FaSearch, FaSpinner, FaBullhorn, FaFilter, FaThumbtack } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
@@ -81,8 +81,37 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
   // Memoize pinnedCount
   const pinnedCount = useMemo(() => filteredAnnouncements.filter(a => a.pinned).length, [filteredAnnouncements]);
 
-  // Separate pinned and regular announcements for display info
-  // const pinnedCount = filteredAnnouncements.filter(a => a.pinned).length;
+  // Memoize event handlers
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => onSearchChange && onSearchChange(e.target.value),
+    [onSearchChange]
+  );
+  const handleCategoryFilterChange = useCallback(
+    (v: string) => onCategoryFilterChange && onCategoryFilterChange(v),
+    [onCategoryFilterChange]
+  );
+  const handleCardClick = useCallback(
+    (announcement: Announcement) => onCardClick && onCardClick(announcement),
+    [onCardClick]
+  );
+
+  // Memoize announcements grid
+  const announcementsGrid = useMemo(() => (
+    <div className="space-y-4">
+      {filteredAnnouncements.map((announcement) => (
+        <AnnouncementCard
+          key={announcement._id}
+          announcement={announcement}
+          theme={theme}
+          isAdmin={isAdmin}
+          onPinToggle={onPinToggle}
+          onComment={onComment}
+          onDelete={onDelete}
+          onCardClick={handleCardClick}
+        />
+      ))}
+    </div>
+  ), [filteredAnnouncements, theme, isAdmin, onPinToggle, onComment, onDelete, handleCardClick]);
 
   if (controlsOnly) {
     return (
@@ -94,7 +123,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
             type="text"
             placeholder={t("searchAnnouncementsPlaceholder")}
             value={search}
-            onChange={e => onSearchChange && onSearchChange(e.target.value)}
+            onChange={handleSearchChange}
             className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200 ${
               theme === 'dark'
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
@@ -108,7 +137,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
           <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5 pointer-events-none" />
           <Select
             value={categoryFilter}
-            onValueChange={v => onCategoryFilterChange && onCategoryFilterChange(v as string)}
+            onValueChange={handleCategoryFilterChange}
           >
             <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
               style={{ height: "36px" }}
@@ -201,20 +230,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
             </div>
 
             {/* Announcements Grid */}
-            <div className="space-y-4">
-              {filteredAnnouncements.map((announcement) => (
-                <AnnouncementCard
-                  key={announcement._id}
-                  announcement={announcement}
-                  theme={theme}
-                  isAdmin={isAdmin}
-                  onPinToggle={onPinToggle}
-                  onComment={onComment}
-                  onDelete={onDelete}
-                  onCardClick={onCardClick}
-                />
-              ))}
-            </div>
+            {announcementsGrid}
           </>
         )}
       </div>
@@ -231,7 +247,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
             type="text"
             placeholder={t("searchAnnouncementsPlaceholder")}
             value={search}
-            onChange={e => onSearchChange && onSearchChange(e.target.value)}
+            onChange={handleSearchChange}
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 h-12
               ${theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
@@ -246,7 +262,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
           <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 pointer-events-none" style={{ top: "50%" }} />
           <Select
             value={categoryFilter}
-            onValueChange={v => onCategoryFilterChange && onCategoryFilterChange(v as string)}
+            onValueChange={handleCategoryFilterChange}
           >
             <select
               className={`pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 appearance-none cursor-pointer min-w-[140px] h-12
@@ -256,7 +272,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
                 }`}
               style={{ height: "48px" }}
               value={categoryFilter}
-              onChange={e => onCategoryFilterChange && onCategoryFilterChange(e.target.value)}
+              onChange={e => handleCategoryFilterChange(e.target.value)}
             >
               {categories.map(cat => (
                 <option key={cat} value={cat}>
@@ -346,20 +362,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
             </div>
 
             {/* Announcements Grid */}
-            <div className="space-y-4">
-              {filteredAnnouncements.map((announcement) => (
-                <AnnouncementCard
-                  key={announcement._id}
-                  announcement={announcement}
-                  theme={theme}
-                  isAdmin={isAdmin}
-                  onPinToggle={onPinToggle}
-                  onComment={onComment}
-                  onDelete={onDelete}
-                  onCardClick={onCardClick}
-                />
-              ))}
-            </div>
+            {announcementsGrid}
           </>
         )}
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import TaskCard from "./TaskCard";
 import TaskDetailsModal from "./TaskDetailsModal";
 import { FaSearch, FaSpinner, FaTasks } from "react-icons/fa";
@@ -65,19 +65,19 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
   const filterPriorityValue = controlledFilterPriority !== undefined ? controlledFilterPriority : filterPriority;
   const sortByValue = controlledSortBy !== undefined ? controlledSortBy : sortBy;
 
-  // Memoize handleShowDetails and handleCloseModal
-  const handleShowDetails = React.useCallback((task: Task) => {
+  // Memoize event handlers
+  const handleShowDetails = useCallback((task: Task) => {
     setDetailsTask(task);
     setModalOpen(true);
-  }, [setDetailsTask, setModalOpen]);
+  }, []);
 
-  const handleCloseModal = React.useCallback(() => {
+  const handleCloseModal = useCallback(() => {
     setModalOpen(false);
     setDetailsTask(null);
-  }, [setModalOpen, setDetailsTask]);
+  }, []);
 
   // Define handleSubtaskToggle function BEFORE any useMemo or JSX usage
-  const handleSubtaskToggle = React.useCallback((subtask: Task) => {
+  const handleSubtaskToggle = useCallback((subtask: Task) => {
     if (onToggleComplete) {
       onToggleComplete(subtask);
     }
@@ -126,7 +126,7 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
     return result;
   }, [tasks, currentUserEmail]);
 
-  // Filtering, searching, sorting logic
+  // Memoize filteredTasks
   const filteredTasks = useMemo(() => {
     let result: Task[] = [];
 

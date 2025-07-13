@@ -28,4 +28,4 @@ const UndoSnackbar = React.memo(function UndoSnackbar({ show, onUndo, deletedIte
   );
 });
 
-export default React.memo(UndoSnackbar);
+export default UndoSnackbar;

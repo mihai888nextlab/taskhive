@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { useAIWindow } from "@/contexts/AIWindowContext";
 import { useTranslations } from "next-intl";
@@ -172,40 +172,40 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     }
   }, [inputPrompt]);
 
-  if (!isOpen) return null;
-
   // Responsive style: right panel on desktop, modal on mobile
-  const panelStyle: React.CSSProperties = isDesktop
-    ? {
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        width: '420px',
-        maxWidth: '32vw',
-        minWidth: '340px',
-        height: '100vh',
-        borderRadius: '0',
-        boxShadow: '0 0 32px 0 rgba(0,0,0,0.10)',
-        zIndex: 50,
-        background: 'linear-gradient(135deg, #fff 60%, #e0e7ef 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'right 0.3s',
-      }
-    : {
-        left: 'auto',
-        right: '2rem',
-        bottom: '4rem',
-        width: '500px',
-        height: '600px',
-        borderRadius: '1.25rem',
-        maxWidth: '95vw',
-        maxHeight: '95vh',
-      };
+  const panelStyle: React.CSSProperties = useMemo(() => (
+    isDesktop
+      ? {
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: '420px',
+          maxWidth: '32vw',
+          minWidth: '340px',
+          height: '100vh',
+          borderRadius: '0',
+          boxShadow: '0 0 32px 0 rgba(0,0,0,0.10)',
+          zIndex: 50,
+          background: 'linear-gradient(135deg, #fff 60%, #e0e7ef 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'right 0.3s',
+        }
+      : {
+          left: 'auto',
+          right: '2rem',
+          bottom: '4rem',
+          width: '500px',
+          height: '600px',
+          borderRadius: '1.25rem',
+          maxWidth: '95vw',
+          maxHeight: '95vh',
+        }
+  ), [isDesktop]);
 
   // --- Unified command processing ---
-  const handleSubmit = async (promptOverride?: string) => {
+  const handleSubmit = useCallback(async (promptOverride?: string) => {
     const promptToSend = typeof promptOverride === "string" ? promptOverride : inputPrompt;
     if (!promptToSend.trim()) return;
 
@@ -250,17 +250,17 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [inputPrompt, setChatHistory, setInputPrompt, chatHistory, setIsLoading]);
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
-  };
+  }, [handleSubmit]);
 
   // --- Web Speech API logic ---
-  const handleVoiceInput = () => {
+  const handleVoiceInput = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("Speech recognition is not supported in this browser.");
@@ -288,22 +288,22 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     };
 
     recognition.start();
-  };
+  }, []);
 
   // Add a state to determine if the textarea is empty
   const isInputEmpty = inputPrompt.trim().length === 0;
 
   // Insert command from quick button or dropdown
-  const handleInsertCommand = (cmd: string, autoSubmit = false) => {
+  const handleInsertCommand = useCallback((cmd: string, autoSubmit = false) => {
     setInputPrompt(cmd);
     setShowCommandList(false);
     if (autoSubmit) {
       setTimeout(() => handleSubmit(cmd), 0);
     }
-  };
+  }, [handleSubmit]);
 
   // Keyboard navigation for command list
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (showCommandList && filteredCommands.length > 0) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -321,7 +321,9 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
       e.preventDefault();
       handleSubmit();
     }
-  };
+  }, [showCommandList, filteredCommands, selectedCommandIndex, handleInsertCommand, handleSubmit]);
+
+  if (!isOpen) return null;
 
   return (
     <div

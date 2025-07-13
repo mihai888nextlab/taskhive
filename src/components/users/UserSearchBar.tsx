@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useTranslations } from "next-intl";
 
 interface UserSearchBarProps {
@@ -11,7 +11,7 @@ interface UserSearchBarProps {
   roles: string[];
 }
 
-const UserSearchBar: React.FC<UserSearchBarProps> = ({
+const UserSearchBar: React.FC<UserSearchBarProps> = React.memo(({
   search,
   setSearch,
   filterRole,
@@ -21,6 +21,18 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
   roles,
 }) => {
   const t = useTranslations("UsersPage");
+
+  // Memoize input handlers
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  }, [setSearch]);
+  const handleRoleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilterRole(e.target.value);
+  }, [setFilterRole]);
+  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(e.target.value as "firstNameAsc" | "lastNameAsc" | "roleAsc");
+  }, [setSortBy]);
+
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 p-6 rounded-2xl shadow-xl bg-white/80 border border-gray-200/60 backdrop-blur-lg">
       <div className="flex-1 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
@@ -30,7 +42,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
             type="text"
             placeholder={t("searchUsersPlaceholder")}
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={handleSearchChange}
             className="ml-2 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary bg-inherit text-gray-900"
           />
         </label>
@@ -40,7 +52,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
           {t("role")}:
           <select
             value={filterRole}
-            onChange={e => setFilterRole(e.target.value)}
+            onChange={handleRoleChange}
             className="ml-2 rounded px-2 py-1 border border-gray-300 bg-inherit text-gray-900"
           >
             <option value="all">{t("all")}</option>
@@ -53,7 +65,7 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
           {t("sortBy")}:
           <select
             value={sortBy}
-            onChange={e => setSortBy(e.target.value as "firstNameAsc" | "lastNameAsc" | "roleAsc")}
+            onChange={handleSortChange}
             className="ml-2 rounded px-2 py-1 border border-gray-300 bg-inherit text-gray-900"
           >
             <option value="firstNameAsc">{t("firstNameAZ")}</option>
@@ -64,6 +76,6 @@ const UserSearchBar: React.FC<UserSearchBarProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default UserSearchBar;
+export default React.memo(UserSearchBar);

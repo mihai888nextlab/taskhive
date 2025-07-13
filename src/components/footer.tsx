@@ -6,8 +6,9 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
+import React from "react";
 
-export default function Footer() {
+const Footer: React.FC = () => {
   return (
     <footer className="w-full bg-[#18181b] border-t border-accent/30 mt-32 pt-10 pb-6 text-white">
       <div className="max-w-7xl mx-auto relative px-4 sm:px-8 flex flex-col items-center">
@@ -110,4 +111,6 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+};
+
+export default React.memo(Footer);

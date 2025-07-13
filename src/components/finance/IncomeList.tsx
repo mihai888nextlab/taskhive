@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { FaTrash, FaFileCsv, FaFilePdf, FaSearch, FaSpinner, FaCoins } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import { useTheme } from '@/components/ThemeContext';
@@ -58,6 +58,11 @@ const IncomeList: React.FC<IncomeListProps> = React.memo(({
   const { theme } = useTheme();
   const t = useTranslations("FinancePage");
 
+  // Memoize delete handler
+  const handleDeleteIncome = useCallback((income: Income) => {
+    onDelete(income);
+  }, [onDelete]);
+
   // Memoize rendered incomes
   const renderedIncomes = useMemo(() => (
     incomes.map(income => (
@@ -98,7 +103,7 @@ const IncomeList: React.FC<IncomeListProps> = React.memo(({
             </div>
           </div>
           <Button
-            onClick={() => onDelete(income)}
+            onClick={() => handleDeleteIncome(income)}
             className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
               theme === 'dark' 
                 ? 'text-red-400 hover:bg-red-900/20 hover:text-red-300' 
@@ -112,7 +117,7 @@ const IncomeList: React.FC<IncomeListProps> = React.memo(({
         </div>
       </div>
     ))
-  ), [incomes, theme, onDelete]);
+  ), [incomes, theme, handleDeleteIncome]);
 
   return (
     <div className="flex flex-col h-full">

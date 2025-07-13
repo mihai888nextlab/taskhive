@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useTheme } from '@/components/ThemeContext';
@@ -81,7 +81,8 @@ export default function useFinancePageLogic() {
     fetchUsers();
   }, []);
 
-  const fetchFinanceData = async () => {
+  // Memoize fetchFinanceData
+  const fetchFinanceData = useCallback(async () => {
     if (!companyId) return;
     setLoading(true);
     try {
@@ -127,60 +128,61 @@ export default function useFinancePageLogic() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [companyId]);
 
   useEffect(() => {
     if (companyId) fetchFinanceData();
     // eslint-disable-next-line
-  }, [companyId]);
+  }, [companyId, fetchFinanceData]);
 
-  // Filtering, searching, sorting
-  useEffect(() => {
-    const filterAndSort = <T extends FinanceItem>(items: T[]) => {
-      let filtered = items;
-      if (categoryFilter !== 'All') {
-        filtered = filtered.filter(i => i.category === categoryFilter);
-      }
-      if (dateRange[0] && dateRange[1]) {
-        filtered = filtered.filter(i => {
-          const d = new Date(i.date || '');
-          return d >= dateRange[0]! && d <= dateRange[1]!;
-        });
-      }
-      if (search) {
-        filtered = filtered.filter(i =>
-          Object.values(i)
-            .join(' ')
-            .toLowerCase()
-            .includes(search.toLowerCase())
-        );
-      }
-      filtered = filtered.sort((a, b) => {
-        if (sortBy === 'date') {
-          const da = new Date(a.date || 0).getTime();
-          const db = new Date(b.date || 0).getTime();
-          return sortOrder === 'asc' ? da - db : db - da;
-        } else {
-          return sortOrder === 'asc'
-            ? a.amount - b.amount
-            : b.amount - a.amount;
-        }
+  // Memoize filterAndSort
+  const filterAndSort = useCallback(<T extends FinanceItem>(items: T[]) => {
+    let filtered = items;
+    if (categoryFilter !== 'All') {
+      filtered = filtered.filter(i => i.category === categoryFilter);
+    }
+    if (dateRange[0] && dateRange[1]) {
+      filtered = filtered.filter(i => {
+        const d = new Date(i.date || '');
+        return d >= dateRange[0]! && d <= dateRange[1]!;
       });
-      return filtered;
-    };
+    }
+    if (search) {
+      filtered = filtered.filter(i =>
+        Object.values(i)
+          .join(' ')
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      );
+    }
+    filtered = filtered.sort((a, b) => {
+      if (sortBy === 'date') {
+        const da = new Date(a.date || 0).getTime();
+        const db = new Date(b.date || 0).getTime();
+        return sortOrder === 'asc' ? da - db : db - da;
+      } else {
+        return sortOrder === 'asc'
+          ? a.amount - b.amount
+          : b.amount - a.amount;
+      }
+    });
+    return filtered;
+  }, [categoryFilter, dateRange, search, sortBy, sortOrder]);
+
+  useEffect(() => {
     setFilteredExpenses(filterAndSort(expenses));
     setFilteredIncomes(filterAndSort(incomes));
-  }, [search, expenses, incomes, sortBy, sortOrder, categoryFilter, dateRange]);
+  }, [search, expenses, incomes, sortBy, sortOrder, categoryFilter, dateRange, filterAndSort]);
 
-  // Form handlers
-  const handleExpenseFormChange = (field: string, value: any) => {
+  // Memoize form handlers
+  const handleExpenseFormChange = useCallback((field: string, value: any) => {
     setExpenseForm((prev) => ({ ...prev, [field]: value }));
-  };
-  const handleIncomeFormChange = (field: string, value: any) => {
+  }, []);
+  const handleIncomeFormChange = useCallback((field: string, value: any) => {
     setIncomeForm((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const handleExpenseSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleExpenseSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const expenseData = {
@@ -205,9 +207,9 @@ export default function useFinancePageLogic() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, expenseForm, categories, fetchFinanceData]);
 
-  const handleIncomeSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleIncomeSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const incomeData = {
@@ -232,10 +234,10 @@ export default function useFinancePageLogic() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, incomeForm, categories, fetchFinanceData]);
 
-  // Undo delete logic
-  const handleDelete = (item: FinanceItem, type: 'expense' | 'income') => {
+  // Memoize delete/undo handlers
+  const handleDelete = useCallback((item: FinanceItem, type: 'expense' | 'income') => {
     setDeletedItem(item);
     setShowUndo(true);
 
@@ -252,16 +254,16 @@ export default function useFinancePageLogic() {
       setDeletedItem(null);
       fetchFinanceData();
     }, 5000);
-  };
-  const finalizeDelete = async (id: string, type: 'expense' | 'income') => {
+  }, []);
+  const finalizeDelete = useCallback(async (id: string, type: 'expense' | 'income') => {
     setLoading(true);
     try {
       await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
     } finally {
       setLoading(false);
     }
-  };
-  const handleUndo = () => {
+  }, []);
+  const handleUndo = useCallback(() => {
     if (undoTimeout.current) clearTimeout(undoTimeout.current);
     setShowUndo(false);
     if (deletedItem) {
@@ -272,10 +274,10 @@ export default function useFinancePageLogic() {
       }
     }
     setDeletedItem(null);
-  };
+  }, [deletedItem]);
 
-  // Inline editing (scaffold, you can expand)
-  const handleInlineEdit = async (item: FinanceItem, field: string, value: any, type: 'expense' | 'income') => {
+  // Memoize inline edit handler
+  const handleInlineEdit = useCallback(async (item: FinanceItem, field: string, value: any, type: 'expense' | 'income') => {
     setLoading(true);
     try {
       await fetch(`/api/expenses/${item._id}`, {
@@ -287,10 +289,10 @@ export default function useFinancePageLogic() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchFinanceData]);
 
-  // CSV Export
-  const exportCSV = (type: 'expenses' | 'incomes') => {
+  // Memoize export handlers
+  const exportCSV = useCallback((type: 'expenses' | 'incomes') => {
     const items = type === 'expenses' ? filteredExpenses : filteredIncomes;
     const csvRows = [
       ['Title', 'Amount', 'Description', 'Date', 'Category'],
@@ -310,10 +312,8 @@ export default function useFinancePageLogic() {
     a.download = `${type}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
-  };
-
-  // PDF Export (with cool template using jsPDF-AutoTable)
-  const exportPDF = (type: 'expenses' | 'incomes') => {
+  }, [filteredExpenses, filteredIncomes]);
+  const exportPDF = useCallback((type: 'expenses' | 'incomes') => {
     const items = type === 'expenses' ? filteredExpenses : filteredIncomes;
     const doc = new jsPDF();
     // Header
@@ -369,10 +369,10 @@ export default function useFinancePageLogic() {
       },
     });
     doc.save(`${type}.pdf`);
-  };
+  }, [filteredExpenses, filteredIncomes, theme]);
 
-  // Pie chart data for category breakdown
-  const getCategoryBreakdown = (items: FinanceItem[], days: number) => {
+  // Memoize pie chart data
+  const getCategoryBreakdown = useCallback((items: FinanceItem[], days: number) => {
     const map: Record<string, number> = {};
     const today = new Date();
     items.forEach(i => {
@@ -385,13 +385,15 @@ export default function useFinancePageLogic() {
       }
     });
     return map;
-  };
+  }, []);
 
-  const pieData = activeTab === 'expenses'
-    ? getCategoryBreakdown(expenses, statsRange === 'week' ? 7 : 30)
-    : getCategoryBreakdown(incomes, statsRange === 'week' ? 7 : 30);
+  const pieData = useMemo(() => (
+    activeTab === 'expenses'
+      ? getCategoryBreakdown(expenses, statsRange === 'week' ? 7 : 30)
+      : getCategoryBreakdown(incomes, statsRange === 'week' ? 7 : 30)
+  ), [activeTab, expenses, incomes, statsRange, getCategoryBreakdown]);
 
-  const pieChartData = {
+  const pieChartData = useMemo(() => ({
     labels: Object.keys(pieData),
     datasets: [
       {
@@ -402,9 +404,9 @@ export default function useFinancePageLogic() {
         borderWidth: 1,
       },
     ],
-  };
+  }), [pieData]);
 
-  const pieChartOptions = {
+  const pieChartOptions = useMemo(() => ({
     plugins: {
       legend: {
         position: 'right' as const,
@@ -414,28 +416,28 @@ export default function useFinancePageLogic() {
         }
       }
     }
-  };
+  }), [theme]);
 
-  const expensesData = statsRange === 'week' ? expensesDataWeek : expensesDataMonth;
-  const incomesData = statsRange === 'week' ? incomesDataWeek : incomesDataMonth;
+  const expensesData = useMemo(() => statsRange === 'week' ? expensesDataWeek : expensesDataMonth, [statsRange, expensesDataWeek, expensesDataMonth]);
+  const incomesData = useMemo(() => statsRange === 'week' ? incomesDataWeek : incomesDataMonth, [statsRange, incomesDataWeek, incomesDataMonth]);
 
-  const totalExpenses = expensesData.reduce((total, amount) => total + amount, 0);
-  const totalIncomes = incomesData.reduce((total, amount) => total + amount, 0);
-  const profit = totalIncomes - totalExpenses;
-  const expenseTrend = expensesData[expensesData.length - 1] - (expensesData[expensesData.length - 2] || 0);
-  const incomeTrend = incomesData[incomesData.length - 1] - (incomesData[expensesData.length - 2] || 0);
-  const profitTrend = incomeTrend - expenseTrend;
+  const totalExpenses = useMemo(() => expensesData.reduce((total, amount) => total + amount, 0), [expensesData]);
+  const totalIncomes = useMemo(() => incomesData.reduce((total, amount) => total + amount, 0), [incomesData]);
+  const profit = useMemo(() => totalIncomes - totalExpenses, [totalIncomes, totalExpenses]);
+  const expenseTrend = useMemo(() => expensesData[expensesData.length - 1] - (expensesData[expensesData.length - 2] || 0), [expensesData]);
+  const incomeTrend = useMemo(() => incomesData[incomesData.length - 1] - (incomesData[expensesData.length - 2] || 0), [incomesData, expensesData]);
+  const profitTrend = useMemo(() => incomeTrend - expenseTrend, [incomeTrend, expenseTrend]);
 
-  const weekLabels = ['Today', 'Yesterday', '2 Days Ago', '3 Days Ago', '4 Days Ago', '5 Days Ago', '6 Days Ago'];
-  const monthLabels = Array.from({ length: 30 }, (_, i) => {
+  const weekLabels = useMemo(() => ['Today', 'Yesterday', '2 Days Ago', '3 Days Ago', '4 Days Ago', '5 Days Ago', '6 Days Ago'], []);
+  const monthLabels = useMemo(() => Array.from({ length: 30 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (29 - i));
     return d.toLocaleDateString();
-  });
-  const chartLabels = statsRange === 'week' ? weekLabels : monthLabels;
+  }), []);
+  const chartLabels = useMemo(() => statsRange === 'week' ? weekLabels : monthLabels, [statsRange, weekLabels, monthLabels]);
 
-  // Props for forms and lists
-  const expenseFormProps = {
+  // Memoize props objects
+  const expenseFormProps = useMemo(() => ({
     title: expenseForm.title,
     amount: expenseForm.amount,
     description: expenseForm.description,
@@ -449,9 +451,9 @@ export default function useFinancePageLogic() {
     onDateChange: (v: Date | null) => handleExpenseFormChange('date', v ?? new Date()),
     onCategoryChange: (v: string) => handleExpenseFormChange('category', v),
     onSubmit: handleExpenseSubmit,
-  };
+  }), [expenseForm, loading, theme, handleExpenseFormChange, handleExpenseSubmit]);
 
-  const incomeFormProps = {
+  const incomeFormProps = useMemo(() => ({
     title: incomeForm.title,
     amount: incomeForm.amount,
     description: incomeForm.description,
@@ -465,9 +467,9 @@ export default function useFinancePageLogic() {
     onDateChange: (v: Date) => handleIncomeFormChange('date', v),
     onCategoryChange: (v: string) => handleIncomeFormChange('category', v),
     onSubmit: handleIncomeSubmit,
-  };
+  }), [incomeForm, loading, theme, handleIncomeFormChange, handleIncomeSubmit]);
 
-  const expenseListProps = {
+  const expenseListProps = useMemo(() => ({
     expenses: filteredExpenses,
     loading,
     onDelete: (item: Expense) => handleDelete(item, 'expense'),
@@ -485,9 +487,9 @@ export default function useFinancePageLogic() {
     onSortOrderChange: (v: string) => setSortOrder(v as 'asc' | 'desc'),
     onExportCSV: () => exportCSV('expenses'),
     onExportPDF: () => exportPDF('expenses'),
-  };
+  }), [filteredExpenses, loading, theme, search, categoryFilter, dateRange, categories, sortBy, sortOrder, exportCSV, exportPDF, handleDelete]);
 
-  const incomeListProps = {
+  const incomeListProps = useMemo(() => ({
     incomes: filteredIncomes,
     loading,
     onDelete: (item: Income) => handleDelete(item, 'income'),
@@ -505,7 +507,7 @@ export default function useFinancePageLogic() {
     onSortOrderChange: (v: string) => setSortOrder(v as 'asc' | 'desc'),
     onExportCSV: () => exportCSV('incomes'),
     onExportPDF: () => exportPDF('incomes'),
-  };
+  }), [filteredIncomes, loading, theme, search, categoryFilter, dateRange, categories, sortBy, sortOrder, exportCSV, exportPDF, handleDelete]);
 
   return {
     statsRange, setStatsRange,

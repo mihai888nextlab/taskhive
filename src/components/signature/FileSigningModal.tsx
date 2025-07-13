@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { FaTimes, FaPencilAlt, FaMousePointer, FaExpandArrowsAlt, FaDownload, FaFileSignature, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { createPortal } from 'react-dom';
 import SignatureModal from './SignatureModal';
@@ -104,21 +104,24 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
     return { x: pixelX, y: pixelY };
   };
 
-  const handleSignatureSelect = (signatureUrl: string) => {
+  // Memoize signature select handler
+  const handleSignatureSelect = useCallback((signatureUrl: string) => {
     setSelectedSignature(signatureUrl);
     setShowSignatureModal(false);
     // Move to placement step
     setCurrentStep('place');
     setIsPlacingSignature(true);
-  };
+  }, []);
 
-  const goBackToSelection = () => {
+  // Memoize go back handler
+  const goBackToSelection = useCallback(() => {
     setCurrentStep('select');
     setSignaturePosition(null);
     setIsPlacingSignature(false);
-  };
+  }, []);
 
-  const signFile = async () => {
+  // Memoize signFile handler
+  const signFile = useCallback(async () => {
     if (!selectedSignature || !file || !previewRef.current || !signaturePosition || !contentDimensions) return;
 
     setSigning(true);
@@ -176,7 +179,12 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
     } finally {
       setSigning(false);
     }
-  };
+  }, [selectedSignature, file, previewRef, signaturePosition, contentDimensions, signatureSize, saveOption, onSigningComplete, onClose]);
+
+  // Memoize modal close handler
+  const handleSignatureModalClose = useCallback(() => {
+    setShowSignatureModal(false);
+  }, []);
 
   if (!isOpen || !file) return null;
 
@@ -526,14 +534,14 @@ const FileSigningModal: React.FC<FileSigningModalProps> = ({
           <div className="bg-white rounded-3xl shadow-xl p-0 max-w-3xl w-full mx-4 max-h-[80vh] relative">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl z-10 p-1"
-              onClick={() => setShowSignatureModal(false)}
+              onClick={handleSignatureModalClose}
               aria-label={t("cancel")}
             >
               <FaTimes />
             </button>
             <SignatureModal
               isOpen={showSignatureModal}
-              onClose={() => setShowSignatureModal(false)}
+              onClose={handleSignatureModalClose}
               onSignatureSelect={handleSignatureSelect}
             />
           </div>

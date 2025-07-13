@@ -78,6 +78,45 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = React.
       [deadlines]
     );
 
+    // List item classes for dark and light themes
+    const listItemClassDark =
+      "relative flex items-center justify-center p-5 rounded-xl shadow-md border border-gray-600 transition-all duration-300 transform hover:shadow-lg hover:scale-102 group";
+    const listItemClassLight =
+      "relative flex items-center justify-center p-5 rounded-xl shadow-md border border-gray-200 transition-all duration-300 transform hover:shadow-lg hover:scale-102 group";
+
+    const textClassDark = "font-semibold text-gray-100 text-lg";
+    const textClassLight = "font-semibold text-gray-800 text-lg";
+
+    // Memoize deadlines list rendering
+    const deadlinesList = useMemo(
+      () => (
+        <ul className="space-y-5">
+          {sortedDeadlines.map((date, idx) => (
+            <li
+              key={idx}
+              className={
+                theme === "dark" ? listItemClassDark : listItemClassLight
+              }
+            >
+              <span
+                className={
+                  theme === "dark" ? textClassDark : textClassLight
+                }
+              >
+                {date.toLocaleDateString(undefined, {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ),
+      [sortedDeadlines, theme, listItemClassDark, listItemClassLight, textClassDark, textClassLight]
+    );
+
     // Container and heading classes based on theme
     const containerClass =
       theme === "dark"
@@ -88,15 +127,6 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = React.
       theme === "dark"
         ? "text-2xl font-extrabold text-gray-100 mb-5 pb-3 border-b-2 border-gray-600 leading-tight"
         : "text-2xl font-extrabold text-gray-900 mb-5 pb-3 border-b-2 border-primary leading-tight";
-
-    // List item classes for dark and light themes
-    const listItemClassDark =
-      "relative flex items-center justify-center p-5 rounded-xl shadow-md border border-gray-600 transition-all duration-300 transform hover:shadow-lg hover:scale-102 group";
-    const listItemClassLight =
-      "relative flex items-center justify-center p-5 rounded-xl shadow-md border border-gray-200 transition-all duration-300 transform hover:shadow-lg hover:scale-102 group";
-
-    const textClassDark = "font-semibold text-gray-100 text-lg";
-    const textClassLight = "font-semibold text-gray-800 text-lg";
 
     // Button classes exactly matching DashboardTaskPreview
     const buttonClass =
@@ -139,29 +169,7 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = React.
               </p>
             </div>
           ) : (
-            <ul className="space-y-5">
-              {sortedDeadlines.map((date, idx) => (
-                <li
-                  key={idx}
-                  className={
-                    theme === "dark" ? listItemClassDark : listItemClassLight
-                  }
-                >
-                  <span
-                    className={
-                      theme === "dark" ? textClassDark : textClassLight
-                    }
-                  >
-                    {date.toLocaleDateString(undefined, {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            deadlinesList
           )}
         </div>
       </>

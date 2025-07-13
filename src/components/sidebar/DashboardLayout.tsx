@@ -6,7 +6,7 @@ import MobileSidebar from "@/components/sidebar/MobileSidebar";
 import UserProfileModal from "@/components/modals/UserProfileModal";
 import AIWindow from "../AIWindow";
 import { FaBars } from "react-icons/fa";
-import { menu } from "@/components/menuConfig"; // Your menu config
+import { menu } from "@/constants/menuConfig"; // Your menu config
 import PersistentTimer from "@/components/time-tracking/PersistentTimer";
 import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext";
 import { useAIWindow } from "@/contexts/AIWindowContext";
@@ -23,18 +23,19 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = React.memo(
   ({ children, locale, requireAuth = true }) => {
+    // --- DO NOT PUT HOOKS BELOW THIS LINE ---
+    // All hooks must be called unconditionally, before any early return!
+
     const { user, loadingUser, isAuthenticated, logout } = useAuth();
     const router = useRouter();
     const currentLocale = locale || useLocale() || "en";
-    const t = useTranslations("Navigation"); // This will use the correct locale automatically
+    const t = useTranslations("Navigation");
 
-    const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } =
-      useTimeTracking();
+    const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } = useTimeTracking();
     const { isAIWindowOpen, setIsAIWindowOpen, toggleAIWindow } = useAIWindow();
     const [showPersistentTimer, setShowPersistentTimer] = useState(false);
     const [timerClosed, setTimerClosed] = useState(false);
 
-    // Show persistent timer only if time > 0, not on time-tracking page, and not closed
     const shouldShowPersistentTimer =
       !timerClosed &&
       router.pathname !== "/app/time-tracking" &&
@@ -44,12 +45,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = React.memo(
           : timerContext.elapsedTime > 0)
       );
 
-    // State to toggle AI window - now managed by context
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isDesktop, setIsDesktop] = useState(false);
 
     useEffect(() => {
-      // Responsive check for desktop
       const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
       checkDesktop();
       window.addEventListener("resize", checkDesktop);
@@ -60,50 +59,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = React.memo(
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
 
-    // Only redirect to login if requireAuth is true
-    useEffect(() => {
-      if (requireAuth && !loadingUser && !isAuthenticated) {
-        if (router.pathname !== "/login") {
-          router.push("/login");
-        }
-      }
-    }, [requireAuth, loadingUser, isAuthenticated, router]);
-
-    useEffect(() => {
-      if (!user) return;
-      // Fetch tasks
-      fetch("/api/tasks")
-        .then((res) => (res.ok ? res.json() : []))
-        .then((data) => setTasks(data))
-        .catch(() => {});
-    }, [user]);
-
-    const handleLogout = async () => {
-      try {
-        logout(); // Call the logout function from useAuth
-        // Clear sensitive state
-        setTasks([]);
-      } catch (error) {
-        console.error("Logout failed:", error);
-      }
-    };
-
-    // Only block rendering if requireAuth and no user
-    if (requireAuth && !user) {
-      // Fix: Only pass user if not null, else pass a fallback user object or skip rendering SidebarNav
-      return null; // Or a spinner
-    }
-
     // Memoize incompleteTasks and incompleteTasksCount
     const incompleteTasks = useMemo(
-      () => tasks.filter((t) => !t.completed),
+      () => (tasks && Array.isArray(tasks) ? tasks.filter((t) => !t.completed) : []),
       [tasks]
     );
     const incompleteTasksCount = useMemo(
       () => incompleteTasks.length,
       [incompleteTasks]
     );
-
+1
     // Memoize menuWithNotifications
     const menuWithNotifications = useMemo(
       () =>
@@ -115,6 +80,41 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = React.memo(
         }),
       [incompleteTasksCount, t]
     );
+
+    // --- EARLY RETURN BELOW, NO HOOKS AFTER THIS ---
+    useEffect(() => {
+      if (requireAuth && !loadingUser && !isAuthenticated) {
+        if (router.pathname !== "/login") {
+          router.push("/login");
+        }
+      }
+    }, [requireAuth, loadingUser, isAuthenticated, router]);
+
+    useEffect(() => {
+      if (!user) return;
+      fetch("/api/tasks")
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => setTasks(data))
+        .catch(() => {});
+    }, [user]);
+
+    // Memoize event handlers
+    const handleLogout = React.useCallback(async () => {
+      try {
+        logout();
+        setTasks([]);
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    }, [logout]);
+
+    const handleProfileModalClose = React.useCallback(() => {
+      setProfileModalOpen(false);
+    }, []);
+
+    if (requireAuth && !user) {
+      return null;
+    }
 
     return (
       <div className="flex w-full min-h-screen bg-gray-100">
@@ -209,7 +209,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = React.memo(
         />
         <UserProfileModal
           open={profileModalOpen}
-          onClose={() => setProfileModalOpen(false)}
+          onClose={handleProfileModalClose}
           user={selectedUser}
         />
       </div>

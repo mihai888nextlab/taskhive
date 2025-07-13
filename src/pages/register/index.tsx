@@ -5,17 +5,21 @@ import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useMemo } from "react";
 import Image from "next/image";
 import { Kanit } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { RegisterForm } from "@/components/register-form";
 
-const kanit = Kanit({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+const kanit = useMemo(
+  () =>
+    Kanit({
+      subsets: ["latin"],
+      weight: ["400", "700"],
+    }),
+  []
+);
 
 export function RegisterPage() {
   const [loading, setLoading] = useState(false);

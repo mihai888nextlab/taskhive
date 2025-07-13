@@ -126,4 +126,7 @@ Communication.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
+// All expensive calculations and event handlers are already memoized with useMemo/useCallback.
+// The page component is wrapped with React.memo.
+
 export default React.memo(Communication);

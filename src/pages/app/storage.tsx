@@ -91,14 +91,15 @@ function Storage() {
     fetchFiles();
   }, [uploadFileModal, fetchFiles]);
 
-  function handleDrag(e: React.DragEvent) {
+  // Memoize drag handlers
+  const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
     else if (e.type === "dragleave") setDragActive(false);
-  }
+  }, []);
 
-  function handleDrop(e: React.DragEvent) {
+  const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -106,7 +107,7 @@ function Storage() {
       setDroppedFiles(e.dataTransfer.files);
       setUploadFileModal(true);
     }
-  }
+  }, []);
 
   // Memoize filteredFiles
   const filteredFiles = useMemo(() => (
@@ -180,6 +181,21 @@ function Storage() {
     fetchFiles();
   }, [fetchFiles]);
 
+  // Memoize modal close handlers
+  const handleUploadModalClose = useCallback(() => {
+    setUploadFileModal(false);
+    setDroppedFiles(null);
+  }, []);
+
+  const handleSignatureModalClose = useCallback(() => {
+    setSignatureModal(false);
+  }, []);
+
+  const handleFileSigningModalClose = useCallback(() => {
+    setFileSigningModal(false);
+    setSelectedFileForSigning(null);
+  }, []);
+
   return (
     <div
       className={`relative min-h-screen transition-all duration-300 ${
@@ -242,25 +258,16 @@ function Storage() {
               <div className="bg-white rounded-3xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
-                  onClick={() => {
-                    setUploadFileModal(false);
-                    setDroppedFiles(null);
-                  }}
+                  onClick={handleUploadModalClose}
                   aria-label="Close upload modal"
                 >
                   ×
                 </button>
                 <FileUploadModal
                   open={uploadFileModal}
-                  onClose={() => {
-                    setUploadFileModal(false);
-                    setDroppedFiles(null);
-                  }}
+                  onClose={handleUploadModalClose}
                   droppedFiles={droppedFiles}
-                  onUploadSuccess={() => {
-                    setUploadFileModal(false);
-                    setDroppedFiles(null);
-                  }}
+                  onUploadSuccess={handleUploadModalClose}
                 />
               </div>
             </div>,
@@ -272,14 +279,14 @@ function Storage() {
               <div className="bg-white rounded-3xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
-                  onClick={() => setSignatureModal(false)}
+                  onClick={handleSignatureModalClose}
                   aria-label="Close signature modal"
                 >
                   ×
                 </button>
                 <SignatureModal
                   isOpen={signatureModal}
-                  onClose={() => setSignatureModal(false)}
+                  onClose={handleSignatureModalClose}
                   onSignatureSelect={() => {}}
                 />
               </div>
@@ -292,20 +299,14 @@ function Storage() {
               <div className="bg-white rounded-3xl p-0 max-w-7xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
-                  onClick={() => {
-                    setFileSigningModal(false);
-                    setSelectedFileForSigning(null);
-                  }}
+                  onClick={handleFileSigningModalClose}
                   aria-label="Close signing modal"
                 >
                   ×
                 </button>
                 <FileSigningModal
                   isOpen={fileSigningModal}
-                  onClose={() => {
-                    setFileSigningModal(false);
-                    setSelectedFileForSigning(null);
-                  }}
+                  onClose={handleFileSigningModalClose}
                   file={
                     selectedFileForSigning && selectedFileForSigning.fileLocation && selectedFileForSigning.fileType
                       ? {

@@ -9,7 +9,7 @@ interface Props {
   loading: boolean;
 }
 
-const FinanceTabs = React.memo(function FinanceTabs({ activeTab, setActiveTab, loading }: Props) {
+const FinanceTabs = function FinanceTabs({ activeTab, setActiveTab, loading }: Props) {
   const { theme } = useTheme();
   const t = useTranslations('FinancePage');
 
@@ -55,6 +55,6 @@ const FinanceTabs = React.memo(function FinanceTabs({ activeTab, setActiveTab, l
       </button>
     </div>
   );
-});
+};
 
 export default React.memo(FinanceTabs);

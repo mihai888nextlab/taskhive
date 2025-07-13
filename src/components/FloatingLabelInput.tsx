@@ -1,4 +1,4 @@
-import React, { useState, InputHTMLAttributes } from "react";
+import React, { useState, InputHTMLAttributes, useCallback } from "react";
 /** @jsx React.createElement */
 
 interface FloatingLabelInputProps
@@ -8,52 +8,63 @@ interface FloatingLabelInputProps
   theme?: "light" | "dark";
 }
 
-const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
-  id,
-  label,
-  type = "text",
-  onChange,
-  onFocus,
-  onBlur,
-  theme = "dark",
-  ...props
-}) => {
-  const [inputValue, setInputValue] = useState<string>("");
-  const [isFocused, setIsFocused] = useState<boolean>(false);
+const FloatingLabelInput: React.FC<FloatingLabelInputProps> = React.memo(
+  ({
+    id,
+    label,
+    type = "text",
+    onChange,
+    onFocus,
+    onBlur,
+    theme = "dark",
+    ...props
+  }) => {
+    const [inputValue, setInputValue] = useState<string>("");
+    const [isFocused, setIsFocused] = useState<boolean>(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    if (onChange) {
-      onChange(e);
-    }
-  };
+    // Memoize handlers
+    const handleInputChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
+        if (onChange) {
+          onChange(e);
+        }
+      },
+      [onChange]
+    );
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(true);
-    if (onFocus) {
-      onFocus(e);
-    }
-  };
+    const handleFocus = useCallback(
+      (e: React.FocusEvent<HTMLInputElement>) => {
+        setIsFocused(true);
+        if (onFocus) {
+          onFocus(e);
+        }
+      },
+      [onFocus]
+    );
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(false);
-    if (onBlur) {
-      onBlur(e);
-    }
-  };
+    const handleBlur = useCallback(
+      (e: React.FocusEvent<HTMLInputElement>) => {
+        setIsFocused(false);
+        if (onBlur) {
+          onBlur(e);
+        }
+      },
+      [onBlur]
+    );
 
-  const isLabelFloated = isFocused || inputValue !== "";
+    const isLabelFloated = isFocused || inputValue !== "";
 
-  return (
-    <div className="relative w-full">
-      <input
-        id={id}
-        type={type}
-        value={inputValue}
-        onChange={handleInputChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        className={`peer w-full p-3 pt-6
+    return (
+      <div className="relative w-full">
+        <input
+          id={id}
+          type={type}
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          className={`peer w-full p-3 pt-6
           border
           rounded-md
           ${theme == "light" ? "bg-transparent " : "bg-background "}
@@ -63,12 +74,12 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
           placeholder-transparent
           font-sans
         `}
-        placeholder={label}
-        {...props}
-      />
-      <label
-        htmlFor={id}
-        className={`
+          placeholder={label}
+          {...props}
+        />
+        <label
+          htmlFor={id}
+          className={`
           absolute
           left-3
           cursor-text
@@ -82,11 +93,12 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({
           peer-focus:top-2 peer-focus:text-xs peer-focus:text-primary dark:peer-focus:text-primary
           font-sans
         `}
-      >
-        {label}
-      </label>
-    </div>
-  );
-};
+        >
+          {label}
+        </label>
+      </div>
+    );
+  }
+);
 
 export default FloatingLabelInput;

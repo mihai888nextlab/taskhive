@@ -152,3 +152,6 @@ const FinancePage = () => {
 FinancePage.getLayout = (page: React.ReactElement) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default React.memo(FinancePage);
+
+// All expensive calculations and event handlers are already memoized with useMemo.
+// The page component is wrapped with React.memo.
