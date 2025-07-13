@@ -47,6 +47,99 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = React.memo(
       []
     );
 
+    // Memoize drag handler
+    const handleDragStart = useCallback(
+      (e: React.DragEvent, taskId: string) => {
+        if (enableDragAndDrop) {
+          e.dataTransfer.setData("text/plain", taskId);
+        }
+      },
+      [enableDragAndDrop]
+    );
+
+    // Memoize events list rendering
+    const eventsList = useMemo(() => {
+      if (loading) {
+        return (
+          <li className="text-gray-400 text-sm sm:text-base">
+            Loading events...
+          </li>
+        );
+      }
+      if (listError) {
+        return (
+          <li className="text-red-500 text-sm sm:text-base">{listError}</li>
+        );
+      }
+      if (!selectedDate) {
+        return (
+          <li className="text-gray-400 text-sm sm:text-base">
+            No upcoming events.
+          </li>
+        );
+      }
+      if (eventsForDate.length === 0) {
+        return (
+          <li className="text-gray-400 text-sm sm:text-base">
+            No upcoming events.
+          </li>
+        );
+      }
+      return eventsForDate.map((task) => (
+        <Link key={task._id} href={`/app/tasks/`} legacyBehavior>
+          <li
+            className={`p-2 sm:p-3 rounded-lg ${
+              task.completed
+                ? "bg-gray-700 opacity-70 hover:bg-gray-700 border-l-2 border-green-400"
+                : isOverdue(task)
+                ? "bg-gray-700 opacity-70 hover:bg-gray-700 border-l-2 border-red-400"
+                : "bg-gray-700 hover:bg-gray-600 border-l-2 border-blue-400"
+            } transition-colors cursor-move flex flex-col gap-1`}
+            draggable={enableDragAndDrop}
+            onDragStart={(e) => handleDragStart(e, task._id)}
+          >
+            <h4
+              className={`font-semibold text-base sm:text-lg ${
+                isOverdue(task) ? "text-red-300" : ""
+              }`}
+            >
+              {isOverdue(task) && (
+                <span className="text-red-400 text-xs sm:text-sm mr-1">
+                  ●
+                </span>
+              )}
+              {task.title}{" "}
+              {task.completed && (
+                <span className="text-green-400 text-xs sm:text-sm">
+                  (Completed)
+                </span>
+              )}
+              {isOverdue(task) && (
+                <span className="text-red-400 text-xs sm:text-sm ml-1">
+                  (Overdue)
+                </span>
+              )}
+            </h4>
+            <p
+              className={`text-xs sm:text-sm ${
+                isOverdue(task) ? "text-red-200" : "text-gray-300"
+              }`}
+            >
+              {new Date(task.deadline).toLocaleDateString()}
+            </p>
+          </li>
+        </Link>
+      ));
+    }, [
+      loading,
+      listError,
+      selectedDate,
+      eventsForDate,
+      enableDragAndDrop,
+      handleDragStart,
+      isOverdue,
+    ]);
+
     return (
       <div className="flex flex-col h-full min-h-0">
         {/* Fixed header that stays at top */}
@@ -60,77 +153,7 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = React.memo(
               Upcoming Events
             </h3>
 
-            <ul className="space-y-2 sm:space-y-3">
-              {loading ? (
-                <li className="text-gray-400 text-sm sm:text-base">
-                  Loading events...
-                </li>
-              ) : listError ? (
-                <li className="text-red-500 text-sm sm:text-base">
-                  {listError}
-                </li>
-              ) : selectedDate ? (
-                eventsForDate.length === 0 ? (
-                  <li className="text-gray-400 text-sm sm:text-base">
-                    No upcoming events.
-                  </li>
-                ) : (
-                  eventsForDate.map((task) => (
-                    <Link key={task._id} href={`/app/tasks/`} legacyBehavior>
-                      <li
-                        className={`p-2 sm:p-3 rounded-lg ${
-                          task.completed
-                            ? "bg-gray-700 opacity-70 hover:bg-gray-700 border-l-2 border-green-400"
-                            : isOverdue(task)
-                            ? "bg-gray-700 opacity-70 hover:bg-gray-700 border-l-2 border-red-400"
-                            : "bg-gray-700 hover:bg-gray-600 border-l-2 border-blue-400"
-                        } transition-colors cursor-move flex flex-col gap-1`}
-                        draggable={enableDragAndDrop}
-                        onDragStart={(e) => {
-                          if (enableDragAndDrop) {
-                            e.dataTransfer.setData("text/plain", task._id);
-                          }
-                        }}
-                      >
-                        <h4
-                          className={`font-semibold text-base sm:text-lg ${
-                            isOverdue(task) ? "text-red-300" : ""
-                          }`}
-                        >
-                          {isOverdue(task) && (
-                            <span className="text-red-400 text-xs sm:text-sm mr-1">
-                              ●
-                            </span>
-                          )}
-                          {task.title}{" "}
-                          {task.completed && (
-                            <span className="text-green-400 text-xs sm:text-sm">
-                              (Completed)
-                            </span>
-                          )}
-                          {isOverdue(task) && (
-                            <span className="text-red-400 text-xs sm:text-sm ml-1">
-                              (Overdue)
-                            </span>
-                          )}
-                        </h4>
-                        <p
-                          className={`text-xs sm:text-sm ${
-                            isOverdue(task) ? "text-red-200" : "text-gray-300"
-                          }`}
-                        >
-                          {new Date(task.deadline).toLocaleDateString()}
-                        </p>
-                      </li>
-                    </Link>
-                  ))
-                )
-              ) : (
-                <li className="text-gray-400 text-sm sm:text-base">
-                  No upcoming events.
-                </li>
-              )}
-            </ul>
+            <ul className="space-y-2 sm:space-y-3">{eventsList}</ul>
           </div>
         </div>
       </div>

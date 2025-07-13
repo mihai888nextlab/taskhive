@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { FaSpinner, FaTimes, FaUserPlus } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,29 +50,50 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     fetchRoles();
   }, [t]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !role) {
-      setError(t("allFieldsRequired"));
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await onUserAdded(email, role);
-      if (result) {
-        setError(result);
-      } else {
-        onClose();
+  // Memoize roles list
+  const memoRoles = useMemo(() => roles, [roles]);
+
+  // Memoize input handlers
+  const handleEmailChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setEmail(e.target.value);
+    },
+    []
+  );
+  const handleRoleChange = useCallback((v: string) => {
+    setRole(v);
+  }, []);
+  const handleFormClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  // Memoize submit handler
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!email || !role) {
+        setError(t("allFieldsRequired"));
+        return;
       }
-    } catch (error: unknown) {
-      setError(
-        error instanceof Error ? error.message : t("errorFetchingRoles")
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await onUserAdded(email, role);
+        if (result) {
+          setError(result);
+        } else {
+          onClose();
+        }
+      } catch (error: unknown) {
+        setError(
+          error instanceof Error ? error.message : t("errorFetchingRoles")
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [email, role, onUserAdded, onClose, t]
+  );
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
@@ -120,7 +141,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 type="email"
                 placeholder="john.doe@company.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
                 required
                 disabled={loading}
@@ -133,7 +154,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               </label>
               <Select
                 value={role}
-                onValueChange={setRole}
+                onValueChange={handleRoleChange}
                 disabled={loading}
                 required
               >
@@ -144,7 +165,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                   className="bg-white border border-gray-300 rounded-lg shadow-lg p-0 z-[250]"
                   sideOffset={4}
                 >
-                  {roles.map((roleName) => (
+                  {memoRoles.map((roleName) => (
                     <SelectItem
                       key={roleName}
                       value={roleName}
@@ -165,7 +186,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={onClose}
+              onClick={handleFormClose}
               className="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300"
               disabled={loading}
             >
@@ -200,4 +221,4 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   );
 };
 
-export default AddUserModal;
+export default React.memo(AddUserModal);

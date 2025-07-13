@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { FaPlay, FaPause, FaStop, FaSave } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,18 +53,35 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
 }) => {
   const t = useTranslations("TimeTrackingPage");
 
-  const formatTime = (timeInSeconds: number) => {
+  // Memoize formatTime
+  const formatTime = useCallback((timeInSeconds: number) => {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
     const seconds = timeInSeconds % 60;
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  };
-  
-  const tags = ["General", "Deep Work", "Meeting", "Break", "Learning"];
+  }, []);
 
-  // Pomodoro progress
-  const totalPhase = pomodoroPhase === 'work' ? workDuration : breakDuration;
-  const progress = pomodoroMode ? ((totalPhase - (pomodoroTime || 0)) / totalPhase) * 100 : 0;
+  // Memoize tags
+  const tags = useMemo(() => ["General", "Deep Work", "Meeting", "Break", "Learning"], []);
+
+  // Memoize progress calculation
+  const totalPhase = useMemo(() => pomodoroPhase === 'work' ? workDuration : breakDuration, [pomodoroPhase, workDuration, breakDuration]);
+  const progress = useMemo(() => pomodoroMode ? ((totalPhase - (pomodoroTime || 0)) / totalPhase) * 100 : 0, [pomodoroMode, totalPhase, pomodoroTime]);
+
+  // Memoize input handlers
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onNameChange(e.target.value);
+  }, [onNameChange]);
+  const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onDescriptionChange(e.target.value);
+  }, [onDescriptionChange]);
+  const handleTagChange = useCallback((v: string) => {
+    setSessionTag(v);
+  }, [setSessionTag]);
+  const handleSave = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    onSave();
+  }, [onSave]);
 
   return (
     <div className="space-y-6">
@@ -137,10 +154,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
 
       {/* Session Form */}
       <form
-        onSubmit={e => {
-          e.preventDefault();
-          onSave();
-        }}
+        onSubmit={handleSave}
         className="space-y-4"
       >
         <div>
@@ -150,7 +164,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
           <Input
             type="text"
             value={sessionName}
-            onChange={e => onNameChange(e.target.value)}
+            onChange={handleNameChange}
             placeholder={t("sessionName")}
             className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 ${
               theme === "dark"
@@ -167,7 +181,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
           </label>
           <Textarea
             value={sessionDescription}
-            onChange={e => onDescriptionChange(e.target.value)}
+            onChange={handleDescriptionChange}
             placeholder={t("addNotesContext")}
             rows={3}
             className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 resize-none ${
@@ -185,7 +199,7 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
           </label>
           <Select
             value={sessionTag}
-            onValueChange={setSessionTag}
+            onValueChange={handleTagChange}
             required
             disabled={false}
           >

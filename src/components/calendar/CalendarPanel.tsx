@@ -54,7 +54,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
   const weekStart = useMemo(() => getWeekStart(currentWeekDate), [currentWeekDate]);
   const weekDays = useMemo(() => getWeekDays(weekStart), [weekStart]);
 
-  // Memoize navigateWeek
+  // Memoize navigation and handlers
   const navigateWeek = useCallback((direction: 'prev' | 'next') => {
     setCurrentWeekDate(prev => {
       const newDate = new Date(prev);
@@ -63,24 +63,20 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
     });
   }, []);
 
-  // Memoize handleMonthDateClick
   const handleMonthDateClick = useCallback((date: Date) => {
     onDateChange(date);
     setCurrentWeekDate(date);
     setViewMode('week');
   }, [onDateChange]);
 
-  // Memoize handleWeekDateClick
   const handleWeekDateClick = useCallback((date: Date) => {
     onDateChange(date);
   }, [onDateChange]);
 
-  // Memoize handleBackToMonth
   const handleBackToMonth = useCallback(() => {
     setViewMode('month');
   }, []);
 
-  // Memoize formatWeekRange
   const formatWeekRange = useCallback((startDate: Date) => {
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + 6);
@@ -94,7 +90,6 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
     }
   }, []);
 
-  // Memoize getCircleColor
   const getCircleColor = useCallback((date: Date) => {
     const dateString = date.toDateString();
     const tasksForDate = tasks.filter(task => 
@@ -112,274 +107,271 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
     return '#4A90E2';
   }, [tasks]);
 
-  const renderWeekView = () => {
-    return (
-      <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
-        <div className="w-full h-full bg-white rounded-xl shadow-lg p-6 lg:p-8 flex flex-col max-w-none" style={{ minHeight: '520px' }}>
-          {/* Header with Back Button - Cleaner */}
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-            <button
-              onClick={handleBackToMonth}
-              className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
-            >
-              <FaArrowLeft className="text-sm" />
-              Back to Month
-            </button>
-            
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-800">
-              {formatWeekRange(weekStart)}
-            </h2>
-            
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigateWeek('prev')}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <FaChevronLeft className="text-blue-600" />
-              </button>
-              <button
-                onClick={() => navigateWeek('next')}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <FaChevronRight className="text-blue-600" />
-              </button>
-            </div>
-          </div>
+  // Memoize drag event handlers for week view
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('bg-blue-100', 'border-blue-400');
+  }, []);
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.classList.remove('bg-blue-100', 'border-blue-400');
+  }, []);
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>, date: Date) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('bg-blue-100', 'border-blue-400');
+    const taskId = e.dataTransfer.getData('text/plain');
+    if (onTaskDrop && taskId) {
+      onTaskDrop(taskId, date);
+    }
+  }, [onTaskDrop]);
 
-          {/* Week Days - Consistent with Month View Size */}
-          <div className="flex-1 grid grid-cols-7 gap-3 min-h-0">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName, index) => {
-              const isToday = weekDays[index].toDateString() === new Date().toDateString();
-              const isSelected = selectedDate && weekDays[index].toDateString() === selectedDate.toDateString();
-              const hasDeadlines = deadlines.includes(weekDays[index].toDateString());
-              const dayTasks = tasks.filter(task => new Date(task.deadline).toDateString() === weekDays[index].toDateString());
-              
-              return (
-                <div 
-                  key={dayName} 
-                  className={`flex flex-col rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden ${
-                    isSelected
-                      ? 'border-blue-400 bg-blue-50 shadow-lg scale-[1.02]'
-                      : isToday
-                      ? 'border-2 border-gray-400 bg-gray-50 shadow-md hover:shadow-lg hover:border-blue-300'
-                      : hasDeadlines
-                      ? 'border-gray-200 bg-white shadow-md hover:shadow-lg hover:border-blue-300'
-                      : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 hover:shadow-md'
-                  }`}
-                  onClick={() => handleWeekDateClick(weekDays[index])}
-                  onDragOver={e => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    e.currentTarget.classList.add('bg-blue-100', 'border-blue-400');
-                  }}
-                  onDragLeave={e => {
-                    e.currentTarget.classList.remove('bg-blue-100', 'border-blue-400');
-                  }}
-                  onDrop={e => {
-                    e.preventDefault();
-                    e.currentTarget.classList.remove('bg-blue-100', 'border-blue-400');
-                    const taskId = e.dataTransfer.getData('text/plain');
-                    if (onTaskDrop && taskId) {
-                      onTaskDrop(taskId, weekDays[index]);
-                    }
-                  }}
-                >
-                  {/* Day Header */}
-                  <div className="p-3 pb-2 bg-white border-b border-gray-100">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                        {dayName}
-                      </span>
-                      <div 
-                        className={`${
-                          isSelected
-                            ? 'bg-blue-600 text-white shadow-lg' 
-                            : hasDeadlines && !isToday
-                            ? 'text-white shadow-md'
-                            : isToday
-                            ? 'bg-blue-500 text-white shadow-lg border-2 border-blue-400'
-                            : 'text-gray-700 bg-gray-100'
-                        } w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200`}
-                        style={{
-                          backgroundColor: hasDeadlines && !isSelected && !isToday
-                            ? getCircleColor(weekDays[index]) || undefined
-                            : undefined
-                        }}
-                      >
-                        {weekDays[index].getDate()}
-                      </div>
+  // Memoize drag event handlers for month view
+  const handleMonthTileDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }, []);
+  const handleMonthTileDrop = useCallback((e: React.DragEvent<HTMLDivElement>, date: Date) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData('text/plain');
+    if (onTaskDrop && taskId) {
+      onTaskDrop(taskId, date);
+    }
+  }, [onTaskDrop]);
+
+  // Memoize week view rendering
+  const weekView = useMemo(() => (
+    <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
+      <div className="w-full h-full bg-white rounded-xl shadow-lg p-6 lg:p-8 flex flex-col max-w-none" style={{ minHeight: '520px' }}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+          <button
+            onClick={handleBackToMonth}
+            className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+          >
+            <FaArrowLeft className="text-sm" />
+            Back to Month
+          </button>
+          <h2 className="text-xl lg:text-2xl font-bold text-gray-800">
+            {formatWeekRange(weekStart)}
+          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigateWeek('prev')}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <FaChevronLeft className="text-blue-600" />
+            </button>
+            <button
+              onClick={() => navigateWeek('next')}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <FaChevronRight className="text-blue-600" />
+            </button>
+          </div>
+        </div>
+        {/* Week Days */}
+        <div className="flex-1 grid grid-cols-7 gap-3 min-h-0">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName, index) => {
+            const isToday = weekDays[index].toDateString() === new Date().toDateString();
+            const isSelected = selectedDate && weekDays[index].toDateString() === selectedDate.toDateString();
+            const hasDeadlines = deadlines.includes(weekDays[index].toDateString());
+            const dayTasks = tasks.filter(task => new Date(task.deadline).toDateString() === weekDays[index].toDateString());
+            return (
+              <div 
+                key={dayName} 
+                className={`flex flex-col rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden ${
+                  isSelected
+                    ? 'border-blue-400 bg-blue-50 shadow-lg scale-[1.02]'
+                    : isToday
+                    ? 'border-2 border-gray-400 bg-gray-50 shadow-md hover:shadow-lg hover:border-blue-300'
+                    : hasDeadlines
+                    ? 'border-gray-200 bg-white shadow-md hover:shadow-lg hover:border-blue-300'
+                    : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 hover:shadow-md'
+                }`}
+                onClick={() => handleWeekDateClick(weekDays[index])}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={e => handleDrop(e, weekDays[index])}
+              >
+                {/* Day Header */}
+                <div className="p-3 pb-2 bg-white border-b border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      {dayName}
+                    </span>
+                    <div 
+                      className={`${
+                        isSelected
+                          ? 'bg-blue-600 text-white shadow-lg' 
+                          : hasDeadlines && !isToday
+                          ? 'text-white shadow-md'
+                          : isToday
+                          ? 'bg-blue-500 text-white shadow-lg border-2 border-blue-400'
+                          : 'text-gray-700 bg-gray-100'
+                      } w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200`}
+                      style={{
+                        backgroundColor: hasDeadlines && !isSelected && !isToday
+                          ? getCircleColor(weekDays[index]) || undefined
+                          : undefined
+                      }}
+                    >
+                      {weekDays[index].getDate()}
                     </div>
                   </div>
-
-                  {/* Tasks Area */}
-                  <div className="flex-1 p-3 overflow-y-auto">
-                    <div className="space-y-2">
-                      {dayTasks.length === 0 ? (
-                        <div className="text-center py-4">
-                          <div className="text-gray-400 text-xs">No tasks</div>
-                        </div>
-                      ) : (
-                        dayTasks.map(task => {
-                          const isOverdue = () => {
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
-                            const taskDate = new Date(task.deadline);
-                            taskDate.setHours(0, 0, 0, 0);
-                            return taskDate < today && !task.completed;
-                          };
-
-                          return (
-                            <div
-                              key={task._id}
-                              className={`p-2 rounded-lg border-l-4 transition-all duration-200 hover:shadow-sm ${
+                </div>
+                {/* Tasks Area */}
+                <div className="flex-1 p-3 overflow-y-auto">
+                  <div className="space-y-2">
+                    {dayTasks.length === 0 ? (
+                      <div className="text-center py-4">
+                        <div className="text-gray-400 text-xs">No tasks</div>
+                      </div>
+                    ) : (
+                      dayTasks.map(task => {
+                        const isOverdue = () => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          const taskDate = new Date(task.deadline);
+                          taskDate.setHours(0, 0, 0, 0);
+                          return taskDate < today && !task.completed;
+                        };
+                        return (
+                          <div
+                            key={task._id}
+                            className={`p-2 rounded-lg border-l-4 transition-all duration-200 hover:shadow-sm ${
+                              task.completed
+                                ? 'bg-green-50 border-green-400 text-green-800'
+                                : isOverdue()
+                                ? 'bg-red-50 border-red-400 text-red-800'
+                                : 'bg-blue-50 border-blue-400 text-blue-800'
+                            }`}
+                            title={task.description || task.title}
+                            draggable
+                            onDragStart={e => {
+                              e.dataTransfer.setData('text/plain', task._id);
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                            onClick={e => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            <div className="flex items-start gap-2">
+                              <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1 ${
                                 task.completed
-                                  ? 'bg-green-50 border-green-400 text-green-800'
+                                  ? 'bg-green-500'
                                   : isOverdue()
-                                  ? 'bg-red-50 border-red-400 text-red-800'
-                                  : 'bg-blue-50 border-blue-400 text-blue-800'
-                              }`}
-                              title={task.description || task.title}
-                              draggable
-                              onDragStart={e => {
-                                e.dataTransfer.setData('text/plain', task._id);
-                                e.dataTransfer.effectAllowed = 'move';
-                              }}
-                              onClick={e => {
-                                e.stopPropagation();
-                              }}
-                            >
-                              <div className="flex items-start gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1 ${
-                                  task.completed
-                                    ? 'bg-green-500'
-                                    : isOverdue()
-                                    ? 'bg-red-500'
-                                    : 'bg-blue-500'
-                                }`} />
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-semibold text-xs leading-tight truncate">
-                                    {task.title}
-                                  </h4>
-                                  {task.description && (
-                                    <p className="text-xs opacity-75 mt-1 line-clamp-2">
-                                      {task.description.length > 30 
-                                        ? `${task.description.substring(0, 30)}...` 
-                                        : task.description
-                                      }
-                                    </p>
-                                  )}
-                                </div>
+                                  ? 'bg-red-500'
+                                  : 'bg-blue-500'
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-xs leading-tight truncate">
+                                  {task.title}
+                                </h4>
+                                {task.description && (
+                                  <p className="text-xs opacity-75 mt-1 line-clamp-2">
+                                    {task.description.length > 30 
+                                      ? `${task.description.substring(0, 30)}...` 
+                                      : task.description
+                                    }
+                                  </p>
+                                )}
                               </div>
                             </div>
-                          );
-                        })
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+                {/* Task Summary */}
+                {dayTasks.length > 0 && (
+                  <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
+                    <div className="flex items-center justify-center gap-3 text-xs">
+                      <div className="flex items-center gap-1">
+                        <span className="text-gray-600">{dayTasks.length}</span>
+                        <span className="text-gray-500">task{dayTasks.length !== 1 ? 's' : ''}</span>
+                      </div>
+                      {dayTasks.filter(t => t.completed).length > 0 && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                          <span className="text-green-600 font-medium">
+                            {dayTasks.filter(t => t.completed).length}
+                          </span>
+                        </div>
+                      )}
+                      {dayTasks.filter(t => !t.completed).length > 0 && (
+                        <div className="flex items-center gap-1">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <span className="text-blue-600 font-medium">
+                            {dayTasks.filter(t => !t.completed).length}
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
-
-                  {/* Task Summary */}
-                  {dayTasks.length > 0 && (
-                    <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
-                      <div className="flex items-center justify-center gap-3 text-xs">
-                        <div className="flex items-center gap-1">
-                          <span className="text-gray-600">{dayTasks.length}</span>
-                          <span className="text-gray-500">task{dayTasks.length !== 1 ? 's' : ''}</span>
-                        </div>
-                        {dayTasks.filter(t => t.completed).length > 0 && (
-                          <div className="flex items-center gap-1">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                            <span className="text-green-600 font-medium">
-                              {dayTasks.filter(t => t.completed).length}
-                            </span>
-                          </div>
-                        )}
-                        {dayTasks.filter(t => !t.completed).length > 0 && (
-                          <div className="flex items-center gap-1">
-                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                            <span className="text-blue-600 font-medium">
-                              {dayTasks.filter(t => !t.completed).length}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
-    );
-  };
+    </div>
+  ), [weekDays, selectedDate, deadlines, tasks, handleWeekDateClick, handleDragOver, handleDragLeave, handleDrop, weekStart, formatWeekRange, navigateWeek, handleBackToMonth, getCircleColor]);
 
-  const renderMonthView = () => {
-    return (
-      <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
-        <Calendar
-          onChange={(val) => {
-            const date = val instanceof Date ? val : null;
-            if (date) {
-              handleMonthDateClick(date);
-            }
-          }}
-          value={selectedDate}
-          className="border-none !bg-white text-gray-800 p-2 sm:p-4 react-calendar-light-theme w-full max-w-full"
-          tileClassName={({ date, view }) => {
-            if (view === 'month' && deadlines.includes(date.toDateString())) {
-              return 'highlight-deadline';
-            }
-            return null;
-          }}
-          tileContent={({ date, view }) => {
-            const highlight = view === 'month' && deadlines.includes(date.toDateString());
-            const circleColor = getCircleColor(date);
-            
-            return (
-              <>
-                {highlight && circleColor && (
-                  <div
-                    className="highlight-circle-content"
-                    style={{
-                      backgroundColor: circleColor,
-                      color: 'white',
-                    }}
-                  >
-                    {date.getDate()}
-                  </div>
-                )}
+  // Memoize month view rendering
+  const monthView = useMemo(() => (
+    <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
+      <Calendar
+        onChange={(val) => {
+          const date = val instanceof Date ? val : null;
+          if (date) {
+            handleMonthDateClick(date);
+          }
+        }}
+        value={selectedDate}
+        className="border-none !bg-white text-gray-800 p-2 sm:p-4 react-calendar-light-theme w-full max-w-full"
+        tileClassName={({ date, view }) => {
+          if (view === 'month' && deadlines.includes(date.toDateString())) {
+            return 'highlight-deadline';
+          }
+          return null;
+        }}
+        tileContent={({ date, view }) => {
+          const highlight = view === 'month' && deadlines.includes(date.toDateString());
+          const circleColor = getCircleColor(date);
+          return (
+            <>
+              {highlight && circleColor && (
                 <div
-                  style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', background: 'transparent' }}
-                  onDragOver={e => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
+                  className="highlight-circle-content"
+                  style={{
+                    backgroundColor: circleColor,
+                    color: 'white',
                   }}
-                  onDrop={e => {
-                    e.preventDefault();
-                    const taskId = e.dataTransfer.getData('text/plain');
-                    if (onTaskDrop && taskId) {
-                      onTaskDrop(taskId, date);
-                    }
-                  }}
-                />
-              </>
-            );
-          }}
-          navigationLabel={({ date, label }) => (
-            <span className="font-bold text-blue-600 text-base sm:text-lg">{label}</span>
-          )}
-          nextLabel={<span className="text-blue-600 text-lg sm:text-2xl font-bold">›</span>}
-          prevLabel={<span className="text-blue-600 text-lg sm:text-2xl font-bold">‹</span>}
-        />
-      </div>
-    );
-  };
+                >
+                  {date.getDate()}
+                </div>
+              )}
+              <div
+                style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', background: 'transparent' }}
+                onDragOver={handleMonthTileDragOver}
+                onDrop={e => handleMonthTileDrop(e, date)}
+              />
+            </>
+          );
+        }}
+        navigationLabel={({ date, label }) => (
+          <span className="font-bold text-blue-600 text-base sm:text-lg">{label}</span>
+        )}
+        nextLabel={<span className="text-blue-600 text-lg sm:text-2xl font-bold">›</span>}
+        prevLabel={<span className="text-blue-600 text-lg sm:text-2xl font-bold">‹</span>}
+      />
+    </div>
+  ), [selectedDate, deadlines, getCircleColor, handleMonthDateClick, handleMonthTileDragOver, handleMonthTileDrop]);
 
   return (
     <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
-      {/* Calendar Views */}
-      {viewMode === 'month' ? renderMonthView() : renderWeekView()}
-      
+      {viewMode === 'month' ? monthView : weekView}
       {/* Enhanced Global Styles - Fixed Sunday Column Display */}
       <style jsx global>{`
         .react-calendar__tile.highlight-deadline abbr {

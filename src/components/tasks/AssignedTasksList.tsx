@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import TaskCard from "./TaskCard";
 import TaskDetailsModal from "./TaskDetailsModal";
 import { FaSearch, FaSpinner, FaTasks } from "react-icons/fa";
@@ -65,17 +65,18 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo(({
   const filterPriorityValue = controlledFilterPriority !== undefined ? controlledFilterPriority : filterPriority;
   const sortByValue = controlledSortBy !== undefined ? controlledSortBy : sortBy;
 
-  const handleShowDetails = React.useCallback((task: Task) => {
+  // Memoize event handlers
+  const handleShowDetails = useCallback((task: Task) => {
     setDetailsTask(task);
     setModalOpen(true);
   }, []);
 
-  const handleCloseModal = React.useCallback(() => {
+  const handleCloseModal = useCallback(() => {
     setModalOpen(false);
     setDetailsTask(null);
   }, []);
 
-  // Filtering, searching, sorting logic
+  // Memoize filteredTasks
   const filteredTasks = useMemo(() => {
     let result = [...tasks];
 

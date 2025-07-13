@@ -25,4 +25,4 @@ const StatsRangeButtons = React.memo(function StatsRangeButtons({ statsRange, se
   );
 });
 
-export default React.memo(StatsRangeButtons);
+export default StatsRangeButtons;

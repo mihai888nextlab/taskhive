@@ -22,4 +22,4 @@ const CategoryPieChart = React.memo(function CategoryPieChart({ data, options, t
   );
 });
 
-export default React.memo(CategoryPieChart);
+export default CategoryPieChart;

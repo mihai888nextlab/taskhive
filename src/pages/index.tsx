@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaTasks, FaCalendarAlt, FaBullhorn, FaComments, FaUserClock, FaMoneyBillWave, FaClock } from "react-icons/fa";
 import { MdSdStorage, MdSettings } from "react-icons/md";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Head from "next/head";
@@ -15,7 +15,7 @@ const kanit = Kanit({
   weight: ["400", "700"],
 });
 
-const features = [
+const features = useMemo(() => [
   {
     icon: <FaTasks className="text-4xl text-primary drop-shadow" />,
     title: "Task Management",
@@ -61,7 +61,7 @@ const features = [
     title: "Custom Settings",
     desc: "Personalize your workspace and notifications.",
   },
-];
+], []);
 
 export default function Home() {
   // Ref for the container that holds the horizontally scrolling content and gets the transform.
@@ -138,6 +138,30 @@ export default function Home() {
     };
   }, []); // Empty dependency array means this effect runs once on mount and once on unmount.
 
+  const FeatureCard = React.memo(function FeatureCard({ feature }: { feature: typeof features[number] }) {
+    return (
+      <Card
+        key={feature.title}
+        className="flex-shrink-0 min-w-[320px] max-w-xs flex flex-col items-center bg-[#23272f] border border-accent/30 rounded-2xl p-10 min-h-[240px] hover:shadow-2xl hover:border-primary transition-all group snap-center shadow-lg mx-4 overflow-hidden w-full"
+        style={{ scrollSnapAlign: 'center', height: 280 }}
+      >
+        <CardHeader className="mb-5 flex items-center justify-center">
+          <div className="rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition flex items-center justify-center">
+            {feature.icon}
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center w-full">
+          <CardTitle className="text-xl font-semibold mb-2 text-white tracking-tight text-center break-words w-full">
+            {feature.title}
+          </CardTitle>
+          <CardDescription className="text-gray-400 text-base font-light text-center break-words whitespace-normal w-full mt-1">
+            {feature.desc}
+          </CardDescription>
+        </CardContent>
+      </Card>
+    );
+  });
+
   return (
     <>
       <Head>
@@ -206,26 +230,8 @@ export default function Home() {
               className="flex flex-row gap-8 whitespace-nowrap transition-transform duration-75 ease-out"
               style={{ transform: `translateX(${-horizontalOffset}px)` }}
             >
-              {features.map((feature, idx) => (
-                <Card
-                  key={feature.title}
-                  className="flex-shrink-0 min-w-[320px] max-w-xs flex flex-col items-center bg-[#23272f] border border-accent/30 rounded-2xl p-10 min-h-[240px] hover:shadow-2xl hover:border-primary transition-all group snap-center shadow-lg mx-4 overflow-hidden w-full"
-                  style={{ scrollSnapAlign: 'center', height: 280 }}
-                >
-                  <CardHeader className="mb-5 flex items-center justify-center">
-                    <div className="rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition flex items-center justify-center">
-                      {feature.icon}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex flex-col items-center w-full">
-                    <CardTitle className="text-xl font-semibold mb-2 text-white tracking-tight text-center break-words w-full">
-                      {feature.title}
-                    </CardTitle>
-                    <CardDescription className="text-gray-400 text-base font-light text-center break-words whitespace-normal w-full mt-1">
-                      {feature.desc}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+              {features.map((feature) => (
+                <FeatureCard key={feature.title} feature={feature} />
               ))}
             </div>
           </div>

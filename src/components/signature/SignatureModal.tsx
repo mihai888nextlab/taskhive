@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FaTimes, FaPlus, FaTrash, FaPencilAlt, FaSignature, FaSpinner } from 'react-icons/fa';
 import SignatureCanvas from './SignatureCanvas';
 import { Input } from "@/components/ui/input";
@@ -29,13 +29,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   const [loading, setLoading] = useState(false);
   const t = useTranslations("Signature");
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchSignatures();
-    }
-  }, [isOpen]);
-
-  const fetchSignatures = async () => {
+  // Memoize fetchSignatures
+  const fetchSignatures = useCallback(async () => {
     try {
       const res = await fetch('/api/signatures');
       const data = await res.json();
@@ -45,14 +40,20 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
     } catch (error) {
       console.error('Error fetching signatures:', error);
     }
-  };
+  }, []);
 
-  const saveSignature = async () => {
+  useEffect(() => {
+    if (isOpen) {
+      fetchSignatures();
+    }
+  }, [isOpen, fetchSignatures]);
+
+  // Memoize saveSignature
+  const saveSignature = useCallback(async () => {
     if (!newSignature || !signatureName.trim()) {
       alert(t("createFirstSignature"));
       return;
     }
-
     setLoading(true);
     try {
       const res = await fetch('/api/signature-upload', {
@@ -79,11 +80,11 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [newSignature, signatureName, signatures, t]);
 
-  const deleteSignature = async (id: string) => {
+  // Memoize deleteSignature
+  const deleteSignature = useCallback(async (id: string) => {
     if (!confirm(t("deleteSignatureConfirm"))) return;
-
     try {
       const res = await fetch(`/api/signatures?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -92,7 +93,64 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
     } catch (error) {
       console.error('Error deleting signature:', error);
     }
-  };
+  }, [signatures, t]);
+
+  // Memoize signatures list rendering
+  const signaturesList = useMemo(() => (
+    signatures.length === 0 ? (
+      <div className="text-center py-12">
+        <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
+          <FaPencilAlt className="text-2xl text-blue-600" />
+        </div>
+        <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noSignaturesFound")}</h4>
+        <p className="text-gray-600 mb-6">{t("createFirstSignature")}</p>
+        <Button
+          onClick={() => setActiveTab('create')}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transition-all duration-200 font-medium"
+        >
+          <FaPlus className="text-sm" />
+          {t("createYourFirstSignature")}
+        </Button>
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {signatures.map((signature) => (
+          <div key={signature._id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-white">
+            <div className="flex justify-between items-start mb-3">
+              <h4 className="font-medium text-gray-900 truncate text-sm">{signature.signatureName}</h4>
+              <Button
+                onClick={() => deleteSignature(signature._id)}
+                className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all duration-200"
+                title="Delete signature"
+                variant="ghost"
+                size="icon"
+              >
+                <FaTrash className="text-xs" />
+              </Button>
+            </div>
+            
+            <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[80px] flex items-center justify-center">
+              <img
+                src={signature.signatureUrl}
+                alt={signature.signatureName}
+                className="max-w-full max-h-[60px] object-contain"
+              />
+            </div>
+            
+            <Button
+              onClick={() => {
+                onSignatureSelect(signature.signatureUrl);
+                onClose();
+              }}
+              className="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 text-sm"
+            >
+              {t("useThisSignature")}
+            </Button>
+          </div>
+        ))}
+      </div>
+    )
+  ), [signatures, deleteSignature, onSignatureSelect, onClose, t]);
 
   if (!isOpen) return null;
 
@@ -154,59 +212,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
               </span>
             </div>
             
-            {signatures.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                  <FaPencilAlt className="text-2xl text-blue-600" />
-                </div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noSignaturesFound")}</h4>
-                <p className="text-gray-600 mb-6">{t("createFirstSignature")}</p>
-                <Button
-                  onClick={() => setActiveTab('create')}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transition-all duration-200 font-medium"
-                >
-                  <FaPlus className="text-sm" />
-                  {t("createYourFirstSignature")}
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {signatures.map((signature) => (
-                  <div key={signature._id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-white">
-                    <div className="flex justify-between items-start mb-3">
-                      <h4 className="font-medium text-gray-900 truncate text-sm">{signature.signatureName}</h4>
-                      <Button
-                        onClick={() => deleteSignature(signature._id)}
-                        className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all duration-200"
-                        title="Delete signature"
-                        variant="ghost"
-                        size="icon"
-                      >
-                        <FaTrash className="text-xs" />
-                      </Button>
-                    </div>
-                    
-                    <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[80px] flex items-center justify-center">
-                      <img
-                        src={signature.signatureUrl}
-                        alt={signature.signatureName}
-                        className="max-w-full max-h-[60px] object-contain"
-                      />
-                    </div>
-                    
-                    <Button
-                      onClick={() => {
-                        onSignatureSelect(signature.signatureUrl);
-                        onClose();
-                      }}
-                      className="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 text-sm"
-                    >
-                      {t("useThisSignature")}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
+            {signaturesList}
           </div>
         )}
 
@@ -266,4 +272,4 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   );
 };
 
-export default SignatureModal;
+export default React.memo(SignatureModal);

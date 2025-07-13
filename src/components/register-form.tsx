@@ -9,13 +9,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FormEvent, useEffect, useState } from "react";
+import React, { FormEvent, useEffect, useState, useCallback } from "react";
 
-export function RegisterForm({
+export const RegisterForm: React.FC<
+  React.ComponentProps<"div"> & { googleClientId?: string }
+> = React.memo(function RegisterForm({
   className,
   googleClientId,
   ...props
-}: React.ComponentProps<"div"> & { googleClientId?: string }) {
+}) {
   const [values, setValues] = useState({
     firstName: "",
     lastName: "",
@@ -26,68 +28,81 @@ export function RegisterForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  // Memoize register handler
+  const handleRegister = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setLoading(true);
+      setError(null);
 
-    // Basic client-side validation
-    if (
-      !values.email ||
-      !values.password ||
-      !values.firstName ||
-      !values.lastName
-    ) {
-      setError("All required fields must be filled.");
-      setLoading(false);
-      return;
-    }
-
-    if (values.password !== values.confirmPassword) {
-      setError("Passwords do not match.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: values.email,
-          password: values.password,
-          firstName: values.firstName,
-          lastName: values.lastName,
-          companyName: "Default Company",
-          companyRegistrationNumber: "",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(
-          data.message || "Registration failed. Please check your details."
-        );
+      // Basic client-side validation
+      if (
+        !values.email ||
+        !values.password ||
+        !values.firstName ||
+        !values.lastName
+      ) {
+        setError("All required fields must be filled.");
         setLoading(false);
         return;
       }
 
-      // Registration successful, redirect or show success
-      window.location.href = "/app";
-    } catch (err) {
-      setError("An error occurred during registration.");
-      setLoading(false);
-    }
-  };
+      if (values.password !== values.confirmPassword) {
+        setError("Passwords do not match.");
+        setLoading(false);
+        return;
+      }
 
-  const handleGoogleRegister = async () => {
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: values.email,
+            password: values.password,
+            firstName: values.firstName,
+            lastName: values.lastName,
+            companyName: "Default Company",
+            companyRegistrationNumber: "",
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(
+            data.message || "Registration failed. Please check your details."
+          );
+          setLoading(false);
+          return;
+        }
+
+        // Registration successful, redirect or show success
+        window.location.href = "/app";
+      } catch (err) {
+        setError("An error occurred during registration.");
+        setLoading(false);
+      }
+    },
+    [values]
+  );
+
+  // Memoize Google register handler
+  const handleGoogleRegister = useCallback(async () => {
     // @ts-ignore
     if (window.google && window.google.accounts) {
       // @ts-ignore
       window.google.accounts.id.prompt();
     }
-  };
+  }, []);
+
+  // Memoize input change handlers
+  const handleInputChange = useCallback(
+    (field: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValues({ ...values, [field]: e.target.value });
+    },
+    [values]
+  );
 
   useEffect(() => {
     // Load Google Identity Services script
@@ -173,9 +188,7 @@ export function RegisterForm({
                   type="text"
                   placeholder="First name"
                   value={values.firstName}
-                  onChange={(e) =>
-                    setValues({ ...values, firstName: e.target.value })
-                  }
+                  onChange={handleInputChange("firstName")}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="given-name"
@@ -193,9 +206,7 @@ export function RegisterForm({
                   type="text"
                   placeholder="Last name"
                   value={values.lastName}
-                  onChange={(e) =>
-                    setValues({ ...values, lastName: e.target.value })
-                  }
+                  onChange={handleInputChange("lastName")}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="family-name"
@@ -213,9 +224,7 @@ export function RegisterForm({
                   type="email"
                   placeholder="m@example.com"
                   value={values.email}
-                  onChange={(e) =>
-                    setValues({ ...values, email: e.target.value })
-                  }
+                  onChange={handleInputChange("email")}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="email"
@@ -232,9 +241,7 @@ export function RegisterForm({
                   id="password"
                   type="password"
                   value={values.password}
-                  onChange={(e) =>
-                    setValues({ ...values, password: e.target.value })
-                  }
+                  onChange={handleInputChange("password")}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="new-password"
@@ -251,9 +258,7 @@ export function RegisterForm({
                   id="confirmPassword"
                   type="password"
                   value={values.confirmPassword}
-                  onChange={(e) =>
-                    setValues({ ...values, confirmPassword: e.target.value })
-                  }
+                  onChange={handleInputChange("confirmPassword")}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="new-password"
@@ -294,4 +299,4 @@ export function RegisterForm({
       </Card>
     </div>
   );
-}
+});

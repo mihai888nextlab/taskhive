@@ -114,7 +114,7 @@ export const TimeTrackingProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [pomodoroMode, pomodoroPhase, pomodoroTime]);
 
-  // Reset all state (for when session is saved)
+  // Memoize resetAll
   const resetAll = useCallback(() => {
     setSessionName('');
     setSessionDescription('');
@@ -128,7 +128,7 @@ export const TimeTrackingProvider = ({ children }: { children: ReactNode }) => {
     setPomodoroCycles(0);
   }, []);
 
-  // Save session handler
+  // Memoize saveSession
   const saveSession = useCallback(async () => {
     if (!sessionName.trim() || !sessionDescription.trim() || !user || !user._id) return;
     await fetch('/api/time-sessions', {
@@ -146,22 +146,22 @@ export const TimeTrackingProvider = ({ children }: { children: ReactNode }) => {
     // Optionally: trigger a callback or event to refresh session list
   }, [sessionName, sessionDescription, user, elapsedTime, sessionTag, resetAll]);
 
-  // Timer/Pomodoro controls
-  const startTimer = () => {
+  // Memoize timer controls
+  const startTimer = useCallback(() => {
     if (pomodoroMode) {
       setPomodoroRunning(true);
     } else {
       setIsRunning(true);
     }
-  };
-  const stopTimer = () => {
+  }, [pomodoroMode]);
+  const stopTimer = useCallback(() => {
     if (pomodoroMode) {
       setPomodoroRunning(false);
     } else {
       setIsRunning(false);
     }
-  };
-  const resetTimer = () => {
+  }, [pomodoroMode]);
+  const resetTimer = useCallback(() => {
     if (pomodoroMode) {
       setPomodoroPhase('work');
       setPomodoroTime(WORK_DURATION);
@@ -171,7 +171,7 @@ export const TimeTrackingProvider = ({ children }: { children: ReactNode }) => {
       setElapsedTime(0);
       setIsRunning(false);
     }
-  };
+  }, [pomodoroMode]);
 
   return (
     <TimeTrackingContext.Provider

@@ -9,45 +9,89 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FormEvent, useEffect } from "react";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/router";
+import React, { FormEvent, useEffect, useCallback } from "react";
 
-export function LoginForm({
+// Extend the Window interface to include 'google'
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
+
+export const LoginForm: React.FC<
+  React.ComponentProps<"div"> & {
+    handleLogin: (e: FormEvent<HTMLFormElement>) => void;
+    values: {
+      userEmail: string;
+      userPassword: string;
+    };
+    setValues: ({
+      userEmail,
+      userPassword,
+    }: {
+      userEmail: string;
+      userPassword: string;
+    }) => void;
+  }
+> = React.memo(function LoginForm({
   className,
   handleLogin,
   values,
   setValues,
   ...props
-}: React.ComponentProps<"div"> & {
-  handleLogin: (e: FormEvent<HTMLFormElement>) => void;
-  values: {
-    userEmail: string;
-    userPassword: string;
-  };
-  setValues: ({
-    userEmail,
-    userPassword,
-  }: {
-    userEmail: string;
-    userPassword: string;
-  }) => void;
 }) {
-  const { login, loadingUser, error } = useAuth();
-  const router = useRouter();
-
-  const handleGoogleSuccess = async (response: any) => {
-    if (response.credential) {
-      console.log("Google ID Token:", response.credential);
-      // Apelează funcția de login din hook-ul tău custom useAuth, trimițând ID Token-ul
-      await login("google", { idToken: response.credential });
+  // Memoize Google login handler
+  const handleGoogleLogin = useCallback(async () => {
+    // @ts-ignore
+    if (window.google && window.google.accounts) {
+      // @ts-ignore
+      window.google.accounts.id.prompt();
     }
-  };
+  }, []);
 
-  const handleGoogleError = () => {
-    console.error("Google Login Failed");
-  };
+  // Memoize input change handlers
+  const handleEmailChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValues({ ...values, userEmail: e.target.value });
+    },
+    [setValues, values]
+  );
+  const handlePasswordChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValues({ ...values, userPassword: e.target.value });
+    },
+    [setValues, values]
+  );
+
+  useEffect(() => {
+    // Load Google Identity Services script
+    if (!window.google) {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.onload = () => {
+        // @ts-ignore
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          callback: async (response: any) => {
+            // Send token to backend
+            const res = await fetch("/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ googleToken: response.credential }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+              window.location.href = "/app";
+            } else {
+              alert(data.message || "Google login failed.");
+            }
+          },
+        });
+      };
+      document.body.appendChild(script);
+    }
+  }, []);
 
   return (
     <div
@@ -72,7 +116,7 @@ export function LoginForm({
               variant="outline"
               className="w-full flex items-center justify-center gap-2 border-blue-600 text-blue-200 hover:bg-blue-600/10 hover:border-blue-500 transition mb-2"
               type="button"
-              onClick={() => {}} //handle Google login here
+              onClick={handleGoogleLogin}
             >
               {/* Use Google logo from a reliable CDN */}
               <span className="w-5 h-5 flex items-center justify-center">
@@ -105,9 +149,7 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   value={values.userEmail}
-                  onChange={(e) =>
-                    setValues({ ...values, userEmail: e.target.value })
-                  }
+                  onChange={handleEmailChange}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="email"
@@ -118,7 +160,10 @@ export function LoginForm({
                   <Label htmlFor="password" className="text-gray-300 text-sm">
                     Password
                   </Label>
-                  <a href="#" className="text-xs text-blue-400 hover:underline">
+                  <a
+                    href="#"
+                    className="text-xs text-blue-400 hover:underline"
+                  >
                     Forgot your password?
                   </a>
                 </div>
@@ -126,9 +171,7 @@ export function LoginForm({
                   id="password"
                   type="password"
                   value={values.userPassword}
-                  onChange={(e) =>
-                    setValues({ ...values, userPassword: e.target.value })
-                  }
+                  onChange={handlePasswordChange}
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="current-password"
@@ -161,13 +204,6 @@ export function LoginForm({
           .
         </div>
       </Card>
-
-      <GoogleLogin
-        onSuccess={handleGoogleSuccess}
-        onError={handleGoogleError}
-        // Poți personaliza butonul cu useGoogleLogin hook și un buton custom
-        // sau folosi direct componenta care oferă un buton predefinit
-      />
     </div>
   );
-}
+});

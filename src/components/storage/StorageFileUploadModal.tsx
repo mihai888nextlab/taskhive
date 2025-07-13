@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FaCloudUploadAlt, FaTimes, FaFile, FaImage } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 
@@ -27,15 +27,20 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
 
     if (!open) return null;
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedFile = event.target.files?.[0];
-      if (!selectedFile) return;
+    // Memoize file change handler
+    const handleFileChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+        if (!selectedFile) return;
 
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
-    };
+        setFile(selectedFile);
+        setPreview(URL.createObjectURL(selectedFile));
+      },
+      []
+    );
 
-    const handleUpload = async () => {
+    // Memoize upload handler
+    const handleUpload = useCallback(async () => {
       if (!file) return alert("Please select a file!");
 
       setUploading(true);
@@ -69,14 +74,15 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
           alert("Upload error: " + data.error);
         }
       };
-    };
+    }, [file, onUploadSuccess]);
 
-    const handleClose = () => {
+    // Memoize close handler
+    const handleClose = useCallback(() => {
       setFile(null);
       setPreview(null);
       setUploadedUrl(null);
       onClose();
-    };
+    }, [onClose]);
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

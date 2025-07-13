@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import DatePicker from "react-datepicker";
 import { FaSpinner, FaMagic, FaCalendarAlt, FaTags } from "react-icons/fa";
 import { useTheme } from '@/components/ThemeContext';
@@ -83,8 +83,30 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
     }
   };
 
+  // Memoize input handlers
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onTitleChange(e.target.value);
+  }, [onTitleChange]);
+  const handleAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onAmountChange(e.target.value);
+  }, [onAmountChange]);
+  const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onDescriptionChange(e.target.value);
+  }, [onDescriptionChange]);
+  const handleDateChange = useCallback((d: Date | null) => {
+    if (d) {
+      onDateChange(d);
+    }
+  }, [onDateChange]);
+  const handleCategoryChange = useCallback((v: string) => {
+    onCategoryChange(v);
+  }, [onCategoryChange]);
+  const handleFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    onSubmit(e);
+  }, [onSubmit]);
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={handleFormSubmit} className="space-y-4">
       {/* Title Input */}
       <div>
         <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -93,7 +115,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
         <Input
           type="text"
           value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
+          onChange={handleTitleChange}
           placeholder={t("incomeTitle")}
           className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
             theme === "dark"
@@ -117,7 +139,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           <Input
             type="number"
             value={amount}
-            onChange={(e) => onAmountChange(e.target.value)}
+            onChange={handleAmountChange}
             placeholder="0.00"
             className={`w-full pl-8 pr-4 py-3 rounded-xl border transition-all duration-200 ${
               theme === "dark"
@@ -139,7 +161,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
         <div className="flex gap-2">
           <Textarea
             value={description}
-            onChange={(e) => onDescriptionChange(e.target.value)}
+            onChange={handleDescriptionChange}
             placeholder="Describe this income..."
             className={`flex-1 px-4 py-3 rounded-xl border transition-all duration-200 resize-none ${
               theme === "dark"
@@ -188,7 +210,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           </label>
           <DatePicker
             selected={date}
-            onChange={(d) => { if (d) onDateChange(d); }}
+            onChange={handleDateChange}
             className={`w-full px-4 py-2 h-[36px] rounded-xl border transition-all duration-200 ${
               theme === "dark"
                 ? "bg-gray-700 text-white border-gray-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
@@ -208,7 +230,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
           </label>
           <Select
             value={category || categories[0]}
-            onValueChange={onCategoryChange}
+            onValueChange={handleCategoryChange}
             disabled={loading}
           >
             <SelectTrigger

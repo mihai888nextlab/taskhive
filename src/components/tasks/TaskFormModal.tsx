@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { createPortal } from "react-dom";
 import TaskForm from "./TaskForm";
 
@@ -6,6 +6,11 @@ const TaskFormModal: React.FC<{ show: boolean } & Record<string, any>> = ({
   show,
   ...props
 }) => {
+  // Memoize cancel handler
+  const handleCancel = useCallback(() => {
+    if (props.onCancel) props.onCancel();
+  }, [props.onCancel]);
+
   if (!show || typeof window === "undefined") return null;
   return createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
@@ -22,7 +27,7 @@ const TaskFormModal: React.FC<{ show: boolean } & Record<string, any>> = ({
           usersBelowMe={props.usersBelowMe}
           formError={props.formError}
           onSubmit={props.onSubmit}
-          onCancel={props.onCancel}
+          onCancel={handleCancel}
           priority={props.priority}
           theme={props.theme}
           onTitleChange={props.onTitleChange}
@@ -37,4 +42,4 @@ const TaskFormModal: React.FC<{ show: boolean } & Record<string, any>> = ({
   );
 };
 
-export default TaskFormModal;
+export default React.memo(TaskFormModal);

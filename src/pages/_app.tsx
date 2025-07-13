@@ -11,7 +11,6 @@ import { IntlProvider } from "next-intl";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 
 // Import all messages
 import enMessages from "../../messages/en.json";
@@ -36,27 +35,15 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-export default function MyApp({
-  Component,
-  pageProps,
-  router,
-}: AppPropsWithLayout) {
+export default function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
   return (
     <LanguageProvider>
-      <LanguageConsumerApp
-        Component={Component}
-        pageProps={pageProps}
-        router={router}
-      />
+      <LanguageConsumerApp Component={Component} pageProps={pageProps} router={router} />
     </LanguageProvider>
   );
 }
 
-function LanguageConsumerApp({
-  Component,
-  pageProps,
-  router,
-}: AppPropsWithLayout) {
+function LanguageConsumerApp({ Component, pageProps, router }: AppPropsWithLayout) {
   const { lang } = useLanguage();
 
   const messagesMap: Record<string, any> = {
@@ -89,38 +76,32 @@ function LanguageConsumerApp({
   const getLayout =
     Component.getLayout ||
     ((page: ReactElement) =>
-      isAppRoute ? (
-        <DashboardLayout locale={lang}>{page}</DashboardLayout>
-      ) : (
-        page
-      ));
+      isAppRoute
+        ? <DashboardLayout locale={lang}>{page}</DashboardLayout>
+        : page);
 
   const content = getLayout(<Component {...mergedPageProps} />);
 
   return (
     <IntlProvider locale={lang} messages={messages}>
       <ThemeProvider>
-        <GoogleOAuthProvider
-          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
-        >
-          <AuthProvider>
-            <TimeTrackingProvider>
-              <AIWindowProvider>
-                <Head>
-                  <link rel="icon" href="favicon.ico" />
-                  <title>Taskhive</title>
-                  <meta
-                    name="description"
-                    content="A employee management application"
-                  />
-                  <link rel="icon" href="/favicon.ico" />
-                </Head>
-                {content}
-                <SpeedInsights />
-              </AIWindowProvider>
-            </TimeTrackingProvider>
-          </AuthProvider>
-        </GoogleOAuthProvider>
+        <AuthProvider>
+          <TimeTrackingProvider>
+            <AIWindowProvider>
+              <Head>
+                <link rel="icon" href="favicon.ico" />
+                <title>Taskhive</title>
+                <meta
+                  name="description"
+                  content="A employee management application"
+                />
+                <link rel="icon" href="/favicon.ico" />
+              </Head>
+              {content}
+              <SpeedInsights />
+            </AIWindowProvider>
+          </TimeTrackingProvider>
+        </AuthProvider>
       </ThemeProvider>
     </IntlProvider>
   );

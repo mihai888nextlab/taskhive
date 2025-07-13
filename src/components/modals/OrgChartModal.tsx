@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { v4 as uuidv4 } from "uuid";
 import { FaPlus, FaSave, FaTimes, FaGripVertical, FaBuilding, FaUserTie, FaSitemap } from "react-icons/fa";
@@ -50,6 +50,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
     fetchOrgChart();
   }, [fetchOrgChart]);
 
+  // Memoize save handler
   const saveOrgChart = useCallback(async () => {
     setSaving(true);
     try {
@@ -66,7 +67,8 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
     }
   }, [departments, fetchOrgChart]);
 
-  const handleAddDepartment = async () => {
+  // Memoize department actions
+  const handleAddDepartment = useCallback(async () => {
     if (!newDeptName.trim()) return;
     const newDepartments = [
       ...departments,
@@ -89,9 +91,9 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
     } catch (error) {
       console.error("Error adding department:", error);
     }
-  };
+  }, [newDeptName, departments, fetchOrgChart]);
 
-  const handleAddLevel = (deptId: string) => {
+  const handleAddLevel = useCallback((deptId: string) => {
     setDepartments((prev) =>
       prev.map((dept) =>
         dept.id === deptId
@@ -102,14 +104,14 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
           : dept
       )
     );
-  };
+  }, []);
 
-  const handleRoleAdded = () => {
+  const handleRoleAdded = useCallback(() => {
     fetchOrgChart();
-  };
+  }, [fetchOrgChart]);
 
-  // Drag and drop logic
-  const onDragEnd = (result: any) => {
+  // Memoize drag and drop logic
+  const onDragEnd = useCallback((result: any) => {
     const { source, destination, draggableId } = result;
     if (!destination) return;
     if (
@@ -165,7 +167,17 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
         return dept;
       });
     });
-  };
+  }, []);
+
+  // Memoize input handler
+  const handleDeptNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewDeptName(e.target.value);
+  }, []);
+
+  // Memoize modal close handler
+  const handleModalClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
@@ -348,7 +360,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
               type="text"
               placeholder={t("enterDepartmentName")}
               value={newDeptName}
-              onChange={(e) => setNewDeptName(e.target.value)}
+              onChange={handleDeptNameChange}
               onKeyPress={(e) => e.key === 'Enter' && handleAddDepartment()}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 text-sm"
             />
@@ -371,7 +383,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
           <div className="flex justify-end gap-3">
             <Button
               type="button"
-              onClick={onClose}
+              onClick={handleModalClose}
               className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
               disabled={saving}
             >
@@ -414,4 +426,4 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
   );
 };
 
-export default OrgChartModal;
+export default React.memo(OrgChartModal);

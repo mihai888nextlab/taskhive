@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { useTheme } from '@/components/ThemeContext';
@@ -37,32 +37,30 @@ const Statistics: React.FC = React.memo(() => {
     );
   }
 
-  // Get the last 7 days, but keep the order so 6 Days Ago is first, Today is last
-  const getLastSeven = (data: number[]) => data.slice(0, 7);
-
-  const data = {
+  // Memoize chart data and options
+  const chartData = useMemo(() => ({
     labels: ['Today', 'Yesterday', '2 Days Ago', '3 Days Ago', '4 Days Ago', '5 Days Ago', '6 Days Ago'],
     datasets: [
       {
         label: 'New Users',
-        data: getLastSeven(stats.newUsersData),
+        data: stats ? stats.newUsersData.slice(0, 7) : [],
         backgroundColor: 'rgba(255, 99, 132, 0.6)',
       },
       {
         label: 'Completed Tasks',
-        data: getLastSeven(stats.completedTasksData),
+        data: stats ? stats.completedTasksData.slice(0, 7) : [],
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
       },
     ],
-  };
+  }), [stats]);
 
-  const options = {
+  const chartOptions = useMemo(() => ({
     responsive: true,
     plugins: {
       legend: { position: 'top' as const },
       title: { display: true, text: 'Statistics Over the Last 7 Days' },
     },
-  };
+  }), []);
 
   return (
     <div className={`rounded-lg shadow-lg transition-transform transform hover:scale-101 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'} p-6`}>
@@ -86,7 +84,7 @@ const Statistics: React.FC = React.memo(() => {
         </div>
       </div>
       <div className="mt-6">
-        <Bar data={data} options={options} />
+        <Bar data={chartData} options={chartOptions} />
       </div>
     </div>
   );

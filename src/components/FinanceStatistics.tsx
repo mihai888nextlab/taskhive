@@ -14,7 +14,7 @@ interface FinanceStatisticsProps {
   className?: string;
 }
 
-const FinanceStatistics: React.FC<FinanceStatisticsProps> = React.memo(({ expensesData, incomesData, labels, hideHeader, hideSummary, className }) => {
+const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, incomesData, labels, hideHeader, hideSummary, className }) => {
   const t = useTranslations("InsightsPage");
 
   // Memoize chart data
@@ -53,6 +53,6 @@ const FinanceStatistics: React.FC<FinanceStatisticsProps> = React.memo(({ expens
       </div>
     </div>
   );
-});
+};
 
 export default React.memo(FinanceStatistics);

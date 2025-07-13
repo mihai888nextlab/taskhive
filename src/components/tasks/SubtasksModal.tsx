@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { FaSpinner, FaRobot, FaPlus, FaTrash, FaTimes, FaTasks } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,8 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
     }
   }, [show, initialSubtasks]);
 
-  const handleGenerateSubtasks = async () => {
+  // Memoize generate subtasks handler
+  const handleGenerateSubtasks = useCallback(async () => {
     if (!taskTitle) return;
     setGeneratingSubtasks(true);
     try {
@@ -62,26 +63,38 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
     } finally {
       setGeneratingSubtasks(false);
     }
-  };
+  }, [taskTitle, taskDescription]);
 
-  const addManualSubtask = () => {
+  // Memoize add/remove/update subtask handlers
+  const addManualSubtask = useCallback(() => {
     setSubtasks([...subtasks, { title: "", description: "" }]);
-  };
+  }, [subtasks]);
 
-  const removeSubtask = (index: number) => {
+  const removeSubtask = useCallback((index: number) => {
     setSubtasks(subtasks.filter((_, i) => i !== index));
-  };
+  }, [subtasks]);
 
-  const updateSubtask = (index: number, field: 'title' | 'description' | 'assignedTo', value: string) => {
+  const updateSubtask = useCallback((index: number, field: 'title' | 'description' | 'assignedTo', value: string) => {
     const updated = [...subtasks];
     updated[index][field] = value;
     setSubtasks(updated);
-  };
+  }, [subtasks]);
 
-  const handleSave = () => {
+  // Memoize save handler
+  const handleSave = useCallback(() => {
     const validSubtasks = subtasks.filter(s => s.title.trim());
     onSave(validSubtasks);
-  };
+  }, [subtasks, onSave]);
+
+  // Memoize filtered usersBelowMe
+  const filteredUsersBelowMe = useMemo(() => (
+    (usersBelowMe || [])
+      .filter(u =>
+        u.user &&
+        u.userId &&
+        (!currentUserId || u.userId !== currentUserId)
+      )
+  ), [usersBelowMe, currentUserId]);
 
   if (!show) return null;
 
@@ -178,17 +191,11 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
                         className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                       >
                         <option value="">{t("assignToMyself")}</option>
-                        {(usersBelowMe || [])
-                          .filter(u =>
-                            u.user &&
-                            u.userId &&
-                            (!currentUserId || u.userId !== currentUserId)
-                          )
-                          .map(u => (
-                            <option key={u.userId} value={u.userId}>
-                              {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
-                            </option>
-                          ))}
+                        {filteredUsersBelowMe.map(u => (
+                          <option key={u.userId} value={u.userId}>
+                            {u.user?.firstName} {u.user?.lastName} ({u.user?.email})
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <Button

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { FaSpinner, FaPlus, FaTimes } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,7 +72,8 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
     parseDurationFromFields(hours, minutes, seconds) === 0 ||
     !cycles;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Memoize submit handler
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -115,7 +116,30 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, name, description, tag, hours, minutes, seconds, cycles, onAdded, onClose, loading]);
+
+  // Memoize input handlers
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  }, []);
+  const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(e.target.value);
+  }, []);
+  const handleTagChange = useCallback((v: string) => {
+    setTag(v);
+  }, []);
+  const handleHoursChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setHours(e.target.value.padStart(2, "0"));
+  }, []);
+  const handleMinutesChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setMinutes(e.target.value.padStart(2, "0"));
+  }, []);
+  const handleSecondsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSeconds(e.target.value.padStart(2, "0"));
+  }, []);
+  const handleCyclesChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCycles(Number(e.target.value));
+  }, []);
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
@@ -141,7 +165,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
           </div>
         </div>
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4" id="manual-session-form">
           {error && (
             <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-700 font-medium text-sm">{error}</p>
@@ -152,7 +176,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
             <Input
               type="text"
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={handleNameChange}
               required
               placeholder={t("sessionName")}
               disabled={loading}
@@ -162,7 +186,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
             <label className="block text-gray-900 font-semibold mb-2 text-sm">{t("sessionDescription")}</label>
             <Textarea
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={handleDescriptionChange}
               required
               placeholder={t("sessionDescription")}
               rows={2}
@@ -173,7 +197,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
             <label className="block text-gray-900 font-semibold mb-2 text-sm">{t("tag")}</label>
             <Select
               value={tag}
-              onValueChange={setTag}
+              onValueChange={handleTagChange}
               required
               disabled={loading}
             >
@@ -197,7 +221,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
                 min={0}
                 max={99}
                 value={hours}
-                onChange={e => setHours(e.target.value.padStart(2, "0"))}
+                onChange={handleHoursChange}
                 placeholder={t("hours")}
                 className="w-16 text-center"
                 disabled={loading}
@@ -208,7 +232,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
                 min={0}
                 max={59}
                 value={minutes}
-                onChange={e => setMinutes(e.target.value.padStart(2, "0"))}
+                onChange={handleMinutesChange}
                 placeholder={t("minutes")}
                 className="w-16 text-center"
                 disabled={loading}
@@ -219,7 +243,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
                 min={0}
                 max={59}
                 value={seconds}
-                onChange={e => setSeconds(e.target.value.padStart(2, "0"))}
+                onChange={handleSecondsChange}
                 placeholder={t("seconds")}
                 className="w-16 text-center"
                 disabled={loading}

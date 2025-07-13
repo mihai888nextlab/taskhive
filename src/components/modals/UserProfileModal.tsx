@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import { FaTimes, FaEnvelope, FaUser, FaUserTag } from "react-icons/fa";
 import { FiChevronDown } from "react-icons/fi";
@@ -55,13 +55,44 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
     setSelectedRole(user?.role || "");
   }, [user, open]);
 
-  const handleRoleBadgeClick = () => {
+  // Memoize role badge color
+  const getRoleBadgeColor = useCallback((role: string) => {
+    switch (role) {
+      case "admin":
+        return "bg-red-100 text-red-700 border-red-200";
+      case "manager":
+        return "bg-orange-100 text-orange-700 border-orange-200";
+      case "user":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  }, []);
+
+  // Memoize initials
+  const getInitials = useCallback(() => {
+    const firstName = user?.firstName || "";
+    const lastName = user?.lastName || "";
+    return (firstName[0] || "") + (lastName[0] || "");
+  }, [user]);
+
+  const handleSendMessage = useCallback(() => {
+    if (user) {
+      router.push(`/app/communication?userId=${user._id}`);
+      onClose();
+    }
+  }, [router, user, onClose]);
+
+  const handleRoleBadgeClick = useCallback(() => {
     if (currentUser?.role === "admin") {
       setRoleDropdownOpen((v) => !v);
     }
-  };
+  }, [currentUser]);
 
-  const handleRoleChange = async (newRole: string) => {
+  // Determine if the current user can change roles
+  const canChangeRole = currentUser?.role === "admin";
+
+  const handleRoleChange = useCallback(async (newRole: string) => {
     setRoleLoading(true);
     try {
       const res = await fetch("/api/update-user-role", {
@@ -79,7 +110,25 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
     } finally {
       setRoleLoading(false);
     }
-  };
+  }, [user]);
+
+  // Memoize skills rendering
+  const skillsList = useMemo(() => (
+    user?.skills && user.skills.length > 0 ? (
+      <div className="flex flex-wrap gap-2">
+        {user.skills.map((skill, index) => (
+          <span
+            key={index}
+            className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium border border-blue-200"
+          >
+            {skill}
+          </span>
+        ))}
+      </div>
+    ) : (
+      <p className="text-gray-500 text-sm">No skills listed.</p>
+    )
+  ), [user]);
 
   // When modal closes, refresh page if role was changed
   useEffect(() => {
@@ -92,45 +141,18 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
 
   if (!open || !user) return null;
 
-  const handleSendMessage = () => {
-    router.push(`/app/communication?userId=${user._id}`);
-    onClose();
-  };
-
-  const getInitials = () => {
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
-    return (firstName[0] || "") + (lastName[0] || "");
-  };
-
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-red-100 text-red-700 border-red-200";
-      case "manager":
-        return "bg-orange-100 text-orange-700 border-orange-200";
-      case "user":
-        return "bg-blue-100 text-blue-700 border-blue-200";
-      default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
-    }
-  };
-
-  // Only allow role change if currentUser is admin AND not editing own profile
-  const canChangeRole = currentUser?.role === "admin" && currentUser?._id !== user?._id;
-
   return (
     <>
       {typeof window !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl relative animate-fadeIn overflow-hidden">
             <button
-                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
-                        onClick={onClose}
-                        aria-label="Close modal"
-                      >
-                      <FaTimes />
-                    </button>
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+              onClick={onClose}
+              aria-label="Close modal"
+            >
+              <FaTimes />
+            </button>
 
             {/* Header */}
             <div className="p-6 border-b border-gray-200 bg-blue-50">
@@ -232,20 +254,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Skills & Expertise</h3>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  {user.skills && user.skills.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {user.skills.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium border border-blue-200"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-sm">No skills listed.</p>
-                  )}
+                  {skillsList}
                 </div>
               </div>
             </div>
@@ -270,4 +279,4 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
   );
 };
 
-export default UserProfileModal;
+export default React.memo(UserProfileModal);

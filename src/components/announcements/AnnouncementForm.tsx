@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useCallback } from "react";
 import { FaBullhorn, FaSpinner, FaMagic, FaTimes } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,16 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   const t = useTranslations("AnnouncementsPage");
   const [generatingContent, setGeneratingContent] = useState(false);
 
-  const handleGenerateContent = async () => {
+  // Memoize event handlers
+  const handleTitleChange = useCallback((v: string) => onTitleChange(v), [onTitleChange]);
+  const handleContentChange = useCallback((v: string) => onContentChange(v), [onContentChange]);
+  const handleCategoryChange = useCallback((v: string) => onCategoryChange(v), [onCategoryChange]);
+  const handlePinnedChange = useCallback((v: boolean) => onPinnedChange(v), [onPinnedChange]);
+  const handleExpiresAtChange = useCallback((v: string) => onExpiresAtChange(v), [onExpiresAtChange]);
+  const handleCancel = useCallback(() => onCancel(), [onCancel]);
+  const handleFormSubmit = useCallback((e: React.FormEvent) => onSubmit(e), [onSubmit]);
+
+  const handleGenerateContent = useCallback(async () => {
     if (!title) return;
     setGeneratingContent(true);
     try {
@@ -82,7 +92,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
     } finally {
       setGeneratingContent(false);
     }
-  };
+  }, [title, onContentChange]);
 
   // Convert string date to Date object for DatePicker
   const expiresAtDateObj = expiresAt ? new Date(expiresAt) : undefined;
@@ -107,7 +117,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
           </div>
           <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
-              onClick={onCancel}
+              onClick={handleCancel}
               aria-label="Close modal"
             >
             <FaTimes />
@@ -124,7 +134,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
           </div>
         )}
 
-        <form onSubmit={onSubmit} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           {/* Title */}
           <div>
             <label className={`block text-sm font-semibold mb-2 ${
@@ -136,7 +146,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
               type="text"
               placeholder={t("enterAnnouncementTitle")}
               value={title}
-              onChange={(e) => onTitleChange(e.target.value)}
+              onChange={(e) => handleTitleChange(e.target.value)}
               className="w-full py-3 px-4 text-base rounded-xl"
               required
               disabled={loading}
@@ -175,7 +185,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
             <textarea
               placeholder={t("writeAnnouncementContent")}
               value={content}
-              onChange={e => onContentChange(e.target.value)}
+              onChange={e => handleContentChange(e.target.value)}
               rows={6}
               className={`w-full py-3 px-4 text-base rounded-xl border transition-all duration-200 resize-y min-h-[120px] max-h-64
                 ${theme === 'dark' 
@@ -204,7 +214,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
                   <Button
                     key={cat}
                     type="button"
-                    onClick={() => onCategoryChange(cat)}
+                    onClick={() => handleCategoryChange(cat)}
                     className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
                       ${category === cat
                         ? `bg-gradient-to-r ${getCategoryColor(cat)} text-white border-transparent`
@@ -239,7 +249,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
               <div className="space-y-2">
                 <Button
                   type="button"
-                  onClick={() => onPinnedChange(false)}
+                  onClick={() => handlePinnedChange(false)}
                   className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
                     ${!pinned
                       ? theme === 'dark'
@@ -262,7 +272,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => onPinnedChange(true)}
+                  onClick={() => handlePinnedChange(true)}
                   className={`w-full py-5 px-4 h-16 rounded-xl border-2 transition-all duration-200 text-left
                     ${pinned
                       ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-transparent'
@@ -296,9 +306,9 @@ Write a clear, engaging, and informative announcement for all employees, based o
                 onChange={date => {
                   if (date) {
                     const formatted = date.toISOString().split("T")[0];
-                    onExpiresAtChange(formatted);
+                    handleExpiresAtChange(formatted);
                   } else {
-                    onExpiresAtChange("");
+                    handleExpiresAtChange("");
                   }
                 }}
                 disabled={loading}
@@ -318,7 +328,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
         <div className="flex gap-3">
           <Button
             type="button"
-            onClick={onCancel}
+            onClick={handleCancel}
             className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
               theme === 'dark'
                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -331,7 +341,7 @@ Write a clear, engaging, and informative announcement for all employees, based o
           </Button>
           <Button
             type="submit"
-            onClick={onSubmit}
+            onClick={handleFormSubmit}
             disabled={loading || !title || !content || !category}
             className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
               loading || !title || !content || !category

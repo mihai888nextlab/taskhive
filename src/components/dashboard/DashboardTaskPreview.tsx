@@ -1,5 +1,5 @@
 // components/DashboardTaskPreview.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   FaSpinner,
   FaRegCircle,
@@ -50,7 +50,8 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
 
-  const isTaskOverdue = React.useCallback((task: Task): boolean => {
+  // Memoize isTaskOverdue
+  const isTaskOverdue = useCallback((task: Task): boolean => {
     if (task.completed) return false;
     const deadlineDate = new Date(task.deadline);
     const now = new Date();
@@ -59,7 +60,8 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
     return deadlineDate < now;
   }, []);
 
-  const fetchTasks = React.useCallback(async () => {
+  // Memoize fetchTasks
+  const fetchTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -118,7 +120,8 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
     fetchTasks();
   }, [fetchTasks]);
 
-  const handleToggleComplete = async (task: Task) => {
+  // Memoize handleToggleComplete
+  const handleToggleComplete = useCallback(async (task: Task) => {
     setUpdatingTaskId(task._id);
     // Optimistic UI update
     setTasks((currentTasks) =>
@@ -151,20 +154,117 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
     } finally {
       setUpdatingTaskId(null);
     }
-  };
+  }, [fetchTasks]);
 
-  // nu e folosit
-  // const handleLogout = async () => {
-  //   try {
-  //     const res = await fetch("/api/auth/logout", { method: "POST" });
-  //     if (!res.ok) {
-  //       throw new Error("Logout failed");
-  //     }
-  //     router.push("/");
-  //   } catch (error) {
-  //     console.error("Error during logout:", error);
-  //   }
-  // };
+  // Memoize rendering of task list
+  const renderedTasks = useMemo(() => (
+    tasks.map((task) => {
+      const isOverdue = isTaskOverdue(task);
+      const deadlineDate = new Date(task.deadline);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      deadlineDate.setHours(0, 0, 0, 0);
+      const isToday = !isOverdue && deadlineDate.getTime() === now.getTime();
+      // Only show exclamation for tasks marked as important or overdue
+      let showExclamation = !!task.important || isOverdue;
+
+      // Highlight important tasks (overdue/today) with a bolder border and subtle background
+      let cardBgClass =
+        isOverdue
+          ? (theme === "dark"
+              ? "bg-red-900/10 border-red-500"
+              : "bg-red-50 border-red-500")
+          : isToday
+            ? (theme === "dark"
+                ? "bg-yellow-900/10 border-yellow-500"
+                : "bg-yellow-50 border-yellow-500")
+            : (theme === "dark"
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200");
+      let titleClass =
+        isOverdue
+          ? "text-lg font-extrabold text-red-700 flex items-center gap-2"
+          : showExclamation
+            ? "text-lg font-extrabold text-gray-900 flex items-center gap-2"
+            : theme === "dark"
+              ? "text-gray-100"
+              : "text-gray-900";
+      let deadlineClass =
+        isOverdue
+          ? "text-red-600 font-bold"
+          : isToday
+            ? "text-yellow-700 font-bold"
+            : theme === "dark"
+              ? "text-gray-300"
+              : "text-gray-700";
+      let icon = (
+        <FaRegCircle className={`transition-transform duration-300 text-2xl${isOverdue ? ' text-red-500' : ''}`} />
+      );
+      // Exclamation mark for important or overdue tasks
+      let exclamation = null;
+      if (isOverdue) {
+        exclamation = (
+          <FaExclamationTriangle className="inline-block mr-1 text-red-500 text-lg align-middle" title="Overdue" />
+        );
+      } else if (showExclamation) {
+        exclamation = (
+          <FaExclamationTriangle className="inline-block mr-1 text-orange-500 text-lg align-middle" title="Important" />
+        );
+      }
+
+      return (
+        <li
+          key={task._id}
+          className={`relative flex items-start justify-between p-5 rounded-xl border ${cardBgClass} shadow-sm group cursor-pointer transition-all duration-200`}
+          title={isOverdue ? t("taskOverdue", { default: "Task is overdue" }) : isToday ? t("taskDueToday", { default: "Task is due today" }) : t("clickToMarkComplete", { default: "Click to mark as complete" })}
+          style={{ opacity: isOverdue ? 0.9 : 1 }}
+          onClick={e => {
+            e.stopPropagation();
+            if (updatingTaskId !== task._id) handleToggleComplete(task);
+          }}
+        >
+          <div className="flex-1 pr-4">
+            <span
+              className={`leading-tight font-bold flex items-center gap-2 ${titleClass}`}
+              style={{ fontSize: (isOverdue || showExclamation) ? '1.15rem' : undefined }}
+            >
+              {exclamation}
+              {task.title}
+            </span>
+            {task.description && (
+              <p className={`mt-2 line-clamp-2 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+                {task.description}
+              </p>
+            )}
+            <p className={`mt-3 text-xs flex items-center gap-2 ${deadlineClass}`}> 
+              {t("due", { default: "Due:" })} {new Date(task.deadline).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+              {isOverdue && (
+                <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded font-extrabold tracking-wide shadow-sm border border-red-600">
+                  {t("overdue", { default: "OVERDUE" })}
+                </span>
+              )}
+              {isToday && !isOverdue && (
+                <span className="ml-2 px-2 py-0.5 bg-yellow-500 text-white text-xs rounded font-extrabold tracking-wide shadow-sm border border-yellow-600">
+                  {t("today", { default: "TODAY" })}
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="self-center pl-3">
+            {updatingTaskId === task._id ? (
+              <FaSpinner className="animate-spin text-2xl text-primary" />
+            ) : (
+              icon
+            )}
+          </div>
+        </li>
+      );
+    })
+  ), [tasks, isTaskOverdue, theme, updatingTaskId, t]);
 
   // Only render the list and controls, no container or heading
   // Clicking a task marks it complete, clicking outside (card) navigates
@@ -199,112 +299,7 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
         </div>
       ) : (
         <ul className="space-y-5">
-          {tasks.map((task) => {
-            const isOverdue = isTaskOverdue(task);
-            const deadlineDate = new Date(task.deadline);
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            deadlineDate.setHours(0, 0, 0, 0);
-            const isToday = !isOverdue && deadlineDate.getTime() === now.getTime();
-            // Only show exclamation for tasks marked as important or overdue
-            let showExclamation = !!task.important || isOverdue;
-
-            // Highlight important tasks (overdue/today) with a bolder border and subtle background
-            let cardBgClass =
-              isOverdue
-                ? (theme === "dark"
-                    ? "bg-red-900/10 border-red-500"
-                    : "bg-red-50 border-red-500")
-                : isToday
-                  ? (theme === "dark"
-                      ? "bg-yellow-900/10 border-yellow-500"
-                      : "bg-yellow-50 border-yellow-500")
-                  : (theme === "dark"
-                      ? "bg-gray-800 border-gray-700"
-                      : "bg-white border-gray-200");
-            let titleClass =
-              isOverdue
-                ? "text-lg font-extrabold text-red-700 flex items-center gap-2"
-                : showExclamation
-                  ? "text-lg font-extrabold text-gray-900 flex items-center gap-2"
-                  : theme === "dark"
-                    ? "text-gray-100"
-                    : "text-gray-900";
-            let deadlineClass =
-              isOverdue
-                ? "text-red-600 font-bold"
-                : isToday
-                  ? "text-yellow-700 font-bold"
-                  : theme === "dark"
-                    ? "text-gray-300"
-                    : "text-gray-700";
-            let icon = (
-              <FaRegCircle className={`transition-transform duration-300 text-2xl${isOverdue ? ' text-red-500' : ''}`} />
-            );
-            // Exclamation mark for important or overdue tasks
-            let exclamation = null;
-            if (isOverdue) {
-              exclamation = (
-                <FaExclamationTriangle className="inline-block mr-1 text-red-500 text-lg align-middle" title="Overdue" />
-              );
-            } else if (showExclamation) {
-              exclamation = (
-                <FaExclamationTriangle className="inline-block mr-1 text-orange-500 text-lg align-middle" title="Important" />
-              );
-            }
-
-            return (
-              <li
-                key={task._id}
-                className={`relative flex items-start justify-between p-5 rounded-xl border ${cardBgClass} shadow-sm group cursor-pointer transition-all duration-200`}
-                title={isOverdue ? t("taskOverdue", { default: "Task is overdue" }) : isToday ? t("taskDueToday", { default: "Task is due today" }) : t("clickToMarkComplete", { default: "Click to mark as complete" })}
-                style={{ opacity: isOverdue ? 0.9 : 1 }}
-                onClick={e => {
-                  e.stopPropagation();
-                  if (updatingTaskId !== task._id) handleToggleComplete(task);
-                }}
-              >
-                <div className="flex-1 pr-4">
-                  <span
-                    className={`leading-tight font-bold flex items-center gap-2 ${titleClass}`}
-                    style={{ fontSize: (isOverdue || showExclamation) ? '1.15rem' : undefined }}
-                  >
-                    {exclamation}
-                    {task.title}
-                  </span>
-                  {task.description && (
-                    <p className={`mt-2 line-clamp-2 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
-                      {task.description}
-                    </p>
-                  )}
-                  <p className={`mt-3 text-xs flex items-center gap-2 ${deadlineClass}`}> 
-                    {t("due", { default: "Due:" })} {new Date(task.deadline).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                    {isOverdue && (
-                      <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded font-extrabold tracking-wide shadow-sm border border-red-600">
-                        {t("overdue", { default: "OVERDUE" })}
-                      </span>
-                    )}
-                    {isToday && !isOverdue && (
-                      <span className="ml-2 px-2 py-0.5 bg-yellow-500 text-white text-xs rounded font-extrabold tracking-wide shadow-sm border border-yellow-600">
-                        {t("today", { default: "TODAY" })}
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <div className="self-center pl-3">
-                  {updatingTaskId === task._id ? (
-                    <FaSpinner className="animate-spin text-2xl text-primary" />
-                  ) : (
-                    icon
-                  )}
-                </div>
-              </li>
-            );
-          })}
+          {renderedTasks}
         </ul>
       )}
     </>

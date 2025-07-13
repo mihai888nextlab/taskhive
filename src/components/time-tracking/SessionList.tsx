@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { FaSearch, FaTrash, FaSpinner, FaClock } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,17 @@ const SessionList: React.FC<SessionListProps> = React.memo(({
 
   const tags = ["General", "Deep Work", "Meeting", "Break", "Learning"];
 
+  // Memoize input handlers
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSessionSearch(e.target.value);
+  }, [setSessionSearch]);
+  const handleTagFilterChange = useCallback((v: string) => {
+    setSessionTagFilter(v);
+  }, [setSessionTagFilter]);
+  const handleSortChange = useCallback((v: string) => {
+    setSessionSort(v);
+  }, [setSessionSort]);
+
   // Memoize filteredSessions
   const filteredSessions = useMemo(() => {
     return sessions.filter(session => {
@@ -81,7 +92,7 @@ const SessionList: React.FC<SessionListProps> = React.memo(({
             type="text"
             placeholder={t("searchSessions")}
             value={sessionSearch}
-            onChange={e => setSessionSearch(e.target.value)}
+            onChange={handleSearchChange}
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl h-[36px] border transition-all duration-200 ${
               theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
@@ -94,7 +105,7 @@ const SessionList: React.FC<SessionListProps> = React.memo(({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Select
             value={sessionTagFilter}
-            onValueChange={setSessionTagFilter}
+            onValueChange={handleTagFilterChange}
             disabled={false}
           >
             <SelectTrigger
@@ -119,7 +130,7 @@ const SessionList: React.FC<SessionListProps> = React.memo(({
 
           <Select
             value={sessionSort}
-            onValueChange={setSessionSort}
+            onValueChange={handleSortChange}
             disabled={false}
           >
             <SelectTrigger

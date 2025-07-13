@@ -6,7 +6,7 @@ import MobileSidebar from "@/components/sidebar/MobileSidebar";
 import UserProfileModal from "@/components/modals/UserProfileModal";
 import AIWindow from "../AIWindow";
 import { FaBars } from "react-icons/fa";
-import { menu } from "@/components/menuConfig"; // Your menu config
+import { menu } from "@/constants/menuConfig"; // Your menu config
 import PersistentTimer from "@/components/time-tracking/PersistentTimer";
 import { useTimeTracking } from "@/components/time-tracking/TimeTrackingContext";
 import { useAIWindow } from "@/contexts/AIWindowContext";

@@ -3,7 +3,7 @@ import Image from "next/image";
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
 import { useAuth } from "@/hooks/useAuth";
 import { User } from "@/types"; // Adjust the import path as necessary
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useTranslations } from "next-intl";
 import AddCompanyModal from "@/components/modals/AddCompanyModal";
@@ -49,7 +49,8 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
   const [addCompanyOpen, setAddCompanyOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleCompanyChange = async (company: { id: string; name: string }) => {
+  // Memoize company change handler
+  const handleCompanyChange = useCallback(async (company: { id: string; name: string }) => {
     await fetch("/api/auth/change-company", {
       method: "POST",
       headers: {
@@ -63,7 +64,52 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
 
     realRouter.push("/app");
     realRouter.reload();
-  };
+  }, [user._id, realRouter]);
+
+  // Memoize add company modal close handler
+  const handleAddCompanyClose = useCallback(() => {
+    setAddCompanyOpen(false);
+    realRouter.reload();
+  }, [realRouter]);
+
+  // Memoize company dropdown rendering
+  const companyDropdown = useMemo(() => (
+    dropdownOpen && (
+      <div className="absolute left-0 bottom-full mb-2 w-full bg-white rounded-xl shadow-xl z-50 border border-gray-200">
+        {user.companies
+          ?.sort((a, b) => (a.id == selectedCompany.id ? -1 : 1))
+          .map((company) => (
+            <button
+              key={company.id}
+              className={`w-full text-left px-4 py-2 rounded-lg transition font-medium flex items-center gap-2
+                ${
+                  selectedCompany.id === company.id
+                    ? "bg-blue-50 text-blue-700 font-bold"
+                    : "text-gray-700 hover:bg-gray-100"
+                }
+              `}
+              onClick={() => {
+                setSelectedCompany(company);
+                setDropdownOpen(false);
+                handleCompanyChange(company);
+              }}
+            >
+              <span>{company.name}</span>
+            </button>
+          ))}
+        <button
+          className="w-full text-left px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-blue-600 hover:bg-blue-50 transition"
+          onClick={() => {
+            setDropdownOpen(false);
+            setAddCompanyOpen(true);
+          }}
+        >
+          <FiPlus className="text-blue-500 text-lg" />
+          {t("addCompany", { default: "Add Company" })}
+        </button>
+      </div>
+    )
+  ), [dropdownOpen, user.companies, selectedCompany.id, handleCompanyChange, t]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -190,52 +236,14 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
-        {dropdownOpen && (
-          <div className="absolute left-0 bottom-full mb-2 w-full bg-white rounded-xl shadow-xl z-50 border border-gray-200">
-            {user.companies
-              ?.sort((a, b) => (a.id == selectedCompany.id ? -1 : 1))
-              .map((company) => (
-                <button
-                  key={company.id}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition font-medium flex items-center gap-2
-              ${
-                selectedCompany.id === company.id
-                  ? "bg-blue-50 text-blue-700 font-bold"
-                  : "text-gray-700 hover:bg-gray-100"
-              }
-            `}
-                  onClick={() => {
-                    setSelectedCompany(company);
-                    setDropdownOpen(false);
-                    handleCompanyChange(company);
-                  }}
-                >
-                  {/* Optionally add a company icon here */}
-                  <span>{company.name}</span>
-                </button>
-              ))}
-            <button
-              className="w-full text-left px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-blue-600 hover:bg-blue-50 transition"
-              onClick={() => {
-                setDropdownOpen(false);
-                setAddCompanyOpen(true);
-              }}
-            >
-              <FiPlus className="text-blue-500 text-lg" />
-              {t("addCompany", { default: "Add Company" })}
-            </button>
-          </div>
-        )}
+        {companyDropdown}
       </div>
       {/* AddCompanyModal */}
       <AddCompanyModal
         open={addCompanyOpen}
-        onClose={() => setAddCompanyOpen(false)}
+        onClose={handleAddCompanyClose}
         userId={user._id}
-        onCompanyAdded={() => {
-          setAddCompanyOpen(false);
-          realRouter.reload();
-        }}
+        onCompanyAdded={handleAddCompanyClose}
       />
     </aside>
   );

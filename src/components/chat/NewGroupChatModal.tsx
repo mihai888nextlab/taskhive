@@ -166,6 +166,92 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = React.memo(({
     onClose();
   }, [onClose]);
 
+  // Memoize search input handler
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  // Memoize users list rendering
+  const usersList = useMemo(() => {
+    if (loadingUsers) {
+      return (
+        <div className="text-center py-12">
+          <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-500 text-lg">{t("loadingTeamMembers")}</p>
+        </div>
+      );
+    }
+    if (memoFilteredUsers.length === 0 && searchTerm === "") {
+      return (
+        <div className="text-center py-12">
+          <FaUsers className="text-6xl text-gray-400 mx-auto mb-4" />
+          <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noTeamMembers")}</h4>
+          <p className="text-gray-500">{t("noOtherUsersAvailable")}</p>
+        </div>
+      );
+    }
+    if (memoFilteredUsers.length === 0 && searchTerm !== "") {
+      return (
+        <div className="text-center py-12">
+          <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
+          <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noResultsFound")}</h4>
+          <p className="text-gray-500">{t("tryDifferentSearch")}</p>
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-3">
+        {memoFilteredUsers.map((u) => {
+          const isSelected = selectedUsers.some(
+            (su) => (su._id as string) === (u._id as string)
+          );
+          return (
+            <div
+              key={u._id as string}
+              className={`flex items-center justify-between p-4 rounded-xl transition-all duration-200 border-2 ${
+                isSelected 
+                  ? "bg-blue-50 border-blue-200" 
+                  : "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-gray-600 font-medium text-lg">
+                    {u.userId.firstName?.[0]}{u.userId.lastName?.[0]}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-lg">
+                    {u.userId.firstName} {u.userId.lastName}
+                  </p>
+                  <p className="text-gray-600">{u.userId.email}</p>
+                </div>
+              </div>
+              
+              {isSelected ? (
+                <div className="flex items-center gap-2 text-blue-600 font-medium">
+                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm">✓</span>
+                  </div>
+                  {t("added")}
+                </div>
+              ) : (
+                <Button 
+                  onClick={() => toggleUserSelection(u)}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 flex items-center gap-2"
+                  disabled={creatingGroup}
+                >
+                  <FaPlus className="text-sm" />
+                  {t("add")}
+                </Button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }, [loadingUsers, memoFilteredUsers, searchTerm, t, selectedUsers, toggleUserSelection, creatingGroup]);
+
   if (!isOpen) return null;
 
   return (
@@ -319,7 +405,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = React.memo(({
                     placeholder={t("searchUsersPlaceholder")}
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={handleSearchChange}
                     disabled={creatingGroup}
                   />
                 </div>
@@ -329,74 +415,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = React.memo(({
               <div className="flex-1 p-6 overflow-y-auto">
                 <h4 className="font-semibold text-gray-900 mb-4">{t("availableTeamMembers")}</h4>
                 
-                {loadingUsers ? (
-                  <div className="text-center py-12">
-                    <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
-                    <p className="text-gray-500 text-lg">{t("loadingTeamMembers")}</p>
-                  </div>
-                ) : memoFilteredUsers.length === 0 && searchTerm === "" ? (
-                  <div className="text-center py-12">
-                    <FaUsers className="text-6xl text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noTeamMembers")}</h4>
-                    <p className="text-gray-500">{t("noOtherUsersAvailable")}</p>
-                  </div>
-                ) : memoFilteredUsers.length === 0 && searchTerm !== "" ? (
-                  <div className="text-center py-12">
-                    <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noResultsFound")}</h4>
-                    <p className="text-gray-500">{t("tryDifferentSearch")}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {memoFilteredUsers.map((u) => {
-                      const isSelected = selectedUsers.some(
-                        (su) => (su._id as string) === (u._id as string)
-                      );
-                      return (
-                        <div
-                          key={u._id as string}
-                          className={`flex items-center justify-between p-4 rounded-xl transition-all duration-200 border-2 ${
-                            isSelected 
-                              ? "bg-blue-50 border-blue-200" 
-                              : "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                              <span className="text-gray-600 font-medium text-lg">
-                                {u.userId.firstName?.[0]}{u.userId.lastName?.[0]}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="font-semibold text-gray-900 text-lg">
-                                {u.userId.firstName} {u.userId.lastName}
-                              </p>
-                              <p className="text-gray-600">{u.userId.email}</p>
-                            </div>
-                          </div>
-                          
-                          {isSelected ? (
-                            <div className="flex items-center gap-2 text-blue-600 font-medium">
-                              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                                <span className="text-white text-sm">✓</span>
-                              </div>
-                              {t("added")}
-                            </div>
-                          ) : (
-                            <Button 
-                              onClick={() => toggleUserSelection(u)}
-                              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 flex items-center gap-2"
-                              disabled={creatingGroup}
-                            >
-                              <FaPlus className="text-sm" />
-                              {t("add")}
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                {usersList}
               </div>
             </div>
           </div>

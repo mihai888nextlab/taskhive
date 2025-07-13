@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { FaSpinner, FaMagic, FaTimes, FaTasks, FaExclamationTriangle, FaBolt, FaFileAlt, FaLightbulb, FaList } from "react-icons/fa";
 import SubtasksModal from "./SubtasksModal";
 import { Input } from "@/components/ui/input";
@@ -64,10 +64,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
     setLocalPriority(priority);
   }, [priority]);
 
-  const handlePriorityChange = (newPriority: 'critical' | 'high' | 'medium' | 'low') => {
+  // Memoize priority change handler
+  const handlePriorityChange = useCallback((newPriority: 'critical' | 'high' | 'medium' | 'low') => {
     setLocalPriority(newPriority);
     onPriorityChange(newPriority);
-  };
+  }, [onPriorityChange]);
 
   const getPriorityColor = (priorityLevel: string) => {
     switch (priorityLevel) {
@@ -89,7 +90,8 @@ const TaskForm: React.FC<TaskFormProps> = ({
     }
   };
 
-  const handleGenerateDescription = async () => {
+  // Memoize generate description handler
+  const handleGenerateDescription = useCallback(async () => {
     if (!taskTitle) return;
     setGeneratingDescription(true);
     try {
@@ -126,9 +128,10 @@ Please enhance and expand this existing description while keeping the original i
     } finally {
       setGeneratingDescription(false);
     }
-  };
+  }, [taskTitle, taskDescription, onDescriptionChange]);
 
-  const handleGenerateSubtasks = async () => {
+  // Memoize generate subtasks handler
+  const handleGenerateSubtasks = useCallback(async () => {
     if (!taskTitle) return;
     setGeneratingSubtasks(true);
     try {
@@ -149,33 +152,37 @@ Please enhance and expand this existing description while keeping the original i
     } finally {
       setGeneratingSubtasks(false);
     }
-  };
+  }, [taskTitle, taskDescription]);
 
-  const addManualSubtask = () => {
+  // Memoize add/remove/update subtask handlers
+  const addManualSubtask = useCallback(() => {
     setSubtasks([...subtasks, { title: "", description: "" }]);
-  };
+  }, [subtasks]);
 
-  const removeSubtask = (index: number) => {
+  const removeSubtask = useCallback((index: number) => {
     setSubtasks(subtasks.filter((_, i) => i !== index));
-  };
+  }, [subtasks]);
 
-  const updateSubtask = (index: number, field: 'title' | 'description', value: string) => {
+  const updateSubtask = useCallback((index: number, field: 'title' | 'description', value: string) => {
     const updated = [...subtasks];
     updated[index][field] = value;
     setSubtasks(updated);
-  };
+  }, [subtasks]);
 
-  const handleSaveSubtasks = (newSubtasks: Subtask[]) => {
+  const handleSaveSubtasks = useCallback((newSubtasks: Subtask[]) => {
     setSubtasks(newSubtasks);
     setIncludeSubtasks(newSubtasks.length > 0);
     setShowSubtasksModal(false);
-  };
+  }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     const validSubtasks = includeSubtasks ? subtasks.filter(s => s.title.trim()) : [];
     onSubmit(e, validSubtasks);
-  };
+  }, [includeSubtasks, subtasks, onSubmit]);
+
+  // Memoize deadlineDateObj
+  const deadlineDateObj = useMemo(() => taskDeadline ? new Date(taskDeadline) : undefined, [taskDeadline]);
 
   useEffect(() => {
     if (!show) {
@@ -186,8 +193,6 @@ Please enhance and expand this existing description while keeping the original i
   }, [show]);
 
   // Convert string date to Date object for DatePicker
-  const deadlineDateObj = taskDeadline ? new Date(taskDeadline) : undefined;
-
   if (!show) return null;
   
   return (

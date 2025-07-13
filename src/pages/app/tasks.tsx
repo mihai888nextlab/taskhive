@@ -85,8 +85,8 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
 
   const t = useTranslations("TasksPage");
 
-  // Fetch tasks
-  const fetchTasks = async () => {
+  // Memoize fetchTasks
+  const fetchTasks = useCallback(async () => {
     setLoading(true);
     setListError(null);
     try {
@@ -134,10 +134,10 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUserId, currentUserEmail, mySortBy]);
 
-  // Fetch assigned tasks
-  const fetchAssignedTasks = async () => {
+  // Memoize fetchAssignedTasks
+  const fetchAssignedTasks = useCallback(async () => {
     try {
       const response = await fetch("/api/tasks/assigned-by-me", {
         method: "GET",
@@ -149,7 +149,7 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     } catch (err) {
       // Optionally handle error
     }
-  };
+  }, []);
 
   // Fetch users below
   useEffect(() => {
@@ -186,8 +186,8 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     fetchAssignedTasks();
   }, []);
 
-  // Form handlers
-  const resetForm = () => {
+  // Memoize resetForm
+  const resetForm = useCallback(() => {
     setTaskTitle("");
     setTaskDescription("");
     setTaskDeadline("");
@@ -195,9 +195,10 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     setFormError(null);
     setAssignedTo("");
     setPriority('medium');
-  };
+  }, []);
 
-  const handleAddTask = async (e: React.FormEvent, subtasks?: any[]) => {
+  // Memoize handleAddTask
+  const handleAddTask = useCallback(async (e: React.FormEvent, subtasks?: any[]) => {
     e.preventDefault();
     if (!taskTitle.trim() || !taskDeadline.trim()) {
       setFormError(t("taskTitle") + " and " + t("deadline") + " are required!");
@@ -251,9 +252,10 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [taskTitle, taskDeadline, taskDescription, assignedTo, priority, editingTaskId, t, fetchTasks, fetchAssignedTasks, resetForm]);
 
-  const handleDeleteTask = async (id: string) => {
+  // Memoize handleDeleteTask
+  const handleDeleteTask = useCallback(async (id: string) => {
     if (!window.confirm(t("deleteAnnouncementConfirm", { default: "Are you sure you want to delete this task?" }))) return;
     setLoading(true);
     setListError(null);
@@ -267,9 +269,10 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t, fetchTasks]);
 
-  const handleToggleComplete = async (task: TaskType) => {
+  // Memoize handleToggleComplete
+  const handleToggleComplete = useCallback(async (task: TaskType) => {
     if (loading) return;
     if (task.subtasks && task.subtasks.length > 0 && !task.isSubtask) {
       alert(t("editingTaskWithSubtasks", { default: "This task has subtasks. Complete all subtasks to automatically complete this task." }));
@@ -295,8 +298,9 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, t, fetchTasks, fetchAssignedTasks]);
 
+  // Memoize handleEditClick
   const handleEditClick = useCallback((task: TaskType) => {
     setEditingTaskId(task._id);
     setTaskTitle(task.title);
@@ -310,10 +314,11 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     setShowForm(true);
   }, [setEditingTaskId, setTaskTitle, setTaskDescription, setTaskDeadline, setAssignedTo, setPriority, setFormError, setShowForm]);
 
-  const handleClose = () => {
+  // Memoize handleClose
+  const handleClose = useCallback(() => {
     resetForm();
     setShowForm(false);
-  };
+  }, [resetForm]);
 
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>

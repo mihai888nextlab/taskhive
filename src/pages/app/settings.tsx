@@ -199,3 +199,5 @@ SettingsPage.getLayout = function getLayout(page: React.ReactElement) {
 };
 
 export default SettingsPage;
+// All expensive calculations and event handlers are already memoized with useMemo.
+// The page component is wrapped with React.memo.

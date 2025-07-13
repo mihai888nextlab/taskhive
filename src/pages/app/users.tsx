@@ -45,7 +45,7 @@ interface User {
   permissions: string[];
 }
 
-const UsersPage: NextPageWithLayout = () => {
+const UsersPage: NextPageWithLayout = React.memo(() => {
   const { theme } = useTheme();
   const { user } = useAuth();
   const t = useTranslations("UsersPage");
@@ -69,8 +69,8 @@ const UsersPage: NextPageWithLayout = () => {
     "firstNameAsc" | "lastNameAsc" | "roleAsc"
   >("firstNameAsc");
 
-  // Fetch data functions
-  const fetchUsers = async () => {
+  // Memoize fetchUsers
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch("/api/get-users");
@@ -82,9 +82,10 @@ const UsersPage: NextPageWithLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchRoles = async () => {
+  // Memoize fetchRoles
+  const fetchRoles = useCallback(async () => {
     try {
       const response = await fetch("/api/roles");
       if (!response.ok) throw new Error("Failed to fetch roles");
@@ -93,9 +94,9 @@ const UsersPage: NextPageWithLayout = () => {
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
-  };
+  }, []);
 
-  // Handle functions
+  // Memoize handleUserClick
   const handleUserClick = useCallback((userId: string) => {
     const userObj = users.find((u) => u.userId._id === userId);
     if (userObj) {
@@ -107,7 +108,8 @@ const UsersPage: NextPageWithLayout = () => {
     }
   }, [users]);
 
-  const addUser = async (
+  // Memoize addUser
+  const addUser = useCallback(async (
     email: string,
     role: string
   ): Promise<string | undefined> => {
@@ -130,9 +132,10 @@ const UsersPage: NextPageWithLayout = () => {
       console.error("Error adding user:", error);
       return `Error adding user: ${error instanceof Error ? error.message : String(error)}`;
     }
-  };
+  }, [fetchUsers]);
 
-  const addRole = async (roleName: string) => {
+  // Memoize addRole
+  const addRole = useCallback(async (roleName: string) => {
     try {
       const response = await fetch("/api/roles", {
         method: "POST",
@@ -148,8 +151,9 @@ const UsersPage: NextPageWithLayout = () => {
     } catch (error) {
       console.error("Error adding role:", error);
     }
-  };
+  }, [fetchRoles]);
 
+  // Memoize filteredUsers
   const filteredUsers = useMemo(() => {
     const companyId = user && "companyId" in user ? (user as any).companyId : undefined;
     const q = search.trim().toLowerCase();
@@ -200,13 +204,13 @@ const UsersPage: NextPageWithLayout = () => {
   const handleTestButtonClick = () => {};
 
   // Handler to open Add User Modal
-  const handleOpenAddUserModal = () => setAddUserModalOpen(true);
+  const handleOpenAddUserModal = useCallback(() => setAddUserModalOpen(true), []);
 
   // Handler to open Add Role Modal
-  const handleOpenAddRoleModal = () => setAddRoleModalOpen(true);
+  const handleOpenAddRoleModal = useCallback(() => setAddRoleModalOpen(true), []);
 
   // Handler to open Org Chart Modal
-  const handleOpenOrgChartModal = () => setOrgChartModalOpen(true);
+  const handleOpenOrgChartModal = useCallback(() => setOrgChartModalOpen(true), []);
 
   //TERMINAT TEST
 
@@ -410,10 +414,10 @@ const UsersPage: NextPageWithLayout = () => {
         )}
     </div>
   );
-};
+});
 
 UsersPage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default UsersPage;
+export default React.memo(UsersPage);

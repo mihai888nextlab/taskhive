@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { TableDataItem, TableColumn, TableAction } from "@/types";
 
 interface DataTableProps<T extends TableDataItem> {
@@ -18,6 +18,64 @@ const Table = React.memo(<T extends TableDataItem>({
   emptyMessage = "Nu există date de afișat.",
   rowOnClick,
 }: DataTableProps<T>) => {
+  // Memoize row click handler
+  const handleRowClick = useCallback((item: T) => {
+    if (rowOnClick) rowOnClick(item);
+  }, [rowOnClick]);
+
+  // Memoize action click handler
+  const getActionHandler = useCallback((action: TableAction<T>, item: T) => {
+    return () => action.onClick(item);
+  }, []);
+
+  // Memoize table rows rendering
+  const tableRows = useMemo(() => (
+    data.map((item, idx) => (
+      <tr
+        key={item.id || idx}
+        className={`hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
+          rowOnClick ? "cursor-pointer" : ""
+        }`}
+        onClick={rowOnClick ? () => handleRowClick(item) : undefined}
+      >
+        {columns.map((column) => (
+          <td
+            key={`${item.id}-${column.key as string}`}
+            className={`py-3 px-6 whitespace-nowrap ${
+              column.align ? `text-${column.align}` : "text-left"
+            }`}
+          >
+            {/* Dacă există o funcție `render`, o folosim. Altfel, afișăm valoarea direct. */}
+            {column.render
+              ? column.render(item)
+              : String(item[column.key as keyof T] ?? "")}
+          </td>
+        ))}
+        {actions && actions.length > 0 && (
+          <td className="py-3 px-6 text-center">
+            <div className="flex items-center justify-center space-x-2">
+              {actions.map((action, index) => (
+                <button
+                  key={`${item.id}-action-${index}`}
+                  onClick={getActionHandler(action, item)}
+                  className={`
+                      py-1 px-3 rounded-lg text-xs transition-colors duration-200
+                      ${
+                        action.className ||
+                        "bg-blue-500 hover:bg-blue-600 text-white"
+                      }
+                    `}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </td>
+        )}
+      </tr>
+    ))
+  ), [data, columns, actions, rowOnClick, handleRowClick, getActionHandler]);
+
   return (
     <div className="bg-white rounded-xl overflow-hidden">
       {title && (
@@ -53,52 +111,7 @@ const Table = React.memo(<T extends TableDataItem>({
               </tr>
             </thead>
             <tbody className="text-gray-700 text-sm font-light divide-y divide-gray-200">
-              {data.map((item, idx) => (
-                <tr
-                  key={item.id || idx}
-                  className={`hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
-                    rowOnClick
-                      ? "cursor-pointer"
-                      : ""
-                  }`}
-                  onClick={rowOnClick ? () => rowOnClick(item) : undefined}
-                >
-                  {columns.map((column) => (
-                    <td
-                      key={`${item.id}-${column.key as string}`}
-                      className={`py-3 px-6 whitespace-nowrap ${
-                        column.align ? `text-${column.align}` : "text-left"
-                      }`}
-                    >
-                      {/* Dacă există o funcție `render`, o folosim. Altfel, afișăm valoarea direct. */}
-                      {column.render
-                        ? column.render(item)
-                        : String(item[column.key as keyof T] ?? "")}
-                    </td>
-                  ))}
-                  {actions && actions.length > 0 && (
-                    <td className="py-3 px-6 text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        {actions.map((action, index) => (
-                          <button
-                            key={`${item.id}-action-${index}`}
-                            onClick={() => action.onClick(item)}
-                            className={`
-                                py-1 px-3 rounded-lg text-xs transition-colors duration-200
-                                ${
-                                  action.className ||
-                                  "bg-blue-500 hover:bg-blue-600 text-white"
-                                }
-                              `}
-                          >
-                            {action.label}
-                          </button>
-                        ))}
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
+              {tableRows}
             </tbody>
           </table>
         </div>

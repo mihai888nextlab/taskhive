@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import UserCard from "./UserCard";
 import { FaSearch, FaSpinner, FaUsers, FaFilter, FaSort } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,7 @@ interface UserListProps {
   onSortByChange?: (v: "firstNameAsc" | "lastNameAsc" | "roleAsc") => void;
 }
 
-const UserList: React.FC<UserListProps> = ({
+const UserList: React.FC<UserListProps> = React.memo(({
   users,
   loading,
   onUserClick,
@@ -102,7 +102,7 @@ const UserList: React.FC<UserListProps> = ({
     return result;
   }, [users, search, filterRole, sortBy, currentUser]);
 
-  // Compute all roles present in the company (not just filtered users)
+  // Memoize companyRoles
   const companyId = currentUser && "companyId" in currentUser ? currentUser.companyId : undefined;
   const companyRoles = useMemo(() => {
     const set = new Set<string>();
@@ -111,6 +111,17 @@ const UserList: React.FC<UserListProps> = ({
     });
     return Array.from(set);
   }, [users, companyId]);
+
+  // Memoize input handlers
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange && onSearchChange(e.target.value);
+  }, [onSearchChange]);
+  const handleFilterRoleChange = useCallback((v: string) => {
+    onFilterRoleChange && onFilterRoleChange(v);
+  }, [onFilterRoleChange]);
+  const handleSortByChange = useCallback((v: "firstNameAsc" | "lastNameAsc" | "roleAsc") => {
+    onSortByChange && onSortByChange(v);
+  }, [onSortByChange]);
 
   if (controlsOnly) {
     return (
@@ -122,7 +133,7 @@ const UserList: React.FC<UserListProps> = ({
             type="text"
             placeholder={t("searchUsersPlaceholder")}
             value={search}
-            onChange={e => onSearchChange && onSearchChange(e.target.value)}
+            onChange={handleSearchChange}
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
               theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
@@ -137,7 +148,7 @@ const UserList: React.FC<UserListProps> = ({
             <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
             <Select
               value={filterRole}
-              onValueChange={onFilterRoleChange}
+              onValueChange={handleFilterRoleChange}
             >
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
                 <SelectValue placeholder={t("role")} />
@@ -166,7 +177,7 @@ const UserList: React.FC<UserListProps> = ({
             <FaSort className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
             <Select
               value={sortBy}
-              onValueChange={onSortByChange}
+              onValueChange={handleSortByChange}
             >
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
                 <SelectValue placeholder={t("sortBy")} />
@@ -277,7 +288,7 @@ const UserList: React.FC<UserListProps> = ({
             type="text"
             placeholder={t("searchUsersPlaceholder")}
             value={search}
-            onChange={e => onSearchChange && onSearchChange(e.target.value)}
+            onChange={handleSearchChange}
             className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all duration-200 ${
               theme === 'dark' 
                 ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20' 
@@ -292,7 +303,7 @@ const UserList: React.FC<UserListProps> = ({
             <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
             <Select
               value={filterRole}
-              onValueChange={onFilterRoleChange}
+              onValueChange={handleFilterRoleChange}
             >
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
                 <SelectValue placeholder={t("role")} />
@@ -321,7 +332,7 @@ const UserList: React.FC<UserListProps> = ({
             <FaSort className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
             <Select
               value={sortBy}
-              onValueChange={onSortByChange}
+              onValueChange={handleSortByChange}
             >
               <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
                 <SelectValue placeholder={t("sortBy")} />
@@ -417,6 +428,6 @@ const UserList: React.FC<UserListProps> = ({
       </div>
     </>
   );
-};
+});
 
 export default React.memo(UserList);

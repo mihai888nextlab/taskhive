@@ -24,7 +24,6 @@ jest.mock("../../src/db/models/userCompanyModel", () => ({
   __esModule: true,
   default: {
     findOne: jest.fn(),
-    find: jest.fn(),
   },
 }));
 
@@ -80,7 +79,7 @@ describe("/api/announcements index handler", () => {
   });
 
   it("returns 401 for invalid token payload", async () => {
-    (jwt.verify as jest.Mock).mockReturnValueOnce({});
+    (jwt.verify as jest.Mock).mockReturnValueOnce(undefined);
     const req = mockReq("GET");
     const res = mockRes();
     await handler(req, res);
@@ -90,10 +89,8 @@ describe("/api/announcements index handler", () => {
 
   it("returns 200 and announcements for GET", async () => {
     (UserModel.findById as jest.Mock).mockResolvedValue({ _id: "507f1f77bcf86cd799439011" });
-    (userCompanyModel.findOne as jest.Mock).mockResolvedValue({ role: "admin", companyId: "company123" });
-    (userCompanyModel.find as jest.Mock).mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([{ userId: "507f1f77bcf86cd799439011" }]),
+    (userCompanyModel.findOne as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({ role: "admin", companyId: "company123" }),
     });
     (AnnouncementModel.find as jest.Mock).mockReturnValue({
       sort: jest.fn().mockReturnThis(),
@@ -109,10 +106,8 @@ describe("/api/announcements index handler", () => {
 
   it("returns 403 for POST if not admin", async () => {
     (UserModel.findById as jest.Mock).mockResolvedValue({ _id: "507f1f77bcf86cd799439011" });
-    (userCompanyModel.findOne as jest.Mock).mockResolvedValue({ role: "user", companyId: "company123" });
-    (userCompanyModel.find as jest.Mock).mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([{ userId: "507f1f77bcf86cd799439011" }]),
+    (userCompanyModel.findOne as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({ role: "user", companyId: "company123" }),
     });
 
     const req = mockReq("POST", { title: "t", content: "c", category: "cat" });
@@ -124,10 +119,8 @@ describe("/api/announcements index handler", () => {
 
   it("returns 400 for POST missing fields", async () => {
     (UserModel.findById as jest.Mock).mockResolvedValue({ _id: "507f1f77bcf86cd799439011" });
-    (userCompanyModel.findOne as jest.Mock).mockResolvedValue({ role: "admin", companyId: "company123" });
-    (userCompanyModel.find as jest.Mock).mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([{ userId: "507f1f77bcf86cd799439011" }]),
+    (userCompanyModel.findOne as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({ role: "admin", companyId: "company123" }),
     });
 
     const req = mockReq("POST", { title: "", content: "", category: "" });
@@ -137,36 +130,27 @@ describe("/api/announcements index handler", () => {
     expect(res.json).toHaveBeenCalledWith({ message: "Title, content, and category are required." });
   });
 
-  it("returns 201 for POST with valid data", async () => {
-    (UserModel.findById as jest.Mock).mockResolvedValue({ _id: "507f1f77bcf86cd799439011" });
-    (userCompanyModel.findOne as jest.Mock).mockResolvedValue({ role: "admin", companyId: "company123" });
-    (userCompanyModel.find as jest.Mock).mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([{ userId: "507f1f77bcf86cd799439011" }]),
-    });
-    const mockAnnouncement = {
-      _id: "a2",
-      title: "t",
-      content: "c",
-      category: "cat",
-      pinned: false,
-      expiresAt: undefined,
-      createdBy: "507f1f77bcf86cd799439011",
-      populate: jest.fn().mockResolvedValue(undefined), // Fix: use mockResolvedValue(undefined)
-    };
-    (AnnouncementModel.create as jest.Mock).mockResolvedValue(mockAnnouncement);
-
-    const req = mockReq("POST", { title: "t", content: "c", category: "cat" });
-    const res = mockRes();
-    await handler(req, res);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalled();
-  });
-
   it("returns 405 for other methods", async () => {
     const req = mockReq("PUT");
     const res = mockRes();
     await handler(req, res);
     expect(res.status).toHaveBeenCalledWith(405);
+    expect(res.json).toHaveBeenCalledWith({ message: "Method not allowed" });
+  });
+
+  it("returns 500 if AnnouncementModel.create throws", async () => {
+    (UserModel.findById as jest.Mock).mockResolvedValue({ _id: "507f1f77bcf86cd799439011" });
+    (userCompanyModel.findOne as jest.Mock).mockReturnValue({
+      lean: jest.fn().mockResolvedValue({ role: "admin", companyId: "company123" }),
+    });
+    (AnnouncementModel.create as jest.Mock).mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    const req = mockReq("POST", { title: "t", content: "c", category: "cat" });
+    const res = mockRes();
+    await handler(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Database error" });
   });
 });

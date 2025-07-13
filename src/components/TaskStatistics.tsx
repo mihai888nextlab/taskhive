@@ -14,7 +14,7 @@ interface TaskStatisticsProps {
   className?: string;
 }
 
-const TaskStatistics: React.FC<TaskStatisticsProps> = React.memo(({ completed, total, last7Days, hideHeader, hideSummary, className }) => {
+const TaskStatistics: React.FC<TaskStatisticsProps> = ({ completed, total, last7Days, hideHeader, hideSummary, className }) => {
   const t = useTranslations("InsightsPage");
 
   // Memoize chart data
@@ -43,6 +43,6 @@ const TaskStatistics: React.FC<TaskStatisticsProps> = React.memo(({ completed, t
       </div>
     </div>
   );
-});
+};
 
 export default React.memo(TaskStatistics);

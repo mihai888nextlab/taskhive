@@ -133,6 +133,92 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = React.memo(({
     onClose();
   }, [onClose]);
 
+  // Memoize search input handler
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  // Memoize users list rendering
+  const usersList = useMemo(() => {
+    if (loadingUsers) {
+      return (
+        <div className="text-center py-12">
+          <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-500 text-lg">{t("loadingTeamMembersShort")}</p>
+        </div>
+      );
+    }
+    if (filteredUsers.length === 0 && searchTerm === "") {
+      return (
+        <div className="text-center py-12">
+          <FaUser className="text-6xl text-gray-400 mx-auto mb-4" />
+          <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noTeamMembers")}</h4>
+          <p className="text-gray-500">{t("noOtherUsersForChat")}</p>
+        </div>
+      );
+    }
+    if (filteredUsers.length === 0 && searchTerm !== "") {
+      return (
+        <div className="text-center py-12">
+          <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
+          <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noResultsFound")}</h4>
+          <p className="text-gray-500">{t("tryDifferentSearch")}</p>
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-3">
+        <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <FaUser className="text-blue-600" />
+          {t("availableTeamMembersCount", { count: filteredUsers.length })}
+        </h4>
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {filteredUsers.map((u) => (
+            <div
+              key={u._id as string}
+              className="flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 font-bold text-lg">
+                    {u.userId.firstName?.[0]}{u.userId.lastName?.[0]}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-lg">
+                    {u.userId.firstName} {u.userId.lastName}
+                  </p>
+                  <p className="text-gray-600">{u.userId.email}</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => handleStartChat(u.userId._id as string)}
+                disabled={creatingChat}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                  creatingChat
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-800'
+                }`}
+              >
+                {creatingChat ? (
+                  <div className="flex items-center gap-2">
+                    <FaSpinner className="animate-spin" />
+                    {t("starting")}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <FaComments />
+                    {t("startChat")}
+                  </div>
+                )}
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }, [loadingUsers, filteredUsers, searchTerm, t, handleStartChat, creatingChat]);
+
   useEffect(() => {
     setFilteredUsers(memoFilteredUsers);
   }, [memoFilteredUsers]);
@@ -180,7 +266,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = React.memo(({
                     placeholder={t("searchUsersPlaceholder")}
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={handleSearchChange}
                     disabled={creatingChat}
                   />
                 </div>
@@ -194,74 +280,7 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = React.memo(({
               )}
 
               {/* Users List */}
-              {loadingUsers ? (
-                <div className="text-center py-12">
-                  <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg">{t("loadingTeamMembersShort")}</p>
-                </div>
-              ) : filteredUsers.length === 0 && searchTerm === "" ? (
-                <div className="text-center py-12">
-                  <FaUser className="text-6xl text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noTeamMembers")}</h4>
-                  <p className="text-gray-500">{t("noOtherUsersForChat")}</p>
-                </div>
-              ) : filteredUsers.length === 0 && searchTerm !== "" ? (
-                <div className="text-center py-12">
-                  <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noResultsFound")}</h4>
-                  <p className="text-gray-500">{t("tryDifferentSearch")}</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <FaUser className="text-blue-600" />
-                    {t("availableTeamMembersCount", { count: filteredUsers.length })}
-                  </h4>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {filteredUsers.map((u) => (
-                      <div
-                        key={u._id as string}
-                        className="flex items-center justify-between p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 font-bold text-lg">
-                              {u.userId.firstName?.[0]}{u.userId.lastName?.[0]}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900 text-lg">
-                              {u.userId.firstName} {u.userId.lastName}
-                            </p>
-                            <p className="text-gray-600">{u.userId.email}</p>
-                          </div>
-                        </div>
-                        <Button
-                          onClick={() => handleStartChat(u.userId._id as string)}
-                          disabled={creatingChat}
-                          className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                            creatingChat
-                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                              : 'bg-blue-600 text-white hover:bg-blue-800'
-                          }`}
-                        >
-                          {creatingChat ? (
-                            <div className="flex items-center gap-2">
-                              <FaSpinner className="animate-spin" />
-                              {t("starting")}
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <FaComments />
-                              {t("startChat")}
-                            </div>
-                          )}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {usersList}
             </div>
 
             {/* Footer */}

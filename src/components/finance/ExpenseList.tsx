@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { FaTrash, FaFileCsv, FaFilePdf, FaSearch, FaSpinner, FaReceipt } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import { useTheme } from '@/components/ThemeContext';
@@ -58,6 +58,11 @@ const ExpenseList: React.FC<ExpenseListProps> = React.memo(({
   const { theme } = useTheme();
   const t = useTranslations("FinancePage");
 
+  // Memoize delete handler
+  const handleDeleteExpense = useCallback((expense: Expense) => {
+    onDelete(expense);
+  }, [onDelete]);
+
   // Memoize rendered expenses
   const renderedExpenses = useMemo(() => (
     expenses.map(expense => (
@@ -98,7 +103,7 @@ const ExpenseList: React.FC<ExpenseListProps> = React.memo(({
             </div>
           </div>
           <button
-            onClick={() => onDelete(expense)}
+            onClick={() => handleDeleteExpense(expense)}
             className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
               theme === 'dark' 
                 ? 'text-red-400 hover:bg-red-900/20 hover:text-red-300' 
@@ -111,7 +116,7 @@ const ExpenseList: React.FC<ExpenseListProps> = React.memo(({
         </div>
       </div>
     ))
-  ), [expenses, theme, onDelete]);
+  ), [expenses, theme, handleDeleteExpense]);
 
   return (
     <div className="flex flex-col h-full">

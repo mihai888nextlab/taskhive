@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { FaFileCsv, FaFire } from "react-icons/fa";
 import { GiTomato } from "react-icons/gi";
 import { useTranslations } from "next-intl";
@@ -19,13 +19,21 @@ const TimeTrackingHeader: React.FC<Props> = React.memo(
     onExport,
     onPomodoroToggle,
   }) => {
+    // Memoize handlers
+    const handleExport = useCallback(() => {
+      onExport();
+    }, [onExport]);
+    const handlePomodoroToggle = useCallback(() => {
+      onPomodoroToggle();
+    }, [onPomodoroToggle]);
+
     const t = useTranslations("TimeTrackingPage");
     return (
       <div className="space-y-3">
         {/* Action Buttons */}
         <div className="flex gap-2">
           <button
-            onClick={onExport}
+            onClick={handleExport}
             className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
               theme === "dark"
                 ? "bg-blue-600 text-white hover:bg-blue-700"
@@ -36,7 +44,7 @@ const TimeTrackingHeader: React.FC<Props> = React.memo(
             {t("export")}
           </button>
           <button
-            onClick={onPomodoroToggle}
+            onClick={handlePomodoroToggle}
             className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
               pomodoroMode
                 ? theme === "dark"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { FaSpinner, FaTimes, FaPlus } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,18 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
   const [roleName, setRoleName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Memoize input handler
+  const handleRoleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setRoleName(e.target.value);
+  }, []);
+
+  // Memoize close handler
+  const handleFormClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  // Memoize submit handler
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (roleName.trim()) {
       setLoading(true);
@@ -38,7 +49,7 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
         setLoading(false);
       }
     }
-  };
+  }, [roleName, t, onRoleAdded, onClose]);
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
@@ -75,7 +86,7 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
               type="text"
               placeholder={t("roleNamePlaceholder")}
               value={roleName}
-              onChange={(e) => setRoleName(e.target.value)}
+              onChange={handleRoleNameChange}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-sm"
               required
               disabled={loading}
@@ -92,7 +103,7 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
             <Button
               type="button"
               variant="secondary"
-              onClick={onClose}
+              onClick={handleFormClose}
               className="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
               disabled={loading}
             >
@@ -127,4 +138,4 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded }) => 
   );
 };
 
-export default AddRoleModal;
+export default React.memo(AddRoleModal);
