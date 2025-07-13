@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { FaPen, FaTrash, FaCheck, FaTimes, FaSignature, FaEye, FaDownload } from "react-icons/fa";
 import FileSigningModal from "@/components/signature/FileSigningModal";
 import { useTranslations } from "next-intl";
@@ -33,7 +33,7 @@ function formatBytes(bytes: number) {
   return bytes + " B";
 }
 
-const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof useTranslations> }> = ({
+const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof useTranslations> }> = React.memo(({
   files,
   loading,
   theme,
@@ -59,6 +59,126 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
     }
     setSigningFile(null);
   };
+
+  const renderedFiles = useMemo(
+    () => files.map((file) => (
+      <div
+        key={file._id}
+        className={`group relative p-6 rounded-2xl transition-all duration-300 hover:transform hover:scale-102 ${
+          theme === "dark" 
+            ? "bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 hover:bg-gray-700/70" 
+            : "bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:bg-white/90"
+        }`}
+      >
+        {/* File Icon */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-4xl opacity-80 group-hover:opacity-100 transition-opacity">
+            {getFileIcon(file.fileName)}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => handleSignFile(file)}
+              className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
+              title={t("signFile")}
+            >
+              <FaSignature size={14} />
+            </button>
+            <button
+              onClick={() => {
+                setRenamingId(file._id);
+                setRenameValue(file.fileName);
+              }}
+              className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
+              title={t("rename")}
+            >
+              <FaPen size={14} />
+            </button>
+            <button
+              onClick={() => handleDelete(file._id)}
+              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
+              title={t("delete")}
+            >
+              <FaTrash size={14} />
+            </button>
+          </div>
+        </div>
+
+        {/* File Name */}
+        {renamingId === file._id ? (
+          <div className="mb-3">
+            <input
+              type="text"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleRename(file._id);
+                if (e.key === "Escape") {
+                  setRenamingId(null);
+                  setRenameValue("");
+                }
+              }}
+              autoFocus
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => handleRename(file._id)}
+                className="flex-1 p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all duration-200"
+              >
+                <FaCheck size={12} />
+              </button>
+              <button
+                onClick={() => {
+                  setRenamingId(null);
+                  setRenameValue("");
+                }}
+                className="flex-1 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+              >
+                <FaTimes size={12} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <h3 className={`font-semibold text-sm mb-3 truncate group-hover:text-blue-600 transition-colors ${
+            theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+          }`} title={file.fileName}>
+            {file.fileName}
+          </h3>
+        )}
+
+        {/* File Size */}
+        <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+          {formatBytes(file.fileSize)}
+        </p>
+
+        {/* Action Buttons */}
+        {file.fileLocation && (
+          <div className="flex gap-2">
+            <a
+              href={file.fileLocation}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-all duration-200"
+            >
+              <FaEye size={12} />
+              {t("view")}
+            </a>
+            <a
+              href={file.fileLocation}
+              download={file.fileName}
+              className="flex items-center justify-center px-3 py-2 bg-gray-500 text-white text-xs rounded-lg hover:bg-gray-600 transition-all duration-200"
+            >
+              <FaDownload size={12} />
+              {t("download")}
+            </a>
+          </div>
+        )}
+      </div>
+    )),
+    [files, theme, renamingId, renameValue, setRenamingId, setRenameValue, handleDelete, handleRename, getFileIcon, t]
+  );
 
   if (loading) {
     return (
@@ -95,122 +215,7 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {files.map((file) => (
-          <div
-            key={file._id}
-            className={`group relative p-6 rounded-2xl transition-all duration-300 hover:transform hover:scale-102 ${
-              theme === "dark" 
-                ? "bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 hover:bg-gray-700/70" 
-                : "bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:bg-white/90"
-            }`}
-          >
-            {/* File Icon */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-4xl opacity-80 group-hover:opacity-100 transition-opacity">
-                {getFileIcon(file.fileName)}
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => handleSignFile(file)}
-                  className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                  title={t("signFile")}
-                >
-                  <FaSignature size={14} />
-                </button>
-                <button
-                  onClick={() => {
-                    setRenamingId(file._id);
-                    setRenameValue(file.fileName);
-                  }}
-                  className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                  title={t("rename")}
-                >
-                  <FaPen size={14} />
-                </button>
-                <button
-                  onClick={() => handleDelete(file._id)}
-                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
-                  title={t("delete")}
-                >
-                  <FaTrash size={14} />
-                </button>
-              </div>
-            </div>
-
-            {/* File Name */}
-            {renamingId === file._id ? (
-              <div className="mb-3">
-                <input
-                  type="text"
-                  value={renameValue}
-                  onChange={(e) => setRenameValue(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleRename(file._id);
-                    if (e.key === "Escape") {
-                      setRenamingId(null);
-                      setRenameValue("");
-                    }
-                  }}
-                  autoFocus
-                />
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => handleRename(file._id)}
-                    className="flex-1 p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all duration-200"
-                  >
-                    <FaCheck size={12} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setRenamingId(null);
-                      setRenameValue("");
-                    }}
-                    className="flex-1 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
-                  >
-                    <FaTimes size={12} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <h3 className={`font-semibold text-sm mb-3 truncate group-hover:text-blue-600 transition-colors ${
-                theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
-              }`} title={file.fileName}>
-                {file.fileName}
-              </h3>
-            )}
-
-            {/* File Size */}
-            <p className={`text-xs mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              {formatBytes(file.fileSize)}
-            </p>
-
-            {/* Action Buttons */}
-            {file.fileLocation && (
-              <div className="flex gap-2">
-                <a
-                  href={file.fileLocation}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-all duration-200"
-                >
-                  <FaEye size={12} />
-                  {t("view")}
-                </a>
-                <a
-                  href={file.fileLocation}
-                  download={file.fileName}
-                  className="flex items-center justify-center px-3 py-2 bg-gray-500 text-white text-xs rounded-lg hover:bg-gray-600 transition-all duration-200"
-                >
-                  <FaDownload size={12} />
-                  {t("download")}
-                </a>
-              </div>
-            )}
-          </div>
-        ))}
+        {renderedFiles}
       </div>
       
       {signingFile && signingFile.fileLocation && signingFile.fileType && (
@@ -228,6 +233,6 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
       )}
     </>
   );
-};
+});
 
-export default StorageFileList;
+export default React.memo(StorageFileList);

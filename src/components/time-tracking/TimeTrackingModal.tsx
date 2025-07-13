@@ -9,7 +9,7 @@ interface TimeTrackingModalProps {
   loading?: boolean;
 }
 
-const TimeTrackingModal: React.FC<TimeTrackingModalProps> = ({ show, onClose, onSubmit, defaultTitle, loading }) => {
+const TimeTrackingModal: React.FC<TimeTrackingModalProps> = React.memo(({ show, onClose, onSubmit, defaultTitle, loading }) => {
   const [title, setTitle] = useState(defaultTitle);
   // Use number inputs for 24-hour time entry
   const [hours, setHours] = useState(0);
@@ -157,6 +157,6 @@ const TimeTrackingModal: React.FC<TimeTrackingModalProps> = ({ show, onClose, on
       </div>
     </div>
   );
-};
+});
 
-export default TimeTrackingModal;
+export default React.memo(TimeTrackingModal);

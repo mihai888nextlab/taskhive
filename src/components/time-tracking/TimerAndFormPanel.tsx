@@ -29,7 +29,7 @@ interface TimerAndFormPanelProps {
   breakDuration?: number;
 }
 
-const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
+const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
   elapsedTime,
   isRunning,
   onStart,
@@ -227,6 +227,6 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = ({
       </form>
     </div>
   );
-};
+});
 
-export default TimerAndFormPanel;
+export default React.memo(TimerAndFormPanel);

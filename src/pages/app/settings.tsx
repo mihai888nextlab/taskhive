@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useTheme } from '@/components/ThemeContext';
@@ -15,7 +15,7 @@ const tabs = [
   { id: "appearance", label: "Appearance" },
 ];
 
-const SettingsPage: NextPageWithLayout = () => {
+const SettingsPage: NextPageWithLayout = React.memo(() => {
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("profile");
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
@@ -113,11 +113,14 @@ const SettingsPage: NextPageWithLayout = () => {
     }
   }, [activeTab]);
 
+  // Memoize tabs
+  const memoTabs = useMemo(() => tabs, []);
+
   return (
     <>
     <div className={`flex flex-col md:flex-row min-h-screen bg-gray-100 text-${theme === 'light' ? 'gray-900' : 'white'}`}>
       <SettingsSidebar
-        tabs={tabs}
+        tabs={memoTabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         theme={theme}
@@ -189,7 +192,7 @@ const SettingsPage: NextPageWithLayout = () => {
     `}</style>
     </>
   );
-};
+});
 
 SettingsPage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;

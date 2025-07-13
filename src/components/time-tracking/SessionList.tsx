@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { FaSearch, FaTrash, FaSpinner, FaClock } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ interface SessionListProps {
   setSessionSort: (v: string) => void;
 }
 
-const SessionList: React.FC<SessionListProps> = ({
+const SessionList: React.FC<SessionListProps> = React.memo(({
   sessions,
   onDelete,
   theme,
@@ -48,25 +48,27 @@ const SessionList: React.FC<SessionListProps> = ({
 
   const tags = ["General", "Deep Work", "Meeting", "Break", "Learning"];
 
-  // Filter and sort sessions
-  const filteredSessions = sessions.filter(session => {
-    const matchesSearch = sessionSearch.trim() === "" ||
-      session.name?.toLowerCase().includes(sessionSearch.toLowerCase()) ||
-      session.description?.toLowerCase().includes(sessionSearch.toLowerCase());
-    const matchesTag = sessionTagFilter === "all" || session.tag === sessionTagFilter;
-    return matchesSearch && matchesTag;
-  }).sort((a, b) => {
-    if (sessionSort === "dateDesc") {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    } else if (sessionSort === "dateAsc") {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    } else if (sessionSort === "durationDesc") {
-      return b.duration - a.duration;
-    } else if (sessionSort === "durationAsc") {
-      return a.duration - b.duration;
-    }
-    return 0;
-  });
+  // Memoize filteredSessions
+  const filteredSessions = useMemo(() => {
+    return sessions.filter(session => {
+      const matchesSearch = sessionSearch.trim() === "" ||
+        session.name?.toLowerCase().includes(sessionSearch.toLowerCase()) ||
+        session.description?.toLowerCase().includes(sessionSearch.toLowerCase());
+      const matchesTag = sessionTagFilter === "all" || session.tag === sessionTagFilter;
+      return matchesSearch && matchesTag;
+    }).sort((a, b) => {
+      if (sessionSort === "dateDesc") {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      } else if (sessionSort === "dateAsc") {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sessionSort === "durationDesc") {
+        return b.duration - a.duration;
+      } else if (sessionSort === "durationAsc") {
+        return a.duration - b.duration;
+      }
+      return 0;
+    });
+  }, [sessions, sessionSearch, sessionTagFilter, sessionSort]);
 
   return (
     <div className="h-full flex flex-col">
@@ -216,6 +218,6 @@ const SessionList: React.FC<SessionListProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default SessionList;
+export default React.memo(SessionList);

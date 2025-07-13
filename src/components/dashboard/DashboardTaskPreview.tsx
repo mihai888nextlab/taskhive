@@ -311,4 +311,4 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
   );
 };
 
-export default DashboardTaskPreview;
+export default React.memo(DashboardTaskPreview);

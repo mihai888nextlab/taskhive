@@ -5,6 +5,7 @@ import { useTheme } from "@/components/ThemeContext";
 import { FiMessageCircle, FiUsers, FiPlus } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import React, { useMemo, useCallback } from "react";
 
 export interface PopulatedConversation extends mongoose.Document {
   _id: string;
@@ -25,7 +26,7 @@ interface ConversationListProps {
   loadingConversations: boolean;
 }
 
-const ConversationList: React.FC<ConversationListProps> = ({
+const ConversationList: React.FC<ConversationListProps> = React.memo(({
   conversations,
   onSelectConversation,
   selectedConversationId,
@@ -37,7 +38,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const { theme } = useTheme();
   const t = useTranslations("CommunicationPage");
 
-  const getConversationName = (conversation: PopulatedConversation) => {
+  // Memoize getConversationName
+  const getConversationName = useCallback((conversation: PopulatedConversation) => {
     if (conversation.type === "direct") {
       const otherParticipant = conversation.participants.find(
         (p) => String(p._id) !== user?._id
@@ -49,9 +51,10 @@ const ConversationList: React.FC<ConversationListProps> = ({
         : "Unknown User";
     }
     return conversation.name || "Group Chat";
-  };
+  }, [user]);
 
-  const getConversationAvatar = (conversation: PopulatedConversation) => {
+  // Memoize getConversationAvatar
+  const getConversationAvatar = useCallback((conversation: PopulatedConversation) => {
     if (conversation.type === "direct") {
       const otherParticipant = conversation.participants.find(
         (p) => String(p._id) !== user?._id
@@ -76,7 +79,13 @@ const ConversationList: React.FC<ConversationListProps> = ({
         <FiUsers className="w-6 h-6" />
       </div>
     );
-  };
+  }, [user, theme]);
+
+  // Memoize sorted conversations if needed
+  const sortedConversations = useMemo(() => {
+    // Optionally sort by updatedAt or other criteria
+    return conversations.slice();
+  }, [conversations]);
 
   return (
     <div className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
@@ -125,7 +134,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
           </div>
         ) : (
           <div className="p-4 space-y-2">
-            {conversations.map((conversation) => {
+            {sortedConversations.map((conversation) => {
               const isSelected = selectedConversationId === conversation._id.toString();
               return (
                 <div
@@ -176,6 +185,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default ConversationList;
+export default React.memo(ConversationList);

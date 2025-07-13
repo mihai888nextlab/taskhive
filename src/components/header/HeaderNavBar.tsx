@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
@@ -43,7 +43,7 @@ type User = {
   profileImage?: { data?: string } | string | null;
 };
 
-const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t: tProp }) => {
+const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React.memo(({ t: tProp }) => {
   const { user, logout } = useAuth() as { user: User, logout: () => void };
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -81,6 +81,10 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
     setLang(newLang); // Only update context, not URL
   };
 
+  // Memoize LANGUAGES and profileTabs
+  const memoLanguages = useMemo(() => LANGUAGES, []);
+  const memoProfileTabs = useMemo(() => profileTabs, []);
+
   return (
     <header
       className="absolute top-0 z-[200] h-14 bg-gray-100 flex items-center px-4"
@@ -117,7 +121,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
                 overflowY: "auto",
               }}
             >
-              {LANGUAGES.map(language => (
+              {memoLanguages.map(language => (
                 <button
                   key={language.code}
                   className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between ${
@@ -172,7 +176,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
               <FiLogOut className="mr-2" /> {t("logout")}
             </button>
             <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
-            {profileTabs.map(tab => (
+            {memoProfileTabs.map(tab => (
               <button
                 key={tab.id}
                 className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
@@ -190,6 +194,6 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({ t:
       </div>
     </header>
   );
-};
+});
 
-export default HeaderNavBar;
+export default React.memo(HeaderNavBar);

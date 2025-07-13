@@ -151,4 +151,4 @@ const FinancePage = () => {
 
 FinancePage.getLayout = (page: React.ReactElement) => <DashboardLayout>{page}</DashboardLayout>;
 
-export default FinancePage;
+export default React.memo(FinancePage);

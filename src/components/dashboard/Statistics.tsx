@@ -14,7 +14,7 @@ interface StatisticsProps {
   completedTasksData: number[];
 }
 
-const Statistics: React.FC = () => {
+const Statistics: React.FC = React.memo(() => {
   const { theme } = useTheme();
   const [stats, setStats] = useState<StatisticsProps | null>(null);
 
@@ -90,6 +90,6 @@ const Statistics: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Statistics;

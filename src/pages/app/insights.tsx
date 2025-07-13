@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import DashboardLayout from '../../components/sidebar/DashboardLayout';
 import ExpensePieChart from '../../components/ExpensePieChart';
 import TaskStatistics from '../../components/TaskStatistics';
@@ -25,7 +25,7 @@ interface TimeSession {
   [key: string]: any;
 }
 
-const InsightsPage = () => {
+const InsightsPage = React.memo(() => {
   const [user, setUser] = useState<any>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [incomes, setIncomes] = useState<Expense[]>([]); // Reuse Expense type for incomes
@@ -150,6 +150,53 @@ const InsightsPage = () => {
     };
     fetchData();
   }, []);
+
+  // Memoize last7DaysHours
+  const last7DaysHours = useMemo(() => {
+    const arr = Array(7).fill(0);
+    const today = new Date(); today.setHours(0,0,0,0);
+    timeSessions.forEach(session => {
+      const sessionDate = new Date(session.createdAt);
+      sessionDate.setHours(0,0,0,0);
+      const diff = Math.floor((today.getTime() - sessionDate.getTime()) / (1000*3600*24));
+      if (diff >= 0 && diff < 7) arr[6-diff] += session.duration / 3600;
+    });
+    return arr;
+  }, [timeSessions]);
+
+  // Memoize pieData and incomePieData
+  const memoPieData = useMemo(() => {
+    const pie: { [cat: string]: number } = {};
+    expenses.forEach((e) => { pie[e.category || 'Other'] = (pie[e.category || 'Other'] || 0) + e.amount; });
+    return pie;
+  }, [expenses]);
+  const memoIncomePieData = useMemo(() => {
+    const pie: { [cat: string]: number } = {};
+    incomes.forEach((i) => { pie[i.category || 'Other'] = (pie[i.category || 'Other'] || 0) + i.amount; });
+    return pie;
+  }, [incomes]);
+
+  // Memoize financeStats
+  const memoFinanceStats = useMemo(() => {
+    const expensesByDay = [0,0,0,0,0,0,0];
+    const incomesByDay = [0,0,0,0,0,0,0];
+    const now = new Date();
+    expenses.forEach((e) => {
+      const daysAgo = Math.floor((now.getTime() - new Date(e.date || e.createdAt).getTime()) / (1000*60*60*24));
+      if (daysAgo >= 0 && daysAgo < 7) expensesByDay[6-daysAgo] += e.amount;
+    });
+    incomes.forEach((i) => {
+      const daysAgo = Math.floor((now.getTime() - new Date(i.date || i.createdAt).getTime()) / (1000*60*60*24));
+      if (daysAgo >= 0 && daysAgo < 7) incomesByDay[6-daysAgo] += i.amount;
+    });
+    return { expenses: expensesByDay, incomes: incomesByDay, labels: ['6d ago','5d ago','4d ago','3d ago','2d ago','Yesterday','Today'] };
+  }, [expenses, incomes]);
+
+  // Memoize taskStats.last7Days
+  const memoTaskStats = useMemo(() => taskStats.last7Days, [taskStats]);
+
+  // Memoize AI tab switch
+  const handleAiTabSwitch = useCallback((tab: 'analytics' | 'suggestions') => setAiTab(tab), []);
 
   return (
       <div className="p-6 md:p-8 bg-gray-100 min-h-screen font-sans">
@@ -282,7 +329,7 @@ const InsightsPage = () => {
                   <h2 className="font-bold text-2xl mb-8 text-gray-900 tracking-tight">{t("expensesByCategory")}</h2>
                   <div className="w-full flex flex-col items-center">
                     <div className="w-56 h-56 flex items-center justify-center">
-                      <ExpensePieChart data={pieData} />
+                      <ExpensePieChart data={memoPieData} />
                     </div>
                     <div className="flex flex-wrap justify-center gap-4 mt-4">
                       {Object.entries(pieData).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([cat], i) => (
@@ -303,7 +350,7 @@ const InsightsPage = () => {
                   <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">{t("incomesByCategory")}</h2>
                   <div className="w-full flex flex-col items-center">
                     <div className="w-56 h-56 flex items-center justify-center">
-                      <ExpensePieChart data={incomePieData} />
+                      <ExpensePieChart data={memoIncomePieData} />
                     </div>
                     <div className="flex flex-wrap justify-center gap-4 mt-4">
                       {Object.entries(incomePieData).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([cat], i) => (
@@ -327,9 +374,9 @@ const InsightsPage = () => {
                 <div className="bg-white rounded-3xl p-16 min-h-[380px] flex flex-col justify-center border border-gray-200">
                   <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">{t("financeOverview")}</h2>
                   <FinanceStatistics 
-                    expensesData={financeStats.expenses} 
-                    incomesData={financeStats.incomes} 
-                    labels={financeStats.labels} 
+                    expensesData={memoFinanceStats.expenses} 
+                    incomesData={memoFinanceStats.incomes} 
+                    labels={memoFinanceStats.labels} 
                     hideHeader 
                     hideSummary 
                     className="h-[320px]"
@@ -341,7 +388,7 @@ const InsightsPage = () => {
               <div className="bg-white rounded-3xl p-16 min-h-[380px] flex flex-col justify-center border border-gray-200">
                 <h2 className="font-bold text-2xl mb-4 text-gray-900 tracking-tight">{t("hoursWorked")}</h2>
                 <TimeStatistics 
-                  last7DaysHours={timeSessions.map(t => t.duration/60).slice(0,7)} 
+                  last7DaysHours={last7DaysHours} 
                   hideHeader 
                   hideSummary 
                   className="h-[320px]"
@@ -358,7 +405,7 @@ const InsightsPage = () => {
                   <TaskStatistics 
                     completed={taskStats.completed} 
                     total={taskStats.total} 
-                    last7Days={taskStats.last7Days} 
+                    last7Days={memoTaskStats} 
                     hideHeader 
                     hideSummary 
                     className="h-[320px]"
@@ -370,6 +417,6 @@ const InsightsPage = () => {
         )}
       </div>
   );
-};
+});
 
-export default InsightsPage;
+export default React.memo(InsightsPage);

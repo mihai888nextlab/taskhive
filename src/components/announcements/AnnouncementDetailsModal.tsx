@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FaThumbtack, FaTrash, FaRegCommentDots, FaChevronDown, FaChevronRight, FaTimes, FaUser, FaPaperPlane, FaSpinner } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -28,7 +28,7 @@ interface AnnouncementDetailsModalProps {
   isAdmin?: boolean;
 }
 
-const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
+const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.memo(({
   open,
   announcement,
   onClose,
@@ -50,11 +50,12 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
 
-  // Update local pinned state when announcement changes
+  // Memoize localPinned
   useEffect(() => {
     setLocalPinned(announcement?.pinned || false);
   }, [announcement?.pinned]);
 
+  // Memoize comments fetch
   useEffect(() => {
     if (!announcement) return;
     setComments([]);
@@ -68,7 +69,8 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
       .finally(() => setLoadingComments(false));
   }, [announcement?._id]);
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
+  // Memoize handleCommentSubmit
+  const handleCommentSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentInput.trim() || !announcement) return;
     setPosting(true);
@@ -88,21 +90,18 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
     } finally {
       setPosting(false);
     }
-  };
+  }, [commentInput, announcement]);
 
-  // Handle pin toggle with immediate UI update
-  const handlePinToggle = () => {
+  // Memoize handlePinToggle
+  const handlePinToggle = useCallback(() => {
     if (!announcement || !onPinToggle) return;
-    
-    // Immediately update local state for responsive UI
     const newPinnedState = !localPinned;
     setLocalPinned(newPinnedState);
-    
-    // Call the parent's pin toggle function
     onPinToggle(announcement._id, newPinnedState);
-  };
+  }, [announcement, onPinToggle, localPinned]);
 
-  const getCategoryColor = (category: string) => {
+  // Memoize getCategoryColor
+  const getCategoryColor = useCallback((category: string) => {
     switch (category) {
       case "Update":
         return theme === 'dark' 
@@ -121,11 +120,12 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
           ? "bg-gray-700 text-gray-300 border-gray-600" 
           : "bg-gray-100 text-gray-700 border-gray-200";
     }
-  };
+  }, [theme]);
 
-  const getInitials = (firstName: string, lastName: string) => {
+  // Memoize getInitials
+  const getInitials = useCallback((firstName: string, lastName: string) => {
     return (firstName[0] || "") + (lastName[0] || "");
-  };
+  }, []);
 
   if (!open || !announcement) return null;
 
@@ -366,6 +366,6 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default AnnouncementDetailsModal;
+export default React.memo(AnnouncementDetailsModal);

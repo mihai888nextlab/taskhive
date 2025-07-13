@@ -1,3 +1,4 @@
+import React from 'react';
 import { useTheme } from '@/components/ThemeContext';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import { useTranslations } from 'next-intl';
@@ -8,7 +9,7 @@ interface Props {
   loading: boolean;
 }
 
-export default function FinanceTabs({ activeTab, setActiveTab, loading }: Props) {
+const FinanceTabs = React.memo(function FinanceTabs({ activeTab, setActiveTab, loading }: Props) {
   const { theme } = useTheme();
   const t = useTranslations('FinancePage');
 
@@ -54,4 +55,6 @@ export default function FinanceTabs({ activeTab, setActiveTab, loading }: Props)
       </button>
     </div>
   );
-}
+});
+
+export default React.memo(FinanceTabs);

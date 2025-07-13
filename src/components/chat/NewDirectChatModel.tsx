@@ -1,5 +1,5 @@
 // components/chat/NewDirectChatModal.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FaTimes, FaComments, FaSearch, FaSpinner, FaUser } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { createPortal } from 'react-dom';
@@ -26,7 +26,7 @@ interface GetUsersResponse {
   permissions: string[];
 }
 
-const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
+const NewDirectChatModal: React.FC<NewDirectChatModalProps> = React.memo(({
   isOpen,
   onClose,
   onChatCreated,
@@ -69,28 +69,21 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
     fetchUsers();
   }, [isOpen, user]);
 
-  useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredUsers(allUsers);
-    } else {
-      setFilteredUsers(
-        allUsers.filter(
-          (u) =>
-            u.userId.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (u.userId.firstName &&
-              u.userId.firstName
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())) ||
-            (u.userId.lastName &&
-              u.userId.lastName
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()))
-        )
-      );
-    }
+  // Memoize filteredUsers
+  const memoFilteredUsers = useMemo(() => {
+    if (searchTerm.trim() === "") return allUsers;
+    return allUsers.filter(
+      (u) =>
+        u.userId.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.userId.firstName &&
+          u.userId.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (u.userId.lastName &&
+          u.userId.lastName.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
   }, [searchTerm, allUsers]);
 
-  const handleStartChat = async (targetUserId: string) => {
+  // Memoize handleStartChat
+  const handleStartChat = useCallback(async (targetUserId: string) => {
     if (!user) {
       setError("User not authenticated.");
       return;
@@ -131,13 +124,18 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
     } finally {
       setCreatingChat(false);
     }
-  };
+  }, [user, onChatCreated, onClose]);
 
-  const handleClose = () => {
+  // Memoize handleClose
+  const handleClose = useCallback(() => {
     setSearchTerm("");
     setError(null);
     onClose();
-  };
+  }, [onClose]);
+
+  useEffect(() => {
+    setFilteredUsers(memoFilteredUsers);
+  }, [memoFilteredUsers]);
 
   if (!isOpen) return null;
 
@@ -283,6 +281,6 @@ const NewDirectChatModal: React.FC<NewDirectChatModalProps> = ({
       )}
     </>
   );
-};
+});
 
-export default NewDirectChatModal;
+export default React.memo(NewDirectChatModal);

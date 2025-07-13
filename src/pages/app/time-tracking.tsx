@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import DashboardLayout from '@/components/sidebar/DashboardLayout';
 import { NextPageWithLayout } from "@/types";
 import Loading from "@/components/Loading";
@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import AddManualSessionModal from '@/components/time-tracking/AddManualSessionModal';
 import { Button } from '@/components/ui/button';
 
-const TimeTrackingPage: NextPageWithLayout = () => {
+const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
   const { theme } = useTheme();
   const { 
     sessionName, setSessionName, 
@@ -53,7 +53,8 @@ const TimeTrackingPage: NextPageWithLayout = () => {
     if (user?._id) fetchSessions();
   }, [user, fetchSessions]);
 
-  const calculateStreak = (sessions: any[]) => {
+  // Memoize streak calculation
+  const streak = useMemo(() => {
     const days = new Set(
       sessions.map(s => new Date(s.createdAt).toDateString())
     );
@@ -64,10 +65,10 @@ const TimeTrackingPage: NextPageWithLayout = () => {
       d.setDate(d.getDate() - 1);
     }
     return streak;
-  };
-  const streak = calculateStreak(sessions);
+  }, [sessions]);
 
-  const handleExportCSV = () => {
+  // Memoize handleExportCSV
+  const handleExportCSV = useCallback(() => {
     if (!sessions.length) return;
     const rows = [
       ["Name", "Description", "Tag", "Duration (h)", "Date"],
@@ -82,24 +83,29 @@ const TimeTrackingPage: NextPageWithLayout = () => {
     const csv = rows.map(r => r.map(f => `"${String(f).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     saveAs(blob, "time_sessions.csv");
-  };
+  }, [sessions]);
 
-  const handleDeleteSession = async (sessionId: string) => {
+  // Memoize handleDeleteSession
+  const handleDeleteSession = useCallback(async (sessionId: string) => {
     if (!user?._id) return;
     await fetch(`/api/time-sessions?id=${sessionId}&userId=${user._id}`, { method: 'DELETE' });
     fetchSessions();
-  };
+  }, [user, fetchSessions]);
 
-  const handleSaveSession = async () => {
+  // Memoize handleSaveSession
+  const handleSaveSession = useCallback(async () => {
     await saveSession();
     fetchSessions();
-  };
+  }, [saveSession, fetchSessions]);
 
-  // Get userId for manual session modal
-  const userId =
-    user?._id ||
-    (typeof window !== "undefined" && localStorage.getItem("userId")) ||
-    undefined;
+  // Memoize userId
+  const userId = useMemo(
+    () =>
+      user?._id ||
+      (typeof window !== "undefined" && localStorage.getItem("userId")) ||
+      undefined,
+    [user]
+  );
 
   if (loading) {
     return <Loading />;
@@ -242,10 +248,10 @@ const TimeTrackingPage: NextPageWithLayout = () => {
       )}
     </div>
   );
-};
+});
 
 TimeTrackingPage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default TimeTrackingPage;
+export default React.memo(TimeTrackingPage);

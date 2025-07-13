@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 
@@ -6,7 +7,7 @@ interface Props {
   setStatsRange: (range: 'week' | 'month') => void;
 }
 
-export default function StatsRangeButtons({ statsRange, setStatsRange }: Props) {
+const StatsRangeButtons = React.memo(function StatsRangeButtons({ statsRange, setStatsRange }: Props) {
   const t = useTranslations("FinancePage");
   return (
     <div className="flex justify-end mb-6">
@@ -22,4 +23,6 @@ export default function StatsRangeButtons({ statsRange, setStatsRange }: Props) 
       >{t("monthly")}</Button>
     </div>
   );
-}
+});
+
+export default React.memo(StatsRangeButtons);

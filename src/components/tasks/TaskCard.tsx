@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { FaEdit, FaTrash, FaCheckCircle, FaRegCircle, FaExclamationTriangle, FaFlag, FaTasks } from "react-icons/fa";
 import { FiCalendar, FiUser, FiChevronDown, FiChevronRight } from "react-icons/fi";
 import TimeTrackingModal from "../time-tracking/TimeTrackingModal";
@@ -38,7 +38,7 @@ interface TaskCardProps {
 }
 
 
-const TaskCard: React.FC<TaskCardProps> = ({
+const TaskCard: React.FC<TaskCardProps> = React.memo(({
   task,
   currentUserEmail,
   loading,
@@ -54,13 +54,17 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const [pendingComplete, setPendingComplete] = useState<null | Task>(null);
   const [showSubtasks, setShowSubtasks] = useState(false);
 
-  const isOverdue = isTaskOverdue(task);
+  // Memoize computed values
+  const isOverdue = useMemo(() => isTaskOverdue(task), [isTaskOverdue, task]);
   const isCompleted = task.completed;
-  const deadlineDate = new Date(task.deadline);
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
+  const deadlineDate = useMemo(() => new Date(task.deadline), [task.deadline]);
+  const now = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
   deadlineDate.setHours(0, 0, 0, 0);
-  const isToday = !isOverdue && deadlineDate.getTime() === now.getTime();
+  const isToday = useMemo(() => !isOverdue && deadlineDate.getTime() === now.getTime(), [isOverdue, deadlineDate, now]);
 
   const assignerEmail = (task.createdBy?.email || "").trim().toLowerCase();
   const userEmail = (currentUserEmail || "").trim().toLowerCase();
@@ -75,16 +79,16 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   const canComplete = isAssignedToMe && !hasSubtasks;
 
-  const handleCompleteClick = (task: Task) => {
+  const handleCompleteClick = React.useCallback((task: Task) => {
     if (!task.completed) {
       setPendingComplete(task);
       setShowTimeModal(true);
     } else if (onToggleComplete) {
       onToggleComplete(task);
     }
-  };
+  }, [onToggleComplete, pendingComplete]);
 
-  const handleTimeModalSubmit = async (data: { title: string; duration: number; description: string; tag: string }) => {
+  const handleTimeModalSubmit = React.useCallback(async (data: { title: string; duration: number; description: string; tag: string }) => {
     setShowTimeModal(false);
     if (pendingComplete) {
       try {
@@ -107,15 +111,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
       }
     }
     setPendingComplete(null);
-  };
+  }, [pendingComplete, onToggleComplete]);
 
-  const handleTimeModalClose = () => {
+  const handleTimeModalClose = React.useCallback(() => {
     setShowTimeModal(false);
     if (pendingComplete && onToggleComplete) {
       onToggleComplete(pendingComplete);
     }
     setPendingComplete(null);
-  };
+  }, [pendingComplete, onToggleComplete]);
 
   const getAssigneeAvatar = () => {
     if (task.userId && typeof task.userId === 'object') {
@@ -486,6 +490,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
       />
     </>
   );
-};
+});
 
-export default TaskCard;
+export default React.memo(TaskCard);

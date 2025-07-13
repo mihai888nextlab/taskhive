@@ -218,4 +218,4 @@ const PersistentTimer: React.FC<PersistentTimerProps> = ({
   );
 };
 
-export default PersistentTimer;
+export default React.memo(PersistentTimer);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { useTranslations } from "next-intl";
@@ -14,10 +14,11 @@ interface FinanceStatisticsProps {
   className?: string;
 }
 
-const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, incomesData, labels, hideHeader, hideSummary, className }) => {
+const FinanceStatistics: React.FC<FinanceStatisticsProps> = React.memo(({ expensesData, incomesData, labels, hideHeader, hideSummary, className }) => {
   const t = useTranslations("InsightsPage");
 
-  const data = {
+  // Memoize chart data
+  const data = useMemo(() => ({
     labels,
     datasets: [
       {
@@ -37,7 +38,7 @@ const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, inc
         categoryPercentage: 0.7,
       },
     ],
-  };
+  }), [labels, expensesData, incomesData]);
 
   return (
     <div className={className ? className : ''}>
@@ -52,6 +53,6 @@ const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, inc
       </div>
     </div>
   );
-};
+});
 
-export default FinanceStatistics;
+export default React.memo(FinanceStatistics);

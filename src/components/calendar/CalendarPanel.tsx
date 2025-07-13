@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Calendar from "react-calendar";
 import { FaArrowLeft, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "react-calendar/dist/Calendar.css";
@@ -22,7 +22,24 @@ interface CalendarPanelProps {
 
 type ViewMode = 'month' | 'week';
 
-const CalendarPanel: React.FC<CalendarPanelProps> = ({
+function getWeekStart(date: Date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day;
+  return new Date(d.setDate(diff));
+}
+
+function getWeekDays(startDate: Date) {
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(startDate);
+    day.setDate(startDate.getDate() + i);
+    days.push(day);
+  }
+  return days;
+}
+
+const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
   selectedDate,
   onDateChange,
   deadlines,
@@ -33,90 +50,67 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [currentWeekDate, setCurrentWeekDate] = useState(selectedDate || new Date());
 
-  // Function to get the circle color for a date
-  const getCircleColor = (date: Date) => {
-    const dateString = date.toDateString();
-    const tasksForDate = tasks.filter(task => 
-      new Date(task.deadline).toDateString() === dateString
-    );
-    
-    if (tasksForDate.length === 0) return null;
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const taskDate = new Date(date);
-    taskDate.setHours(0, 0, 0, 0);
-    
-    // Check if all tasks are completed
-    const allCompleted = tasksForDate.every(task => task.completed);
-    if (allCompleted) return '#22C55E'; // Green for all completed
-    
-    // Check if date is overdue (past today) and has incomplete tasks
-    const hasIncompleteTask = tasksForDate.some(task => !task.completed);
-    if (taskDate < today && hasIncompleteTask) return '#EF4444'; // Red for overdue
-    
-    return '#4A90E2'; // Default blue for upcoming tasks
-  };
+  // Memoize weekStart and weekDays
+  const weekStart = useMemo(() => getWeekStart(currentWeekDate), [currentWeekDate]);
+  const weekDays = useMemo(() => getWeekDays(weekStart), [weekStart]);
 
-  // Get the start of the week (Sunday)
-  const getWeekStart = (date: Date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day;
-    return new Date(d.setDate(diff));
-  };
+  // Memoize navigateWeek
+  const navigateWeek = useCallback((direction: 'prev' | 'next') => {
+    setCurrentWeekDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setDate(prev.getDate() + (direction === 'next' ? 7 : -7));
+      return newDate;
+    });
+  }, []);
 
-  // Get week days array
-  const getWeekDays = (startDate: Date) => {
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(startDate);
-      day.setDate(startDate.getDate() + i);
-      days.push(day);
-    }
-    return days;
-  };
-
-  const weekStart = getWeekStart(currentWeekDate);
-  const weekDays = getWeekDays(weekStart);
-
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    const newDate = new Date(currentWeekDate);
-    newDate.setDate(currentWeekDate.getDate() + (direction === 'next' ? 7 : -7));
-    setCurrentWeekDate(newDate);
-  };
-
-  // Handle date click from month view - switch to week view
-  const handleMonthDateClick = (date: Date) => {
+  // Memoize handleMonthDateClick
+  const handleMonthDateClick = useCallback((date: Date) => {
     onDateChange(date);
     setCurrentWeekDate(date);
-    setViewMode('week'); // Automatically switch to week view
-  };
+    setViewMode('week');
+  }, [onDateChange]);
 
-  // Handle date click from week view - just select the date
-  const handleWeekDateClick = (date: Date) => {
+  // Memoize handleWeekDateClick
+  const handleWeekDateClick = useCallback((date: Date) => {
     onDateChange(date);
-  };
+  }, [onDateChange]);
 
-  // Handle back to month view
-  const handleBackToMonth = () => {
+  // Memoize handleBackToMonth
+  const handleBackToMonth = useCallback(() => {
     setViewMode('month');
-  };
+  }, []);
 
-  const formatWeekRange = (startDate: Date) => {
+  // Memoize formatWeekRange
+  const formatWeekRange = useCallback((startDate: Date) => {
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + 6);
-    
     const startMonth = startDate.toLocaleDateString(undefined, { month: 'short' });
     const endMonth = endDate.toLocaleDateString(undefined, { month: 'short' });
     const year = startDate.getFullYear();
-    
     if (startMonth === endMonth) {
       return `${startMonth} ${startDate.getDate()}-${endDate.getDate()}, ${year}`;
     } else {
       return `${startMonth} ${startDate.getDate()} - ${endMonth} ${endDate.getDate()}, ${year}`;
     }
-  };
+  }, []);
+
+  // Memoize getCircleColor
+  const getCircleColor = useCallback((date: Date) => {
+    const dateString = date.toDateString();
+    const tasksForDate = tasks.filter(task => 
+      new Date(task.deadline).toDateString() === dateString
+    );
+    if (tasksForDate.length === 0) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const taskDate = new Date(date);
+    taskDate.setHours(0, 0, 0, 0);
+    const allCompleted = tasksForDate.every(task => task.completed);
+    if (allCompleted) return '#22C55E';
+    const hasIncompleteTask = tasksForDate.some(task => !task.completed);
+    if (taskDate < today && hasIncompleteTask) return '#EF4444';
+    return '#4A90E2';
+  }, [tasks]);
 
   const renderWeekView = () => {
     return (
@@ -667,6 +661,6 @@ const CalendarPanel: React.FC<CalendarPanelProps> = ({
       `}</style>
     </div>
   );
-};
+});
 
-export default CalendarPanel;
+export default React.memo(CalendarPanel);

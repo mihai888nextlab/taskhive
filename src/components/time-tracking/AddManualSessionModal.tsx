@@ -34,7 +34,7 @@ function formatDurationToFields(seconds: number) {
   };
 }
 
-const AddManualSessionModal: React.FC<AddManualSessionModalProps> = ({
+const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo(({
   open,
   onClose,
   userId,
@@ -268,6 +268,6 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default AddManualSessionModal;
+export default React.memo(AddManualSessionModal);

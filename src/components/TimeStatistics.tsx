@@ -1,5 +1,5 @@
 // src/components/TimeStatistics.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { useTranslations } from "next-intl";
@@ -13,10 +13,11 @@ interface TimeStatisticsProps {
     className?: string;
 }
 
-const TimeStatistics: React.FC<TimeStatisticsProps> = ({ last7DaysHours, hideHeader, hideSummary, className }) => {
+const TimeStatistics: React.FC<TimeStatisticsProps> = React.memo(({ last7DaysHours, hideHeader, hideSummary, className }) => {
     const t = useTranslations("InsightsPage");
 
-    const data = {
+    // Memoize chart data
+    const data = useMemo(() => ({
         labels: ['6d ago', '5d ago', '4d ago', '3d ago', '2d ago', 'Yesterday', 'Today'],
         datasets: [
             {
@@ -28,7 +29,7 @@ const TimeStatistics: React.FC<TimeStatisticsProps> = ({ last7DaysHours, hideHea
                 categoryPercentage: 0.7,
             },
         ],
-    };
+    }), [last7DaysHours]);
 
     return (
         <div className={className ? className : ''}>
@@ -51,6 +52,6 @@ const TimeStatistics: React.FC<TimeStatisticsProps> = ({ last7DaysHours, hideHea
             </div>
         </div>
     );
-};
+});
 
-export default TimeStatistics;
+export default React.memo(TimeStatistics);

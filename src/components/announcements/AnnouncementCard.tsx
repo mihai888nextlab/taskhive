@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FaBullhorn, FaThumbtack, FaTrash, FaCalendarAlt, FaUser, FaChevronRight } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -44,7 +44,7 @@ const getCategoryColor = (category: string, theme: string) => {
     : 'bg-gray-100 text-gray-700 border-gray-200');
 };
 
-const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
+const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
   announcement,
   theme,
   isAdmin,
@@ -68,23 +68,27 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
   }, [read, announcement._id]);
 
   // Expiry logic
-  const expired =
+  const expired = useMemo(() =>
     announcement.expiresAt &&
-    new Date(new Date(announcement.expiresAt).setHours(23, 59, 59, 999)) < new Date();
-  
+    new Date(new Date(announcement.expiresAt).setHours(23, 59, 59, 999)) < new Date(),
+    [announcement.expiresAt]
+  );
+
   if (expired) return null;
 
-  const getInitials = () => {
+  // Memoize getInitials
+  const getInitials = useMemo(() => {
     const firstName = announcement.createdBy.firstName || "";
     const lastName = announcement.createdBy.lastName || "";
     return (firstName[0] || "") + (lastName[0] || "");
-  };
+  }, [announcement.createdBy]);
 
-  const truncateContent = (content: string, maxWords: number = 15) => {
+  // Memoize truncateContent
+  const truncateContent = useMemo(() => (content: string, maxWords: number = 15) => {
     const words = content.split(/\s+/);
     if (words.length <= maxWords) return content;
     return words.slice(0, maxWords).join(' ') + '...';
-  };
+  }, []);
 
   const t = useTranslations("AnnouncementsPage");
 
@@ -214,7 +218,7 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
               <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-medium ${
                 theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
               }`}>
-                {getInitials() || <FaUser className="w-3 h-3" />}
+                {getInitials || <FaUser className="w-3 h-3" />}
               </div>
               <span className={`font-medium ${
                 theme === "dark" ? "text-gray-300" : "text-gray-700"
@@ -260,6 +264,6 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
       <div className={`absolute inset-0 rounded-2xl ring-2 ring-transparent group-hover:ring-blue-500 transition-all duration-200 pointer-events-none`} />
     </div>
   );
-};
+});
 
-export default AnnouncementCard;
+export default React.memo(AnnouncementCard);

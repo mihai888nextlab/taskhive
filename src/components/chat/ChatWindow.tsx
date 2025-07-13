@@ -1,5 +1,5 @@
 // components/ChatWindow.tsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import io from "socket.io-client";
 import { useAuth } from "@/hooks/useAuth";
 import { IUser } from "@/db/models/userModel";
@@ -31,7 +31,7 @@ interface ChatWindowProps {
 
 let socket: ReturnType<typeof io>;
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
+const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation }) => {
   const router = useRouter();
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -46,7 +46,28 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("CommunicationPage");
 
-  const conversationId = selectedConversation?._id?.toString();
+  // Memoize conversationId
+  const conversationId = useMemo(() => selectedConversation?._id?.toString(), [selectedConversation]);
+
+  // Memoize participants
+  const participants = useMemo(() => selectedConversation?.participants || [], [selectedConversation]);
+
+  // Memoize chat type
+  const chatType = useMemo(() => selectedConversation?.type || "direct", [selectedConversation]);
+
+  // Memoize chat name
+  const currentChatName = useMemo(() => {
+    if (!selectedConversation || !user) return "";
+    if (chatType === "direct") {
+      const otherParticipant = participants.find(
+        (p) => (p._id as string).toString() !== user._id
+      );
+      return otherParticipant
+        ? `${otherParticipant.firstName || ""} ${otherParticipant.lastName || ""}`.trim() || otherParticipant.email
+        : "Direct Chat";
+    }
+    return selectedConversation.name || "Group Chat";
+  }, [selectedConversation, user, chatType, participants]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -69,16 +90,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       });
 
       socket.on("connect", () => {
-        console.log(`Socket.io connected for conversation: ${conversationId}`);
         socket.emit("joinRoom", conversationId);
       });
 
-      socket.on("disconnect", () => {
-        console.log("Socket.io disconnected");
-      });
+      socket.on("disconnect", () => {});
 
       socket.on("messageReceived", (message: ChatMessage) => {
-        console.log("New message received:", message);
         setMessages((prevMessages) => {
           if (prevMessages.some((m) => m._id === message._id)) {
             return prevMessages;
@@ -88,7 +105,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       });
 
       socket.on("messageError", (errorMessage: string) => {
-        console.error("Message send error:", errorMessage);
         setError(`Error sending message: ${errorMessage}`);
       });
     }
@@ -124,7 +140,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
         const data = await res.json();
         setMessages(data.messages as ChatMessage[]);
       } catch (err) {
-        console.error("Error fetching initial messages:", err);
         setError("Could not load messages.");
       } finally {
         setLoadingMessages(false);
@@ -136,27 +151,28 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newMessageContent.trim() && user && socket && socket.connected) {
-      const messageData = {
-        conversationId,
-        senderId: user._id,
-        content: newMessageContent.trim(),
-        type: "text" as const,
-      };
-      socket.emit("sendMessage", messageData);
-      setNewMessageContent("");
-      setError(null);
-    } else if (!newMessageContent.trim()) {
-      setError("Message cannot be empty!");
-    } else if (!socket || !socket.connected) {
-      setError("Chat is not connected. Please try again.");
+  // Memoize getMessageAvatar
+  const getMessageAvatar = useCallback((senderId: string | IUser) => {
+    const senderInfo = typeof senderId === "object" ? senderId : null;
+    if (senderInfo?.profileImage?.data) {
+      return (
+        <img
+          src={senderInfo.profileImage.data}
+          alt="Profile"
+          className="w-8 h-8 rounded-full object-cover"
+        />
+      );
     }
-  };
+    const initial = senderInfo?.firstName?.[0] || senderInfo?.email?.[0] || "U";
+    return (
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-500'}`}>
+        {initial.toUpperCase()}
+      </div>
+    );
+  }, [theme]);
 
   // Fetch user files when dropdown is opened
   useEffect(() => {
@@ -185,11 +201,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
     }
   }, [showFilesDropdown, user]);
 
-  const handleSendFile = (
-    fileUrl: string,
-    fileName: string,
-    fileSize: number
-  ) => {
+  // Memoize handleSendFile
+  const handleSendFile = useCallback((fileUrl: string, fileName: string, fileSize: number) => {
     if (user && socket && socket.connected && conversationId) {
       const messageData = {
         conversationId,
@@ -201,8 +214,36 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       setShowFilesDropdown(false);
       setError(null);
     }
-  };
+  }, [user, conversationId]);
 
+  // Memoize handleSendMessage
+  const handleSendMessage = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (newMessageContent.trim() && user && socket && socket.connected && conversationId) {
+      const messageData = {
+        conversationId,
+        senderId: user._id,
+        content: newMessageContent.trim(),
+        type: "text" as const,
+      };
+      socket.emit("sendMessage", messageData);
+      setNewMessageContent("");
+      setError(null);
+    } else if (!newMessageContent.trim()) {
+      setError("Message cannot be empty!");
+    } else if (!socket || !socket.connected) {
+      setError("Chat is not connected. Please try again.");
+    }
+  }, [newMessageContent, user, conversationId]);
+
+  // Memoize handleVideoCall
+  const handleVideoCall = useCallback(() => {
+    if (selectedConversation?._id) {
+      router.push(`/app/video-call/${encodeURIComponent(selectedConversation._id)}`);
+    }
+  }, [router, selectedConversation]);
+
+  // Early return if no conversation selected
   if (!selectedConversation) {
     return (
       <div className={`flex flex-col items-center justify-center h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"}`}>
@@ -227,53 +268,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       </div>
     );
   }
-
-  const getParticipantNames = (
-    participants: IUser[],
-    currentUserId: string
-  ): string => {
-    if (selectedConversation.type === "direct") {
-      const otherParticipant = participants.find(
-        (p) => (p._id as string).toString() !== currentUserId
-      );
-      return otherParticipant
-        ? `${otherParticipant.firstName || ""} ${
-            otherParticipant.lastName || ""
-          }`.trim() || otherParticipant.email
-        : "Direct Chat";
-    }
-    return selectedConversation.name || "Group Chat";
-  };
-
-  const currentChatName = getParticipantNames(
-    selectedConversation.participants,
-    user?._id || ""
-  );
-
-  const handleVideoCall = () => {
-    router.push(
-      `/app/video-call/${encodeURIComponent(selectedConversation._id)}`
-    );
-  };
-
-  const getMessageAvatar = (senderId: string | IUser) => {
-    const senderInfo = typeof senderId === "object" ? senderId : null;
-    if (senderInfo?.profileImage?.data) {
-      return (
-        <img
-          src={senderInfo.profileImage.data}
-          alt="Profile"
-          className="w-8 h-8 rounded-full object-cover"
-        />
-      );
-    }
-    const initial = senderInfo?.firstName?.[0] || senderInfo?.email?.[0] || "U";
-    return (
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-500'}`}>
-        {initial.toUpperCase()}
-      </div>
-    );
-  };
 
   return (
     <div className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
@@ -542,6 +536,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       </div>
     </div>
   );
-};
+});
 
-export default ChatWindow;
+export default React.memo(ChatWindow);

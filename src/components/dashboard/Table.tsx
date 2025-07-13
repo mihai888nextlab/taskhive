@@ -10,14 +10,14 @@ interface DataTableProps<T extends TableDataItem> {
   rowOnClick?: (item: T) => void;
 }
 
-function Table<T extends TableDataItem>({
+const Table = React.memo(<T extends TableDataItem>({
   data,
   columns,
   actions,
   title,
   emptyMessage = "Nu există date de afișat.",
   rowOnClick,
-}: DataTableProps<T>) {
+}: DataTableProps<T>) => {
   return (
     <div className="bg-white rounded-xl overflow-hidden">
       {title && (
@@ -105,6 +105,6 @@ function Table<T extends TableDataItem>({
       )}
     </div>
   );
-}
+});
 
 export default Table;

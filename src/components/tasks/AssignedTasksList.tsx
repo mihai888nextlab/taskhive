@@ -30,7 +30,7 @@ interface AssignedTasksListProps {
   onSortByChange?: (v: "createdAtDesc" | "deadlineAsc" | "priorityDesc") => void;
 }
 
-const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
+const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo(({
   tasks,
   currentUserEmail,
   loading,
@@ -65,26 +65,15 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
   const filterPriorityValue = controlledFilterPriority !== undefined ? controlledFilterPriority : filterPriority;
   const sortByValue = controlledSortBy !== undefined ? controlledSortBy : sortBy;
 
-  const handleShowDetails = (task: Task) => {
+  const handleShowDetails = React.useCallback((task: Task) => {
     setDetailsTask(task);
     setModalOpen(true);
-  };
-  const handleCloseModal = () => {
+  }, []);
+
+  const handleCloseModal = React.useCallback(() => {
     setModalOpen(false);
     setDetailsTask(null);
-  };
-
-  // Helper function to check if user can complete a task
-  const canUserCompleteTask = (task: Task) => {
-    const assignerEmail = (task.createdBy?.email || "").trim().toLowerCase();
-    const userEmail = (currentUserEmail || "").trim().toLowerCase();
-    const canEditOrDelete = assignerEmail === userEmail;
-    
-    const taskAssigneeEmail = typeof task.userId === 'object' && task.userId?.email ? task.userId.email.trim().toLowerCase() : '';
-    const isAssignedToMe = taskAssigneeEmail === userEmail || (typeof task.userId === 'string' && task.userId === userEmail);
-    
-    return canEditOrDelete || isAssignedToMe;
-  };
+  }, []);
 
   // Filtering, searching, sorting logic
   const filteredTasks = useMemo(() => {
@@ -176,6 +165,40 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
 
     return result;
   }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue, currentUserEmail]);
+
+  // Memoize taskCards
+  const taskCards = useMemo(() => filteredTasks.map(task => ({
+    ...task,
+    parentTask:
+      typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
+        ? task.parentTask._id
+        : typeof task.parentTask === "string"
+          ? task.parentTask
+          : undefined,
+    subtasks: Array.isArray(task.subtasks)
+      ? task.subtasks.map(st => ({
+          ...st,
+          parentTask:
+            typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
+              ? st.parentTask._id
+              : typeof st.parentTask === "string"
+                ? st.parentTask
+                : undefined,
+          subtasks: undefined
+        }))
+      : undefined
+  })), [filteredTasks]);
+
+  // Helper to check if the current user can complete the task
+  function canUserCompleteTask(task: Task): boolean {
+    // Example logic: user can complete if assigned to them and not completed
+    return (
+      (task.userId &&
+        typeof task.userId === "object" &&
+        task.userId.email === currentUserEmail) &&
+      !task.completed
+    );
+  }
 
   if (controlsOnly) {
     return (
@@ -278,31 +301,10 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredTasks.map(task => (
+              {taskCards.map(task => (
                 <TaskCard
                   key={task._id}
-                  task={{
-                    ...task,
-                    parentTask:
-                      typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
-                        ? task.parentTask._id
-                        : typeof task.parentTask === "string"
-                          ? task.parentTask
-                          : undefined,
-                    subtasks: Array.isArray(task.subtasks)
-                      ? task.subtasks.map(st => ({
-                          ...st,
-                          parentTask:
-                            typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
-                              ? st.parentTask._id
-                              : typeof st.parentTask === "string"
-                                ? st.parentTask
-                                : undefined,
-                          // Ensure subtasks do not have nested subtasks to match Task type
-                          subtasks: undefined
-                        }))
-                      : undefined
-                  }}
+                  task={task}
                   currentUserEmail={currentUserEmail}
                   loading={loading}
                   onEdit={onEdit}
@@ -427,31 +429,10 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredTasks.map(task => (
+            {taskCards.map(task => (
               <TaskCard
                 key={task._id}
-                task={{
-                  ...task,
-                  parentTask:
-                    typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
-                      ? task.parentTask._id
-                      : typeof task.parentTask === "string"
-                        ? task.parentTask
-                        : undefined,
-                  subtasks: Array.isArray(task.subtasks)
-                    ? task.subtasks.map(st => ({
-                        ...st,
-                        parentTask:
-                          typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
-                            ? st.parentTask._id
-                            : typeof st.parentTask === "string"
-                              ? st.parentTask
-                              : undefined,
-                        // Ensure subtasks do not have nested subtasks to match Task type
-                        subtasks: undefined
-                      }))
-                    : undefined
-                }}
+                task={task}
                 currentUserEmail={currentUserEmail}
                 loading={loading}
                 onEdit={onEdit}
@@ -478,6 +459,6 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = ({
       />
     </>
   );
-};
+});
 
-export default AssignedTasksList;
+export default React.memo(AssignedTasksList);
