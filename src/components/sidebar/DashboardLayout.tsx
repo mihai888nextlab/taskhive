@@ -20,11 +20,35 @@ interface DashboardLayoutProps {
   requireAuth?: boolean; // <-- Add this prop, default true
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, locale, requireAuth = true }) => {
-  const { user, loadingUser, isAuthenticated, logout } = useAuth();
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({
+  children,
+  locale,
+  requireAuth = true,
+}) => {
+  const { user, loadingUser, isAuthenticated, hasCompany, logout } = useAuth();
+
   const router = useRouter();
   const currentLocale = locale || useLocale() || "en";
   const t = useTranslations("Navigation"); // This will use the correct locale automatically
+
+  if (hasCompany == false) {
+    return (
+      <div className="flex w-full min-h-screen bg-gray-100">
+        {/* Header NavBar */}
+        <HeaderNavBar t={t} />
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+          <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-lg">
+            <h1 className="text-2xl font-bold mb-4">
+              You haven't joined any companies yet
+            </h1>
+            <p className="text-gray-600 mb-6">
+              Create a company or check your email for invitations
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const { isRunning, pomodoroMode, pomodoroRunning, ...timerContext } =
     useTimeTracking();
@@ -36,11 +60,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, locale, req
   const shouldShowPersistentTimer =
     !timerClosed &&
     router.pathname !== "/app/time-tracking" &&
-    (
-      (pomodoroMode
-        ? timerContext.pomodoroTime > 0
-        : timerContext.elapsedTime > 0)
-    );
+    (pomodoroMode
+      ? timerContext.pomodoroTime > 0
+      : timerContext.elapsedTime > 0);
 
   // State to toggle AI window - now managed by context
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -76,17 +98,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, locale, req
       .catch(() => {});
   }, [user]);
 
-  const handleLogout = async () => {
-    try {
-      logout(); // Call the logout function from useAuth
-      // Clear sensitive state
-      setTasks([]);
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
-  // Only block rendering if requireAuth and no user
   if (requireAuth && !user) {
     // Fix: Only pass user if not null, else pass a fallback user object or skip rendering SidebarNav
     return null; // Or a spinner
@@ -108,7 +119,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, locale, req
       <HeaderNavBar t={t} />
       {/* Sidebar for desktop */}
       {user && (
-        <SidebarNav menu={menuWithNotifications} user={user} router={router} t={t} />
+        <SidebarNav
+          menu={menuWithNotifications}
+          user={user}
+          router={router}
+          t={t}
+        />
       )}
       {/* Sidebar drawer for mobile */}
       {user && (
@@ -126,7 +142,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, locale, req
         className="flex-1 flex flex-col bg-gray-100"
         style={{
           marginLeft: 300, // width of the fixed sidebar
-          marginTop: 42,   // height of the absolute header (14 * 4)
+          marginTop: 42, // height of the absolute header (14 * 4)
           marginRight: isDesktop && isAIWindowOpen ? 420 : 0,
         }}
       >

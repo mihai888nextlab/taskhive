@@ -10,13 +10,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormEvent, useEffect } from "react";
-
-// Extend the Window interface to include 'google'
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/router";
 
 export function LoginForm({
   className,
@@ -38,43 +34,20 @@ export function LoginForm({
     userPassword: string;
   }) => void;
 }) {
-  const handleGoogleLogin = async () => {
-    // @ts-ignore
-    if (window.google && window.google.accounts) {
-      // @ts-ignore
-      window.google.accounts.id.prompt();
+  const { login, loadingUser, error } = useAuth();
+  const router = useRouter();
+
+  const handleGoogleSuccess = async (response: any) => {
+    if (response.credential) {
+      console.log("Google ID Token:", response.credential);
+      // Apelează funcția de login din hook-ul tău custom useAuth, trimițând ID Token-ul
+      await login("google", { idToken: response.credential });
     }
   };
 
-  useEffect(() => {
-    // Load Google Identity Services script
-    if (!window.google) {
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.onload = () => {
-        // @ts-ignore
-        window.google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-          callback: async (response: any) => {
-            // Send token to backend
-            const res = await fetch("/api/auth/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ googleToken: response.credential }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-              window.location.href = "/app";
-            } else {
-              alert(data.message || "Google login failed.");
-            }
-          },
-        });
-      };
-      document.body.appendChild(script);
-    }
-  }, []);
+  const handleGoogleError = () => {
+    console.error("Google Login Failed");
+  };
 
   return (
     <div
@@ -99,7 +72,7 @@ export function LoginForm({
               variant="outline"
               className="w-full flex items-center justify-center gap-2 border-blue-600 text-blue-200 hover:bg-blue-600/10 hover:border-blue-500 transition mb-2"
               type="button"
-              onClick={handleGoogleLogin}
+              onClick={() => {}} //handle Google login here
             >
               {/* Use Google logo from a reliable CDN */}
               <span className="w-5 h-5 flex items-center justify-center">
@@ -145,10 +118,7 @@ export function LoginForm({
                   <Label htmlFor="password" className="text-gray-300 text-sm">
                     Password
                   </Label>
-                  <a
-                    href="#"
-                    className="text-xs text-blue-400 hover:underline"
-                  >
+                  <a href="#" className="text-xs text-blue-400 hover:underline">
                     Forgot your password?
                   </a>
                 </div>
@@ -191,6 +161,13 @@ export function LoginForm({
           .
         </div>
       </Card>
+
+      <GoogleLogin
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
+        // Poți personaliza butonul cu useGoogleLogin hook și un buton custom
+        // sau folosi direct componenta care oferă un buton predefinit
+      />
     </div>
   );
 }

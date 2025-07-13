@@ -35,7 +35,10 @@ export default function Login() {
     }
 
     try {
-      const res = await auth.login(values.userEmail, values.userPassword);
+      const res = await auth.login("credentials", {
+        email: values.userEmail,
+        password: values.userPassword,
+      });
       if (!res) {
         throw new Error("Login failed. Please check your credentials.");
       }
@@ -64,11 +67,11 @@ export default function Login() {
       </div>
       <Header />
       <main className="w-full min-h-[80vh] flex flex-col items-center justify-center px-2 sm:px-4 py-4 sm:py-8 relative z-10 mt-6 sm:mt-16">
-          <LoginForm
-            handleLogin={handleLogin}
-            values={values}
-            setValues={setValues}
-          />
+        <LoginForm
+          handleLogin={handleLogin}
+          values={values}
+          setValues={setValues}
+        />
       </main>
       <Footer />
     </div>
