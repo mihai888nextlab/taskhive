@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { FaPlus, FaTasks, FaUserCheck } from "react-icons/fa";
@@ -48,7 +48,7 @@ const isTaskOverdue = (task: TaskType): boolean => {
 
 type ActiveTab = 'my-tasks' | 'assigned-tasks';
 
-const TasksPage: NextPageWithLayout = (props) => {
+const TasksPage: NextPageWithLayout = React.memo((props) => {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<ActiveTab>('my-tasks');
   const [tasks, setTasks] = useState<TaskType[]>([]);
@@ -297,7 +297,7 @@ const TasksPage: NextPageWithLayout = (props) => {
     }
   };
 
-  const handleEditClick = (task: TaskType) => {
+  const handleEditClick = useCallback((task: TaskType) => {
     setEditingTaskId(task._id);
     setTaskTitle(task.title);
     setTaskDescription(task.description || "");
@@ -308,7 +308,7 @@ const TasksPage: NextPageWithLayout = (props) => {
     setPriority(task.priority || 'medium');
     setFormError(null);
     setShowForm(true);
-  };
+  }, [setEditingTaskId, setTaskTitle, setTaskDescription, setTaskDeadline, setAssignedTo, setPriority, setFormError, setShowForm]);
 
   const handleClose = () => {
     resetForm();
@@ -537,11 +537,11 @@ const TasksPage: NextPageWithLayout = (props) => {
       )}
     </div>
   );
-};
+});
 
 TasksPage.getLayout = function getLayout(page: React.ReactElement) {
   const locale = (page.props as any)?.locale;
   return <DashboardLayout locale={locale}>{page}</DashboardLayout>;
 };
 
-export default TasksPage;
+export default React.memo(TasksPage);

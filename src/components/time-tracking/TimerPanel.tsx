@@ -24,7 +24,7 @@ const formatTime = (timeInSeconds: number) => {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-const TimerPanel: React.FC<TimerPanelProps> = ({
+const TimerPanel: React.FC<TimerPanelProps> = React.memo(({
   elapsedTime,
   isRunning,
   onStart,
@@ -101,6 +101,6 @@ const TimerPanel: React.FC<TimerPanelProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default TimerPanel;
+export default React.memo(TimerPanel);

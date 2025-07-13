@@ -36,7 +36,7 @@ interface AnnouncementListProps {
   categories?: string[];
 }
 
-const AnnouncementList: React.FC<AnnouncementListProps> = ({
+const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
   announcements,
   theme,
   isAdmin,
@@ -55,7 +55,7 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
 }) => {
   const t = useTranslations("AnnouncementsPage");
 
-  // Filter and sort announcements - pinned first, then by creation date
+  // Memoize filteredAnnouncements
   const filteredAnnouncements = useMemo(() => {
     const filtered = announcements.filter(a => {
       const matchesCategory = categoryFilter === "All" || a.category === categoryFilter;
@@ -78,8 +78,11 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
     });
   }, [announcements, search, categoryFilter]);
 
+  // Memoize pinnedCount
+  const pinnedCount = useMemo(() => filteredAnnouncements.filter(a => a.pinned).length, [filteredAnnouncements]);
+
   // Separate pinned and regular announcements for display info
-  const pinnedCount = filteredAnnouncements.filter(a => a.pinned).length;
+  // const pinnedCount = filteredAnnouncements.filter(a => a.pinned).length;
 
   if (controlsOnly) {
     return (
@@ -362,6 +365,6 @@ const AnnouncementList: React.FC<AnnouncementListProps> = ({
       </div>
     </>
   );
-};
+});
 
-export default AnnouncementList;
+export default React.memo(AnnouncementList);

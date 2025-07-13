@@ -1,5 +1,5 @@
 // components/chat/NewGroupChatModal.tsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { FaTimes, FaUsers, FaPlus, FaSearch, FaSpinner } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { createPortal } from 'react-dom';
@@ -26,7 +26,7 @@ interface GetUsersResponse {
   permissions: string[];
 }
 
-const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
+const NewGroupChatModal: React.FC<NewGroupChatModalProps> = React.memo(({
   isOpen,
   onClose,
   onChatCreated,
@@ -69,29 +69,21 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
     fetchUsers();
   }, [isOpen, user]);
 
-  // Filter users based on search term
-  useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredUsers(allUsers);
-    } else {
-      setFilteredUsers(
-        allUsers.filter(
-          (u) =>
-            u.userId.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (u.userId.firstName &&
-              u.userId.firstName
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())) ||
-            (u.userId.lastName &&
-              u.userId.lastName
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()))
-        )
-      );
-    }
+  // Memoize filteredUsers
+  const memoFilteredUsers = useMemo(() => {
+    if (searchTerm.trim() === "") return allUsers;
+    return allUsers.filter(
+      (u) =>
+        u.userId.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.userId.firstName &&
+          u.userId.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (u.userId.lastName &&
+          u.userId.lastName.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
   }, [searchTerm, allUsers]);
 
-  const toggleUserSelection = (userToToggle: GetUsersResponse) => {
+  // Memoize toggleUserSelection
+  const toggleUserSelection = useCallback((userToToggle: GetUsersResponse) => {
     setSelectedUsers((prev) =>
       prev.find(
         (u) => (u.userId._id as string) === (userToToggle.userId._id as string)
@@ -102,9 +94,10 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
           )
         : [...prev, userToToggle]
     );
-  };
+  }, []);
 
-  const handleCreateGroup = async () => {
+  // Memoize handleCreateGroup
+  const handleCreateGroup = useCallback(async () => {
     if (!user) {
       setError("User not authenticated.");
       return;
@@ -162,15 +155,16 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
     } finally {
       setCreatingGroup(false);
     }
-  };
+  }, [user, selectedUsers, groupName, onChatCreated, onClose]);
 
-  const handleClose = () => {
+  // Memoize handleClose
+  const handleClose = useCallback(() => {
     setGroupName("");
     setSelectedUsers([]);
     setSearchTerm("");
     setError(null);
     onClose();
-  };
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -340,13 +334,13 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                     <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-4" />
                     <p className="text-gray-500 text-lg">{t("loadingTeamMembers")}</p>
                   </div>
-                ) : filteredUsers.length === 0 && searchTerm === "" ? (
+                ) : memoFilteredUsers.length === 0 && searchTerm === "" ? (
                   <div className="text-center py-12">
                     <FaUsers className="text-6xl text-gray-400 mx-auto mb-4" />
                     <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noTeamMembers")}</h4>
                     <p className="text-gray-500">{t("noOtherUsersAvailable")}</p>
                   </div>
-                ) : filteredUsers.length === 0 && searchTerm !== "" ? (
+                ) : memoFilteredUsers.length === 0 && searchTerm !== "" ? (
                   <div className="text-center py-12">
                     <FaSearch className="text-6xl text-gray-400 mx-auto mb-4" />
                     <h4 className="text-lg font-semibold text-gray-900 mb-2">{t("noResultsFound")}</h4>
@@ -354,7 +348,7 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {filteredUsers.map((u) => {
+                    {memoFilteredUsers.map((u) => {
                       const isSelected = selectedUsers.some(
                         (su) => (su._id as string) === (u._id as string)
                       );
@@ -411,6 +405,6 @@ const NewGroupChatModal: React.FC<NewGroupChatModalProps> = ({
       )}
     </>
   );
-};
+});
 
-export default NewGroupChatModal;
+export default React.memo(NewGroupChatModal);

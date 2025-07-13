@@ -14,7 +14,7 @@ interface SessionFormProps {
   setSessionTag: (v: string) => void;
 }
 
-const SessionForm: React.FC<SessionFormProps> = ({
+const SessionForm: React.FC<SessionFormProps> = React.memo(({
   sessionName,
   sessionDescription,
   onNameChange,
@@ -114,6 +114,6 @@ const SessionForm: React.FC<SessionFormProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default SessionForm;
+export default React.memo(SessionForm);

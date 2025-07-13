@@ -7,7 +7,7 @@ import StorageDragOverlay from "@/components/storage/StorageDragOverlay";
 import SignatureModal from "@/components/signature/SignatureModal";
 import FileSigningModal from "@/components/signature/FileSigningModal";
 import { useTheme } from '@/components/ThemeContext';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom'; // Add this import
 import { FaFile, FaFileImage, FaFilePdf, FaFileArchive, FaFileAlt, FaSignature, FaCloudUploadAlt } from 'react-icons/fa';
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ function formatBytes(bytes: number) {
   return bytes + " B";
 }
 
-const Storage = () => {
+function Storage() {
   const { theme } = useTheme();
   const [files, setFiles] = useState<FileType[]>([]);
   const [usedStorage, setUsedStorage] = useState<number>(0);
@@ -58,10 +58,12 @@ const Storage = () => {
   const [renameValue, setRenameValue] = useState("");
   const t = useTranslations("StoragePage");
 
-  const percentUsed = Math.min((usedStorage / MAX_STORAGE_BYTES) * 100, 100);
+  // Memoize percentUsed
+  const percentUsed = useMemo(() => Math.min((usedStorage / MAX_STORAGE_BYTES) * 100, 100), [usedStorage]);
 
   // Make fetchFiles accessible to other parts of the component
-  const fetchFiles = async () => {
+  // Memoize fetchFiles
+  const fetchFiles = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/getFiles");
@@ -83,11 +85,11 @@ const Storage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchFiles();
-  }, [uploadFileModal]);
+  }, [uploadFileModal, fetchFiles]);
 
   function handleDrag(e: React.DragEvent) {
     e.preventDefault();
@@ -106,17 +108,23 @@ const Storage = () => {
     }
   }
 
-  const filteredFiles = files.filter(f =>
-    f.fileName.toLowerCase().includes(search.toLowerCase())
-  );
+  // Memoize filteredFiles
+  const filteredFiles = useMemo(() => (
+    files.filter(f =>
+      f.fileName.toLowerCase().includes(search.toLowerCase())
+    )
+  ), [files, search]);
 
-  const sortedFiles = [...filteredFiles].sort((a, b) => {
-    if (sortBy === "name") return a.fileName.localeCompare(b.fileName);
-    if (sortBy === "size") return b.fileSize - a.fileSize;
-    return 0;
-  });
+  // Memoize sortedFiles
+  const sortedFiles = useMemo(() => {
+    const arr = [...filteredFiles];
+    if (sortBy === "name") return arr.sort((a, b) => a.fileName.localeCompare(b.fileName));
+    if (sortBy === "size") return arr.sort((a, b) => b.fileSize - a.fileSize);
+    return arr;
+  }, [filteredFiles, sortBy]);
 
-  async function handleDelete(fileId: string) {
+  // Memoize handleDelete
+  const handleDelete = useCallback(async (fileId: string) => {
     if (!window.confirm(t("deleteFileConfirm"))) return;
     try {
       const res = await fetch(`/api/getFiles?id=${fileId}`, { method: "DELETE" });
@@ -132,9 +140,10 @@ const Storage = () => {
     } catch {
       alert(t("deleteFileError"));
     }
-  }
+  }, [t]);
 
-  async function handleRename(fileId: string) {
+  // Memoize handleRename
+  const handleRename = useCallback(async (fileId: string) => {
     if (!renameValue.trim()) return;
     try {
       const res = await fetch("/api/getFiles", {
@@ -156,18 +165,20 @@ const Storage = () => {
     } catch {
       alert(t("renameFileError"));
     }
-  }
+  }, [renameValue, t]);
 
-  const handleSignFile = (file: FileType) => {
+  // Memoize handleSignFile
+  const handleSignFile = useCallback((file: FileType) => {
     setSelectedFileForSigning(file);
     setFileSigningModal(true);
-  };
+  }, []);
 
-  const handleSigningComplete = () => {
+  // Memoize handleSigningComplete
+  const handleSigningComplete = useCallback(() => {
     setFileSigningModal(false);
     setSelectedFileForSigning(null);
-    fetchFiles(); // Refresh the file list
-  };
+    fetchFiles();
+  }, [fetchFiles]);
 
   return (
     <div
@@ -315,10 +326,10 @@ const Storage = () => {
       )}
     </div>
   );
-};
+}
 
 Storage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default Storage;
+export default React.memo(Storage);

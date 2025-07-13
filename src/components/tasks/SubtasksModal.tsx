@@ -236,4 +236,4 @@ const SubtasksModal: React.FC<SubtasksModalProps> = ({
   );
 };
 
-export default SubtasksModal;
+export default React.memo(SubtasksModal);

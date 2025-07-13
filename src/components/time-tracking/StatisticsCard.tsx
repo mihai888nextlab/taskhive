@@ -7,7 +7,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-const StatisticsCard: React.FC<Props> = ({ title, theme, children }) => {
+const StatisticsCard: React.FC<Props> = React.memo(({ title, theme, children }) => {
   const t = useTranslations("TimeTrackingPage");
   return (
     <div className={`rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
@@ -17,6 +17,6 @@ const StatisticsCard: React.FC<Props> = ({ title, theme, children }) => {
       {children}
     </div>
   );
-};
+});
 
-export default StatisticsCard;
+export default React.memo(StatisticsCard);

@@ -1,5 +1,5 @@
 // components/FinancePreview.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import Link from 'next/link';
 import { useTheme } from '@/components/ThemeContext';
@@ -11,40 +11,44 @@ interface FinancePreviewProps {
   profit: number;
 }
 
-const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalIncomes, profit }) => {
+const FinancePreview: React.FC<FinancePreviewProps> = React.memo(({ totalExpenses, totalIncomes, profit }) => {
   const { theme } = useTheme();
   const t = useTranslations("DashboardPage");
 
-  // Total Income block conditional classes (even smaller version)
-  const incomeBlockClass =
+  // Memoize conditional classes
+  const incomeBlockClass = useMemo(() =>
     theme === 'dark'
       ? "bg-gradient-to-br from-green-800 to-green-700 p-3 rounded-lg border border-green-900 transform transition-all duration-300 hover:scale-102"
-      : "bg-gradient-to-br from-green-100 to-green-50 p-3 rounded-lg border border-green-200 transform transition-all duration-300 hover:scale-102";
-  const incomeTitleClass =
+      : "bg-gradient-to-br from-green-100 to-green-50 p-3 rounded-lg border border-green-200 transform transition-all duration-300 hover:scale-102"
+  , [theme]);
+  const incomeTitleClass = useMemo(() =>
     theme === 'dark'
       ? "text-base font-bold text-gray-200 mb-1"
-      : "text-base font-bold text-green-800 mb-1";
-  const incomeValueClass =
+      : "text-base font-bold text-green-800 mb-1"
+  , [theme]);
+  const incomeValueClass = useMemo(() =>
     theme === 'dark'
       ? "text-xl font-bold text-green-300"
-      : "text-xl font-bold text-green-600";
+      : "text-xl font-bold text-green-600"
+  , [theme]);
 
-  // Total Expenses block conditional classes (even smaller version)
-  const expenseBlockClass =
+  const expenseBlockClass = useMemo(() =>
     theme === 'dark'
       ? "bg-gradient-to-br from-red-800 to-red-700 p-3 rounded-lg border border-red-900 transform transition-all duration-300 hover:scale-102"
-      : "bg-gradient-to-br from-red-100 to-red-50 p-3 rounded-lg border border-red-200 transform transition-all duration-300 hover:scale-102";
-  const expenseTitleClass =
+      : "bg-gradient-to-br from-red-100 to-red-50 p-3 rounded-lg border border-red-200 transform transition-all duration-300 hover:scale-102"
+  , [theme]);
+  const expenseTitleClass = useMemo(() =>
     theme === 'dark'
       ? "text-base font-bold text-gray-200 mb-1"
-      : "text-base font-bold text-red-800 mb-1";
-  const expenseValueClass =
+      : "text-base font-bold text-red-800 mb-1"
+  , [theme]);
+  const expenseValueClass = useMemo(() =>
     theme === 'dark'
       ? "text-xl font-bold text-red-300"
-      : "text-xl font-bold text-red-600";
+      : "text-xl font-bold text-red-600"
+  , [theme]);
 
-  // Profit block conditional classes based on profit value (even smaller version)
-  const profitBlockClass =
+  const profitBlockClass = useMemo(() =>
     profit > 0 
       ? theme === 'dark'
          ? "bg-gradient-to-br from-green-800 to-green-700 p-3 rounded-lg border border-green-900 transform transition-all duration-300 hover:scale-102"
@@ -55,12 +59,14 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
            : "bg-white p-3 rounded-lg border border-gray-100 transform transition-all duration-300 hover:scale-102"
          : theme === 'dark'
          ? "bg-gradient-to-br from-red-900 to-red-800 p-3 rounded-lg border border-red-900 transform transition-all duration-300 hover:scale-102"
-         : "bg-gradient-to-br from-red-100 to-red-50 p-3 rounded-lg border border-red-200 transform transition-all duration-300 hover:scale-102";
-  const profitTitleClass =
+         : "bg-gradient-to-br from-red-100 to-red-50 p-3 rounded-lg border border-red-200 transform transition-all duration-300 hover:scale-102"
+  , [profit, theme]);
+  const profitTitleClass = useMemo(() =>
     theme === 'dark'
       ? "text-base font-bold text-gray-200 mb-1"
-      : "text-base font-bold text-gray-800 mb-1";
-  const profitValueClass =
+      : "text-base font-bold text-gray-800 mb-1"
+  , [theme]);
+  const profitValueClass = useMemo(() =>
     profit > 0
        ? theme === 'dark'
           ? "text-xl font-bold text-green-300"
@@ -71,7 +77,8 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
              : "text-xl font-bold text-gray-600"
           : theme === 'dark'
              ? "text-xl font-bold text-red-300"
-             : "text-xl font-bold text-red-600";
+             : "text-xl font-bold text-red-600"
+  , [profit, theme]);
 
   // Button classes (even smaller version) with increased vertical padding for a taller button
   const buttonClass =
@@ -99,6 +106,6 @@ const FinancePreview: React.FC<FinancePreviewProps> = ({ totalExpenses, totalInc
       </div>
     </div>
   );
-};
+});
 
-export default FinancePreview;
+export default React.memo(FinancePreview);

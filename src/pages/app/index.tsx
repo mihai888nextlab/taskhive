@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import DashboardLayout from '@/components/sidebar/DashboardLayout';
 import { NextPageWithLayout } from '@/types';
 import Statistics from '@/components/dashboard/Statistics';
@@ -64,7 +64,7 @@ const DashboardCard: React.FC<{
   );
 };
 
-const DashboardPage: NextPageWithLayout = () => {
+const DashboardPage: NextPageWithLayout = React.memo(() => {
   const { theme } = useTheme();
   const t = useTranslations("DashboardPage");
   const [users, setUsers] = useState<any[]>([]);
@@ -159,6 +159,26 @@ const DashboardPage: NextPageWithLayout = () => {
     };
     fetchAnnouncement();
   }, []);
+
+  // Memoize filtered users for Table
+  const filteredTableUsers = useMemo(() => {
+    return users
+      .filter(u => u.companyId === currentUser?.companyId)
+      .slice(0, 5)
+      .map((user) => ({
+        id: user._id,
+        firstName: user.userId.firstName,
+        lastName: user.userId.lastName,
+        email: user.userId.email,
+      }));
+  }, [users, currentUser]);
+
+  // Memoize Table columns
+  const tableColumns = useMemo(() => [
+    { key: "firstName", header: t("firstName", { default: "First Name" }) },
+    { key: "lastName", header: t("lastName", { default: "Last Name" }) },
+    { key: "email", header: t("email", { default: "Email" }) },
+  ], [t]);
 
   if (!currentUser) {
     return <p className="text-center text-gray-600 mb-8">{t("loadingDashboard", { default: "Loading your dashboard..." })}</p>;
@@ -337,21 +357,8 @@ const DashboardPage: NextPageWithLayout = () => {
               ) : users.length > 0 ? (
                 <>
                   <Table
-                    data={users
-                      .filter(u => u.companyId === currentUser?.companyId)
-                      .slice(0, 5)
-                      .map((user) => ({
-                        id: user._id,
-                        firstName: user.userId.firstName,
-                        lastName: user.userId.lastName,
-                        email: user.userId.email,
-                      }))
-                    }
-                    columns={[
-                      { key: "firstName", header: t("firstName", { default: "First Name" }) },
-                      { key: "lastName", header: t("lastName", { default: "Last Name" }) },
-                      { key: "email", header: t("email", { default: "Email" }) },
-                    ]}
+                    data={filteredTableUsers}
+                    columns={tableColumns}
                     emptyMessage={t("noTeamMembersYet", { default: "No team members yet" })}
                   />
                 </>
@@ -390,10 +397,10 @@ const DashboardPage: NextPageWithLayout = () => {
       </div>
     </div>
   );
-};
+});
 
 DashboardPage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default DashboardPage;
+export default React.memo(DashboardPage);

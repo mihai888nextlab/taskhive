@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { PREDEFINED_SKILLS } from "@/constants/skills";
 
 interface ProfileTabProps {
@@ -15,17 +15,15 @@ interface ProfileTabProps {
   theme: string;
 }
 
-const ProfileTab: React.FC<ProfileTabProps> = ({
-  formData,
-  onInputChange,
-  onSkillsChange,
-  onSubmit,
-  theme,
-}) => {
+const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
+  const { formData, onInputChange, onSkillsChange, onSubmit, theme } = props;
+
   const [photoPreview, setPhotoPreview] = useState<string>(formData.profilePhoto || "");
   const [uploading, setUploading] = useState(false);
   const [customSkill, setCustomSkill] = useState("");
   const [skills, setSkills] = useState<string[]>(formData.skills || []);
+
+  const memoFormData = useMemo(() => formData, [formData]);
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -243,6 +241,6 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
       </form>
     </div>
   );
-};
+});
 
-export default ProfileTab;
+export default React.memo(ProfileTab);

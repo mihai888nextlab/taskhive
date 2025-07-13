@@ -141,4 +141,4 @@ const UserCard: React.FC<UserCardProps> = ({ user, theme, onClick }) => {
   );
 };
 
-export default UserCard;
+export default React.memo(UserCard);

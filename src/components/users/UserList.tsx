@@ -102,11 +102,15 @@ const UserList: React.FC<UserListProps> = ({
     return result;
   }, [users, search, filterRole, sortBy, currentUser]);
 
-  const companyRoles = Array.from(
-    new Set(users.filter(u => 
-      u.companyId === (currentUser && "companyId" in currentUser ? currentUser.companyId : undefined)
-    ).map(u => u.role))
-  );
+  // Compute all roles present in the company (not just filtered users)
+  const companyId = currentUser && "companyId" in currentUser ? currentUser.companyId : undefined;
+  const companyRoles = useMemo(() => {
+    const set = new Set<string>();
+    users.forEach(u => {
+      if (u.companyId === companyId) set.add(u.role);
+    });
+    return Array.from(set);
+  }, [users, companyId]);
 
   if (controlsOnly) {
     return (
@@ -415,4 +419,4 @@ const UserList: React.FC<UserListProps> = ({
   );
 };
 
-export default UserList;
+export default React.memo(UserList);

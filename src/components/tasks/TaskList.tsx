@@ -30,7 +30,7 @@ interface TaskListProps {
   onSortByChange?: (v: "createdAtDesc" | "deadlineAsc" | "priorityDesc") => void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({
+const TaskList: React.FC<TaskListProps> = React.memo(({
   tasks,
   currentUserEmail,
   loading,
@@ -65,52 +65,27 @@ const TaskList: React.FC<TaskListProps> = ({
   const filterPriorityValue = controlledFilterPriority !== undefined ? controlledFilterPriority : filterPriority;
   const sortByValue = controlledSortBy !== undefined ? controlledSortBy : sortBy;
 
-  const handleShowDetails = (task: Task) => {
+  // Memoize handleShowDetails and handleCloseModal
+  const handleShowDetails = React.useCallback((task: Task) => {
     setDetailsTask(task);
     setModalOpen(true);
-  };
-  const handleCloseModal = () => {
+  }, [setDetailsTask, setModalOpen]);
+
+  const handleCloseModal = React.useCallback(() => {
     setModalOpen(false);
     setDetailsTask(null);
-  };
+  }, [setModalOpen, setDetailsTask]);
 
-  const handleSubtaskToggle = async (subtask: Task) => {
-    // Call the same toggle function
-    await onToggleComplete(subtask);
-    
-    // Update the detailsTask with the updated task from the tasks array
-    if (detailsTask) {
-      const updatedMainTask = tasks.find(t => t._id === detailsTask._id);
-      if (updatedMainTask) {
-        setDetailsTask(updatedMainTask);
-      }
+  // Define handleSubtaskToggle function BEFORE any useMemo or JSX usage
+  const handleSubtaskToggle = React.useCallback((subtask: Task) => {
+    if (onToggleComplete) {
+      onToggleComplete(subtask);
     }
-  };
+  }, [onToggleComplete]);
 
-  // Filtering, searching, sorting logic
-  const filteredTasks = useMemo(() => {
-    let result: Task[] = [];
-
-    // 1. Include main tasks assigned to me
-    result = tasks.filter(task => {
-      if (!task.userId) return false;
-      // Accept both _id and email for userId
-      if (typeof task.userId === "object" && (task.userId._id || task.userId.email)) {
-        if (task.userId._id && String(task.userId._id) === String(currentUserEmail)) return true;
-        if (task.userId.email && task.userId.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()) return true;
-      }
-      if (typeof task.userId === "string") {
-        // Accept both userId and email as string
-        return (
-          task.userId === currentUserEmail ||
-          task.userId.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()
-        );
-      }
-      return false;
-    });
-
-    // 2. Also include subtasks assigned to me, but only if main task is NOT created/assigned by me
-    const subtasksAssignedToMe: Task[] = [];
+  // Memoize subtasksAssignedToMe
+  const subtasksAssignedToMe = useMemo(() => {
+    const result: Task[] = [];
     tasks.forEach(task => {
       // Check if main task is NOT created/assigned by me
       const isCreatedByMe =
@@ -135,7 +110,7 @@ const TaskList: React.FC<TaskListProps> = ({
               (typeof subtask.userId === "string" && (subtask.userId === currentUserEmail || subtask.userId.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()))
             )
           ) {
-            subtasksAssignedToMe.push({
+            result.push({
               ...subtask,
               createdBy: task.createdBy,
               priority: subtask.priority || task.priority,
@@ -147,6 +122,30 @@ const TaskList: React.FC<TaskListProps> = ({
           }
         });
       }
+    });
+    return result;
+  }, [tasks, currentUserEmail]);
+
+  // Filtering, searching, sorting logic
+  const filteredTasks = useMemo(() => {
+    let result: Task[] = [];
+
+    // 1. Include main tasks assigned to me
+    result = tasks.filter(task => {
+      if (!task.userId) return false;
+      // Accept both _id and email for userId
+      if (typeof task.userId === "object" && (task.userId._id || task.userId.email)) {
+        if (task.userId._id && String(task.userId._id) === String(currentUserEmail)) return true;
+        if (task.userId.email && task.userId.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()) return true;
+      }
+      if (typeof task.userId === "string") {
+        // Accept both userId and email as string
+        return (
+          task.userId === currentUserEmail ||
+          task.userId.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()
+        );
+      }
+      return false;
     });
 
     // Combine main tasks and filtered subtasks assigned to me
@@ -215,7 +214,30 @@ const TaskList: React.FC<TaskListProps> = ({
     });
 
     return result;
-  }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue, currentUserEmail]);
+  }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue, currentUserEmail, subtasksAssignedToMe]);
+
+  // Memoize props for TaskCard
+  const taskCards = useMemo(() => filteredTasks.map(task => ({
+    ...task,
+    parentTask:
+      typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
+        ? task.parentTask._id
+        : typeof task.parentTask === "string"
+          ? task.parentTask
+          : undefined,
+    subtasks: Array.isArray(task.subtasks)
+      ? task.subtasks.map(st => ({
+          ...st,
+          parentTask:
+            typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
+              ? st.parentTask._id
+              : typeof st.parentTask === "string"
+                ? st.parentTask
+                : undefined,
+          subtasks: undefined
+        }))
+      : undefined
+  })), [filteredTasks]);
 
   if (controlsOnly) {
     return (
@@ -318,30 +340,10 @@ const TaskList: React.FC<TaskListProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredTasks.map(task => (
+              {taskCards.map(task => (
                 <TaskCard
                   key={task._id}
-                  task={{
-                    ...task,
-                    parentTask:
-                      typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
-                        ? task.parentTask._id
-                        : typeof task.parentTask === "string"
-                          ? task.parentTask
-                          : undefined,
-                    subtasks: Array.isArray(task.subtasks)
-                      ? task.subtasks.map(st => ({
-                          ...st,
-                          parentTask:
-                            typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
-                              ? st.parentTask._id
-                              : typeof st.parentTask === "string"
-                                ? st.parentTask
-                                : undefined,
-                          subtasks: undefined // Prevent nested subtasks for type compatibility
-                        }))
-                      : undefined
-                  }}
+                  task={task}
                   currentUserEmail={currentUserEmail}
                   loading={loading}
                   onEdit={onEdit}
@@ -469,30 +471,10 @@ const TaskList: React.FC<TaskListProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredTasks.map(task => (
+            {taskCards.map(task => (
               <TaskCard
                 key={task._id}
-                task={{
-                  ...task,
-                  parentTask:
-                    typeof task.parentTask === "object" && task.parentTask && "_id" in task.parentTask
-                      ? task.parentTask._id
-                      : typeof task.parentTask === "string"
-                        ? task.parentTask
-                        : undefined,
-                  subtasks: Array.isArray(task.subtasks)
-                    ? task.subtasks.map(st => ({
-                        ...st,
-                        parentTask:
-                          typeof st.parentTask === "object" && st.parentTask && "_id" in st.parentTask
-                            ? st.parentTask._id
-                            : typeof st.parentTask === "string"
-                              ? st.parentTask
-                              : undefined,
-                        subtasks: undefined // Prevent nested subtasks for type compatibility
-                      }))
-                    : undefined
-                }}
+                task={task}
                 currentUserEmail={currentUserEmail}
                 loading={loading}
                 onEdit={onEdit}
@@ -522,6 +504,6 @@ const TaskList: React.FC<TaskListProps> = ({
       )}
     </>
   );
-};
+});
 
-export default TaskList;
+export default React.memo(TaskList);

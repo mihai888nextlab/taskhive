@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useTheme } from '@/components/ThemeContext';
@@ -22,18 +22,18 @@ interface Task {
   };
 }
 
-const CalendarPage: NextPageWithLayout = () => {
+const CalendarPage: NextPageWithLayout = React.memo(() => {
   const { theme } = useTheme();
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [loading, setLoading] = useState<boolean>(false);
   const [listError, setListError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const handleDateChange = (date: Date | null) => {
+  const handleDateChange = useCallback((date: Date | null) => {
     setSelectedDate(date);
-  };
+  }, []);
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setLoading(true);
     setListError(null);
     try {
@@ -60,13 +60,13 @@ const CalendarPage: NextPageWithLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [fetchTasks]);
 
-  const handleTaskDrop = async (taskId: string, date: Date) => {
+  const handleTaskDrop = useCallback(async (taskId: string, date: Date) => {
     setLoading(true);
     setListError(null);
     try {
@@ -85,9 +85,10 @@ const CalendarPage: NextPageWithLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchTasks]);
 
-  const deadlines = tasks.map(task => new Date(task.deadline).toDateString());
+  // Memoize deadlines
+  const deadlines = useMemo(() => tasks.map(task => new Date(task.deadline).toDateString()), [tasks]);
 
   return (
     <div className={`bg-${theme === 'light' ? 'white' : 'gray-900'} text-${theme === 'light' ? 'gray-900' : 'white'}`}>
@@ -153,10 +154,10 @@ const CalendarPage: NextPageWithLayout = () => {
       </div>
     </div>
   );
-};
+});
 
 CalendarPage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default CalendarPage;
+export default React.memo(CalendarPage);

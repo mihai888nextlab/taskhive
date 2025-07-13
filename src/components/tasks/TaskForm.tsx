@@ -471,4 +471,4 @@ Please enhance and expand this existing description while keeping the original i
   );
 };
 
-export default TaskForm;
+export default React.memo(TaskForm);

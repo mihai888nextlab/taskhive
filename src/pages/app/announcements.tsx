@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { FaPlus, FaDownload, FaBullhorn, FaThumbtack } from "react-icons/fa";
@@ -21,7 +21,7 @@ interface Announcement {
   expiresAt?: string;
 }
 
-const AnnouncementsPage: NextPageWithLayout = () => {
+const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
   const { theme } = useTheme();
   const t = useTranslations("AnnouncementsPage");
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -64,10 +64,11 @@ const AnnouncementsPage: NextPageWithLayout = () => {
       });
   }, []);
 
-  const isAdmin = currentUser?.role === "admin";
+  // Memoize isAdmin
+  const isAdmin = useMemo(() => currentUser?.role === "admin", [currentUser]);
 
-  // Pin toggle handler
-  const handlePinToggle = async (id: string, pinned: boolean) => {
+  // Memoize pin toggle handler
+  const handlePinToggle = useCallback(async (id: string, pinned: boolean) => {
     setLoading(true);
     try {
       await fetch(`/api/announcements/${id}/pin`, {
@@ -81,15 +82,15 @@ const AnnouncementsPage: NextPageWithLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Comment handler (demo: local, could be API)
-  const handleComment = (id: string, comment: string) => {
+  // Memoize comment handler
+  const handleComment = useCallback((id: string, comment: string) => {
     // Optionally send to backend
-  };
+  }, []);
 
-  // Export as CSV
-  const handleExportCSV = () => {
+  // Memoize export handler
+  const handleExportCSV = useCallback(() => {
     if (!announcements || announcements.length === 0) {
       alert("No announcements to export.");
       return;
@@ -112,9 +113,10 @@ const AnnouncementsPage: NextPageWithLayout = () => {
     const csv = rows.map(r => r.map(f => `"${String(f).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     saveAs(blob, "announcements.csv");
-  };
+  }, [announcements]);
 
-  const handleAddAnnouncement = async (e: React.FormEvent) => {
+  // Memoize add announcement handler
+  const handleAddAnnouncement = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim() || !category) {
       setFormError("Title, content, and category are required!");
@@ -145,9 +147,10 @@ const AnnouncementsPage: NextPageWithLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [title, content, category, pinned, expiresAt, announcements]);
 
-  const handleDelete = async (id: string) => {
+  // Memoize delete handler
+  const handleDelete = useCallback(async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this announcement?")) return;
     setLoading(true);
     try {
@@ -162,38 +165,45 @@ const AnnouncementsPage: NextPageWithLayout = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [announcements]);
 
-  // Filtered lists
-  const filteredAnnouncements = announcements.filter(a => {
-    const matchesCategory = categoryFilter === "All" || a.category === categoryFilter;
-    const matchesSearch =
-      a.title.toLowerCase().includes(search.toLowerCase()) ||
-      a.content.toLowerCase().includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Memoize filtered lists
+  const filteredAnnouncements = useMemo(() => (
+    announcements.filter(a => {
+      const matchesCategory = categoryFilter === "All" || a.category === categoryFilter;
+      const matchesSearch =
+        a.title.toLowerCase().includes(search.toLowerCase()) ||
+        a.content.toLowerCase().includes(search.toLowerCase());
+      return matchesCategory && matchesSearch;
+    })
+  ), [announcements, categoryFilter, search]);
 
-  const pinnedAnnouncements = filteredAnnouncements
-    .filter(a => a.pinned)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const pinnedAnnouncements = useMemo(() => (
+    filteredAnnouncements
+      .filter(a => a.pinned)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  ), [filteredAnnouncements]);
 
-  const otherAnnouncements = filteredAnnouncements
-    .filter(a => !a.pinned)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const otherAnnouncements = useMemo(() => (
+    filteredAnnouncements
+      .filter(a => !a.pinned)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  ), [filteredAnnouncements]);
 
-  const displayedAnnouncements = activeTab === 'pinned' ? pinnedAnnouncements : filteredAnnouncements;
+  const displayedAnnouncements = useMemo(() => (
+    activeTab === 'pinned' ? pinnedAnnouncements : filteredAnnouncements
+  ), [activeTab, pinnedAnnouncements, filteredAnnouncements]);
 
-  // Handler to open details modal
-  const handleCardClick = (announcement: Announcement) => {
+  // Memoize card click and modal close handlers
+  const handleCardClick = useCallback((announcement: Announcement) => {
     setSelectedAnnouncement(announcement);
     setDetailsModalOpen(true);
-  };
+  }, []);
 
-  // Handler to close details modal
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setDetailsModalOpen(false);
     setSelectedAnnouncement(null);
-  };
+  }, []);
 
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
@@ -376,10 +386,10 @@ const AnnouncementsPage: NextPageWithLayout = () => {
       )}
     </div>
   );
-};
+});
 
 AnnouncementsPage.getLayout = (page) => (
   <DashboardLayout>{page}</DashboardLayout>
 );
 
-export default AnnouncementsPage;
+export default React.memo(AnnouncementsPage);

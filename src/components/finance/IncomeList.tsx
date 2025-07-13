@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { FaTrash, FaFileCsv, FaFilePdf, FaSearch, FaSpinner, FaCoins } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import { useTheme } from '@/components/ThemeContext';
@@ -37,7 +37,7 @@ export interface IncomeListProps {
   onExportPDF: () => void;
 }
 
-const IncomeList: React.FC<IncomeListProps> = ({
+const IncomeList: React.FC<IncomeListProps> = React.memo(({
   incomes,
   loading,
   onDelete,
@@ -57,6 +57,62 @@ const IncomeList: React.FC<IncomeListProps> = ({
 }) => {
   const { theme } = useTheme();
   const t = useTranslations("FinancePage");
+
+  // Memoize rendered incomes
+  const renderedIncomes = useMemo(() => (
+    incomes.map(income => (
+      <div
+        key={income._id}
+        className={`p-4 rounded-xl border transition-all duration-200 ${
+          theme === "dark"
+            ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
+            : "bg-white border-gray-200 hover:border-gray-300"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1">
+              <h3 className={`font-semibold text-base truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {income.title}
+              </h3>
+              <span className="text-lg font-bold text-green-500">
+                +${income.amount.toFixed(2)}
+              </span>
+            </div>
+            <p className={`text-sm mb-2 leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              {income.description}
+            </p>
+            <div className="flex items-center gap-4 text-xs">
+              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                {income.date ? new Date(income.date).toLocaleDateString() : "No date"}
+              </span>
+              {income.category && (
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  theme === 'dark' 
+                    ? 'bg-green-900/30 text-green-400' 
+                    : 'bg-green-50 text-green-700'
+                }`}>
+                  {income.category}
+                </span>
+              )}
+            </div>
+          </div>
+          <Button
+            onClick={() => onDelete(income)}
+            className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
+              theme === 'dark' 
+                ? 'text-red-400 hover:bg-red-900/20 hover:text-red-300' 
+                : 'text-red-600 hover:bg-red-50'
+            }`}
+            title="Delete Income"
+            variant="ghost"
+          >
+            <FaTrash size={16} />
+          </Button>
+        </div>
+      </div>
+    ))
+  ), [incomes, theme, onDelete]);
 
   return (
     <div className="flex flex-col h-full">
@@ -253,63 +309,12 @@ const IncomeList: React.FC<IncomeListProps> = ({
           </div>
         ) : (
           <div className="space-y-3">
-            {incomes.map(income => (
-              <div
-                key={income._id}
-                className={`p-4 rounded-xl border transition-all duration-200 ${
-                  theme === "dark"
-                    ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
-                    : "bg-white border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className={`font-semibold text-base truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {income.title}
-                      </h3>
-                      <span className="text-lg font-bold text-green-500">
-                        +${income.amount.toFixed(2)}
-                      </span>
-                    </div>
-                    <p className={`text-sm mb-2 leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {income.description}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                        {income.date ? new Date(income.date).toLocaleDateString() : "No date"}
-                      </span>
-                      {income.category && (
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          theme === 'dark' 
-                            ? 'bg-green-900/30 text-green-400' 
-                            : 'bg-green-50 text-green-700'
-                        }`}>
-                          {income.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => onDelete(income)}
-                    className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
-                      theme === 'dark' 
-                        ? 'text-red-400 hover:bg-red-900/20 hover:text-red-300' 
-                        : 'text-red-600 hover:bg-red-50'
-                    }`}
-                    title="Delete Income"
-                    variant="ghost"
-                  >
-                    <FaTrash size={16} />
-                  </Button>
-                </div>
-              </div>
-            ))}
+            {renderedIncomes}
           </div>
         )}
       </div>
     </div>
   );
-};
+});
 
-export default IncomeList;
+export default React.memo(IncomeList);

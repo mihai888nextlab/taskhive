@@ -1,3 +1,4 @@
+import React from "react";
 import { FaArrowUp, FaArrowDown, FaMoneyBill, FaChartLine } from 'react-icons/fa';
 import { useTheme } from '@/components/ThemeContext';
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +13,7 @@ interface Props {
   profitTrend: number;
 }
 
-export default function FinanceSummaryCards({
+const FinanceSummaryCards = React.memo(function FinanceSummaryCards({
   totalExpenses,
   totalIncomes,
   profit,
@@ -89,4 +90,6 @@ export default function FinanceSummaryCards({
       </Card>
     </div>
   );
-}
+});
+
+export default React.memo(FinanceSummaryCards);

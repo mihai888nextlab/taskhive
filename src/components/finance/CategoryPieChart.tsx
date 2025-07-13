@@ -1,3 +1,4 @@
+import React from "react";
 import { Pie } from 'react-chartjs-2';
 import { useTranslations } from "next-intl";
 
@@ -7,7 +8,7 @@ interface Props {
   theme: string;
 }
 
-export default function CategoryPieChart({ data, options, theme }: Props) {
+const CategoryPieChart = React.memo(function CategoryPieChart({ data, options, theme }: Props) {
   const t = useTranslations("FinancePage");
   return (
     <div className={`rounded-2xl shadow-xl p-6 sm:p-8 mb-8 hover:scale-[1.005] hover:shadow-2xl transition-all duration-100 mt-8 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
@@ -19,4 +20,6 @@ export default function CategoryPieChart({ data, options, theme }: Props) {
       </div>
     </div>
   );
-}
+});
+
+export default React.memo(CategoryPieChart);

@@ -1,6 +1,6 @@
 import React from "react";
 
-const NotificationsTab: React.FC = () => (
+const NotificationsTab: React.FC<any> = React.memo((props) => (
   <div className="w-full max-w-2xl mx-auto px-2 sm:px-4">
     <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4 text-gray-900">
       Notifications
@@ -14,6 +14,6 @@ const NotificationsTab: React.FC = () => (
       </p>
     </div>
   </div>
-);
+));
 
-export default NotificationsTab;
+export default React.memo(NotificationsTab);

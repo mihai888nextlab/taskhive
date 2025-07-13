@@ -1,3 +1,4 @@
+import React from "react";
 import { FaUndo } from 'react-icons/fa';
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
@@ -8,7 +9,7 @@ interface Props {
   deletedItem: any;
 }
 
-export default function UndoSnackbar({ show, onUndo, deletedItem }: Props) {
+const UndoSnackbar = React.memo(function UndoSnackbar({ show, onUndo, deletedItem }: Props) {
   const t = useTranslations("FinancePage");
   if (!show || !deletedItem) return null;
   return (
@@ -25,4 +26,6 @@ export default function UndoSnackbar({ show, onUndo, deletedItem }: Props) {
       </Button>
     </div>
   );
-}
+});
+
+export default React.memo(UndoSnackbar);

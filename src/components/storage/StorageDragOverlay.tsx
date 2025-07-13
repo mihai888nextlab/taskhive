@@ -10,4 +10,4 @@ const StorageDragOverlay: React.FC = () => {
   );
 };
 
-export default StorageDragOverlay;
+export default React.memo(StorageDragOverlay);

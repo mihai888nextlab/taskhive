@@ -6,7 +6,7 @@ interface Props {
   message: string;
 }
 
-const PomodoroSavePanel: React.FC<Props> = ({ onSave, message }) => {
+const PomodoroSavePanel: React.FC<Props> = React.memo(({ onSave, message }) => {
   const t = useTranslations("TimeTrackingPage");
   return (
     <div className="flex flex-col items-center mb-8">
@@ -23,6 +23,6 @@ const PomodoroSavePanel: React.FC<Props> = ({ onSave, message }) => {
       )}
     </div>
   );
-};
+});
 
-export default PomodoroSavePanel;
+export default React.memo(PomodoroSavePanel);

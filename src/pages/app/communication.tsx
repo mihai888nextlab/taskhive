@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import ChatWindow from "@/components/chat/ChatWindow";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
 import ConversationList, {
   PopulatedConversation,
 } from "@/components/chat/ConversationList";
@@ -13,7 +12,7 @@ import NewGroupChatModal from "@/components/chat/NewGroupChatModal";
 import { useRouter } from "next/router";
 import { useTheme } from "@/components/ThemeContext";
 
-const Communication: NextPageWithLayout = () => {
+const Communication: NextPageWithLayout = React.memo(() => {
   const { user, loadingUser } = useAuth();
   const { theme } = useTheme();
   const [conversations, setConversations] = useState<PopulatedConversation[]>(
@@ -64,7 +63,8 @@ const Communication: NextPageWithLayout = () => {
     }
   }, [router.query.userId, conversations]);
 
-  const handleChatCreated = (newConversationId: string) => {
+  // Memoize handleChatCreated
+  const handleChatCreated = useCallback((newConversationId: string) => {
     if (user) {
       fetch(`/api/conversations?userId=${user._id}`)
         .then((res) => res.json())
@@ -82,35 +82,32 @@ const Communication: NextPageWithLayout = () => {
           console.error("Failed to re-fetch conversations after creation", err)
         );
     }
-  };
+  }, [user]);
+
+  // Memoize selectedConversationId
+  const selectedConversationId = useMemo(
+    () => selectedConversation?._id?.toString() || null,
+    [selectedConversation]
+  );
 
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} p-4 lg:px-8`}>
       {loadingUser && <Loading />}
-
-      {/* Main Communication Container */}
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] max-w-8xl mx-auto">
-        {/* Conversation List Panel */}
         <div className="w-full lg:w-1/3 xl:w-1/4 min-w-0">
           <ConversationList
             conversations={conversations}
             onSelectConversation={setSelectedConversation}
-            selectedConversationId={
-              selectedConversation?._id?.toString() || null
-            }
+            selectedConversationId={selectedConversationId}
             onNewChatClick={() => setShowNewDirectChatModal(true)}
             onNewGroupClick={() => setShowNewGroupChatModal(true)}
             loadingConversations={loadingConversations}
           />
         </div>
-
-        {/* Chat Window Panel */}
         <div className="flex-1 min-w-0">
           <ChatWindow selectedConversation={selectedConversation} />
         </div>
       </div>
-
-      {/* Modals */}
       <NewDirectChatModal
         isOpen={showNewDirectChatModal}
         onClose={() => setShowNewDirectChatModal(false)}
@@ -123,10 +120,10 @@ const Communication: NextPageWithLayout = () => {
       />
     </div>
   );
-};
+});
 
 Communication.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default Communication;
+export default React.memo(Communication);

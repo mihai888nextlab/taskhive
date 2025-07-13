@@ -3,11 +3,12 @@ import Image from "next/image";
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
 import { useAuth } from "@/hooks/useAuth";
 import { User } from "@/types"; // Adjust the import path as necessary
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useTranslations } from "next-intl";
 import AddCompanyModal from "@/components/modals/AddCompanyModal";
 import { FiPlus } from "react-icons/fi";
+import React from "react";
 
 type MenuItem = {
   name: string;
@@ -26,7 +27,7 @@ type SidebarNavProps = {
   unreadMessages?: number;
 };
 
-const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslations> }> = ({
+const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslations> }> = React.memo(({
   menu,
   user,
   router,
@@ -82,19 +83,23 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
     };
   }, [dropdownOpen]);
 
-  // menuWithNotifications should use the translation keys, not translated values
-  const menuWithNotifications = menu.map((item) => {
-    if (item.name === "tasks" && tasksCount > 0) {
-      return { ...item, notification: tasksCount };
-    }
-    if (item.name === "announcements" && unreadAnnouncements > 0) {
-      return { ...item, notification: unreadAnnouncements };
-    }
-    if (item.name === "communication" && unreadMessages > 0) {
-      return { ...item, notification: unreadMessages };
-    }
-    return { ...item, notification: item.notification };
-  });
+  // Memoize menuWithNotifications
+  const menuWithNotifications = useMemo(
+    () =>
+      menu.map((item) => {
+        if (item.name === "tasks" && tasksCount > 0) {
+          return { ...item, notification: tasksCount };
+        }
+        if (item.name === "announcements" && unreadAnnouncements > 0) {
+          return { ...item, notification: unreadAnnouncements };
+        }
+        if (item.name === "communication" && unreadMessages > 0) {
+          return { ...item, notification: unreadMessages };
+        }
+        return { ...item, notification: item.notification };
+      }),
+    [menu, tasksCount, unreadAnnouncements, unreadMessages]
+  );
 
   return (
     <aside className="hidden md:flex fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] text-white px-5 flex-col shadow-lg border-r border-[#23272f] z-[90]">
@@ -234,6 +239,6 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
       />
     </aside>
   );
-};
+});
 
-export default SidebarNav;
+export default React.memo(SidebarNav);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { FaTrash, FaFileCsv, FaFilePdf, FaSearch, FaSpinner, FaReceipt } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import { useTheme } from '@/components/ThemeContext';
@@ -37,7 +37,7 @@ export interface ExpenseListProps {
   onExportPDF: () => void;
 }
 
-const ExpenseList: React.FC<ExpenseListProps> = ({
+const ExpenseList: React.FC<ExpenseListProps> = React.memo(({
   expenses,
   loading,
   onDelete,
@@ -57,6 +57,61 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
 }) => {
   const { theme } = useTheme();
   const t = useTranslations("FinancePage");
+
+  // Memoize rendered expenses
+  const renderedExpenses = useMemo(() => (
+    expenses.map(expense => (
+      <div
+        key={expense._id}
+        className={`p-4 rounded-xl border transition-all duration-200 ${
+          theme === "dark"
+            ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
+            : "bg-white border-gray-200 hover:border-gray-300"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1">
+              <h3 className={`font-semibold text-base truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {expense.title}
+              </h3>
+              <span className="text-lg font-bold text-red-500">
+                -${expense.amount.toFixed(2)}
+              </span>
+            </div>
+            <p className={`text-sm mb-2 leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              {expense.description}
+            </p>
+            <div className="flex items-center gap-4 text-xs">
+              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                {expense.date ? new Date(expense.date).toLocaleDateString() : "No date"}
+              </span>
+              {expense.category && (
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  theme === 'dark' 
+                    ? 'bg-red-900/30 text-red-400' 
+                    : 'bg-red-50 text-red-700'
+                }`}>
+                  {expense.category}
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => onDelete(expense)}
+            className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
+              theme === 'dark' 
+                ? 'text-red-400 hover:bg-red-900/20 hover:text-red-300' 
+                : 'text-red-600 hover:bg-red-50'
+            }`}
+            title="Delete Expense"
+          >
+            <FaTrash size={16} />
+          </button>
+        </div>
+      </div>
+    ))
+  ), [expenses, theme, onDelete]);
 
   return (
     <div className="flex flex-col h-full">
@@ -253,62 +308,12 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
           </div>
         ) : (
           <div className="space-y-3">
-            {expenses.map(expense => (
-              <div
-                key={expense._id}
-                className={`p-4 rounded-xl border transition-all duration-200 ${
-                  theme === "dark"
-                    ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
-                    : "bg-white border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className={`font-semibold text-base truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {expense.title}
-                      </h3>
-                      <span className="text-lg font-bold text-red-500">
-                        -${expense.amount.toFixed(2)}
-                      </span>
-                    </div>
-                    <p className={`text-sm mb-2 leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {expense.description}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                        {expense.date ? new Date(expense.date).toLocaleDateString() : "No date"}
-                      </span>
-                      {expense.category && (
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          theme === 'dark' 
-                            ? 'bg-red-900/30 text-red-400' 
-                            : 'bg-red-50 text-red-700'
-                        }`}>
-                          {expense.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => onDelete(expense)}
-                    className={`ml-4 p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
-                      theme === 'dark' 
-                        ? 'text-red-400 hover:bg-red-900/20 hover:text-red-300' 
-                        : 'text-red-600 hover:bg-red-50'
-                    }`}
-                    title="Delete Expense"
-                  >
-                    <FaTrash size={16} />
-                  </button>
-                </div>
-              </div>
-            ))}
+            {renderedExpenses}
           </div>
         )}
       </div>
     </div>
   );
-};
+});
 
-export default ExpenseList;
+export default React.memo(ExpenseList);

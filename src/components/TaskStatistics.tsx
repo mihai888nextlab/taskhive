@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { useTranslations } from "next-intl";
@@ -14,10 +14,11 @@ interface TaskStatisticsProps {
   className?: string;
 }
 
-const TaskStatistics: React.FC<TaskStatisticsProps> = ({ completed, total, last7Days, hideHeader, hideSummary, className }) => {
+const TaskStatistics: React.FC<TaskStatisticsProps> = React.memo(({ completed, total, last7Days, hideHeader, hideSummary, className }) => {
   const t = useTranslations("InsightsPage");
 
-  const data = {
+  // Memoize chart data
+  const data = useMemo(() => ({
     labels: ['6d ago', '5d ago', '4d ago', '3d ago', '2d ago', 'Yesterday', 'Today'],
     datasets: [
       {
@@ -29,7 +30,7 @@ const TaskStatistics: React.FC<TaskStatisticsProps> = ({ completed, total, last7
         categoryPercentage: 0.7,
       },
     ],
-  };
+  }), [last7Days]);
 
   return (
     <div className={className ? className : ''}>
@@ -42,6 +43,6 @@ const TaskStatistics: React.FC<TaskStatisticsProps> = ({ completed, total, last7
       </div>
     </div>
   );
-};
+});
 
-export default TaskStatistics;
+export default React.memo(TaskStatistics);

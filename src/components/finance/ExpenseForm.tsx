@@ -259,4 +259,4 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
   );
 };
 
-export default ExpenseForm;
+export default React.memo(ExpenseForm);

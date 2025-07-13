@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useAIWindow } from "@/contexts/AIWindowContext";
 import { useTranslations } from "next-intl";
@@ -120,7 +120,7 @@ interface AIWindowProps {
 }
 
 // Use the correct translation namespace and pass locale
-const AIWindow: React.FC<AIWindowProps> = ({
+const AIWindow: React.FC<AIWindowProps> = React.memo(({
   isOpen,
   onClose,
   isDesktop = false,
@@ -513,6 +513,6 @@ const AIWindow: React.FC<AIWindowProps> = ({
       </div>
     </div>
   );
-};
+});
 
-export default AIWindow;
+export default React.memo(AIWindow);

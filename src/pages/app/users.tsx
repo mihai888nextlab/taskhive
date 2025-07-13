@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { FaPlus, FaUsers, FaUserPlus, FaSitemap } from "react-icons/fa";
@@ -96,7 +96,7 @@ const UsersPage: NextPageWithLayout = () => {
   };
 
   // Handle functions
-  const handleUserClick = (userId: string) => {
+  const handleUserClick = useCallback((userId: string) => {
     const userObj = users.find((u) => u.userId._id === userId);
     if (userObj) {
       setSelectedUser({
@@ -105,7 +105,7 @@ const UsersPage: NextPageWithLayout = () => {
       });
       setProfileModalOpen(true);
     }
-  };
+  }, [users]);
 
   const addUser = async (
     email: string,
@@ -150,52 +150,63 @@ const UsersPage: NextPageWithLayout = () => {
     }
   };
 
-  const filteredUsers = users
-    .filter(
-      (u) =>
-        u.companyId ===
-        (user && "companyId" in user ? (user as any).companyId : undefined)
-    )
-    .filter((u) => {
-      const q = search.trim().toLowerCase();
-      if (!q) return true;
-      return (
-        u.userId.firstName.toLowerCase().includes(q) ||
-        u.userId.lastName.toLowerCase().includes(q) ||
-        u.userId.email.toLowerCase().includes(q)
-      );
-    })
-    .filter((u) => (filterRole === "all" ? true : u.role === filterRole))
-    .sort((a, b) => {
-      if (sortBy === "firstNameAsc") {
-        return (a.userId.firstName || "").localeCompare(
-          b.userId.firstName || ""
+  const filteredUsers = useMemo(() => {
+    const companyId = user && "companyId" in user ? (user as any).companyId : undefined;
+    const q = search.trim().toLowerCase();
+
+    return users
+      .filter((u) => u.companyId === companyId)
+      .filter((u) => {
+        // Search filter
+        if (!q) return true;
+        return (
+          u.userId.firstName?.toLowerCase().includes(q) ||
+          u.userId.lastName?.toLowerCase().includes(q) ||
+          u.userId.email?.toLowerCase().includes(q)
         );
-      }
-      if (sortBy === "lastNameAsc") {
-        return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
-      }
-      if (sortBy === "roleAsc") {
-        return (a.role || "").localeCompare(b.role || "");
-      }
-      return 0;
-    });
+      })
+      .filter((u) => {
+        // Role filter
+        if (filterRole === "all") return true;
+        return u.role === filterRole;
+      })
+      .sort((a, b) => {
+        if (sortBy === "firstNameAsc") {
+          return (a.userId.firstName || "").localeCompare(b.userId.firstName || "");
+        }
+        if (sortBy === "lastNameAsc") {
+          return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
+        }
+        if (sortBy === "roleAsc") {
+          return (a.role || "").localeCompare(b.role || "");
+        }
+        return 0;
+      });
+  }, [users, user, search, filterRole, sortBy]);
 
   // Only roles from users in your company
-  const companyRoles = Array.from(
-    new Set(
-      users
-        .filter(
-          (u) =>
-            u.companyId ===
-            (user && "companyId" in user ? (user as any).companyId : undefined)
-        )
-        .map((u) => u.role)
-    )
-  );
+  const companyId = user && "companyId" in user ? (user as any).companyId : undefined;
+  const companyRoles = useMemo(() => {
+    const rolesSet = new Set<string>();
+    users.forEach((u) => {
+      if (u.companyId === companyId) {
+        rolesSet.add(u.role);
+      }
+    });
+    return Array.from(rolesSet);
+  }, [users, companyId]);
 
   // TESTE - DE STERS DUPA
   const handleTestButtonClick = () => {};
+
+  // Handler to open Add User Modal
+  const handleOpenAddUserModal = () => setAddUserModalOpen(true);
+
+  // Handler to open Add Role Modal
+  const handleOpenAddRoleModal = () => setAddRoleModalOpen(true);
+
+  // Handler to open Org Chart Modal
+  const handleOpenOrgChartModal = () => setOrgChartModalOpen(true);
 
   //TERMINAT TEST
 
@@ -291,7 +302,7 @@ const UsersPage: NextPageWithLayout = () => {
                           : "bg-blue-500 hover:bg-blue-600 text-white"
                       }`}
                     >
-                      <span onClick={() => setAddUserModalOpen(true)}>
+                      <span onClick={handleOpenAddUserModal}>
                         <FaUserPlus className="w-4 h-4" />
                         <span>{t("addUser")}</span>
                       </span>
@@ -304,7 +315,7 @@ const UsersPage: NextPageWithLayout = () => {
                           : "bg-blue-500 hover:bg-blue-600 text-white"
                       }`}
                     >
-                      <span onClick={() => setAddRoleModalOpen(true)}>
+                      <span onClick={handleOpenAddRoleModal}>
                         <FaPlus className="w-4 h-4" />
                         <span>{t("addRole")}</span>
                       </span>
@@ -317,7 +328,7 @@ const UsersPage: NextPageWithLayout = () => {
                           : "bg-slate-500 hover:bg-slate-600 text-white"
                       }`}
                     >
-                      <span onClick={() => setOrgChartModalOpen(true)}>
+                      <span onClick={handleOpenOrgChartModal}>
                         <FaSitemap className="w-4 h-4" />
                         <span>{t("orgChart")}</span>
                       </span>
@@ -331,7 +342,7 @@ const UsersPage: NextPageWithLayout = () => {
               className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"} border-b`}
             >
               <UserList
-                users={users}
+                users={users} // <-- Pass all users here!
                 loading={loading}
                 onUserClick={handleUserClick}
                 theme={theme}
