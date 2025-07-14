@@ -11,15 +11,6 @@ import {
   FaComments,
 } from "react-icons/fa";
 
-const kanit = useMemo(
-  () =>
-    Kanit({
-      subsets: ["latin"],
-      weight: ["400", "700"],
-    }),
-  []
-);
-
 const HelpSection = React.memo(function HelpSection({
   icon,
   title,
@@ -32,12 +23,7 @@ const HelpSection = React.memo(function HelpSection({
   return (
     <div className="relative bg-gradient-to-br from-white/10 via-background/60 to-white/5 backdrop-blur-xl border border-accent/20 rounded-2xl p-6 sm:p-10 flex flex-col items-start shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40 min-h-[260px]">
       {icon}
-      <h2
-        className={
-          kanit.className +
-          " text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight"
-        }
-      >
+      <h2 className="text-xl sm:text-2xl font-bold mb-3 text-white tracking-tight">
         {title}
       </h2>
       <p className="text-base leading-7 text-gray-300">{desc}</p>
@@ -62,12 +48,7 @@ export default function Help() {
         <div className="w-full max-w-5xl flex flex-col items-center justify-center">
           {/* Premium accent bar */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-8 w-24 h-2 rounded-full bg-gradient-to-r from-primary/80 via-primary/60 to-primary/80 blur-sm opacity-80" />
-          <h1
-            className={
-              kanit.className +
-              " text-[2.2rem] xs:text-[2.7rem] sm:text-[2.9rem] md:text-[60px] leading-[1.1] text-white text-center mb-10 sm:mb-14 border-b-4 border-accent pb-3 sm:pb-5 animate-fade-in font-bold tracking-tight"
-            }
-          >
+          <h1 className=" text-[2.2rem] xs:text-[2.7rem] sm:text-[2.9rem] md:text-[60px] leading-[1.1] text-white text-center mb-10 sm:mb-14 border-b-4 border-accent pb-3 sm:pb-5 animate-fade-in font-bold tracking-tight">
             How TaskHive Works
           </h1>
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 w-full">
@@ -79,14 +60,18 @@ export default function Help() {
               desc="TaskHive allows you to create an admin account for your organization. As an admin, you can manage the structure of your organization and oversee all operations."
             />
             <HelpSection
-              icon={<FaUsers className="text-4xl text-primary mb-5 drop-shadow" />}
+              icon={
+                <FaUsers className="text-4xl text-primary mb-5 drop-shadow" />
+              }
               title="2. Adding Collaborators"
               desc="You can add multiple collaborators or staff members to your organization. Each collaborator can be assigned specific roles and responsibilities."
             />
             <HelpSection
-              icon={<FaTasks className="text-4xl text-primary mb-5 drop-shadow" />}
+              icon={
+                <FaTasks className="text-4xl text-primary mb-5 drop-shadow" />
+              }
               title="3. Task Assignment"
-              desc="Tasks can be assigned to collaborators based on the company&apos;s hierarchy. The hierarchy is defined using a dynamic organizational chart created by the admin."
+              desc="Tasks can be assigned to collaborators based on the company's hierarchy. The hierarchy is defined using a dynamic organizational chart created by the admin."
             />
             <HelpSection
               icon={
@@ -96,7 +81,9 @@ export default function Help() {
               desc="TaskHive includes an integrated calendar to help you track deadlines and manage schedules effectively."
             />
             <HelpSection
-              icon={<FaComments className="text-4xl text-primary mb-5 drop-shadow" />}
+              icon={
+                <FaComments className="text-4xl text-primary mb-5 drop-shadow" />
+              }
               title="5. Communication Channels"
               desc="TaskHive provides communication channels for employees, enabling seamless collaboration and effective communication within the team."
             />
