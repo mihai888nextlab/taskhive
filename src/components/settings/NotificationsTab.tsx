@@ -1,4 +1,5 @@
 import React from "react";
+import PushNotificationManager from "../PushNotificationManager";
 
 const NotificationsTab: React.FC<any> = React.memo((props) => (
   <div className="w-full max-w-2xl mx-auto px-2 sm:px-4">
@@ -10,8 +11,11 @@ const NotificationsTab: React.FC<any> = React.memo((props) => (
     </p>
     <div className="mt-2 sm:mt-4 p-3 sm:p-6 bg-gray-50 border border-gray-200 rounded-md text-gray-700 text-sm sm:text-base">
       <p>
-        Notification settings will go here (e.g., email alerts, push notifications).
+        Notification settings will go here (e.g., email alerts, push
+        notifications).
       </p>
+
+      <PushNotificationManager />
     </div>
   </div>
 ));
