@@ -33,10 +33,12 @@ export default async function handler(
   let user = await UserModel.findById(decoded.userId);
   let userCompany = null;
   if (user && !Array.isArray(user)) {
-    userCompany = await userCompanyModel.findOne({
-      userId: user._id,
-      companyId: decoded.companyId,
-    }).lean();
+    userCompany = await userCompanyModel
+      .findOne({
+        userId: user._id,
+        companyId: decoded.companyId,
+      })
+      .lean();
   }
 
   if (req.method === "GET") {
@@ -54,7 +56,8 @@ export default async function handler(
     if (
       !user ||
       !userCompany ||
-      (userCompany.role || "").toLowerCase() !== "admin"
+      Array.isArray(userCompany) ||
+      ((userCompany as any).role || "").toLowerCase() !== "admin"
     ) {
       return res
         .status(403)
@@ -78,8 +81,12 @@ export default async function handler(
       });
 
       // Only require Gemini for POST
-      const { GoogleGenerativeAIEmbeddings } = await import("@langchain/google-genai");
-      const { RecursiveCharacterTextSplitter } = await import("langchain/text_splitter");
+      const { GoogleGenerativeAIEmbeddings } = await import(
+        "@langchain/google-genai"
+      );
+      const { RecursiveCharacterTextSplitter } = await import(
+        "langchain/text_splitter"
+      );
       const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
       const embeddings = new GoogleGenerativeAIEmbeddings({
         apiKey: GEMINI_API_KEY,

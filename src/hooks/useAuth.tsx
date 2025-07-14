@@ -13,8 +13,12 @@ interface AuthContextType {
   loadingUser: boolean;
   error: string | null;
   isAuthenticated: boolean; // O nouă proprietate utilă
+  hasCompany: boolean; // O nouă proprietate utilă pentru a verifica dacă utilizatorul are o companie
   refetchUser: () => Promise<void>; // Funcție pentru a re-fetch-ui manual
-  login: (email: string, password: string) => Promise<boolean>; // Adaugă funcție de login
+  login: (
+    provider: string,
+    credentials: { email?: string; password?: string; idToken?: string }
+  ) => Promise<boolean>; // Adaugă funcție de login
   register: (
     email: string,
     password: string,
@@ -61,7 +65,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []); // Dependențe goale, deoarece nu se bazează pe props sau state din acest scope
 
   const login = useCallback(
-    async (email: string, password: string): Promise<boolean> => {
+    async (
+      provider: string,
+      credentials: { email?: string; password?: string; idToken?: string }
+    ): Promise<boolean> => {
       setLoadingUser(true);
       setError(null);
       try {
@@ -91,12 +98,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           throw new Error("Invalid provider or missing credentials");
         }
 
-        if (response.ok) {
+        if (res.ok) {
           await fetchUserData();
           router.push("/app");
           return true;
         } else {
-          const errData = await response.json();
+          const errData = await res.json();
           setError(
             errData.message || "Login failed. Please check your credentials."
           );
@@ -191,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [fetchUserData]); // Rulează o singură dată la montare
 
   const isAuthenticated = user !== null;
+  const hasCompany = user?.companyId ? true : false; // Verifică dacă utilizatorul are o companie
 
   return (
     <AuthContext.Provider
@@ -199,6 +207,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loadingUser,
         error,
         isAuthenticated,
+        hasCompany,
         refetchUser: fetchUserData,
         login,
         register,
