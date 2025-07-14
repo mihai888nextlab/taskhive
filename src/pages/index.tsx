@@ -3,11 +3,25 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Link from "next/link";
 import Image from "next/image";
-import { FaTasks, FaCalendarAlt, FaBullhorn, FaComments, FaUserClock, FaMoneyBillWave, FaClock } from "react-icons/fa";
+import {
+  FaTasks,
+  FaCalendarAlt,
+  FaBullhorn,
+  FaComments,
+  FaUserClock,
+  FaMoneyBillWave,
+  FaClock,
+} from "react-icons/fa";
 import { MdSdStorage, MdSettings } from "react-icons/md";
-import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import Head from "next/head";
 
 const kanit = Kanit({
@@ -15,7 +29,7 @@ const kanit = Kanit({
   weight: ["400", "700"],
 });
 
-const features = useMemo(() => [
+const features = [
   {
     icon: <FaTasks className="text-4xl text-primary drop-shadow" />,
     title: "Task Management",
@@ -61,7 +75,7 @@ const features = useMemo(() => [
     title: "Custom Settings",
     desc: "Personalize your workspace and notifications.",
   },
-], []);
+];
 
 export default function Home() {
   // Ref for the container that holds the horizontally scrolling content and gets the transform.
@@ -77,7 +91,8 @@ export default function Home() {
       if (horizontalContentRef.current) {
         // Get the bounding rectangle of the horizontal content section.
         // This tells us its position relative to the viewport.
-        const containerRect = horizontalContentRef.current.getBoundingClientRect();
+        const containerRect =
+          horizontalContentRef.current.getBoundingClientRect();
 
         // Get the total scrollable width of the content inside the container.
         // This is the sum of the widths of all feature cards, including gaps.
@@ -92,7 +107,8 @@ export default function Home() {
 
         // Define the vertical scroll zone over which the horizontal animation will occur.
         // The animation starts when the top of the horizontal section is just visible (at the bottom of the viewport).
-        const animationStartVerticalScroll = window.pageYOffset + containerRect.top - window.innerHeight;
+        const animationStartVerticalScroll =
+          window.pageYOffset + containerRect.top - window.innerHeight;
 
         // The total vertical distance we want the horizontal animation to span.
         // This value can be adjusted to make the horizontal scroll faster or slower
@@ -106,7 +122,9 @@ export default function Home() {
         // Calculate the progress (0 to 1) of the vertical scroll within our defined animation zone.
         let scrollProgress = 0;
         if (fixedVerticalAnimationDistance > 0) {
-          scrollProgress = (currentScrollY - animationStartVerticalScroll) / fixedVerticalAnimationDistance;
+          scrollProgress =
+            (currentScrollY - animationStartVerticalScroll) /
+            fixedVerticalAnimationDistance;
         }
 
         // Clamp the scroll progress between 0 and 1 to ensure the horizontal content
@@ -123,8 +141,8 @@ export default function Home() {
     };
 
     // Add event listeners for 'scroll' and 'resize' to continuously update the horizontal position.
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll);
 
     // Perform an initial calculation and update on component mount
     // to ensure the content is correctly positioned immediately.
@@ -133,17 +151,21 @@ export default function Home() {
     // Cleanup function: Remove the event listeners when the component unmounts
     // to prevent memory leaks.
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
     };
   }, []); // Empty dependency array means this effect runs once on mount and once on unmount.
 
-  const FeatureCard = React.memo(function FeatureCard({ feature }: { feature: typeof features[number] }) {
+  const FeatureCard = React.memo(function FeatureCard({
+    feature,
+  }: {
+    feature: (typeof features)[number];
+  }) {
     return (
       <Card
         key={feature.title}
         className="flex-shrink-0 min-w-[320px] max-w-xs flex flex-col items-center bg-[#23272f] border border-accent/30 rounded-2xl p-10 min-h-[240px] hover:shadow-2xl hover:border-primary transition-all group snap-center shadow-lg mx-4 overflow-hidden w-full"
-        style={{ scrollSnapAlign: 'center', height: 280 }}
+        style={{ scrollSnapAlign: "center", height: 280 }}
       >
         <CardHeader className="mb-5 flex items-center justify-center">
           <div className="rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition flex items-center justify-center">
@@ -166,11 +188,23 @@ export default function Home() {
     <>
       <Head>
         <title>TaskHive – All-in-One Business Management Tool</title>
-        <meta name="description" content="Empower modern teams with TaskHive: minimal collaboration, advanced AI, task management, calendar, announcements, chat, finance, and more." />
-        <meta name="keywords" content="business management, team collaboration, task management, calendar, announcements, chat, finance, productivity, AI" />
+        <meta
+          name="description"
+          content="Empower modern teams with TaskHive: minimal collaboration, advanced AI, task management, calendar, announcements, chat, finance, and more."
+        />
+        <meta
+          name="keywords"
+          content="business management, team collaboration, task management, calendar, announcements, chat, finance, productivity, AI"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="TaskHive – All-in-One Business Management Tool" />
-        <meta property="og:description" content="Empower modern teams with TaskHive: minimal collaboration, advanced AI, task management, calendar, announcements, chat, finance, and more." />
+        <meta
+          property="og:title"
+          content="TaskHive – All-in-One Business Management Tool"
+        />
+        <meta
+          property="og:description"
+          content="Empower modern teams with TaskHive: minimal collaboration, advanced AI, task management, calendar, announcements, chat, finance, and more."
+        />
         <meta property="og:image" content="/hive-icon.png" />
         <meta property="og:type" content="website" />
         <link rel="canonical" href="https://taskhive.app/" />
@@ -200,8 +234,7 @@ export default function Home() {
               >
                 Empower Modern Teams
                 <br />
-                with{" "}
-                <span className="text-primary">Minimal</span> Collaboration
+                with <span className="text-primary">Minimal</span> Collaboration
               </h1>
               <p className="text-primary/80 text-base sm:text-lg md:text-xl font-medium mb-7 sm:mb-10 max-w-xl mx-auto">
                 Powered by advanced AI for smarter, faster teamwork.
@@ -213,7 +246,10 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Link href="/features" className="w-full sm:w-auto">
-                  <Button variant="outline" className="border border-primary text-primary py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold hover:bg-primary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    className="border border-primary text-primary py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold hover:bg-primary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto"
+                  >
                     Learn More
                   </Button>
                 </Link>
@@ -223,7 +259,7 @@ export default function Home() {
           {/* Features Section */}
           <div
             className="relative w-full flex items-center justify-center overflow-hidden py-16 bg-transparent"
-            style={{ height: '400px' }}
+            style={{ height: "400px" }}
           >
             <div
               ref={horizontalContentRef}
