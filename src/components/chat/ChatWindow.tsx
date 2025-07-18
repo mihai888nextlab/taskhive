@@ -352,99 +352,123 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
             <p className="text-sm opacity-75">{t("beFirstToSend")}</p>
           </div>
         ) : (
-          <div className="p-6 space-y-4">
-            {messages.map((msg, index) => {
-              const isSender =
-                (typeof msg.senderId === "object"
-                  ? msg.senderId._id
-                  : msg.senderId) === user?._id;
-              const senderInfo =
-                typeof msg.senderId === "object" ? msg.senderId : null;
-              const senderName = isSender
-                ? t("you")
-                : senderInfo
-                ? `${senderInfo.firstName || ""} ${
-                    senderInfo.lastName || ""
-                  }`.trim() || senderInfo.email
-                : t("unknown");
-
-              const showAvatar = !isSender && (index === 0 || 
-                (typeof messages[index - 1]?.senderId === "object" 
-                  ? (typeof messages[index - 1].senderId === "object"
-                      ? (messages[index - 1].senderId as IUser)._id
-                      : messages[index - 1].senderId)
-                  : messages[index - 1]?.senderId) !== (typeof msg.senderId === "object" ? (msg.senderId as IUser)._id : msg.senderId)
-              );
-
-              return (
-                <div
-                  key={msg._id || Math.random()}
-                  className={`flex ${isSender ? "justify-end" : "justify-start"} items-end gap-3`}
-                >
-                  {/* Avatar for received messages */}
-                  {!isSender && (
-                    <div className="w-8 h-8 flex-shrink-0">
-                      {showAvatar ? getMessageAvatar(msg.senderId) : <div className="w-8"></div>}
-                    </div>
-                  )}
-
-                  {/* Message Content */}
-                  <div className={`max-w-[75%] ${isSender ? "order-1" : "order-2"}`}>
-                    {!isSender && showAvatar && (
-                      <p className="text-xs text-gray-500 mb-1 ml-1">{senderName}</p>
-                    )}
-                    
+          <div className="p-6 space-y-1.5">
+            {/* Group messages by 10-minute window and show time on the last message in each group */}
+            {(() => {
+              const groups: { msgs: typeof messages; time: string }[] = [];
+              let currentGroup: typeof messages = [];
+              let lastTime: number | null = null;
+              messages.forEach((msg, idx) => {
+                const currTime = new Date(msg.timestamp).getTime();
+                if (
+                  lastTime === null ||
+                  Math.abs(currTime - lastTime) > 10 * 60 * 1000
+                ) {
+                  if (currentGroup.length) {
+                    groups.push({ msgs: currentGroup, time: new Date(messages[idx - 1].timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+                  }
+                  currentGroup = [msg];
+                } else {
+                  currentGroup.push(msg);
+                }
+                lastTime = currTime;
+              });
+              if (currentGroup.length) {
+                groups.push({ msgs: currentGroup, time: new Date(currentGroup[currentGroup.length - 1].timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+              }
+              let msgIdx = 0;
+              return groups.map((group, groupIdx) =>
+                group.msgs.map((msg, idx) => {
+                  const isSender =
+                    (typeof msg.senderId === "object"
+                      ? msg.senderId._id
+                      : msg.senderId) === user?._id;
+                  const senderInfo =
+                    typeof msg.senderId === "object" ? msg.senderId : null;
+                  const senderName = isSender
+                    ? t("you")
+                    : senderInfo
+                    ? `${senderInfo.firstName || ""} ${
+                        senderInfo.lastName || ""
+                      }`.trim() || senderInfo.email
+                    : t("unknown");
+                  const showAvatar = !isSender && (msgIdx === 0 || 
+                    (typeof messages[msgIdx - 1]?.senderId === "object" 
+                      ? (typeof messages[msgIdx - 1].senderId === "object"
+                          ? (messages[msgIdx - 1].senderId as IUser)._id
+                          : messages[msgIdx - 1].senderId)
+                      : messages[msgIdx - 1]?.senderId) !== (typeof msg.senderId === "object" ? (msg.senderId as IUser)._id : msg.senderId)
+                  );
+                  const showTime = idx === group.msgs.length - 1;
+                  const rendered = (
                     <div
-                      className={`inline-block px-3 py-2 rounded-2xl transition-all duration-200 ${
-                        isSender
-                          ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} text-white rounded-br-md`
-                          : theme === "light"
-                          ? "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
-                          : "bg-gray-700 text-white rounded-bl-md"
-                      }`}
+                      key={msg._id || Math.random()}
+                      className={`flex ${isSender ? "justify-end" : "justify-start"} items-end gap-3`}
                     >
-                      {msg.type === "file" ? (
-                        (() => {
-                          let fileData: {
-                            fileUrl: string;
-                            fileName: string;
-                            fileSize?: number;
-                          } | null = null;
-                          try {
-                            fileData = JSON.parse(msg.content);
-                          } catch {
-                            fileData = null;
-                          }
-                          return fileData ? (
-                            <FileCard
-                              fileName={fileData.fileName}
-                              fileSize={fileData.fileSize || 0}
-                              downloadUrl={fileData.fileUrl}
-                              theme={theme}
-                            />
-                          ) : (
-                            <span className="text-red-500 text-sm">
-                              Invalid file
-                            </span>
-                          );
-                        })()
-                      ) : (
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                          {msg.content}
-                        </p>
+                      {/* Avatar for received messages */}
+                      {!isSender && (
+                        <div className="w-8 h-8 flex-shrink-0">
+                          {showAvatar ? getMessageAvatar(msg.senderId) : <div className="w-8"></div>}
+                        </div>
                       )}
+                      {/* Message Content */}
+                      <div className={`max-w-[75%] ${isSender ? "order-1" : "order-2"}`}> 
+                        {!isSender && showAvatar && (
+                          <p className="text-xs text-gray-500 mb-1 ml-1">{senderName}</p>
+                        )}
+                        <div
+                          className={`inline-block px-3 py-2 rounded-2xl transition-all duration-200 ${
+                            isSender
+                              ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} text-white rounded-br-md`
+                              : theme === "light"
+                              ? "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
+                              : "bg-gray-700 text-white rounded-bl-md"
+                          }`}
+                        >
+                          {msg.type === "file" ? (
+                            (() => {
+                              let fileData: {
+                                fileUrl: string;
+                                fileName: string;
+                                fileSize?: number;
+                              } | null = null;
+                              try {
+                                fileData = JSON.parse(msg.content);
+                              } catch {
+                                fileData = null;
+                              }
+                              return fileData ? (
+                                <FileCard
+                                  fileName={fileData.fileName}
+                                  fileSize={fileData.fileSize || 0}
+                                  downloadUrl={fileData.fileUrl}
+                                  theme={theme}
+                                />
+                              ) : (
+                                <span className="text-red-500 text-sm">
+                                  Invalid file
+                                </span>
+                              );
+                            })()
+                          ) : (
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                              {msg.content}
+                            </p>
+                          )}
+                        </div>
+                        {showTime && (
+                          <p className={`text-xs mt-1 ${isSender ? "text-right" : "text-left"} ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}>
+                            {group.time}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    
-                    <p className={`text-xs mt-1 ${isSender ? "text-right" : "text-left"} ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}>
-                      {new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </div>
+                  );
+                  msgIdx++;
+                  return rendered;
+                })
               );
-            })}
+            })()}
             <div ref={messagesEndRef} />
           </div>
         )}

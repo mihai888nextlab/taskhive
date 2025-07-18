@@ -3,7 +3,8 @@ import { FaTimes, FaSignOutAlt } from "react-icons/fa";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
+
 
 type MenuItem = {
   name: string;
@@ -22,6 +23,7 @@ type MobileSidebarProps = {
   tasksCount?: number;
   unreadAnnouncements?: number;
   unreadMessages?: number;
+  header?: React.ReactNode;
 };
 
 const MobileSidebar: React.FC<MobileSidebarProps> = ({
@@ -34,7 +36,26 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
   tasksCount = 0,
   unreadAnnouncements = 0,
   unreadMessages = 0,
+  header,
 }) => {
+  // Close sidebar on route change (using router.events for Next.js)
+  useEffect(() => {
+    if (!router || !router.events) return;
+    const handleRouteChange = () => setSidebarOpen(false);
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [router, setSidebarOpen]);
+  // Close sidebar on route change (using router.events)
+  useEffect(() => {
+    if (!router?.events) return;
+    const handleRouteChange = () => setSidebarOpen(false);
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [router, setSidebarOpen]);
   const auth = useAuth();
 
   // Memoize sidebar close handler
@@ -50,7 +71,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
 
   if (!sidebarOpen) return null;
   return (
-    <div className="fixed inset-0 z-40 flex md:hidden">
+    <div className="fixed inset-0 z-[400] flex md:hidden">
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black bg-opacity-40"
@@ -58,14 +79,16 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
         aria-label="Close sidebar overlay"
       ></div>
       {/* Drawer */}
-      <aside className="relative w-full max-w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 text-white px-5 py-6 flex flex-col shadow-lg animate-slideInLeft overflow-y-auto">
+      <aside className="relative w-full max-w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 text-white px-0 pt-0 flex flex-col shadow-lg animate-slideInLeft overflow-y-auto">
+        {/* Close button with higher z-index than sidebar */}
         <button
-          className="absolute top-4 right-4 text-white text-2xl focus:outline-none"
+          className="absolute top-4 right-4 text-white text-2xl focus:outline-none z-[500]"
           onClick={handleSidebarClose}
           aria-label="Close sidebar"
         >
           <FaTimes />
         </button>
+        {/* Header removed for mobile sidebar */}
         <Link href="/app">
           <div className="w-full max-w-[180px] h-[72px] mx-auto mb-8 cursor-pointer hover:opacity-90 transition-opacity duration-300 relative">
             <Image

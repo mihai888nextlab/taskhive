@@ -12,5 +12,4 @@ export const menu = [
   { name: "storage", path: "/app/storage", icon: MdSdStorage },
   { name: "calendar", path: "/app/calendar", icon: FaCalendarAlt },
   { name: "insights", path: "/app/insights", icon: MdInsights },
-  { name: "settings", path: "/app/settings", icon: MdSettings },
 ];

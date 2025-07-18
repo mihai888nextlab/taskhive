@@ -1,4 +1,5 @@
 import React from 'react';
+// ...existing code...
 import DashboardLayout from '@/components/sidebar/DashboardLayout';
 import FinanceStatistics from '@/components/FinanceStatistics';
 import { useTheme } from '@/components/ThemeContext';
@@ -15,18 +16,20 @@ import StatsRangeButtons from '@/components/finance/StatsRangeButtons';
 import { FaDollarSign, FaChartLine } from 'react-icons/fa';
 import { useTranslations } from "next-intl";
 
+import MobileListWithFormButton from './MobileListWithFormButton';
+
 const FinancePage = () => {
   const { theme } = useTheme();
   const logic = useFinancePageLogic();
   const t = useTranslations("FinancePage");
 
   return (
-    <div className={`flex flex-col h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+    <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       {/* Header Section - Fixed Height */}
-      <div className={`flex-shrink-0 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} px-4 lg:px-8 py-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-        <div className="max-w-[100vw] mx-auto">
+      <div className={`flex-shrink-0 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} px-2 sm:px-4 lg:px-8 py-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className="max-w-full mx-auto">
           {/* Summary Cards */}
-          <div className="">
+          <div className="w-full">
             <FinanceSummaryCards
               totalExpenses={logic.totalExpenses}
               totalIncomes={logic.totalIncomes}
@@ -39,21 +42,26 @@ const FinancePage = () => {
         </div>
       </div>
 
-      {/* Main Content - Tabs+Form left, List right */}
-      <div className="flex-1 px-2 lg:px-4 py-2 overflow-hidden">
-        <div className="max-w-[100vw] mx-auto h-full">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+      {/* Main Content - Responsive Grid */}
+      <div className="flex-1 px-1 sm:px-2 lg:px-4 py-2 overflow-x-hidden overflow-y-auto w-full">
+        <div className="max-w-full mx-auto h-full">
+          {/* Mobile: List first, form toggleable below. Desktop: grid as before */}
+          <div className="block md:hidden">
+            {/* List at the top on mobile */}
+            <div className="w-full flex flex-col min-w-0">
+              <MobileListWithFormButton logic={logic} theme={theme} t={t} />
+            </div>
+          </div>
+          {/* Desktop/tablet: grid layout as before */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 h-full">
             {/* Tabs + Form Column */}
-            <div className="lg:col-span-1 flex flex-col gap-4">
-              {/* Tabs */}
+            <div className="col-span-1 flex flex-col gap-4 min-w-0">
               <FinanceTabs
                 activeTab={logic.activeTab}
                 setActiveTab={logic.setActiveTab}
                 loading={logic.loading}
               />
-              {/* Form */}
-              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-fit max-h-full flex flex-col overflow-hidden mx-2`}>
-                {/* Form Header */}
+              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-fit max-h-full flex flex-col overflow-hidden mx-0 sm:mx-2`}>
                 <div className={`flex-shrink-0 px-4 py-3 ${
                   logic.activeTab === 'expenses' 
                     ? theme === "dark" ? "bg-red-900/20 border-gray-600" : "bg-red-50 border-gray-200"
@@ -80,8 +88,7 @@ const FinancePage = () => {
                     </div>
                   </div>
                 </div>
-                {/* Form Content */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto p-2 sm:p-4">
                   {logic.activeTab === 'expenses' ? (
                     <ExpenseForm {...logic.expenseFormProps} />
                   ) : (
@@ -90,18 +97,15 @@ const FinancePage = () => {
                 </div>
               </div>
             </div>
-
-            {/* List Column */}
-            <div className="lg:col-span-2">
-              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[700px] flex flex-col overflow-hidden mx-2`}>
-                {/* List Header */}
+            {/* List Column - Responsive */}
+            <div className="col-span-1 md:col-span-1 lg:col-span-2 flex flex-col min-w-0">
+              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[700px] flex flex-col overflow-hidden mx-0 sm:mx-2`}>
                 <div className={`flex-shrink-0 px-4 py-3 ${
                   logic.activeTab === 'expenses' 
                     ? theme === "dark" ? "bg-red-900/20 border-gray-600" : "bg-red-50 border-gray-200"
                     : theme === "dark" ? "bg-green-900/20 border-gray-600" : "bg-green-50 border-gray-200"
                 } border-b`}>
                   <div className="flex items-center justify-between">
-                    {/* Left side - Title and description */}
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg ${
                         logic.activeTab === 'expenses'
@@ -124,9 +128,7 @@ const FinancePage = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* List Content */}
-                <div className="flex-1 min-h-0 overflow-hidden">
+                <div className="flex-1 min-h-0 overflow-x-auto overflow-y-auto">
                   {logic.activeTab === 'expenses' ? (
                     <ExpenseList {...logic.expenseListProps} />
                   ) : (

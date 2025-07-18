@@ -30,24 +30,25 @@ const FileCard: React.FC<FileCardProps> = React.memo(
     const t = useTranslations("StoragePage");
     return (
       <div
-        className={`p-3 sm:p-4 rounded-xl sm:rounded-lg ${
+        className={`p-2 sm:p-4 rounded-xl sm:rounded-lg ${
           theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
-        } border border-gray-200 sm:border-0`}
+        } border border-gray-200 sm:border-0 w-full max-w-full`}
       >
-        <div className="flex items-center gap-2 sm:gap-3">
-          <IoIosDocument className="text-2xl sm:text-3xl text-primary" />
-          <div>
+        <div className="flex items-center gap-2 sm:gap-3 w-full">
+          <IoIosDocument className="text-xl sm:text-3xl text-primary flex-shrink-0" />
+          <div className="min-w-0">
             <div
-              className={`font-semibold text-sm sm:text-base ${
+              className={`font-semibold text-xs sm:text-base truncate ${
                 theme === "dark" ? "text-white" : "text-gray-900"
               }`}
+              title={fileName}
             >
               {fileName}
             </div>
-            <div className="text-xs text-gray-500">{formatBytes(fileSize)}</div>
+            <div className="text-xs text-gray-500 truncate">{formatBytes(fileSize)}</div>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 mt-2">
+        <div className="flex flex-wrap items-center gap-2 mt-2 w-full">
           {downloadUrl && (
             <a
               href={downloadUrl}

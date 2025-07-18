@@ -6,7 +6,7 @@ import { useTheme } from '@/components/ThemeContext';
 import DashboardFinancePreview from '@/components/dashboard/DashboardFinancePreview';
 import DashboardTaskPreview from '@/components/dashboard/DashboardTaskPreview';
 import DashboardCalendarPreview from '@/components/dashboard/DashboardCalendarPreview';
-import Table from '@/components/dashboard/Table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import Link from 'next/link';
 import { FaUserClock, FaTasks, FaCalendarAlt, FaArrowRight, FaMoneyBillWave, FaBullhorn } from 'react-icons/fa';
 import { MdSettings } from 'react-icons/md';
@@ -354,26 +354,36 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
             <div className="flex flex-col h-full">
               {loadingUsers ? (
                 <p className="text-gray-600">{t("loadingUsers", { default: "Loading users..." })}</p>
-              ) : users.length > 0 ? (
-                <>
-                  <Table
-                    data={filteredTableUsers}
-                    columns={tableColumns}
-                    emptyMessage={t("noTeamMembersYet", { default: "No team members yet" })}
-                  />
-                </>
+              ) : filteredTableUsers.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("firstName", { default: "First Name" })}</TableHead>
+                      <TableHead>{t("lastName", { default: "Last Name" })}</TableHead>
+                      <TableHead>{t("email", { default: "Email" })}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTableUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>{user.firstName}</TableCell>
+                        <TableCell>{user.lastName}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               ) : (
-                // Empty state for users (copied from UserList)
                 <div className="text-center py-16">
                   <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
                     theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
                   }`}>
                     <FaUserClock className="text-2xl text-gray-400" />
                   </div>
-                  <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}> 
                     {t("noTeamMembersYet", { default: "No team members yet" })}
                   </h3>
-                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}> 
                     {t("startByAddingFirstMember", { default: "Start by adding your first team member" })}
                   </p>
                 </div>

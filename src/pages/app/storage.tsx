@@ -208,7 +208,7 @@ function Storage() {
       onDragLeave={handleDrag}
       onDrop={handleDrop}
     >
-      <div className="max-w-[100vw] mx-auto px-2 lg:px-4 py-8">
+      <div className="max-w-full mx-auto px-2 sm:px-4 py-4 sm:py-8 w-full">
         {/* Header Section */}
         <div className="mb-4">
           <StorageHeader

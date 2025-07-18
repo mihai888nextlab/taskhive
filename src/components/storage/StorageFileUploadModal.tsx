@@ -85,40 +85,40 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
     }, [onClose]);
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         {/* Backdrop with blur */}
         <div
-          className="absolute inset-0 bg-black/30 backdrop-blur-md"
+          className="absolute inset-0 bg-black/30 backdrop-blur-sm"
           onClick={handleClose}
         />
 
         {/* Modal */}
-        <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl max-w-md w-full border border-white/20">
+        <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl max-w-full sm:max-w-md w-full border border-white/20 mx-2">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-4 sm:p-6 border-b border-gray-200/50">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-blue-100 rounded-xl">
-                <FaCloudUploadAlt className="text-xl text-blue-600" />
+                <FaCloudUploadAlt className="text-lg sm:text-xl text-blue-600" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-base sm:text-xl font-bold text-gray-800">
                   {t("uploadFile")}
                 </h2>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600">
                   {t("chooseFileToUpload")}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200 mt-2 sm:mt-0"
             >
-              <FaTimes className="text-lg" />
+              <FaTimes className="text-base sm:text-lg" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {/* File Input */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -101,34 +101,67 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // }
 
   return (
-    <div className="flex w-full min-h-screen bg-gray-100">
-      {/* Header NavBar */}
-      <HeaderNavBar t={t} />
+    <div className="flex w-full min-h-screen bg-gray-100 relative">
+      {/* Header NavBar (desktop only) */}
+      <div className="hidden md:block">
+        <HeaderNavBar t={t} />
+      </div>
+      {/* Hamburger button for mobile */}
+      {user && (
+        !sidebarOpen ? (
+          <button
+            className="fixed top-4 left-4 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-primary text-white shadow-lg md:hidden"
+            onClick={() => setSidebarOpen(true)}
+            aria-label={t("openSidebar", { default: "Open sidebar" })}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+          >
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        ) : (
+          <button
+            className="fixed top-4 left-4 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-gray-700 text-white shadow-lg md:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label={t("closeSidebar", { default: "Close sidebar" })}
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+          >
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )
+      )}
       {/* Sidebar for desktop */}
       {user && (
-        <SidebarNav
-          menu={menuWithNotifications}
-          user={user}
-          router={router}
-          t={t}
-        />
+        <aside className="hidden md:block">
+          <SidebarNav
+            menu={menuWithNotifications}
+            user={user}
+            router={router}
+            t={t}
+          />
+        </aside>
       )}
-      {/* Sidebar drawer for mobile */}
+      {/* Sidebar drawer for mobile, pass header as prop */}
       {user && (
-        <MobileSidebar
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          menu={menu}
-          user={user}
-          router={router}
-          t={t}
-        />
+        <aside className="block md:hidden">
+          <MobileSidebar
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            menu={menu}
+            user={user}
+            router={router}
+            t={t}
+            header={<HeaderNavBar t={t} />}
+          />
+        </aside>
       )}
       {/* Main Content */}
       <div
         className="flex-1 flex flex-col bg-gray-100"
         style={{
-          marginLeft: 300, // width of the fixed sidebar
+          marginLeft: isDesktop ? 300 : 0, // Only add margin on desktop
           marginTop: 42, // height of the absolute header (14 * 4)
           marginRight: isDesktop && isAIWindowOpen ? 420 : 0,
         }}

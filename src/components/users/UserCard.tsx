@@ -104,39 +104,38 @@ const UserCard: React.FC<UserCardProps> = React.memo(({ user, theme, onClick }) 
                 </div>
               </div>
             </div>
-
-            {/* Email */}
-            <div className="flex items-center gap-2 mb-3">
-              <FaEnvelope className="w-3 h-3 text-gray-500" />
-              <span className="text-sm truncate text-gray-700">
-                {user.userId.email}
-              </span>
-            </div>
-
-            {/* Skills Preview */}
-            {user.userId.skills && user.userId.skills.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {user.userId.skills.slice(0, 3).map((skill, index) => (
-                  <Badge
-                    key={index}
-                    variant="outline"
-                    className="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600"
-                  >
-                    {skill}
-                  </Badge>
-                ))}
-                {user.userId.skills.length > 3 && (
-                  <Badge
-                    variant="outline"
-                    className="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-500"
-                  >
-                    +{user.userId.skills.length - 3}
-                  </Badge>
-                )}
-              </div>
-            )}
           </div>
         </div>
+        {/* Email - now below skills */}
+        <div className="flex items-center gap-2 mt-3 mb-3">
+          <FaEnvelope className="w-3 h-3 text-gray-500" />
+          <span className="text-sm truncate text-gray-700">
+            {user.userId.email}
+          </span>
+        </div>
+        {/* Skills Preview - now full width below avatar/content */}
+        {user.userId.skills && user.userId.skills.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-4 w-full">
+            {user.userId.skills.slice(0, 3).map((skill, index) => (
+              <Badge
+                key={index}
+                variant="outline"
+                className="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600"
+              >
+                {skill}
+              </Badge>
+            ))}
+            {user.userId.skills.length > 3 && (
+              <Badge
+                variant="outline"
+                className="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-500"
+              >
+                +{user.userId.skills.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
+        
         {/* Hover indicator */}
         <div
           className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-blue-500 transition-all duration-200 pointer-events-none"

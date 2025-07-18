@@ -3,7 +3,16 @@ import Image from "next/image";
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
 import { useAuth } from "@/hooks/useAuth";
 import { User } from "@/types"; // Adjust the import path as necessary
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+// ...existing code...
+// Helper to merge memberCounts into companies
+function mergeCompanyMembers(companies: any[], memberCounts: any[]): any[] {
+  if (!Array.isArray(companies) || !Array.isArray(memberCounts)) return companies;
+  return companies.map(company => {
+    const found = memberCounts.find((c) => String(c._id) === String(company.id || company._id));
+    return { ...company, members: found ? found.members : 1 };
+  });
+}
 import { useRouter } from "next/router";
 import { useTranslations } from "next-intl";
 import AddCompanyModal from "@/components/modals/AddCompanyModal";
@@ -47,7 +56,29 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
   );
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [addCompanyOpen, setAddCompanyOpen] = useState(false);
+  const [companiesWithMembers, setCompaniesWithMembers] = useState<any[]>(user.companies || []);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch companies and memberCounts from API and merge
+  useEffect(() => {
+    async function fetchCompaniesAndMembers() {
+      try {
+        const res = await fetch('/api/get-users');
+        if (!res.ok) return;
+        const data = await res.json();
+        // user.companies may be in data.user or data.users[0].companies, adjust as needed
+        let companies = user.companies || [];
+        if (data.user && data.user.companies) companies = data.user.companies;
+        if (Array.isArray(data.users) && data.users[0]?.companies) companies = data.users[0].companies;
+        setCompaniesWithMembers(mergeCompanyMembers(companies, data.memberCounts || []));
+      } catch (e) {
+        // fallback: just use user.companies
+        setCompaniesWithMembers(user.companies || []);
+      }
+    }
+    fetchCompaniesAndMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Memoize company change handler
   const handleCompanyChange = useCallback(async (company: { id: string; name: string }) => {
@@ -72,21 +103,19 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
     realRouter.reload();
   }, [realRouter]);
 
-  // Memoize company dropdown rendering
-  const companyDropdown = useMemo(() => (
-    dropdownOpen && (
-      <div className="absolute left-0 bottom-full mb-2 w-full bg-white rounded-xl shadow-xl z-50 border border-gray-200">
-        {user.companies
-          ?.sort((a, b) => (a.id == selectedCompany.id ? -1 : 1))
-          .map((company) => (
+  // Company dropdown rendering (no memoization)
+  const companyDropdown = dropdownOpen && (
+    <div className="absolute left-full bottom-0 ml-2 w-full bg-white rounded-2xl shadow-2xl z-50 border border-gray-100 ">
+      <div className="p-2">
+        {companiesWithMembers.map((company) => {
+          const members = company.members;
+          const isSelected = selectedCompany.id === company.id;
+          return (
             <button
               key={company.id}
-              className={`w-full text-left px-4 py-2 rounded-lg transition font-medium flex items-center gap-2
-                ${
-                  selectedCompany.id === company.id
-                    ? "bg-blue-50 text-blue-700 font-bold"
-                    : "text-gray-700 hover:bg-gray-100"
-                }
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition font-medium mb-1 last:mb-0 relative
+                ${isSelected ? "bg-blue-50 shadow border border-blue-200" : "hover:bg-gray-100"}
+                cursor-pointer
               `}
               onClick={() => {
                 setSelectedCompany(company);
@@ -94,22 +123,38 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
                 handleCompanyChange(company);
               }}
             >
-              <span>{company.name}</span>
+              {/* Avatar/Icon */}
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-200 text-gray-700 font-bold text-lg">
+                {company.name?.[0]?.toUpperCase() || "?"}
+              </div>
+              <div className="flex flex-col flex-1 min-w-0 text-left">
+                <span className="font-semibold text-gray-900 leading-tight truncate">{company.name}</span>
+                <span className="text-xs text-gray-500 leading-tight truncate">{members} member{members !== 1 ? "s" : ""}</span>
+              </div>
+              {isSelected && (
+                <svg className="w-5 h-5 text-blue-500 absolute right-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
             </button>
-          ))}
+          );
+        })}
+      </div>
+      <div className="w-full border-t border-gray-200 flex bg-white rounded-b-2xl" style={{borderBottomLeftRadius: '1rem', borderBottomRightRadius: '1rem'}}>
         <button
-          className="w-full text-left px-4 py-2 rounded-lg font-bold flex items-center gap-2 text-blue-600 hover:bg-blue-50 transition"
+          className="w-full flex items-center gap-2 px-3 py-4 font-bold text-blue-600 hover:bg-blue-50 transition rounded-b-2xl cursor-pointer text-lg"
+          style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, minHeight: '52px'}}
           onClick={() => {
             setDropdownOpen(false);
             setAddCompanyOpen(true);
           }}
         >
-          <FiPlus className="text-blue-500 text-lg" />
+          <FiPlus className="text-blue-500 text-xl" />
           {t("addCompany", { default: "Add Company" })}
         </button>
       </div>
-    )
-  ), [dropdownOpen, user.companies, selectedCompany.id, handleCompanyChange, t]);
+    </div>
+  );
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -129,23 +174,19 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
     };
   }, [dropdownOpen]);
 
-  // Memoize menuWithNotifications
-  const menuWithNotifications = useMemo(
-    () =>
-      menu.map((item) => {
-        if (item.name === "tasks" && tasksCount > 0) {
-          return { ...item, notification: tasksCount };
-        }
-        if (item.name === "announcements" && unreadAnnouncements > 0) {
-          return { ...item, notification: unreadAnnouncements };
-        }
-        if (item.name === "communication" && unreadMessages > 0) {
-          return { ...item, notification: unreadMessages };
-        }
-        return { ...item, notification: item.notification };
-      }),
-    [menu, tasksCount, unreadAnnouncements, unreadMessages]
-  );
+  // No memoization: menuWithNotifications is recalculated on every render
+  const menuWithNotifications = menu.map((item) => {
+    if (item.name === "tasks" && tasksCount > 0) {
+      return { ...item, notification: tasksCount };
+    }
+    if (item.name === "announcements" && unreadAnnouncements > 0) {
+      return { ...item, notification: unreadAnnouncements };
+    }
+    if (item.name === "communication" && unreadMessages > 0) {
+      return { ...item, notification: unreadMessages };
+    }
+    return { ...item, notification: item.notification };
+  });
 
   return (
     <aside className="hidden md:flex fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] text-white px-5 flex-col shadow-lg border-r border-[#23272f] z-[90]">
@@ -215,26 +256,35 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
       <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
       {/* User Profile Section */}
 
-      {/* Dropdown pentru companii */}
+      {/* Company Selector styled as in the image */}
       <div className="relative mt-4 mb-2" ref={dropdownRef}>
         <div
-          className="flex items-center justify-between space-x-3 px-3 py-2 rounded-xl bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer shadow-sm border border-gray-600"
+          className="flex items-center px-4 py-3 rounded-2xl bg-[#23272f] shadow-lg border border-[#23272f] cursor-pointer transition hover:bg-[#23272f]/90 min-h-[64px]"
           onClick={() => setDropdownOpen((v) => !v)}
-          style={{ minHeight: 56 }}
         >
-          <div>
-            <p className="font-semibold text-white">{selectedCompany.name}</p>
-            <p className="text-xs text-gray-400">{user.role}</p>
+          {/* Company avatar/icon */}
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3">
+            {/* You can replace this with a company logo if available */}
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="16" cy="16" r="16" fill="#23272f" />
+              <path d="M10 22L16 10L22 22H10Z" fill="#60A5FA" />
+            </svg>
           </div>
-          <svg
-            className={`ml-2 w-4 h-4 transition-transform ${dropdownOpen ? "rotate-180" : ""} text-gray-300`}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
+          <div className="flex flex-col flex-1 min-w-0">
+            <span className="font-semibold text-white leading-tight truncate">{selectedCompany.name}</span>
+            <span className="text-xs text-gray-400 leading-tight truncate">{user.role}</span>
+          </div>
+          <div className="ml-2 flex items-center">
+            <svg
+              className={`w-5 h-5 transition-transform ${dropdownOpen ? "rotate-180" : ""} text-gray-400`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </div>
         {companyDropdown}
       </div>

@@ -160,8 +160,9 @@ const ConversationList: React.FC<ConversationListProps> = React.memo(({
                         <h4 className={`font-semibold truncate ${theme === "light" ? "text-gray-900" : "text-white"} ${isSelected ? "text-blue-600" : ""}`}>
                           {getConversationName(conversation)}
                         </h4>
+                        {/* Show time for the last message of each conversation group */}
                         <span className={`text-xs ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}>
-                          {new Date(conversation.updatedAt).toLocaleDateString()}
+                          {new Date(conversation.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                       <p className={`text-sm truncate ${theme === "light" ? "text-gray-600" : "text-gray-300"} ${isSelected ? "text-blue-500" : ""}`}>

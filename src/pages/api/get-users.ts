@@ -59,7 +59,11 @@ export default async function handler(
       permissions: u.permissions,
     }));
 
-    return res.status(200).json({ users: mappedUsers });
+    const companyMemberCounts = await userCompanyModel.aggregate([
+      { $group: { _id: "$companyId", members: { $sum: 1 } } }
+    ]);
+
+    return res.status(200).json({ users: mappedUsers, memberCounts: companyMemberCounts });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
   }
