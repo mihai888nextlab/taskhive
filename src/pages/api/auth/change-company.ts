@@ -5,6 +5,9 @@ import dbConnect from "@/db/dbConfig";
 import userModel from "@/db/models/userModel";
 import companyModel from "@/db/models/companyModel";
 import userCompanyModel from "@/db/models/userCompanyModel";
+import { JWTPayload } from "@/types";
+import jwt from "jsonwebtoken";
+import * as cookie from "cookie";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
@@ -18,7 +21,25 @@ export default async function handler(
 
   await dbConnect();
 
-  const { userId, companyId } = req.body;
+  const { companyId } = req.body;
+
+  const cookies = cookie.parse(req.headers.cookie || "");
+  const token = cookies.auth_token;
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const decodedToken: JWTPayload | null = jwt.verify(
+    token,
+    process.env.JWT_SECRET || ""
+  ) as JWTPayload;
+
+  if (!decodedToken || !decodedToken.userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const userId = decodedToken.userId; // Assuming user.id is available in session
 
   // Basic validation
   if (!userId) {

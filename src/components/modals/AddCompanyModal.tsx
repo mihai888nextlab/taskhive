@@ -24,51 +24,67 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
 
   const t = useTranslations("DashboardPage");
 
-  if (!open) return null;
-
   // Memoize input handlers
-  const handleCompanyNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCompanyName(e.target.value);
-  }, []);
-  const handleCompanyRegNrChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCompanyRegNr(e.target.value);
-  }, []);
+  const handleCompanyNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setCompanyName(e.target.value);
+    },
+    []
+  );
+  const handleCompanyRegNrChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setCompanyRegNr(e.target.value);
+    },
+    []
+  );
   const handleFormClose = useCallback(() => {
     onClose();
   }, [onClose]);
 
   // Memoize submit handler
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!companyName.trim()) {
-      setError(t("companyNameRequired", { default: "Company name is required." }));
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/add-company", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          companyName: companyName.trim(),
-          companyRegistrationNumber: companyRegNr.trim(),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || t("failedToAddCompany", { default: "Failed to add company." }));
-      } else {
-        if (onCompanyAdded) onCompanyAdded(data.company); // <-- triggers reload in parent
-        onClose();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
+      if (!companyName.trim()) {
+        setError(
+          t("companyNameRequired", { default: "Company name is required." })
+        );
+        return;
       }
-    } catch (err: any) {
-      setError(t("unexpectedError", { default: "An unexpected error occurred." }));
-    } finally {
-      setLoading(false);
-    }
-  }, [companyName, companyRegNr, userId, onCompanyAdded, onClose, t]);
+      setLoading(true);
+      try {
+        const res = await fetch("/api/auth/add-company", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            companyName: companyName.trim(),
+            companyRegistrationNumber: companyRegNr.trim(),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(
+            data.message ||
+              t("failedToAddCompany", { default: "Failed to add company." })
+          );
+        } else {
+          if (onCompanyAdded) onCompanyAdded(data.company); // <-- triggers reload in parent
+          onClose();
+        }
+      } catch (err: any) {
+        setError(
+          t("unexpectedError", { default: "An unexpected error occurred." })
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [companyName, companyRegNr, userId, onCompanyAdded, onClose, t]
+  );
+
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
@@ -110,7 +126,9 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
             </label>
             <Input
               type="text"
-              placeholder={t("companyNamePlaceholder", { default: "e.g. Acme Inc." })}
+              placeholder={t("companyNamePlaceholder", {
+                default: "e.g. Acme Inc.",
+              })}
               value={companyName}
               onChange={handleCompanyNameChange}
               required
@@ -124,7 +142,9 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
             </label>
             <Input
               type="text"
-              placeholder={t("registrationNumberPlaceholder", { default: "Optional" })}
+              placeholder={t("registrationNumberPlaceholder", {
+                default: "Optional",
+              })}
               value={companyRegNr}
               onChange={handleCompanyRegNrChange}
               disabled={loading}

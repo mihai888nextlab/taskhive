@@ -1,9 +1,17 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import UniversalSearchBar from "@/components/sidebar/UniversalSearchBar";
 import { useAuth } from "@/hooks/useAuth";
-import { FiBell, FiSettings, FiUser, FiLock, FiLogOut, FiBell as FiBellIcon, FiSun } from "react-icons/fi";
+import {
+  FiBell,
+  FiSettings,
+  FiUser,
+  FiLock,
+  FiLogOut,
+  FiBell as FiBellIcon,
+  FiSun,
+} from "react-icons/fi";
 import { useRouter } from "next/router";
 import { useAIWindow } from "@/contexts/AIWindowContext";
 import { useTranslations } from "next-intl";
@@ -15,7 +23,11 @@ const AI_WINDOW_WIDTH = 420;
 const profileTabs = [
   { id: "profile", label: "profile", icon: <FiUser className="mr-2" /> },
   { id: "security", label: "security", icon: <FiLock className="mr-2" /> },
-  { id: "notifications", label: "notifications", icon: <FiBellIcon className="mr-2" /> },
+  {
+    id: "notifications",
+    label: "notifications",
+    icon: <FiBellIcon className="mr-2" />,
+  },
   { id: "appearance", label: "appearance", icon: <FiSun className="mr-2" /> },
 ];
 
@@ -43,8 +55,10 @@ type User = {
   profileImage?: { data?: string } | string | null;
 };
 
-const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React.memo(({ t: tProp }) => {
-  const { user, logout } = useAuth() as { user: User, logout: () => void };
+const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
+  t: tProp,
+}) => {
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -54,12 +68,12 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React
   const t = tProp || useTranslations("HeaderNavBar");
 
   // Close dropdown on route change
-  React.useEffect(() => {
+  useEffect(() => {
     setDropdownOpen(false);
   }, [router.pathname]);
 
   // Close dropdown on click outside
-  React.useEffect(() => {
+  useEffect(() => {
     if (!dropdownOpen) return;
     const handle = (e: MouseEvent) => {
       const dropdown = document.getElementById("profile-dropdown-menu");
@@ -72,77 +86,81 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React
   }, [dropdownOpen]);
 
   // Memoize tab click handler
-  const handleTabClick = useCallback((tabId: string) => {
-    setDropdownOpen(false);
-    router.push(`/app/settings#${tabId}`);
-  }, [router]);
+  const handleTabClick = useCallback(
+    (tabId: string) => {
+      setDropdownOpen(false);
+      router.push(`/app/settings#${tabId}`);
+    },
+    [router]
+  );
 
   // Memoize language change handler
-  const handleLangChange = useCallback((newLang: string) => {
-    setLangDropdownOpen(false);
-    setLang(newLang);
-  }, [setLang]);
+  const handleLangChange = useCallback(
+    (newLang: string) => {
+      setLangDropdownOpen(false);
+      setLang(newLang);
+    },
+    [setLang]
+  );
 
-  // Memoize LANGUAGES and profileTabs
-  const memoLanguages = useMemo(() => LANGUAGES, []);
-  const memoProfileTabs = useMemo(() => profileTabs, []);
+  const languageDropdown = langDropdownOpen && (
+    <div
+      className="absolute right-0 mt-2 w-22 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
+      style={{
+        maxHeight: "260px",
+        overflowY: "auto",
+      }}
+    >
+      {LANGUAGES.map((language) => (
+        <button
+          key={language.code}
+          className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between ${
+            language.code === lang ? "font-bold bg-gray-100" : ""
+          }`}
+          onClick={() => handleLangChange(language.code)}
+        >
+          <span>{language.label}</span>
+          <span>{language.flag}</span>
+        </button>
+      ))}
+    </div>
+  );
 
-  // Memoize dropdown rendering
-  const languageDropdown = useMemo(() => (
-    langDropdownOpen && (
-      <div
-        className="absolute right-0 mt-2 w-22 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
-        style={{
-          maxHeight: "260px",
-          overflowY: "auto",
+  const profileDropdown = dropdownOpen && (
+    <div
+      id="profile-dropdown-menu"
+      className="absolute right-4 top-14 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-2"
+    >
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+        <div className="font-semibold text-gray-900 dark:text-white">
+          {user?.firstName} {user?.lastName}
+        </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400">
+          {user?.email}
+        </div>
+      </div>
+      <button
+        className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+        onClick={() => {
+          setDropdownOpen(false);
+          logout();
         }}
       >
-        {memoLanguages.map(language => (
-          <button
-            key={language.code}
-            className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between ${
-              language.code === lang ? "font-bold bg-gray-100" : ""
-            }`}
-            onClick={() => handleLangChange(language.code)}
-          >
-            <span>{language.label}</span>
-            <span>{language.flag}</span>
-          </button>
-        ))}
-      </div>
-    )
-  ), [langDropdownOpen, memoLanguages, lang, handleLangChange]);
-
-  const profileDropdown = useMemo(() => (
-    dropdownOpen && (
-      <div
-        id="profile-dropdown-menu"
-        className="absolute right-4 top-14 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-2"
-      >
-        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-          <div className="font-semibold text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</div>
-        </div>
+        <FiLogOut className="mr-2" /> {t("logout")}
+      </button>
+      <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
+      {profileTabs.map((tab) => (
         <button
+          key={tab.id}
           className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-          onClick={() => { setDropdownOpen(false); logout(); }}
+          onClick={() => handleTabClick(tab.id)}
         >
-          <FiLogOut className="mr-2" /> {t("logout")}
+          {tab.icon}
+          {t(tab.label)}
         </button>
-        <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
-        {memoProfileTabs.map(tab => (
-          <button
-            key={tab.id}
-            className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-            onClick={() => handleTabClick(tab.id)}
-          >
-            {tab.icon}
-            {t(tab.label)}
-          </button>
-        ))}
-      </div>
-    )
-  ), [dropdownOpen, user, t, memoProfileTabs, handleTabClick, logout]);
+      ))}
+    </div>
+  );
 
   return (
     <header
@@ -174,7 +192,10 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React
           </button>
           {languageDropdown}
         </div>
-        <button className="p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-white transition-colors" title={t("notifications")}>
+        <button
+          className="p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-white transition-colors"
+          title={t("notifications")}
+        >
           <FiBell className="w-5 h-5" />
         </button>
         <button
@@ -186,8 +207,15 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React
           tabIndex={0}
         >
           <div className="w-9 h-9 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-[#23272f]">
-            {user?.profileImage && typeof user.profileImage === "object" && user.profileImage.data ? (
-              <Image src={user.profileImage.data} alt="Profile" width={36} height={36} />
+            {user?.profileImage &&
+            typeof user.profileImage === "object" &&
+            user.profileImage.data ? (
+              <Image
+                src={user.profileImage.data}
+                alt="Profile"
+                width={36}
+                height={36}
+              />
             ) : user?.firstName ? (
               <span className="text-white font-bold text-lg">
                 {user.firstName[0].toUpperCase()}
@@ -202,6 +230,6 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = React
       </div>
     </header>
   );
-});
+};
 
-export default React.memo(HeaderNavBar);
+export default HeaderNavBar;

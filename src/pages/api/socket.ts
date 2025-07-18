@@ -1,7 +1,6 @@
 import { Server as IOServer } from "socket.io";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Server as HttpServer } from "http";
-import { parse } from "url";
 
 // Augment the type of res.socket.server to include io
 import type { Socket as NetSocket } from "net";

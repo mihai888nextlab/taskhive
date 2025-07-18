@@ -1,5 +1,5 @@
 // components/ChatWindow.tsx
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import io from "socket.io-client";
 import { useAuth } from "@/hooks/useAuth";
 import { IUser } from "@/db/models/userModel";
@@ -9,7 +9,14 @@ import { BsPaperclip } from "react-icons/bs";
 import FileCard from "@/components/storage/StorageFileCard";
 import { useTheme } from "@/components/ThemeContext";
 import { useRouter } from "next/router";
-import { FiSend, FiVideo, FiPhone, FiMoreVertical, FiUsers, FiMessageCircle } from "react-icons/fi";
+import {
+  FiSend,
+  FiVideo,
+  FiPhone,
+  FiMoreVertical,
+  FiUsers,
+  FiMessageCircle,
+} from "react-icons/fi";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "../ui/textarea";
@@ -31,7 +38,7 @@ interface ChatWindowProps {
 
 let socket: ReturnType<typeof io>;
 
-const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   const router = useRouter();
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -46,28 +53,22 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("CommunicationPage");
 
-  // Memoize conversationId
-  const conversationId = useMemo(() => selectedConversation?._id?.toString(), [selectedConversation]);
-
-  // Memoize participants
-  const participants = useMemo(() => selectedConversation?.participants || [], [selectedConversation]);
-
-  // Memoize chat type
-  const chatType = useMemo(() => selectedConversation?.type || "direct", [selectedConversation]);
-
-  // Memoize chat name
-  const currentChatName = useMemo(() => {
+  const conversationId = selectedConversation?._id?.toString();
+  const participants = selectedConversation?.participants || [];
+  const chatType = selectedConversation?.type || "direct";
+  const currentChatName = () => {
     if (!selectedConversation || !user) return "";
     if (chatType === "direct") {
       const otherParticipant = participants.find(
         (p) => (p._id as string).toString() !== user._id
       );
       return otherParticipant
-        ? `${otherParticipant.firstName || ""} ${otherParticipant.lastName || ""}`.trim() || otherParticipant.email
+        ? `${otherParticipant.firstName || ""} ${otherParticipant.lastName || ""}`.trim() ||
+            otherParticipant.email
         : "Direct Chat";
     }
     return selectedConversation.name || "Group Chat";
-  }, [selectedConversation, user, chatType, participants]);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -155,24 +156,30 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
   }, [messages]);
 
   // Memoize getMessageAvatar
-  const getMessageAvatar = useCallback((senderId: string | IUser) => {
-    const senderInfo = typeof senderId === "object" ? senderId : null;
-    if (senderInfo?.profileImage?.data) {
+  const getMessageAvatar = useCallback(
+    (senderId: string | IUser) => {
+      const senderInfo = typeof senderId === "object" ? senderId : null;
+      if (senderInfo?.profileImage?.data) {
+        return (
+          <img
+            src={senderInfo.profileImage.data}
+            alt="Profile"
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        );
+      }
+      const initial =
+        senderInfo?.firstName?.[0] || senderInfo?.email?.[0] || "U";
       return (
-        <img
-          src={senderInfo.profileImage.data}
-          alt="Profile"
-          className="w-8 h-8 rounded-full object-cover"
-        />
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${theme === "dark" ? "bg-gray-600" : "bg-gray-500"}`}
+        >
+          {initial.toUpperCase()}
+        </div>
       );
-    }
-    const initial = senderInfo?.firstName?.[0] || senderInfo?.email?.[0] || "U";
-    return (
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-500'}`}>
-        {initial.toUpperCase()}
-      </div>
-    );
-  }, [theme]);
+    },
+    [theme]
+  );
 
   // Fetch user files when dropdown is opened
   useEffect(() => {
@@ -202,61 +209,84 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
   }, [showFilesDropdown, user]);
 
   // Memoize handleSendFile
-  const handleSendFile = useCallback((fileUrl: string, fileName: string, fileSize: number) => {
-    if (user && socket && socket.connected && conversationId) {
-      const messageData = {
-        conversationId,
-        senderId: user._id,
-        content: JSON.stringify({ fileUrl, fileName, fileSize }),
-        type: "file" as const,
-      };
-      socket.emit("sendMessage", messageData);
-      setShowFilesDropdown(false);
-      setError(null);
-    }
-  }, [user, conversationId]);
+  const handleSendFile = useCallback(
+    (fileUrl: string, fileName: string, fileSize: number) => {
+      if (user && socket && socket.connected && conversationId) {
+        const messageData = {
+          conversationId,
+          senderId: user._id,
+          content: JSON.stringify({ fileUrl, fileName, fileSize }),
+          type: "file" as const,
+        };
+        socket.emit("sendMessage", messageData);
+        setShowFilesDropdown(false);
+        setError(null);
+      }
+    },
+    [user, conversationId]
+  );
 
   // Memoize handleSendMessage
-  const handleSendMessage = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (newMessageContent.trim() && user && socket && socket.connected && conversationId) {
-      const messageData = {
-        conversationId,
-        senderId: user._id,
-        content: newMessageContent.trim(),
-        type: "text" as const,
-      };
-      socket.emit("sendMessage", messageData);
-      setNewMessageContent("");
-      setError(null);
-    } else if (!newMessageContent.trim()) {
-      setError("Message cannot be empty!");
-    } else if (!socket || !socket.connected) {
-      setError("Chat is not connected. Please try again.");
-    }
-  }, [newMessageContent, user, conversationId]);
+  const handleSendMessage = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (
+        newMessageContent.trim() &&
+        user &&
+        socket &&
+        socket.connected &&
+        conversationId
+      ) {
+        const messageData = {
+          conversationId,
+          senderId: user._id,
+          content: newMessageContent.trim(),
+          type: "text" as const,
+        };
+        socket.emit("sendMessage", messageData);
+        setNewMessageContent("");
+        setError(null);
+      } else if (!newMessageContent.trim()) {
+        setError("Message cannot be empty!");
+      } else if (!socket || !socket.connected) {
+        setError("Chat is not connected. Please try again.");
+      }
+    },
+    [newMessageContent, user, conversationId]
+  );
 
-  // Memoize handleVideoCall
   const handleVideoCall = useCallback(() => {
     if (selectedConversation?._id) {
-      router.push(`/app/video-call/${encodeURIComponent(selectedConversation._id)}`);
+      router.push(
+        `/app/video-call/${encodeURIComponent(selectedConversation._id)}`
+      );
     }
   }, [router, selectedConversation]);
 
   // Early return if no conversation selected
   if (!selectedConversation) {
     return (
-      <div className={`flex flex-col items-center justify-center h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"}`}>
+      <div
+        className={`flex flex-col items-center justify-center h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"}`}
+      >
         <div className="text-center max-w-md px-6">
           <div className="mb-6">
-            <div className={`w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
-              <FiMessageCircle className={`w-12 h-12 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-500'}`} />
+            <div
+              className={`w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center ${theme === "dark" ? "bg-gray-700" : "bg-gray-100"}`}
+            >
+              <FiMessageCircle
+                className={`w-12 h-12 ${theme === "dark" ? "text-blue-400" : "text-blue-500"}`}
+              />
             </div>
           </div>
-          <h3 className={`text-2xl font-bold mb-3 ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+          <h3
+            className={`text-2xl font-bold mb-3 ${theme === "light" ? "text-gray-900" : "text-white"}`}
+          >
             {t("welcomeMessages")}
           </h3>
-          <p className={`text-lg ${theme === "light" ? "text-gray-600" : "text-gray-400"} mb-6`}>
+          <p
+            className={`text-lg ${theme === "light" ? "text-gray-600" : "text-gray-400"} mb-6`}
+          >
             {t("selectOrStartChat")}
           </p>
           <div className="space-y-2 text-sm text-gray-500">
@@ -270,18 +300,23 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
   }
 
   return (
-    <div className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
+    <div
+      className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}
+    >
       {/* Chat Header */}
-      <div className={`p-6 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+      <div
+        className={`p-6 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Chat Avatar */}
             <div className="relative">
               {selectedConversation.type === "direct" ? (
                 (() => {
-                  const otherParticipant = selectedConversation.participants.find(
-                    (p) => String(p._id) !== user?._id
-                  );
+                  const otherParticipant =
+                    selectedConversation.participants.find(
+                      (p) => String(p._id) !== user?._id
+                    );
                   return otherParticipant?.profileImage?.data ? (
                     <img
                       src={otherParticipant.profileImage.data}
@@ -289,13 +324,21 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${theme === 'dark' ? 'bg-gray-600' : 'bg-blue-500'}`}>
-                      {(otherParticipant?.firstName?.[0] || otherParticipant?.email?.[0] || "U").toUpperCase()}
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${theme === "dark" ? "bg-gray-600" : "bg-blue-500"}`}
+                    >
+                      {(
+                        otherParticipant?.firstName?.[0] ||
+                        otherParticipant?.email?.[0] ||
+                        "U"
+                      ).toUpperCase()}
                     </div>
                   );
                 })()
               ) : (
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-500'}`}>
+                <div
+                  className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${theme === "dark" ? "bg-gray-600" : "bg-gray-500"}`}
+                >
                   <FiUsers className="w-6 h-6" />
                 </div>
               )}
@@ -304,13 +347,19 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
 
             {/* Chat Info */}
             <div>
-              <h3 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
-                {currentChatName}
+              <h3
+                className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}
+              >
+                {currentChatName()}
               </h3>
-              <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"}`}>
+              <p
+                className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"}`}
+              >
                 {selectedConversation.type === "direct"
                   ? t("online")
-                  : t("members", { count: selectedConversation.participants.length })}
+                  : t("members", {
+                      count: selectedConversation.participants.length,
+                    })}
               </p>
             </div>
           </div>
@@ -319,11 +368,13 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
           <div className="flex items-center gap-2">
             <button
               onClick={handleVideoCall}
-              className={`p-3 rounded-xl transition-all duration-200 transform hover:scale-105 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+              className={`p-3 rounded-xl transition-all duration-200 transform hover:scale-105 ${theme === "dark" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-blue-500 hover:bg-blue-600 text-white"}`}
             >
               <FiVideo className="w-5 h-5" />
             </button>
-            <button className={`p-3 rounded-xl transition-all duration-200 ${theme === "light" ? "bg-gray-100 hover:bg-gray-200 text-gray-700" : "bg-gray-600 hover:bg-gray-500 text-gray-300"}`}>
+            <button
+              className={`p-3 rounded-xl transition-all duration-200 ${theme === "light" ? "bg-gray-100 hover:bg-gray-200 text-gray-700" : "bg-gray-600 hover:bg-gray-500 text-gray-300"}`}
+            >
               <FiMoreVertical className="w-5 h-5" />
             </button>
           </div>
@@ -331,11 +382,15 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
       </div>
 
       {/* Messages Area */}
-      <div className={`flex-1 overflow-y-auto custom-scrollbar ${theme === "light" ? "bg-gray-50" : "bg-gray-900"}`}>
+      <div
+        className={`flex-1 overflow-y-auto custom-scrollbar ${theme === "light" ? "bg-gray-50" : "bg-gray-900"}`}
+      >
         {loadingMessages ? (
           <div className="flex flex-col items-center justify-center h-full">
             <Loading />
-            <p className={`mt-4 text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"}`}>
+            <p
+              className={`mt-4 text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"}`}
+            >
               {t("loadingMessages")}
             </p>
           </div>
@@ -363,18 +418,22 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
               const senderName = isSender
                 ? t("you")
                 : senderInfo
-                ? `${senderInfo.firstName || ""} ${
-                    senderInfo.lastName || ""
-                  }`.trim() || senderInfo.email
-                : t("unknown");
+                  ? `${senderInfo.firstName || ""} ${
+                      senderInfo.lastName || ""
+                    }`.trim() || senderInfo.email
+                  : t("unknown");
 
-              const showAvatar = !isSender && (index === 0 || 
-                (typeof messages[index - 1]?.senderId === "object" 
-                  ? (typeof messages[index - 1].senderId === "object"
+              const showAvatar =
+                !isSender &&
+                (index === 0 ||
+                  (typeof messages[index - 1]?.senderId === "object"
+                    ? typeof messages[index - 1].senderId === "object"
                       ? (messages[index - 1].senderId as IUser)._id
-                      : messages[index - 1].senderId)
-                  : messages[index - 1]?.senderId) !== (typeof msg.senderId === "object" ? (msg.senderId as IUser)._id : msg.senderId)
-              );
+                      : messages[index - 1].senderId
+                    : messages[index - 1]?.senderId) !==
+                    (typeof msg.senderId === "object"
+                      ? (msg.senderId as IUser)._id
+                      : msg.senderId));
 
               return (
                 <div
@@ -384,23 +443,31 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
                   {/* Avatar for received messages */}
                   {!isSender && (
                     <div className="w-8 h-8 flex-shrink-0">
-                      {showAvatar ? getMessageAvatar(msg.senderId) : <div className="w-8"></div>}
+                      {showAvatar ? (
+                        getMessageAvatar(msg.senderId)
+                      ) : (
+                        <div className="w-8"></div>
+                      )}
                     </div>
                   )}
 
                   {/* Message Content */}
-                  <div className={`max-w-[75%] ${isSender ? "order-1" : "order-2"}`}>
+                  <div
+                    className={`max-w-[75%] ${isSender ? "order-1" : "order-2"}`}
+                  >
                     {!isSender && showAvatar && (
-                      <p className="text-xs text-gray-500 mb-1 ml-1">{senderName}</p>
+                      <p className="text-xs text-gray-500 mb-1 ml-1">
+                        {senderName}
+                      </p>
                     )}
-                    
+
                     <div
                       className={`inline-block px-3 py-2 rounded-2xl transition-all duration-200 ${
                         isSender
-                          ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} text-white rounded-br-md`
+                          ? `${theme === "dark" ? "bg-blue-600" : "bg-blue-500"} text-white rounded-br-md`
                           : theme === "light"
-                          ? "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
-                          : "bg-gray-700 text-white rounded-bl-md"
+                            ? "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
+                            : "bg-gray-700 text-white rounded-bl-md"
                       }`}
                     >
                       {msg.type === "file" ? (
@@ -434,8 +501,10 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
                         </p>
                       )}
                     </div>
-                    
-                    <p className={`text-xs mt-1 ${isSender ? "text-right" : "text-left"} ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}>
+
+                    <p
+                      className={`text-xs mt-1 ${isSender ? "text-right" : "text-left"} ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}
+                    >
                       {new Date(msg.timestamp).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -451,7 +520,9 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
       </div>
 
       {/* Message Input */}
-      <div className={`p-6 ${theme === "light" ? "bg-white" : "bg-gray-800"} border-t ${theme === "light" ? "border-gray-200" : "border-gray-700"}`}>
+      <div
+        className={`p-6 ${theme === "light" ? "bg-white" : "bg-gray-800"} border-t ${theme === "light" ? "border-gray-200" : "border-gray-700"}`}
+      >
         <form onSubmit={handleSendMessage} className="flex items-end gap-3">
           {/* File Attachment Button */}
           <div className="relative">
@@ -462,12 +533,18 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
             >
               <BsPaperclip className="w-5 h-5" />
             </button>
-            
+
             {/* Files Dropdown */}
             {showFilesDropdown && (
-              <div className={`absolute bottom-16 left-0 border rounded-2xl z-50 w-72 max-h-64 overflow-hidden ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-600"}`}>
-                <div className={`p-4 border-b ${theme === "light" ? "border-gray-200 bg-gray-50" : "border-gray-600 bg-gray-700"}`}>
-                  <h4 className={`font-semibold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+              <div
+                className={`absolute bottom-16 left-0 border rounded-2xl z-50 w-72 max-h-64 overflow-hidden ${theme === "light" ? "bg-white border-gray-200" : "bg-gray-800 border-gray-600"}`}
+              >
+                <div
+                  className={`p-4 border-b ${theme === "light" ? "border-gray-200 bg-gray-50" : "border-gray-600 bg-gray-700"}`}
+                >
+                  <h4
+                    className={`font-semibold ${theme === "light" ? "text-gray-900" : "text-white"}`}
+                  >
                     Your Files
                   </h4>
                 </div>
@@ -490,10 +567,14 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
                         }
                         type="button"
                       >
-                        <p className={`font-medium truncate ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+                        <p
+                          className={`font-medium truncate ${theme === "light" ? "text-gray-900" : "text-white"}`}
+                        >
                           {file.fileName}
                         </p>
-                        <p className={`text-xs ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}>
+                        <p
+                          className={`text-xs ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}
+                        >
                           {(file.fileSize / 1024).toFixed(1)} KB
                         </p>
                       </button>
@@ -517,8 +598,8 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
               }}
               placeholder={t("typeMessage")}
               className={`w-full px-4 py-3 rounded-2xl resize-none border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                theme === "light" 
-                  ? "bg-gray-100 border-gray-200 text-gray-900 placeholder-gray-500 focus:bg-white" 
+                theme === "light"
+                  ? "bg-gray-100 border-gray-200 text-gray-900 placeholder-gray-500 focus:bg-white"
                   : "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:bg-gray-600"
               }`}
               rows={1}
@@ -528,7 +609,7 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
           <Button
             type="submit"
             disabled={!user || loadingMessages || !newMessageContent.trim()}
-            className={`p-3 rounded-2xl font-semibold transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            className={`p-3 rounded-2xl font-semibold transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${theme === "dark" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-blue-500 hover:bg-blue-600 text-white"}`}
           >
             <FiSend className="w-5 h-5" />
           </Button>
@@ -536,6 +617,6 @@ const ChatWindow: React.FC<ChatWindowProps> = React.memo(({ selectedConversation
       </div>
     </div>
   );
-});
+};
 
-export default React.memo(ChatWindow);
+export default ChatWindow;
