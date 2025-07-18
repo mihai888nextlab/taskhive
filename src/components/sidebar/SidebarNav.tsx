@@ -38,8 +38,7 @@ type SidebarNavProps = {
 
 const SidebarNav: React.FC<
   SidebarNavProps & { t: ReturnType<typeof useTranslations> }
-> = React.memo(
-  ({
+> = ({
     menu,
     user,
     router,
@@ -83,27 +82,29 @@ const SidebarNav: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Memoize company change handler
-  const handleCompanyChange = useCallback(async (company: { id: string; name: string }) => {
+  // Company change handler
+  const handleCompanyChange = async (company: { id: string; name: string }) => {
     await fetch("/api/auth/change-company", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      [user._id, realRouter]
-    );
+      body: JSON.stringify({
+        userId: user._id,
+        companyId: company.id,
+      }),
+    });
+    setSelectedCompany(company);
+    setDropdownOpen(false);
+    realRouter.push("/app");
+    realRouter.reload();
+  };
 
-    // Memoize add company modal close handler
-    const handleAddCompanyClose = useCallback(() => {
-      setAddCompanyOpen(false);
-      realRouter.reload();
-    }, [realRouter]);
-
-  // Memoize add company modal close handler
-  const handleAddCompanyClose = useCallback(() => {
+  // Add company modal close handler
+  const handleAddCompanyClose = () => {
     setAddCompanyOpen(false);
     realRouter.reload();
-  }, [realRouter]);
+  };
 
   // Company dropdown rendering (no memoization)
   const companyDropdown = dropdownOpen && (
@@ -262,7 +263,7 @@ const SidebarNav: React.FC<
         <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
         {/* User Profile Section */}
 
-      {/* Company Selector styled as in the image */}
+      {/* Company Selector styled as in the image, with dropdown and member counts */}
       <div className="relative mt-4 mb-2" ref={dropdownRef}>
         <div
           className="flex items-center px-4 py-3 rounded-2xl bg-[#23272f] shadow-lg border border-[#23272f] cursor-pointer transition hover:bg-[#23272f]/90 min-h-[64px]"
@@ -292,6 +293,7 @@ const SidebarNav: React.FC<
             </svg>
           </div>
         </div>
+        {companyDropdown}
         {/* AddCompanyModal */}
         <AddCompanyModal
           open={addCompanyOpen}
@@ -299,9 +301,9 @@ const SidebarNav: React.FC<
           userId={user._id}
           onCompanyAdded={handleAddCompanyClose}
         />
-      </aside>
-    );
-  }
-);
+      </div>
+    </aside>
+  );
+}
 
-export default React.memo(SidebarNav);
+export default SidebarNav;

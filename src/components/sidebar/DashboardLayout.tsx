@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/router";
 import { ReactNode, useState, useEffect } from "react";
-import SidebarNav from "@/components/sidebar/SidebarNav";
+import Sidebar from "@/components/sidebar/SidebarNav";
 import MobileSidebar from "@/components/sidebar/MobileSidebar";
 import UserProfileModal from "@/components/modals/UserProfileModal";
 import AIWindow from "../AIWindow";
@@ -14,6 +14,7 @@ import Link from "next/link";
 import HeaderNavBar from "@/components/header/HeaderNavBar";
 import { useTranslations, useLocale } from "next-intl";
 import React from "react";
+import SidebarNav from "@/components/sidebar/SidebarNav";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

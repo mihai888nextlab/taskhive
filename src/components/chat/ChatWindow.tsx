@@ -410,17 +410,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
           <div className="p-6 space-y-1.5">
             {/* Group messages by 10-minute window and show time on the last message in each group */}
             {(() => {
+              // Sort messages by timestamp ascending before grouping
+              const sortedMessages = [...messages].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
               const groups: { msgs: typeof messages; time: string }[] = [];
               let currentGroup: typeof messages = [];
               let lastTime: number | null = null;
-              messages.forEach((msg, idx) => {
+              sortedMessages.forEach((msg, idx) => {
                 const currTime = new Date(msg.timestamp).getTime();
                 if (
                   lastTime === null ||
                   Math.abs(currTime - lastTime) > 10 * 60 * 1000
                 ) {
                   if (currentGroup.length) {
-                    groups.push({ msgs: currentGroup, time: new Date(messages[idx - 1].timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+                    groups.push({
+                      msgs: currentGroup,
+                      time: new Date(sortedMessages[idx - 1].timestamp).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Bucharest' })
+                    });
                   }
                   currentGroup = [msg];
                 } else {
@@ -429,11 +434,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                 lastTime = currTime;
               });
               if (currentGroup.length) {
-                groups.push({ msgs: currentGroup, time: new Date(currentGroup[currentGroup.length - 1].timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+                groups.push({
+                  msgs: currentGroup,
+                  time: new Date(currentGroup[currentGroup.length - 1].timestamp).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Bucharest' })
+                });
               }
               let msgIdx = 0;
-              return groups.map((group, groupIdx) =>
-                group.msgs.map((msg, idx) => {
+              return groups.map((group, groupIdx) => {
+                // Always show name/avatar for the first message in the group (if not your own message)
+                return group.msgs.map((msg, idx) => {
                   const isSender =
                     (typeof msg.senderId === "object"
                       ? msg.senderId._id
@@ -447,13 +456,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                         senderInfo.lastName || ""
                       }`.trim() || senderInfo.email
                     : t("unknown");
-                  const showAvatar = !isSender && (msgIdx === 0 || 
-                    (typeof messages[msgIdx - 1]?.senderId === "object" 
-                      ? (typeof messages[msgIdx - 1].senderId === "object"
-                          ? (messages[msgIdx - 1].senderId as IUser)._id
-                          : messages[msgIdx - 1].senderId)
-                      : messages[msgIdx - 1]?.senderId) !== (typeof msg.senderId === "object" ? (msg.senderId as IUser)._id : msg.senderId)
-                  );
+                  // Show avatar/name for the first message in the group (if not your own message)
+                  const showAvatar = !isSender && idx === 0;
+                  const showName = !isSender && idx === 0;
                   const showTime = idx === group.msgs.length - 1;
                   const rendered = (
                     <div
@@ -468,7 +473,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                       )}
                       {/* Message Content */}
                       <div className={`max-w-[75%] ${isSender ? "order-1" : "order-2"}`}> 
-                        {!isSender && showAvatar && (
+                        {!isSender && showName && (
                           <p className="text-xs text-gray-500 mb-1 ml-1">{senderName}</p>
                         )}
                         <div
@@ -521,8 +526,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                   );
                   msgIdx++;
                   return rendered;
-                })
-              );
+                });
+              });
             })()}
             <div ref={messagesEndRef} />
           </div>
@@ -596,7 +601,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
           </div>
 
           {/* Message Input */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative flex items-center">
             <Textarea
               value={newMessageContent}
               onChange={(e) => setNewMessageContent(e.target.value)}
@@ -607,11 +612,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                 }
               }}
               placeholder={t("typeMessage")}
-              className={`w-full px-4 py-3 rounded-2xl resize-none border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+              className={`w-full px-4 py-2 rounded-2xl resize-none border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 flex items-center ${
                 theme === "light"
                   ? "bg-gray-100 border-gray-200 text-gray-900 placeholder-gray-500 focus:bg-white"
                   : "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:bg-gray-600"
               }`}
+              style={{ height: '44px', minHeight: '44px', maxHeight: '44px', textAlign: 'left', display: 'flex', alignItems: 'center' }}
               rows={1}
               disabled={!user || loadingMessages}
             />
