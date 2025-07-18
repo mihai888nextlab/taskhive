@@ -36,17 +36,20 @@ type SidebarNavProps = {
   unreadMessages?: number;
 };
 
-const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslations> }> = React.memo(({
-  menu,
-  user,
-  router,
-  tasksCount = 0,
-  unreadAnnouncements = 0,
-  unreadMessages = 0,
-  t,
-}) => {
-  const auth = useAuth();
-  const realRouter = useRouter();
+const SidebarNav: React.FC<
+  SidebarNavProps & { t: ReturnType<typeof useTranslations> }
+> = React.memo(
+  ({
+    menu,
+    user,
+    router,
+    tasksCount = 0,
+    unreadAnnouncements = 0,
+    unreadMessages = 0,
+    t,
+  }) => {
+    const auth = useAuth();
+    const realRouter = useRouter();
 
   // Example: Replace with your real companies array
   const [selectedCompany, setSelectedCompany] = useState(
@@ -87,15 +90,14 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        userId: user._id,
-        companyId: company.id,
-      }),
-    });
+      [user._id, realRouter]
+    );
 
-    realRouter.push("/app");
-    realRouter.reload();
-  }, [user._id, realRouter]);
+    // Memoize add company modal close handler
+    const handleAddCompanyClose = useCallback(() => {
+      setAddCompanyOpen(false);
+      realRouter.reload();
+    }, [realRouter]);
 
   // Memoize add company modal close handler
   const handleAddCompanyClose = useCallback(() => {
@@ -156,23 +158,23 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
     </div>
   );
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
+    // Close dropdown on outside click
+    useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target as Node)
+        ) {
+          setDropdownOpen(false);
+        }
       }
-    }
-    if (dropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownOpen]);
+      if (dropdownOpen) {
+        document.addEventListener("mousedown", handleClickOutside);
+      }
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [dropdownOpen]);
 
   // No memoization: menuWithNotifications is recalculated on every render
   const menuWithNotifications = menu.map((item) => {
@@ -188,23 +190,23 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
     return { ...item, notification: item.notification };
   });
 
-  return (
-    <aside className="hidden md:flex fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] text-white px-5 flex-col shadow-lg border-r border-[#23272f] z-[90]">
-      {/* Logo/Brand */}
-      <Link href="/app">
-        <div className="relative w-48 h-20 mx-auto mt-2 mb-2">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            fill
-            className="object-contain"
-            priority
-            sizes="240px"
-          />
-        </div>
-      </Link>
-      {/* Search Bar */}
-      {/* <DashboardSearch
+    return (
+      <aside className="hidden md:flex fixed top-0 left-0 h-screen w-[300px] bg-[#18181b] text-white px-5 flex-col shadow-lg border-r border-[#23272f] z-[90]">
+        {/* Logo/Brand */}
+        <Link href="/app">
+          <div className="relative w-48 h-20 mx-auto mt-2 mb-2">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              fill
+              className="object-contain"
+              priority
+              sizes="240px"
+            />
+          </div>
+        </Link>
+        {/* Search Bar */}
+        {/* <DashboardSearch
         menu={menu}
         users={users}
         tasks={tasks}
@@ -218,43 +220,47 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
         timeSessions={timeSessions}
         onUserCardClick={onUserCardClick}
       /> */}
-      {/* Navigation */}
-      <nav>
-        <ul className="mt-4 space-y-2">
-          {menuWithNotifications.map((item) => (
-            <Link
-              key={item.name}
-              href={item.path}
-              className="block"
-              tabIndex={0}
-            >
-              <li
-                className={`flex items-center w-full h-full p-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md ${
-                  router.pathname === item.path
-                    ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-md"
-                    : "hover:bg-gray-700 hover:text-white text-gray-300"
-                }`}
+        {/* Navigation */}
+        <nav>
+          <ul className="mt-4 space-y-2">
+            {menuWithNotifications.map((item) => (
+              <Link
+                key={item.name}
+                href={item.path}
+                className="block"
+                tabIndex={0}
               >
-                {item.icon && (
-                  <item.icon className="mr-3 text-xl text-primary-light" />
-                )}
-                {/* Use translation key directly and fallback to capitalized key */}
-                <span className="font-medium">
-                  {t(item.name, { default: item.name.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()) })}
-                </span>
-                {item.notification && (
-                  <span className="ml-auto bg-red-500 text-white rounded-full px-2 text-xs">
-                    {item.notification}
+                <li
+                  className={`flex items-center w-full h-full p-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-md ${
+                    router.pathname === item.path
+                      ? "bg-gradient-to-r from-primary to-primary-dark text-white shadow-md"
+                      : "hover:bg-gray-700 hover:text-white text-gray-300"
+                  }`}
+                >
+                  {item.icon && (
+                    <item.icon className="mr-3 text-xl text-primary-light" />
+                  )}
+                  {/* Use translation key directly and fallback to capitalized key */}
+                  <span className="font-medium">
+                    {t(item.name, {
+                      default: item.name
+                        .replace(/-/g, " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase()),
+                    })}
                   </span>
-                )}
-              </li>
-            </Link>
-          ))}
-        </ul>
-      </nav>
-      {/* Separator before user info */}
-      <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
-      {/* User Profile Section */}
+                  {item.notification && (
+                    <span className="ml-auto bg-red-500 text-white rounded-full px-2 text-xs">
+                      {item.notification}
+                    </span>
+                  )}
+                </li>
+              </Link>
+            ))}
+          </ul>
+        </nav>
+        {/* Separator before user info */}
+        <div className="mt-8 mb-4 border-t border-gray-700 opacity-50"></div>
+        {/* User Profile Section */}
 
       {/* Company Selector styled as in the image */}
       <div className="relative mt-4 mb-2" ref={dropdownRef}>
@@ -286,17 +292,16 @@ const SidebarNav: React.FC<SidebarNavProps & { t: ReturnType<typeof useTranslati
             </svg>
           </div>
         </div>
-        {companyDropdown}
-      </div>
-      {/* AddCompanyModal */}
-      <AddCompanyModal
-        open={addCompanyOpen}
-        onClose={handleAddCompanyClose}
-        userId={user._id}
-        onCompanyAdded={handleAddCompanyClose}
-      />
-    </aside>
-  );
-});
+        {/* AddCompanyModal */}
+        <AddCompanyModal
+          open={addCompanyOpen}
+          onClose={handleAddCompanyClose}
+          userId={user._id}
+          onCompanyAdded={handleAddCompanyClose}
+        />
+      </aside>
+    );
+  }
+);
 
 export default React.memo(SidebarNav);

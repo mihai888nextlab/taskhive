@@ -57,12 +57,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
-  useEffect(() => {
-    if (hasCompany == false && !loadingUser) {
-      router.push("/app/companies/create");
-    }
-  }, [hasCompany, loadingUser, router]);
-
   const [tasks, setTasks] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -73,11 +67,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       if (router.pathname !== "/login") {
         router.push("/login");
       }
+    } else if (!hasCompany && !loadingUser) {
+      router.push("/app/select-company");
     }
   }, [requireAuth, loadingUser, isAuthenticated, router]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !hasCompany) return;
     // Fetch tasks
     fetch("/api/tasks")
       .then((res) => (res.ok ? res.json() : []))

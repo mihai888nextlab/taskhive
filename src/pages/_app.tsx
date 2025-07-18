@@ -26,6 +26,7 @@ import grMessages from "../../messages/gr.json";
 import deMessages from "../../messages/de.json";
 import daMessages from "../../messages/da.json";
 import itMessages from "../../messages/it.json";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 // Type for pages with custom layout
 export type NextPageWithLayout = NextPage & {
@@ -35,15 +36,27 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-export default function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
+export default function MyApp({
+  Component,
+  pageProps,
+  router,
+}: AppPropsWithLayout) {
   return (
     <LanguageProvider>
-      <LanguageConsumerApp Component={Component} pageProps={pageProps} router={router} />
+      <LanguageConsumerApp
+        Component={Component}
+        pageProps={pageProps}
+        router={router}
+      />
     </LanguageProvider>
   );
 }
 
-function LanguageConsumerApp({ Component, pageProps, router }: AppPropsWithLayout) {
+function LanguageConsumerApp({
+  Component,
+  pageProps,
+  router,
+}: AppPropsWithLayout) {
   const { lang } = useLanguage();
 
   const messagesMap: Record<string, any> = {
@@ -76,32 +89,38 @@ function LanguageConsumerApp({ Component, pageProps, router }: AppPropsWithLayou
   const getLayout =
     Component.getLayout ||
     ((page: ReactElement) =>
-      isAppRoute
-        ? <DashboardLayout locale={lang}>{page}</DashboardLayout>
-        : page);
+      isAppRoute ? (
+        <DashboardLayout locale={lang}>{page}</DashboardLayout>
+      ) : (
+        page
+      ));
 
   const content = getLayout(<Component {...mergedPageProps} />);
 
   return (
     <IntlProvider locale={lang} messages={messages}>
       <ThemeProvider>
-        <AuthProvider>
-          <TimeTrackingProvider>
-            <AIWindowProvider>
-              <Head>
-                <link rel="icon" href="favicon.ico" />
-                <title>Taskhive</title>
-                <meta
-                  name="description"
-                  content="A employee management application"
-                />
-                <link rel="icon" href="/favicon.ico" />
-              </Head>
-              {content}
-              <SpeedInsights />
-            </AIWindowProvider>
-          </TimeTrackingProvider>
-        </AuthProvider>
+        <GoogleOAuthProvider
+          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
+        >
+          <AuthProvider>
+            <TimeTrackingProvider>
+              <AIWindowProvider>
+                <Head>
+                  <link rel="icon" href="favicon.ico" />
+                  <title>Taskhive</title>
+                  <meta
+                    name="description"
+                    content="A employee management application"
+                  />
+                  <link rel="icon" href="/favicon.ico" />
+                </Head>
+                {content}
+                <SpeedInsights />
+              </AIWindowProvider>
+            </TimeTrackingProvider>
+          </AuthProvider>
+        </GoogleOAuthProvider>
       </ThemeProvider>
     </IntlProvider>
   );

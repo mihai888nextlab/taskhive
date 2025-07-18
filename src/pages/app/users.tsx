@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { FaPlus, FaUsers, FaUserPlus, FaSitemap } from "react-icons/fa";
@@ -97,65 +103,72 @@ const UsersPage: NextPageWithLayout = React.memo(() => {
   }, []);
 
   // Memoize handleUserClick
-  const handleUserClick = useCallback((userId: string) => {
-    const userObj = users.find((u) => u.userId._id === userId);
-    if (userObj) {
-      setSelectedUser({
-        ...userObj.userId,
-        role: userObj.role,
-      });
-      setProfileModalOpen(true);
-    }
-  }, [users]);
+  const handleUserClick = useCallback(
+    (userId: string) => {
+      const userObj = users.find((u) => u.userId._id === userId);
+      if (userObj) {
+        setSelectedUser({
+          ...userObj.userId,
+          role: userObj.role,
+        });
+        setProfileModalOpen(true);
+      }
+    },
+    [users]
+  );
 
   // Memoize addUser
-  const addUser = useCallback(async (
-    email: string,
-    role: string
-  ): Promise<string | undefined> => {
-    try {
-      const response = await fetch("/api/invitations/send/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, role }),
-      });
+  const addUser = useCallback(
+    async (email: string, role: string): Promise<string | undefined> => {
+      try {
+        const response = await fetch("/api/invitations/send/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, role }),
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        return `Failed to add user: ${errorText}`;
+        if (!response.ok) {
+          const errorText = await response.text();
+          return `Failed to add user: ${errorText}`;
+        }
+
+        await fetchUsers();
+        setAddUserModalOpen(false);
+        return undefined;
+      } catch (error) {
+        console.error("Error adding user:", error);
+        return `Error adding user: ${error instanceof Error ? error.message : String(error)}`;
       }
-
-      await fetchUsers();
-      setAddUserModalOpen(false);
-      return undefined;
-    } catch (error) {
-      console.error("Error adding user:", error);
-      return `Error adding user: ${error instanceof Error ? error.message : String(error)}`;
-    }
-  }, [fetchUsers]);
+    },
+    [fetchUsers]
+  );
 
   // Memoize addRole
-  const addRole = useCallback(async (roleName: string) => {
-    try {
-      const response = await fetch("/api/roles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: roleName }),
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to add role: ${errorText}`);
+  const addRole = useCallback(
+    async (roleName: string) => {
+      try {
+        const response = await fetch("/api/roles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: roleName }),
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to add role: ${errorText}`);
+        }
+        await fetchRoles();
+        setAddRoleModalOpen(false);
+      } catch (error) {
+        console.error("Error adding role:", error);
       }
-      await fetchRoles();
-      setAddRoleModalOpen(false);
-    } catch (error) {
-      console.error("Error adding role:", error);
-    }
-  }, [fetchRoles]);
+    },
+    [fetchRoles]
+  );
 
   // Memoize filteredUsers
   const filteredUsers = useMemo(() => {
-    const companyId = user && "companyId" in user ? (user as any).companyId : undefined;
+    const companyId =
+      user && "companyId" in user ? (user as any).companyId : undefined;
     const q = search.trim().toLowerCase();
 
     return users
@@ -176,10 +189,14 @@ const UsersPage: NextPageWithLayout = React.memo(() => {
       })
       .sort((a, b) => {
         if (sortBy === "firstNameAsc") {
-          return (a.userId.firstName || "").localeCompare(b.userId.firstName || "");
+          return (a.userId.firstName || "").localeCompare(
+            b.userId.firstName || ""
+          );
         }
         if (sortBy === "lastNameAsc") {
-          return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
+          return (a.userId.lastName || "").localeCompare(
+            b.userId.lastName || ""
+          );
         }
         if (sortBy === "roleAsc") {
           return (a.role || "").localeCompare(b.role || "");
@@ -189,7 +206,8 @@ const UsersPage: NextPageWithLayout = React.memo(() => {
   }, [users, user, search, filterRole, sortBy]);
 
   // Only roles from users in your company
-  const companyId = user && "companyId" in user ? (user as any).companyId : undefined;
+  const companyId =
+    user && "companyId" in user ? (user as any).companyId : undefined;
   const companyRoles = useMemo(() => {
     const rolesSet = new Set<string>();
     users.forEach((u) => {
@@ -200,19 +218,23 @@ const UsersPage: NextPageWithLayout = React.memo(() => {
     return Array.from(rolesSet);
   }, [users, companyId]);
 
-  // TESTE - DE STERS DUPA
-  const handleTestButtonClick = () => {};
-
   // Handler to open Add User Modal
-  const handleOpenAddUserModal = useCallback(() => setAddUserModalOpen(true), []);
+  const handleOpenAddUserModal = useCallback(
+    () => setAddUserModalOpen(true),
+    []
+  );
 
   // Handler to open Add Role Modal
-  const handleOpenAddRoleModal = useCallback(() => setAddRoleModalOpen(true), []);
+  const handleOpenAddRoleModal = useCallback(
+    () => setAddRoleModalOpen(true),
+    []
+  );
 
   // Handler to open Org Chart Modal
-  const handleOpenOrgChartModal = useCallback(() => setOrgChartModalOpen(true), []);
-
-  //TERMINAT TEST
+  const handleOpenOrgChartModal = useCallback(
+    () => setOrgChartModalOpen(true),
+    []
+  );
 
   //effects
   useEffect(() => {

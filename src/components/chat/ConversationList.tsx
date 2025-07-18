@@ -5,7 +5,7 @@ import { useTheme } from "@/components/ThemeContext";
 import { FiMessageCircle, FiUsers, FiPlus } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-import React, { useMemo, useCallback } from "react";
+import React, { useCallback } from "react";
 
 export interface PopulatedConversation extends mongoose.Document {
   _id: string;
@@ -26,7 +26,7 @@ interface ConversationListProps {
   loadingConversations: boolean;
 }
 
-const ConversationList: React.FC<ConversationListProps> = React.memo(({
+const ConversationList: React.FC<ConversationListProps> = ({
   conversations,
   onSelectConversation,
   selectedConversationId,
@@ -38,80 +38,94 @@ const ConversationList: React.FC<ConversationListProps> = React.memo(({
   const { theme } = useTheme();
   const t = useTranslations("CommunicationPage");
 
-  // Memoize getConversationName
-  const getConversationName = useCallback((conversation: PopulatedConversation) => {
-    if (conversation.type === "direct") {
-      const otherParticipant = conversation.participants.find(
-        (p) => String(p._id) !== user?._id
-      );
-      return otherParticipant
-        ? `${otherParticipant.firstName || ""} ${
-            otherParticipant.lastName || ""
-          }`.trim() || otherParticipant.email
-        : "Unknown User";
-    }
-    return conversation.name || "Group Chat";
-  }, [user]);
+  const getConversationName = useCallback(
+    (conversation: PopulatedConversation) => {
+      if (conversation.type === "direct") {
+        const otherParticipant = conversation.participants.find(
+          (p) => String(p._id) !== user?._id
+        );
+        return otherParticipant
+          ? `${otherParticipant.firstName || ""} ${
+              otherParticipant.lastName || ""
+            }`.trim() || otherParticipant.email
+          : "Unknown User";
+      }
+      return conversation.name || "Group Chat";
+    },
+    [user]
+  );
 
-  // Memoize getConversationAvatar
-  const getConversationAvatar = useCallback((conversation: PopulatedConversation) => {
-    if (conversation.type === "direct") {
-      const otherParticipant = conversation.participants.find(
-        (p) => String(p._id) !== user?._id
-      );
-      if (otherParticipant?.profileImage?.data) {
+  const getConversationAvatar = useCallback(
+    (conversation: PopulatedConversation) => {
+      if (conversation.type === "direct") {
+        const otherParticipant = conversation.participants.find(
+          (p) => String(p._id) !== user?._id
+        );
+        if (otherParticipant?.profileImage?.data) {
+          return (
+            <img
+              src={otherParticipant.profileImage.data}
+              alt="Profile"
+              className="w-12 h-12 rounded-full object-cover"
+            />
+          );
+        }
         return (
-          <img
-            src={otherParticipant.profileImage.data}
-            alt="Profile"
-            className="w-12 h-12 rounded-full object-cover"
-          />
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${theme === "dark" ? "bg-gray-600" : "bg-blue-500"}`}
+          >
+            {(
+              otherParticipant?.firstName?.[0] ||
+              otherParticipant?.email?.[0] ||
+              "U"
+            ).toUpperCase()}
+          </div>
         );
       }
       return (
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${theme === 'dark' ? 'bg-gray-600' : 'bg-blue-500'}`}>
-          {(otherParticipant?.firstName?.[0] || otherParticipant?.email?.[0] || "U").toUpperCase()}
+        <div
+          className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${theme === "dark" ? "bg-gray-600" : "bg-gray-500"}`}
+        >
+          <FiUsers className="w-6 h-6" />
         </div>
       );
-    }
-    return (
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-500'}`}>
-        <FiUsers className="w-6 h-6" />
-      </div>
-    );
-  }, [user, theme]);
-
-  // Memoize sorted conversations if needed
-  const sortedConversations = useMemo(() => {
-    // Optionally sort by updatedAt or other criteria
-    return conversations.slice();
-  }, [conversations]);
+    },
+    [user, theme]
+  );
 
   return (
-    <div className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}>
+    <div
+      className={`flex flex-col h-full ${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden`}
+    >
       {/* Header */}
-      <div className={`p-6 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
+      <div
+        className={`p-6 ${theme === "light" ? "bg-gray-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}
+      >
         <div className="flex items-center gap-3 mb-6">
-          <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
+          <div
+            className={`p-2 rounded-xl ${theme === "dark" ? "bg-blue-600" : "bg-blue-500"}`}
+          >
             <FiMessageCircle className="w-6 h-6 text-white" />
           </div>
-          <h2 className={`text-2xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+          <h2
+            className={`text-2xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}
+          >
             {t("messages")}
           </h2>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3">
           <Button
             onClick={onNewChatClick}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${theme === "dark" ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-blue-500 hover:bg-blue-600 text-white"}`}
           >
             <FiPlus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
             <span className="hidden sm:inline">{t("newChat")}</span>
           </Button>
           <Button
             onClick={onNewGroupClick}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-500 hover:bg-gray-600 text-white'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${theme === "dark" ? "bg-gray-600 hover:bg-gray-500 text-white" : "bg-gray-500 hover:bg-gray-600 text-white"}`}
           >
             <FiUsers className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
             <span className="hidden sm:inline">{t("newGroup")}</span>
@@ -129,20 +143,25 @@ const ConversationList: React.FC<ConversationListProps> = React.memo(({
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-gray-500 px-6">
             <FiMessageCircle className="w-12 h-12 mb-4 opacity-50" />
-            <p className="text-center text-sm font-medium">{t("noConversations")}</p>
-            <p className="text-center text-xs mt-1 opacity-75">{t("startNewChat")}</p>
+            <p className="text-center text-sm font-medium">
+              {t("noConversations")}
+            </p>
+            <p className="text-center text-xs mt-1 opacity-75">
+              {t("startNewChat")}
+            </p>
           </div>
         ) : (
           <div className="p-4 space-y-2">
-            {sortedConversations.map((conversation) => {
-              const isSelected = selectedConversationId === conversation._id.toString();
+            {conversations.slice().map((conversation) => {
+              const isSelected =
+                selectedConversationId === conversation._id.toString();
               return (
                 <div
                   key={conversation._id.toString()}
                   onClick={() => onSelectConversation(conversation)}
                   className={`relative p-4 rounded-2xl cursor-pointer transition-all duration-200 group ${
                     isSelected
-                      ? `${theme === 'dark' ? 'bg-blue-900/30 border-blue-500/50' : 'bg-blue-50 border-blue-200'} border-2`
+                      ? `${theme === "dark" ? "bg-blue-900/30 border-blue-500/50" : "bg-blue-50 border-blue-200"} border-2`
                       : `hover:${theme === "light" ? "bg-gray-50" : "bg-gray-700"}`
                   }`}
                 >
@@ -157,15 +176,22 @@ const ConversationList: React.FC<ConversationListProps> = React.memo(({
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className={`font-semibold truncate ${theme === "light" ? "text-gray-900" : "text-white"} ${isSelected ? "text-blue-600" : ""}`}>
+                        <h4
+                          className={`font-semibold truncate ${theme === "light" ? "text-gray-900" : "text-white"} ${isSelected ? "text-blue-600" : ""}`}
+                        >
                           {getConversationName(conversation)}
                         </h4>
-                        {/* Show time for the last message of each conversation group */}
-                        <span className={`text-xs ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}>
-                          {new Date(conversation.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <span
+                          className={`text-xs ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}
+                        >
+                          {new Date(
+                            conversation.updatedAt
+                          ).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className={`text-sm truncate ${theme === "light" ? "text-gray-600" : "text-gray-300"} ${isSelected ? "text-blue-500" : ""}`}>
+                      <p
+                        className={`text-sm truncate ${theme === "light" ? "text-gray-600" : "text-gray-300"} ${isSelected ? "text-blue-500" : ""}`}
+                      >
                         {conversation.lastMessage || "No messages yet"}
                       </p>
                     </div>
@@ -186,6 +212,6 @@ const ConversationList: React.FC<ConversationListProps> = React.memo(({
       </div>
     </div>
   );
-});
+};
 
-export default React.memo(ConversationList);
+export default ConversationList;

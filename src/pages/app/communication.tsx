@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ChatWindow from "@/components/chat/ChatWindow";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
@@ -12,7 +12,7 @@ import NewGroupChatModal from "@/components/chat/NewGroupChatModal";
 import { useRouter } from "next/router";
 import { useTheme } from "@/components/ThemeContext";
 
-const Communication: NextPageWithLayout = React.memo(() => {
+const Communication: NextPageWithLayout = () => {
   const { user, loadingUser } = useAuth();
   const { theme } = useTheme();
   const [conversations, setConversations] = useState<PopulatedConversation[]>(
@@ -63,35 +63,38 @@ const Communication: NextPageWithLayout = React.memo(() => {
     }
   }, [router.query.userId, conversations]);
 
-  // Memoize handleChatCreated
-  const handleChatCreated = useCallback((newConversationId: string) => {
-    if (user) {
-      fetch(`/api/conversations?userId=${user._id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setConversations(data.conversations as PopulatedConversation[]);
-          const newConvo = data.conversations.find(
-            (c: PopulatedConversation) =>
-              (c._id as string) === newConversationId
+  const handleChatCreated = useCallback(
+    (newConversationId: string) => {
+      if (user) {
+        fetch(`/api/conversations?userId=${user._id}`)
+          .then((res) => res.json())
+          .then((data) => {
+            setConversations(data.conversations as PopulatedConversation[]);
+            const newConvo = data.conversations.find(
+              (c: PopulatedConversation) =>
+                (c._id as string) === newConversationId
+            );
+            if (newConvo) {
+              setSelectedConversation(newConvo);
+            }
+          })
+          .catch((err) =>
+            console.error(
+              "Failed to re-fetch conversations after creation",
+              err
+            )
           );
-          if (newConvo) {
-            setSelectedConversation(newConvo);
-          }
-        })
-        .catch((err) =>
-          console.error("Failed to re-fetch conversations after creation", err)
-        );
-    }
-  }, [user]);
-
-  // Memoize selectedConversationId
-  const selectedConversationId = useMemo(
-    () => selectedConversation?._id?.toString() || null,
-    [selectedConversation]
+      }
+    },
+    [user]
   );
 
+  const selectedConversationId = selectedConversation?._id?.toString() || null;
+
   return (
-    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} p-4 lg:px-8`}>
+    <div
+      className={`relative min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"} p-4 lg:px-8`}
+    >
       {loadingUser && <Loading />}
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] max-w-8xl mx-auto">
         <div className="w-full lg:w-1/3 xl:w-1/4 min-w-0">
@@ -120,13 +123,10 @@ const Communication: NextPageWithLayout = React.memo(() => {
       />
     </div>
   );
-});
+};
 
 Communication.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-// All expensive calculations and event handlers are already memoized with useMemo/useCallback.
-// The page component is wrapped with React.memo.
-
-export default React.memo(Communication);
+export default Communication;

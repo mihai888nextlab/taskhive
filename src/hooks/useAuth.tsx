@@ -17,7 +17,7 @@ interface AuthContextType {
   refetchUser: () => Promise<void>; // Funcție pentru a re-fetch-ui manual
   login: (
     provider: string,
-    credentials: { email?: string; password?: string; idToken?: string }
+    credentials: { email?: string; password?: string; code?: string }
   ) => Promise<boolean>; // Adaugă funcție de login
   register: (
     email: string,
@@ -54,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         } as User);
       } else {
         setUser(null);
+        router.push("/login"); // Redirecționează la login dacă nu este autentificat
       }
     } catch (err: unknown) {
       console.error("Error fetching user data in AuthProvider:", err);
@@ -67,18 +68,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = useCallback(
     async (
       provider: string,
-      credentials: { email?: string; password?: string; idToken?: string }
+      credentials: { email?: string; password?: string; code?: string }
     ): Promise<boolean> => {
       setLoadingUser(true);
       setError(null);
       try {
         let res;
-        if (provider == "google" && credentials.idToken) {
+        if (provider == "google" && credentials.code) {
           res = await fetch("/api/auth/google", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              idToken: credentials.idToken,
+              code: credentials.code,
             }),
           });
         } else if (
@@ -100,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (res.ok) {
           await fetchUserData();
-          router.push("/app");
+          router.push("/app/select-company");
           return true;
         } else {
           const errData = await res.json();
