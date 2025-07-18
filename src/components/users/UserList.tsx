@@ -124,6 +124,7 @@ const UserList: React.FC<UserListProps> = React.memo(({
   }, [onSortByChange]);
 
   if (controlsOnly) {
+    const [showFilterModal, setShowFilterModal] = React.useState(false);
     return (
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Search Bar */}
@@ -142,54 +143,89 @@ const UserList: React.FC<UserListProps> = React.memo(({
           />
         </div>
 
-        {/* Filter and Sort */}
-        <div className="flex gap-3">
-          <div className="relative">
-            <FaFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-            <Select
-              value={filterRole}
-              onValueChange={handleFilterRoleChange}
-            >
-              <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]">
-                <SelectValue placeholder={t("role")} />
-              </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-                <SelectItem
-                  value="all"
-                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
-                >
-                  {t("all")}
-                </SelectItem>
-                {companyRoles.map(role => (
-                  <SelectItem
-                    key={role}
-                    value={role}
-                    className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
-                  >
-                    {role.charAt(0).toUpperCase() + role.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="relative">
-            <FaSort className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-            <Select
-              value={sortBy}
-              onValueChange={handleSortByChange}
-            >
-              <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]">
-                <SelectValue placeholder={t("sortBy")} />
-              </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-                <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("firstName")}</SelectItem>
-                <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("lastName")}</SelectItem>
-                <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("role")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Filter & Sort Button */}
+        <div className="flex w-full lg:w-auto">
+          <button
+            type="button"
+            className="rounded-xl px-4 py-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white shadow flex items-center gap-2 w-full lg:w-auto"
+            onClick={() => setShowFilterModal(true)}
+            style={{ minWidth: 0, height: 40, justifyContent: 'center' }}
+            title={t("filterSortButton", { default: "Filter & Sort" })}
+          >
+            <FaFilter className="w-5 h-5" />
+            <span className="ml-1">{t("filterSortButton", { default: "Filter & Sort" })}</span>
+          </button>
         </div>
+
+        {/* Modal for filter/sort */}
+        {showFilterModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+            <div className="relative w-full max-w-lg mx-2 lg:mx-0 lg:rounded-3xl rounded-2xl shadow-lg bg-white border border-gray-200 flex flex-col overflow-hidden animate-fadeInUp">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white relative">
+                <h3 className="text-2xl font-bold text-gray-900">{t("filterSortTitle", { default: "Filter & Sort Users" })}</h3>
+                <button
+                  className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full z-10"
+                  onClick={() => setShowFilterModal(false)}
+                  aria-label="Close"
+                  tabIndex={0}
+                  type="button"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {/* Modal Content */}
+              <div className="flex-1 p-6 space-y-6 bg-white">
+                {/* Filter by Role */}
+                <Select value={filterRole} onValueChange={handleFilterRoleChange}>
+                  <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]" style={{ zIndex: 300 }}>
+                    <SelectValue placeholder={t("role")} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0 z-[300]">
+                    <SelectItem
+                      value="all"
+                      className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                    >
+                      {t("all")}
+                    </SelectItem>
+                    {companyRoles.map(role => (
+                      <SelectItem
+                        key={role}
+                        value={role}
+                        className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                      >
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {/* Sort By */}
+                <Select value={sortBy} onValueChange={handleSortByChange}>
+                  <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]" style={{ zIndex: 300 }}>
+                    <SelectValue placeholder={t("sortBy")} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0 z-[300]">
+                    <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("firstName")}</SelectItem>
+                    <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("lastName")}</SelectItem>
+                    <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("role")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-gray-200 bg-white flex justify-end">
+                <button
+                  type="button"
+                  className="rounded-xl px-6 py-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white shadow"
+                  onClick={() => setShowFilterModal(false)}
+                >
+                  {t("applyFiltersButton", { default: "Apply" })}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

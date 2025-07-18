@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import { FaSearch, FaTrash, FaSpinner, FaClock } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,8 @@ interface SessionListProps {
   setSessionSort: (v: string) => void;
 }
 
-const SessionList: React.FC<SessionListProps> = React.memo(({
+
+const SessionList: React.FC<SessionListProps> = ({
   sessions,
   onDelete,
   theme,
@@ -38,6 +39,7 @@ const SessionList: React.FC<SessionListProps> = React.memo(({
   setSessionSort,
 }) => {
   const t = useTranslations("TimeTrackingPage");
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -84,69 +86,116 @@ const SessionList: React.FC<SessionListProps> = React.memo(({
   return (
     <div className="h-full flex flex-col">
       {/* Controls */}
-      <div className="flex-shrink-0 p-3 space-y-3">
-        {/* Search */}
-        <div className="relative">
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            type="text"
-            placeholder={t("searchSessions")}
-            value={sessionSearch}
-            onChange={handleSearchChange}
-            className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl h-[36px] border transition-all duration-200 ${
-              theme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20'
-            }`}
-          />
-        </div>
-
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Select
-            value={sessionTagFilter}
-            onValueChange={handleTagFilterChange}
-            disabled={false}
-          >
-            <SelectTrigger
-              className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
-              style={{ height: "36px" }}
+      <div className="flex-shrink-0 p-3">
+        {/* Search, Filter Button Row */}
+        <div className="flex gap-3 items-center flex-col md:flex-row md:items-center">
+          <div className="flex-1 relative w-full md:w-auto">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            <Input
+              type="text"
+              placeholder={t("searchSessions")}
+              value={sessionSearch}
+              onChange={handleSearchChange}
+              className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200 h-[36px] ${
+                theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20'
+              }`}
+              disabled={false}
+            />
+          </div>
+          {/* Filter & Sort Button: on its own row on mobile, inline on desktop */}
+          <div className="flex w-full mt-2 md:mt-0 md:w-auto md:inline-flex md:justify-end">
+            <Button
+              type="button"
+              className="rounded-xl px-4 py-2 font-semibold text-sm bg-green-500 hover:bg-green-600 text-white shadow flex items-center justify-center gap-2 w-full md:w-auto"
+              onClick={() => setShowFilterModal(true)}
+              style={{ minWidth: 0, height: 40, justifyContent: 'center' }}
+              title={t("filterSortButton", { default: "Filter & Sort" })}
             >
-              <SelectValue placeholder={t("allCategories")} />
-            </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-              <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("allCategories")}</SelectItem>
-              {tags.map(tag => (
-                <SelectItem
-                  key={tag}
-                  value={tag}
-                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A2 2 0 0013 14.586V19a1 1 0 01-1.447.894l-2-1A1 1 0 019 18v-3.414a2 2 0 00-.586-1.414L2 6.707A1 1 0 012 6V4z" /></svg>
+              <span className="ml-1">{t("filterSortButton", { default: "Filter & Sort" })}</span>
+            </Button>
+          </div>
+        </div>
+        {/* Modal for filter/sort */}
+        {showFilterModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+            <div className="relative w-full max-w-lg mx-2 md:mx-0 md:rounded-3xl rounded-2xl shadow-lg bg-white border border-gray-200 flex flex-col overflow-hidden animate-fadeInUp">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white relative">
+                <h3 className="text-2xl font-bold text-gray-900">{t("filterSortTitle", { default: "Filter & Sort Sessions" })}</h3>
+                <button
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+                  onClick={() => setShowFilterModal(false)}
+                  aria-label="Close modal"
+                  type="button"
                 >
-                  {tag}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={sessionSort}
-            onValueChange={handleSortChange}
-            disabled={false}
-          >
-            <SelectTrigger
-              className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
-              style={{ height: "36px" }}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-              <SelectItem value="dateDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("newestFirst")}</SelectItem>
-              <SelectItem value="dateAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("oldestFirst")}</SelectItem>
-              <SelectItem value="durationDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("longestDuration")}</SelectItem>
-              <SelectItem value="durationAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("shortestDuration")}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {/* Modal Content */}
+              <div className="flex-1 p-6 space-y-6 bg-white">
+                {/* Tag Filter */}
+                <Select
+                  value={sessionTagFilter}
+                  onValueChange={handleTagFilterChange}
+                  disabled={false}
+                >
+                  <SelectTrigger
+                    className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 min-w-[140px]"
+                    style={{ height: "36px", zIndex: 300 }}
+                  >
+                    <SelectValue placeholder={t("allCategories")} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0 z-[300]">
+                    <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("allCategories")}</SelectItem>
+                    {tags.map(tag => (
+                      <SelectItem
+                        key={tag}
+                        value={tag}
+                        className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                      >
+                        {tag}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {/* Sorting */}
+                <Select
+                  value={sessionSort}
+                  onValueChange={handleSortChange}
+                  disabled={false}
+                >
+                  <SelectTrigger
+                    className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 min-w-[140px]"
+                    style={{ height: "36px", zIndex: 300 }}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0 z-[300]">
+                    <SelectItem value="dateDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("newestFirst")}</SelectItem>
+                    <SelectItem value="dateAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("oldestFirst")}</SelectItem>
+                    <SelectItem value="durationDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("longestDuration")}</SelectItem>
+                    <SelectItem value="durationAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("shortestDuration")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-gray-200 bg-white flex justify-end">
+                <Button
+                  type="button"
+                  className="rounded-xl px-6 py-2 font-semibold text-sm bg-green-500 hover:bg-green-600 text-white shadow"
+                  onClick={() => setShowFilterModal(false)}
+                >
+                  {t("applyFiltersButton", { default: "Apply" })}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Sessions List */}
@@ -229,6 +278,6 @@ const SessionList: React.FC<SessionListProps> = React.memo(({
       </div>
     </div>
   );
-});
+};
 
-export default React.memo(SessionList);
+export default SessionList;

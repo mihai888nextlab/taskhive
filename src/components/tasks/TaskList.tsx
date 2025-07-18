@@ -240,83 +240,127 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
   })), [filteredTasks]);
 
   if (controlsOnly) {
+    // Show search input outside the modal, and a button to open filter/sort modal
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-        <div className="relative">
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-          <Input
-            type="text"
-            placeholder={t("searchTasksPlaceholder", { default: "Search by title or description..." })}
-            value={searchValue}
-            onChange={e => {
-              if (onSearchChange) onSearchChange(e.target.value);
-              else setSearch(e.target.value);
-            }}
-            className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200 ${
-              theme === 'dark'
-                ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
-                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
-            }`}
-            style={{ height: "36px" }}
-          />
+      <div>
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:w-auto flex-1">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            <Input
+              type="text"
+              placeholder={t("searchTasksPlaceholder", { default: "Search by title or description..." })}
+              value={searchValue}
+              onChange={e => {
+                if (onSearchChange) onSearchChange(e.target.value);
+                else setSearch(e.target.value);
+              }}
+              className={`w-full pl-10 pr-4 text-sm rounded-xl border transition-all duration-200 ${
+                theme === 'dark'
+                  ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+              }`}
+              style={{ height: "36px" }}
+            />
+          </div>
+          <Button
+            type="button"
+            className="rounded-xl px-6 py-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white shadow flex items-center gap-2 sm:ml-2"
+            onClick={() => setModalOpen(true)}
+          >
+            {/* Filter icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-6.414 6.414A2 2 0 0013 14.586V19a1 1 0 01-1.447.894l-2-1A1 1 0 019 18v-3.414a2 2 0 00-.586-1.414L2 6.707A1 1 0 012 6V4z" /></svg>
+            {t("filterSortButton", { default: "Filter & Sort" })}
+          </Button>
         </div>
-        <Select
-          value={filterStatusValue}
-          onValueChange={v => {
-            if (onFilterStatusChange) onFilterStatusChange(v as any);
-            else setFilterStatus(v as any);
-          }}
-        >
-          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
-            style={{ height: "36px" }}
-          >
-            <SelectValue placeholder={t("statusAll")} />
-          </SelectTrigger>
-          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-            <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("statusAll")}</SelectItem>
-            <SelectItem value="completed" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("completed")}</SelectItem>
-            <SelectItem value="pending" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("pending")}</SelectItem>
-            <SelectItem value="overdue" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("overdue")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={filterPriorityValue}
-          onValueChange={v => {
-            if (onFilterPriorityChange) onFilterPriorityChange(v as any);
-            else setFilterPriority(v as any);
-          }}
-        >
-          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
-            style={{ height: "36px" }}
-          >
-            <SelectValue placeholder={t("priorityAll")} />
-          </SelectTrigger>
-          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-            <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("priorityAll")}</SelectItem>
-            <SelectItem value="critical" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("critical")}</SelectItem>
-            <SelectItem value="high" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("high")}</SelectItem>
-            <SelectItem value="medium" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("medium")}</SelectItem>
-            <SelectItem value="low" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("low")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={sortByValue}
-          onValueChange={v => {
-            if (onSortByChange) onSortByChange(v as any);
-            else setSortBy(v as any);
-          }}
-        >
-          <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]"
-            style={{ height: "36px" }}
-          >
-            <SelectValue placeholder={t("sortNewest")} />
-          </SelectTrigger>
-          <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-            <SelectItem value="createdAtDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortNewest")}</SelectItem>
-            <SelectItem value="deadlineAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortDeadline")}</SelectItem>
-            <SelectItem value="priorityDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortPriority")}</SelectItem>
-          </SelectContent>
-        </Select>
+        {modalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+            <div className="relative w-full max-w-lg mx-2 md:mx-0 md:rounded-3xl rounded-2xl shadow-lg bg-white border border-gray-200 flex flex-col overflow-hidden animate-fadeInUp">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
+                <h3 className="text-2xl font-bold text-gray-900">{t("filterSortTitle", { default: "Filter & Sort Tasks" })}</h3>
+                <button
+                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                  onClick={handleCloseModal}
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              {/* Modal Content */}
+              <div className="flex-1 p-6 space-y-6 bg-white">
+                <div className="flex gap-2">
+                  <Select
+                    value={filterStatusValue}
+                    onValueChange={v => {
+                      if (onFilterStatusChange) onFilterStatusChange(v as any);
+                      else setFilterStatus(v as any);
+                    }}
+                  >
+                    <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[120px]"
+                      style={{ height: "36px" }}
+                    >
+                      <SelectValue placeholder={t("statusAll")} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+                      <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("statusAll")}</SelectItem>
+                      <SelectItem value="completed" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("completed")}</SelectItem>
+                      <SelectItem value="pending" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("pending")}</SelectItem>
+                      <SelectItem value="overdue" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("overdue")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={filterPriorityValue}
+                    onValueChange={v => {
+                      if (onFilterPriorityChange) onFilterPriorityChange(v as any);
+                      else setFilterPriority(v as any);
+                    }}
+                  >
+                    <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[120px]"
+                      style={{ height: "36px" }}
+                    >
+                      <SelectValue placeholder={t("priorityAll")} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+                      <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("priorityAll")}</SelectItem>
+                      <SelectItem value="critical" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("critical")}</SelectItem>
+                      <SelectItem value="high" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("high")}</SelectItem>
+                      <SelectItem value="medium" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("medium")}</SelectItem>
+                      <SelectItem value="low" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("low")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Select
+                  value={sortByValue}
+                  onValueChange={v => {
+                    if (onSortByChange) onSortByChange(v as any);
+                    else setSortBy(v as any);
+                  }}
+                >
+                  <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+                    style={{ height: "36px" }}
+                  >
+                    <SelectValue placeholder={t("sortNewest")} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+                    <SelectItem value="createdAtDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortNewest")}</SelectItem>
+                    <SelectItem value="deadlineAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortDeadline")}</SelectItem>
+                    <SelectItem value="priorityDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortPriority")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-gray-200 bg-white flex justify-end">
+                <Button
+                  type="button"
+                  className="rounded-xl px-6 py-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white shadow"
+                  onClick={handleCloseModal}
+                >
+                  {t("applyFiltersButton", { default: "Apply" })}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

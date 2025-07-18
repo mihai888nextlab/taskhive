@@ -16,7 +16,7 @@ import StatsRangeButtons from '@/components/finance/StatsRangeButtons';
 import { FaDollarSign, FaChartLine } from 'react-icons/fa';
 import { useTranslations } from "next-intl";
 
-import MobileListWithFormButton from './MobileListWithFormButton';
+import MobileListWithFormButton from '@/components/MobileListWithFormButton';
 
 const FinancePage = () => {
   const { theme } = useTheme();
