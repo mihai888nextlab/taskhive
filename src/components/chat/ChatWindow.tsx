@@ -70,10 +70,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
     return selectedConversation.name || "Group Chat";
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   // Socket.IO connection and event listeners
   useEffect(() => {
     if (!user || !conversationId) return;

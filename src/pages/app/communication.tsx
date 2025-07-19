@@ -93,7 +93,7 @@ const Communication: NextPageWithLayout = () => {
 
   return (
     <div
-      className={`relative min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"} p-4 lg:px-8`}
+      className={`relative ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"} p-4 lg:px-8`}
     >
       {loadingUser && <Loading />}
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] max-w-8xl mx-auto">

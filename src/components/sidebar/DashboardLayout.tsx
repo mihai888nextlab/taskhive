@@ -104,16 +104,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <HeaderNavBar t={t} />
       </div>
       {/* Hamburger button for mobile */}
-      {user && (
-        !sidebarOpen ? (
+      {user &&
+        (!sidebarOpen ? (
           <button
             className="fixed top-4 left-4 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-primary text-white shadow-lg md:hidden"
             onClick={() => setSidebarOpen(true)}
             aria-label={t("openSidebar", { default: "Open sidebar" })}
-            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}
           >
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
         ) : (
@@ -121,14 +131,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             className="fixed top-4 left-4 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-gray-700 text-white shadow-lg md:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-label={t("closeSidebar", { default: "Close sidebar" })}
-            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}
           >
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
-        )
-      )}
+        ))}
       {/* Sidebar for desktop */}
       {user && (
         <aside className="hidden md:block">
@@ -163,7 +182,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           marginRight: isDesktop && isAIWindowOpen ? 420 : 0,
         }}
       >
-        <main className="flex-1 bg-gray-100 rounded-tl-lg shadow-lg min-h-screen">
+        <main className="flex-1 bg-gray-100 rounded-tl-lg shadow-lg">
           {children}
         </main>
         {/* Persistent Timer - Only show timer, no form */}
