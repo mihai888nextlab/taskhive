@@ -17,10 +17,10 @@ import {
   FiUsers,
   FiMessageCircle,
 } from "react-icons/fi";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "../ui/textarea";
 import { useTranslations } from "next-intl";
+import AgoraRTM from "agora-rtm-sdk";
 
 interface ChatMessage {
   _id?: string;
@@ -85,8 +85,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
     ) {
       if (socket) socket.disconnect();
 
-      socket = io({
-        path: "/api/socket",
+      socket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER_URL, {
+        path: "/api/socket", // This must match the backend server's path
+        // You might pass auth token here if your backend Socket.IO requires it
+        // auth: { token: localStorage.getItem('app_session_token') }
         query: { conversationId, userId: user._id },
       });
 
@@ -411,7 +413,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
             {/* Group messages by 10-minute window and show time on the last message in each group */}
             {(() => {
               // Sort messages by timestamp ascending before grouping
-              const sortedMessages = [...messages].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+              const sortedMessages = [...messages].sort(
+                (a, b) =>
+                  new Date(a.timestamp).getTime() -
+                  new Date(b.timestamp).getTime()
+              );
               const groups: { msgs: typeof messages; time: string }[] = [];
               let currentGroup: typeof messages = [];
               let lastTime: number | null = null;
@@ -424,7 +430,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                   if (currentGroup.length) {
                     groups.push({
                       msgs: currentGroup,
-                      time: new Date(sortedMessages[idx - 1].timestamp).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Bucharest' })
+                      time: new Date(
+                        sortedMessages[idx - 1].timestamp
+                      ).toLocaleTimeString("ro-RO", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                        timeZone: "Europe/Bucharest",
+                      }),
                     });
                   }
                   currentGroup = [msg];
@@ -436,7 +449,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
               if (currentGroup.length) {
                 groups.push({
                   msgs: currentGroup,
-                  time: new Date(currentGroup[currentGroup.length - 1].timestamp).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Bucharest' })
+                  time: new Date(
+                    currentGroup[currentGroup.length - 1].timestamp
+                  ).toLocaleTimeString("ro-RO", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                    timeZone: "Europe/Bucharest",
+                  }),
                 });
               }
               let msgIdx = 0;
@@ -452,10 +472,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                   const senderName = isSender
                     ? t("you")
                     : senderInfo
-                    ? `${senderInfo.firstName || ""} ${
-                        senderInfo.lastName || ""
-                      }`.trim() || senderInfo.email
-                    : t("unknown");
+                      ? `${senderInfo.firstName || ""} ${
+                          senderInfo.lastName || ""
+                        }`.trim() || senderInfo.email
+                      : t("unknown");
                   // Show avatar/name for the first message in the group (if not your own message)
                   const showAvatar = !isSender && idx === 0;
                   const showName = !isSender && idx === 0;
@@ -468,21 +488,29 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                       {/* Avatar for received messages */}
                       {!isSender && (
                         <div className="w-8 h-8 flex-shrink-0">
-                          {showAvatar ? getMessageAvatar(msg.senderId) : <div className="w-8"></div>}
+                          {showAvatar ? (
+                            getMessageAvatar(msg.senderId)
+                          ) : (
+                            <div className="w-8"></div>
+                          )}
                         </div>
                       )}
                       {/* Message Content */}
-                      <div className={`max-w-[75%] ${isSender ? "order-1" : "order-2"}`}> 
+                      <div
+                        className={`max-w-[75%] ${isSender ? "order-1" : "order-2"}`}
+                      >
                         {!isSender && showName && (
-                          <p className="text-xs text-gray-500 mb-1 ml-1">{senderName}</p>
+                          <p className="text-xs text-gray-500 mb-1 ml-1">
+                            {senderName}
+                          </p>
                         )}
                         <div
                           className={`inline-block px-3 py-2 rounded-2xl transition-all duration-200 ${
                             isSender
-                              ? `${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} text-white rounded-br-md`
+                              ? `${theme === "dark" ? "bg-blue-600" : "bg-blue-500"} text-white rounded-br-md`
                               : theme === "light"
-                              ? "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
-                              : "bg-gray-700 text-white rounded-bl-md"
+                                ? "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
+                                : "bg-gray-700 text-white rounded-bl-md"
                           }`}
                         >
                           {msg.type === "file" ? (
@@ -517,7 +545,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                           )}
                         </div>
                         {showTime && (
-                          <p className={`text-xs mt-1 ${isSender ? "text-right" : "text-left"} ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}>
+                          <p
+                            className={`text-xs mt-1 ${isSender ? "text-right" : "text-left"} ${theme === "light" ? "text-gray-500" : "text-gray-400"}`}
+                          >
                             {group.time}
                           </p>
                         )}
@@ -617,7 +647,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                   ? "bg-gray-100 border-gray-200 text-gray-900 placeholder-gray-500 focus:bg-white"
                   : "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:bg-gray-600"
               }`}
-              style={{ height: '44px', minHeight: '44px', maxHeight: '44px', textAlign: 'left', display: 'flex', alignItems: 'center' }}
+              style={{
+                height: "44px",
+                minHeight: "44px",
+                maxHeight: "44px",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+              }}
               rows={1}
               disabled={!user || loadingMessages}
             />
