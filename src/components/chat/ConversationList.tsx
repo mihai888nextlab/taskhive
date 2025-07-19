@@ -41,9 +41,9 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const getConversationName = useCallback(
     (conversation: PopulatedConversation) => {
       if (conversation.type === "direct") {
-        const otherParticipant = conversation.participants.find(
-          (p) => String(p._id) !== user?._id
-        );
+        const otherParticipant = Array.isArray(conversation.participants)
+          ? conversation.participants.find((p) => String(p._id) !== user?._id)
+          : undefined;
         return otherParticipant
           ? `${otherParticipant.firstName || ""} ${
               otherParticipant.lastName || ""
@@ -58,9 +58,9 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const getConversationAvatar = useCallback(
     (conversation: PopulatedConversation) => {
       if (conversation.type === "direct") {
-        const otherParticipant = conversation.participants.find(
-          (p) => String(p._id) !== user?._id
-        );
+        const otherParticipant = Array.isArray(conversation.participants)
+          ? conversation.participants.find((p) => String(p._id) !== user?._id)
+          : undefined;
         if (otherParticipant?.profileImage?.data) {
           return (
             <img

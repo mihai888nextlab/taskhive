@@ -139,17 +139,18 @@ const AnnouncementList: React.FC<AnnouncementListProps> = React.memo(({
             value={categoryFilter}
             onValueChange={handleCategoryFilterChange}
           >
-            <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+            <SelectTrigger
+              className={`w-full pl-9 pr-8 text-sm rounded-xl border transition-all duration-200 min-w-[140px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
               style={{ height: "36px" }}
             >
               <SelectValue placeholder={t("categoryAll")} />
             </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
+            <SelectContent className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border border-gray-300'} rounded-lg p-0`}>
               {categories.map(cat => (
                 <SelectItem
                   key={cat}
                   value={cat}
-                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                  className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}
                 >
                   {cat === "All" ? t("categoryAll") : t(`category${cat}`)}
                 </SelectItem>

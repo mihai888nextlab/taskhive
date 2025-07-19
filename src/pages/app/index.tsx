@@ -180,13 +180,18 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
     { key: "email", header: t("email", { default: "Email" }) },
   ], [t]);
 
+
   if (!currentUser) {
-    return <p className="text-center text-gray-600 mb-8">{t("loadingDashboard", { default: "Loading your dashboard..." })}</p>;
+    return (
+      <div className={`min-h-screen flex items-center justify-center w-full ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+        <p className="text-center text-lg font-medium opacity-80">{t("loadingDashboard", { default: "Loading your dashboard..." })}</p>
+      </div>
+    );
   }
 
   return (
     <div
-      className="sm:p-7 min-h-screen rounded-lg bg-transpare text-gray-900"
+      className={`sm:p-7 min-h-screen rounded-lg ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}
       style={{ maxWidth: '100vw', overflowX: 'hidden' }}
     >
       <Head>

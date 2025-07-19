@@ -25,6 +25,9 @@
     "user": "यूज़र",
     "loadingTeamMembers": "टीम सदस्य लोड हो रहे हैं...",
     "pleaseWaitFetchTeam": "कृपया प्रतीक्षा करें, आपकी टीम डेटा प्राप्त की जा रही है"
+    ,"filterSortButton": "फ़िल्टर और छाँटें"
+    ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
+    ,"applyFiltersButton": "फ़िल्टर लागू करें"
   },
   "TasksPage": {
     "myTasks": "मेरी कार्य",
@@ -98,6 +101,9 @@
     "priorityHighSubtitle": "महत्वपूर्ण",
     "priorityMediumSubtitle": "सामान्य",
     "priorityLowSubtitle": "ऐच्छिक"
+    ,"filterSortButton": "फ़िल्टर और छाँटें"
+    ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
+    ,"applyFiltersButton": "फ़िल्टर लागू करें"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "सभी घोषणाएँ",
@@ -273,6 +279,9 @@
     "total": "कुल",
     "exportCSV": "CSV निर्यात करें",
     "exportPDF": "PDF निर्यात करें"
+    ,"filterSortButton": "फ़िल्टर और छाँटें"
+    ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
+    ,"applyFiltersButton": "फ़िल्टर लागू करें"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "कार्य के लिए समय दर्ज करें",
@@ -320,6 +329,12 @@
     "trackWorkSessions": "अपने कार्य सत्र और उत्पादकता को ट्रैक करें",
     "timeSessions": "समय सत्र",
     "viewManageSessions": "अपने दर्ज किए गए समय सत्र देखें और प्रबंधित करें"
+    ,"filterSortButton": "फ़िल्टर और छाँटें"
+    ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
+    ,"applyFiltersButton": "फ़िल्टर लागू करें"
+    ,"filterSortButton": "फ़िल्टर और छाँटें"
+    ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
+    ,"applyFiltersButton": "फ़िल्टर लागू करें"
   },
   "StoragePage": {
     "storageUsage": "स्टोरेज उपयोग",

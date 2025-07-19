@@ -142,12 +142,12 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
   return (
     <div className="space-y-6">
       {/* Compact Canvas Controls */}
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
         {/* Pen Size */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <FaPencilAlt className="text-blue-600 text-sm" />
-            <span className="text-gray-700 font-medium text-sm">{t("size")}: {lineWidth}px</span>
+            <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">{t("size")}: {lineWidth}px</span>
           </div>
           <input
             type="range"
@@ -166,13 +166,13 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <FaPalette className="text-purple-600 text-sm" />
-            <span className="text-gray-700 font-medium text-sm">{t("color")}:</span>
+            <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">{t("color")}</span>
           </div>
           <input
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="w-8 h-8 border-2 border-gray-300 rounded-md cursor-pointer"
+            className="w-8 h-8 border-2 border-gray-300 dark:border-gray-600 rounded-md cursor-pointer bg-white dark:bg-gray-900"
             title={t("pickPenColor")}
           />
         </div>
@@ -180,9 +180,9 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
 
       {/* Canvas */}
       <div className="relative">
-        <div className="bg-white rounded-xl border-2 border-gray-300 p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border-2 border-gray-300 dark:border-gray-700 p-4">
           <div 
-            className="relative rounded-lg border border-gray-200"
+            className="relative rounded-lg border border-gray-200 dark:border-gray-700"
             style={{
               backgroundImage: `
                 linear-gradient(45deg, #f9fafb 25%, transparent 25%),
@@ -191,7 +191,8 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
                 linear-gradient(-45deg, transparent 75%, #f9fafb 75%)
               `,
               backgroundSize: '20px 20px',
-              backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
+              backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
+              backgroundColor: 'var(--tw-bg-opacity, 1)'
             }}
           >
             <canvas
@@ -256,17 +257,16 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
       <div className="flex gap-2">
         <button
           onClick={clearCanvas}
-          className="flex-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium transition-all duration-200 border border-red-200 text-sm"
+          className="flex-1 px-3 py-2 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg hover:bg-red-200 dark:hover:bg-red-800 font-medium transition-all duration-200 border border-red-200 dark:border-red-700 text-sm"
         >
           <div className="flex items-center justify-center gap-2">
             <FaEraser className="text-xs" />
             {t("clear")}
           </div>
         </button>
-        
         <button
           onClick={undoLastStroke}
-          className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-all duration-200 border border-gray-200 text-sm"
+          className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition-all duration-200 border border-gray-200 dark:border-gray-700 text-sm"
         >
           <div className="flex items-center justify-center gap-2">
             <FaUndo className="text-xs" />
@@ -276,10 +276,10 @@ const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
       </div>
 
       {/* Compact Signature Tips */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-900 rounded-lg p-3">
         <div className="flex items-center gap-2">
-          <span className="text-blue-600 text-sm">💡</span>
-          <span className="text-blue-800 text-sm font-medium">
+          <span className="text-blue-600 dark:text-blue-300 text-sm">💡</span>
+          <span className="text-blue-800 dark:text-blue-200 text-sm font-medium">
             {t("signNaturallyTip")}
           </span>
         </div>

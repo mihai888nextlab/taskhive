@@ -104,6 +104,9 @@
     "priorityHighSubtitle": "Vigtig",
     "priorityMediumSubtitle": "Normal",
     "priorityLowSubtitle": "Rart at have"
+    ,"filterSortButton": "Filtrer & Sortér"
+    ,"filterSortTitle": "Filtrerings- og sorteringsmuligheder"
+    ,"applyFiltersButton": "Anvend filtre"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Alle meddelelser",
@@ -279,6 +282,9 @@
     "total": "Total",
     "exportCSV": "Eksporter CSV",
     "exportPDF": "Eksporter PDF"
+    ,"filterSortButton": "Filtrer & Sortér"
+    ,"filterSortTitle": "Filtrerings- og sorteringsmuligheder"
+    ,"applyFiltersButton": "Anvend filtre"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Registrer tid for opgave",
@@ -326,6 +332,9 @@
     "trackWorkSessions": "Følg dine arbejds-sessioner og produktivitet",
     "timeSessions": "Tidssessioner",
     "viewManageSessions": "Se og administrer dine registrerede tidssessioner"
+    ,"filterSortButton": "Filtrer & Sortér"
+    ,"filterSortTitle": "Filtrerings- og sorteringsmuligheder"
+    ,"applyFiltersButton": "Anvend filtre"
   },
   "StoragePage": {
     "storageUsage": "Lagerforbrug",

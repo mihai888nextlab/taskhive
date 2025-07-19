@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useTheme } from "@/components/ThemeContext";
 import Link from "next/link";
 import UserProfileModal from "../modals/UserProfileModal";
 import { useTranslations } from "next-intl"; // <-- Add this import
@@ -64,6 +65,7 @@ const UniversalSearchBar: React.FC = () => {
   // Add a ref to the input
   const inputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations("UniversalSearchBar"); // <-- Use a dedicated namespace
+  const { theme } = useTheme();
 
   // Focus input on Cmd+K or Ctrl+K
   useEffect(() => {
@@ -176,8 +178,8 @@ const UniversalSearchBar: React.FC = () => {
         onChange={(e) => setSearch(e.target.value)}
         onFocus={() => search && setShowDropdown(true)}
         onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-        placeholder={t("placeholder", { default: "Search tasks, users, files, etc..." })} // <-- Use translation
-        className="w-full px-5 py-2 rounded-3xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/60 border border-gray-200 text-base font-medium transition-all"
+        placeholder={t("placeholder", { default: "Search tasks, users, files, etc..." })}
+        className={`w-full px-5 py-2 rounded-3xl text-base font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/60 border ${theme === 'dark' ? 'bg-gray-900 text-white placeholder-gray-400 border-gray-700' : 'bg-white text-gray-900 placeholder-gray-400 border-gray-200'}`}
       />
       {loading && (
         <div className="absolute right-4 top-2.5 animate-spin text-primary">
@@ -188,9 +190,16 @@ const UniversalSearchBar: React.FC = () => {
         </div>
       )}
       {showDropdown && (
-        <div className="absolute left-0 right-0 mt-2 bg-white text-gray-900 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto border border-primary/20 backdrop-blur-xl" style={{boxShadow:'0 8px 32px 0 rgba(31,38,135,0.15)'}}>
+        <div
+          className={`absolute left-0 right-0 mt-2 rounded-2xl shadow-2xl z-50 max-h-80 overflow-y-auto border backdrop-blur-xl transition-colors duration-200 ${
+            theme === 'dark'
+              ? 'bg-gray-900 text-white border-gray-700'
+              : 'bg-white text-gray-900 border-primary/20'
+          }`}
+          style={{ boxShadow: '0 8px 32px 0 rgba(31,38,135,0.15)' }}
+        >
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center text-gray-400">
+            <div className={`flex flex-col items-center justify-center py-8 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
               <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" />
@@ -248,13 +257,13 @@ const UniversalSearchBar: React.FC = () => {
 
             if (categoriesWithResults.length === 0) {
               return (
-                <div className="flex flex-col items-center justify-center py-8 text-center text-gray-400">
+                <div className={`flex flex-col items-center justify-center py-8 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`}>
                   <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" />
                   </svg>
                   <span className="text-base font-medium">{t("noResults", { default: "No results found" })}</span>
-                  <span className="text-xs text-gray-400 mt-1">{t("tryDifferent", { default: "Try a different search term" })}</span>
+                  <span className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{t("tryDifferent", { default: "Try a different search term" })}</span>
                 </div>
               );
             }
@@ -263,7 +272,7 @@ const UniversalSearchBar: React.FC = () => {
               <div>
                 {categoriesWithResults.map(cat => (
                   <div key={cat.key} className="mb-2">
-                    <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary/80 bg-primary/5 border-b border-primary/10 rounded-t-lg">
+                    <div className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border-b rounded-t-lg ${theme === 'dark' ? 'text-primary/80 bg-gray-800 border-gray-700' : 'text-primary/80 bg-primary/5 border-primary/10'}` }>
                       {t(`category.${cat.key}`, { default: cat.label })}
                     </div>
                     <ul>

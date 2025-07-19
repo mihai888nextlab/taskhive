@@ -25,6 +25,9 @@
     "user": "User",
     "loadingTeamMembers": "Loading team members...",
     "pleaseWaitFetchTeam": "Please wait while we fetch your team data"
+    ,"filterSortButton": "Filter & Sort"
+    ,"filterSortTitle": "Filter & Sort Options"
+    ,"applyFiltersButton": "Apply Filters"
   },
   "TasksPage": {
     "myTasks": "My Tasks",
@@ -98,6 +101,9 @@
     "priorityHighSubtitle": "Important",
     "priorityMediumSubtitle": "Normal",
     "priorityLowSubtitle": "Nice to have"
+    ,"filterSortButton": "Filter & Sort"
+    ,"filterSortTitle": "Filter & Sort Options"
+    ,"applyFiltersButton": "Apply Filters"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "All Announcements",
@@ -273,6 +279,9 @@
     "total": "Total",
     "exportCSV": "Export CSV",
     "exportPDF": "Export PDF"
+    ,"filterSortButton": "Filter & Sort"
+    ,"filterSortTitle": "Filter & Sort Options"
+    ,"applyFiltersButton": "Apply Filters"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Log Time for Task",
@@ -320,6 +329,9 @@
     "trackWorkSessions": "Track your work sessions and productivity",
     "timeSessions": "Time Sessions",
     "viewManageSessions": "View and manage your recorded time sessions"
+    ,"filterSortButton": "Filter & Sort"
+    ,"filterSortTitle": "Filter & Sort Options"
+    ,"applyFiltersButton": "Apply Filters"
   },
   "StoragePage": {
     "storageUsage": "Storage Usage",

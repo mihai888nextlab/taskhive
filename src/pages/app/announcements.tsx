@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { FaPlus, FaDownload, FaBullhorn, FaThumbtack } from "react-icons/fa";
@@ -208,13 +209,14 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       {/* Header Section - Outside main container */}
-      <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} px-4 lg:px-8 pt-10`}>
+      <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900 ' : 'bg-gray-100 '} px-4 lg:px-8 pt-10`}> 
         <div className="max-w-[100vw] mx-auto">
           {/* Tab Navigation & Action Buttons */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             {/* Tab Buttons */}
-            <div className={`flex rounded-xl p-1 gap-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-              <button
+            <div className={`flex rounded-xl p-1 gap-2 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <Button
+                type="button"
                 onClick={() => setActiveTab('all')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                   activeTab === 'all'
@@ -225,11 +227,13 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
                       ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
+                variant="ghost"
               >
                 <FaBullhorn className="w-4 h-4" />
                 <span>{t("allAnnouncements")}</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => setActiveTab('pinned')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                   activeTab === 'pinned'
@@ -240,16 +244,18 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
                       ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
+                variant="ghost"
               >
                 <FaThumbtack className="w-4 h-4" />
                 <span>{t("pinnedAnnouncements")} ({pinnedAnnouncements.length})</span>
-              </button>
+              </Button>
             </div>
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3">
               {isAdmin && (
-                <button
+                <Button
+                  type="button"
                   onClick={() => setShowForm(true)}
                   className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 group ${
                     theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
@@ -257,9 +263,10 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
                 >
                   <FaPlus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
                   <span>{t("createAnnouncement")}</span>
-                </button>
+                </Button>
               )}
-              <button
+              <Button
+                type="button"
                 onClick={handleExportCSV}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
                   theme === 'dark' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-500 hover:bg-green-600 text-white'
@@ -267,7 +274,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
               >
                 <FaDownload className="w-4 h-4" />
                 <span>{t("export")}</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -278,11 +285,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
         <div className="max-w-[100vw] mx-auto">
           <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
             {/* Announcements Header */}
-            <div className={`p-6 ${
-              activeTab === 'all' 
-                ? theme === "dark" ? "bg-blue-50 border-gray-200" : "bg-blue-50 border-gray-200"
-                : theme === "dark" ? "bg-yellow-50 border-gray-200" : "bg-yellow-50 border-gray-200"
-            } border-b`}>
+            <div className={`p-6 ${theme === "dark" ? "bg-gray-700 border-b border-gray-600" : (activeTab === 'all' ? "bg-blue-50 border-b border-blue-200" : "bg-yellow-50 border-b border-yellow-200")}`}>
               <div className="flex items-center gap-4">
                 <div className={`p-3 rounded-xl ${
                   activeTab === 'all'
@@ -310,7 +313,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
             </div>
 
             {/* Controls */}
-            <div className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"} border-b`}>
+            <div className={`p-6 ${theme === "dark" ? "bg-gray-700 border-b border-gray-600" : "bg-gray-50 border-b border-gray-200"}`}>
               <AnnouncementList
                 announcements={displayedAnnouncements}
                 theme={theme}
@@ -329,7 +332,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
             </div>
 
             {/* Announcements List */}
-            <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
+            <div className={`max-h-[calc(100vh-320px)] overflow-y-auto ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
               <AnnouncementList
                 announcements={displayedAnnouncements}
                 theme={theme}
@@ -349,7 +352,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
       {/* Announcement Form Modal */}
       {showForm && typeof window !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
+          <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-3xl w-full max-w-2xl max-h-[90vh] relative animate-fadeIn overflow-hidden border ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
             <AnnouncementForm
               title={title}
               content={content}
@@ -381,7 +384,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
           onDelete={handleDelete}
           onPinToggle={handlePinToggle}
           isAdmin={isAdmin}
-        />,
+        />, 
         document.body
       )}
     </div>

@@ -94,7 +94,7 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   const CalendarPanelSection = (
-    <div className={`flex-1 lg:flex-[4] p-3 sm:p-4 lg:p-6 xl:p-8 rounded-b-lg lg:rounded-r-lg lg:rounded-bl-none flex justify-center items-center w-full overflow-hidden ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} min-h-[400px] lg:min-h-[500px]`}>
+    <div className={`flex-1 lg:flex-[4] p-3 sm:p-4 lg:p-6 xl:p-8 rounded-b-lg lg:rounded-r-lg lg:rounded-bl-none flex justify-center items-center w-full overflow-hidden ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'} min-h-[400px] lg:min-h-[500px]`}>
       <div className="w-full h-full flex items-center justify-center">
         <CalendarPanel
           selectedDate={selectedDate}
@@ -109,7 +109,7 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
   );
 
   const EventsListSection = (
-    <div className="flex flex-col justify-between p-4 sm:p-6 lg:p-6 xl:p-8 bg-gray-800 text-white rounded-t-lg lg:rounded-l-lg lg:rounded-tr-none flex-1 lg:flex-[1] min-w-0 w-full min-h-[400px] lg:min-h-[500px]">
+    <div className={`flex flex-col justify-between p-4 sm:p-6 lg:p-6 xl:p-8 rounded-t-lg lg:rounded-l-lg lg:rounded-tr-none flex-1 lg:flex-[1] min-w-0 w-full min-h-[400px] lg:min-h-[500px] ${theme === 'dark' ? 'bg-gray-800 text-white border border-gray-700' : 'bg-white text-gray-900 border border-gray-200'}`}>
       <div className="mb-6 lg:mb-8 flex-shrink-0">
         {selectedDate ? (
           <div>
@@ -152,8 +152,8 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
   );
 
   return (
-    <div className={`bg-${theme === 'light' ? 'white' : 'gray-900'} text-${theme === 'light' ? 'gray-900' : 'white'}`}>
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-gray-100 px-2 sm:px-4 lg:px-6 xl:px-8">
+    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] px-2 sm:px-4 lg:px-6 xl:px-8">
         <main className="flex flex-col lg:flex-row w-full max-w-[2000px] gap-3 sm:gap-4 lg:gap-6 rounded-lg overflow-hidden min-h-[600px] lg:min-h-[700px] bg-transparent">
           {/* On mobile: calendar first, then events list. On desktop: events list left, calendar right. */}
           {typeof window !== 'undefined' && window.innerWidth < 1024 ? (

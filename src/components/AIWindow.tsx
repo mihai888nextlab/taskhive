@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useTheme } from "@/components/ThemeContext";
 import Image from "next/image";
 import { useAIWindow } from "@/contexts/AIWindowContext";
 import { useTranslations } from "next-intl";
@@ -172,37 +173,41 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     }
   }, [inputPrompt]);
 
+  const { theme } = useTheme();
   // Responsive style: right panel on desktop, modal on mobile
-  const panelStyle: React.CSSProperties = useMemo(() => (
-    isDesktop
-      ? {
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: '420px',
-          maxWidth: '32vw',
-          minWidth: '340px',
-          height: '100vh',
-          borderRadius: '0',
-          boxShadow: '0 0 32px 0 rgba(0,0,0,0.10)',
-          zIndex: 50,
-          background: 'linear-gradient(135deg, #fff 60%, #e0e7ef 100%)',
-          display: 'flex',
-          flexDirection: 'column',
-          transition: 'right 0.3s',
-        }
-      : {
-          left: 'auto',
-          right: '2rem',
-          bottom: '4rem',
-          width: '500px',
-          height: '600px',
-          borderRadius: '1.25rem',
-          maxWidth: '95vw',
-          maxHeight: '95vh',
-        }
-  ), [isDesktop]);
+  const panelStyle: React.CSSProperties = useMemo(() => {
+    if (isDesktop) {
+      return {
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: '420px',
+        maxWidth: '32vw',
+        minWidth: '340px',
+        height: '100vh',
+        borderRadius: '0',
+        boxShadow: theme === 'dark' ? '0 0 32px 0 rgba(0,0,0,0.40)' : '0 0 32px 0 rgba(0,0,0,0.10)',
+        zIndex: 50,
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'right 0.3s',
+        background: undefined,
+      };
+    } else {
+      return {
+        left: 'auto',
+        right: '2rem',
+        bottom: '4rem',
+        width: '500px',
+        height: '600px',
+        borderRadius: '1.25rem',
+        maxWidth: '95vw',
+        maxHeight: '95vh',
+        background: undefined,
+      };
+    }
+  }, [isDesktop, theme]);
 
   // --- Unified command processing ---
   const handleSubmit = useCallback(async (promptOverride?: string) => {
@@ -327,7 +332,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
 
   return (
     <div
-      className={`fixed z-[101] animate-slide-up flex flex-col transition-all aiwindow-mobile ${isDesktop ? 'aiwindow-desktop' : ''}`}
+      className={`fixed z-[101] animate-slide-up flex flex-col transition-all aiwindow-mobile ${isDesktop ? 'aiwindow-desktop' : ''} ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}
       style={panelStyle}
     >
       <style>{`
@@ -360,7 +365,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
             height: 100vh !important;
             border-radius: 0 !important;
             box-shadow: 0 0 32px 0 rgba(0,0,0,0.10);
-            border-left: 1px solid #e5e7eb;
+            border-left: none !important;
             padding: 0 !important;
             transform: none !important;
           }
@@ -368,16 +373,20 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
       `}</style>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex justify-between items-center px-5 pt-5 pb-3 border-b border-gray-100 bg-white/90 rounded-t-3xl shadow-sm">
+        <div className={`flex justify-between items-center px-5 pt-5 pb-3 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-800 rounded-t-3xl' : 'border-gray-100 bg-white/90 rounded-t-3xl'} shadow-sm`}>
           <div className="flex items-center gap-3">
-            <img src="/hive-icon.png" alt="Hive Logo" className="w-8 h-8" />
-            <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight drop-shadow-sm">{t("title")}</h3>
+            <img
+              src={theme === 'dark' ? '/hive-icon-white.png' : '/hive-icon.png'}
+              alt="Hive Logo"
+              className="w-8 h-8"
+            />
+            <h3 className={`text-2xl font-extrabold tracking-tight drop-shadow-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("title")}</h3>
           </div>
           <div className="flex items-center gap-2">
             {chatHistory.length > 0 && (
               <button
                 onClick={clearChatHistory}
-                className="text-gray-400 hover:text-blue-500 transition-all text-sm font-medium px-2 py-1 rounded"
+                className={`transition-all text-sm font-medium px-2 py-1 rounded ${theme === 'dark' ? 'text-gray-400 hover:text-blue-300' : 'text-gray-400 hover:text-blue-500'}`}
                 title={t("clearHistory")}
               >
                 {t("clear")}
@@ -385,7 +394,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
             )}
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-red-500 transition-all text-2xl font-bold"
+              className={`text-2xl font-bold transition-all ${theme === 'dark' ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-500'}`}
               aria-label={t("closeLabel")}
             >
               ✕
@@ -395,27 +404,21 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
 
 
         {/* Chat History */}
-        <div ref={chatHistoryRef} className="flex-1 overflow-y-auto px-2 py-4 custom-scrollbar bg-transparent">
+        <div ref={chatHistoryRef} className={`flex-1 overflow-y-auto px-2 py-4 custom-scrollbar ${theme === 'dark' ? 'bg-gray-900' : 'bg-transparent'}`}> 
           {chatHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
-              <p className="text-gray-500 text-lg text-center font-medium opacity-80">
-                {t("welcomeMessageFirst")}
-                <span className="text-primary font-semibold">
-                  {t("welcomeMessageAssistant")}
-                </span>
+              <p className={`text-lg text-center font-medium opacity-80 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{t("welcomeMessageFirst")}
+                <span className="text-primary font-semibold">{t("welcomeMessageAssistant")}</span>
                 {t("welcomeMessageExclamation")}
               </p>
-              <p className="text-gray-500 text-lg text-center font-medium opacity-80">
-                {t("welcomeMessageSecond")}
-              </p>
-              
+              <p className={`text-lg text-center font-medium opacity-80 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{t("welcomeMessageSecond")}</p>
               {/* Quick command buttons - Only show if chat is empty */}
               <div className="flex gap-2 mt-6 px-7 pt-2">
                 {[commands[0], commands[1], commands[3]].map((c) => (
                   <button
                     key={c.command}
                     type="button"
-                    className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-1 rounded-full border border-blue-200 transition-all"
+                    className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all ${theme === 'dark' ? 'bg-blue-900 hover:bg-blue-800 text-blue-200 border-blue-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'}`}
                     onClick={() => handleInsertCommand(c.command, true)}
                     disabled={isLoading}
                     tabIndex={-1}
@@ -429,15 +432,19 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
             chatHistory.map((msg, index) => (
               <div key={index} className={`mb-2 px-4 py-2 rounded-2xl text-base shadow-sm max-w-[90%] ${
                 msg.type === 'user'
-                  ? 'bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 text-white self-end ml-auto border border-blue-200'
-                  : 'bg-white/95 border border-gray-100 text-gray-900 self-start mr-auto'
+                  ? (theme === 'dark'
+                      ? 'bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 text-white self-end ml-auto border border-blue-400'
+                      : 'bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 text-white self-end ml-auto border border-blue-200')
+                  : (theme === 'dark'
+                      ? 'bg-gray-800 border border-gray-700 text-gray-100 self-start mr-auto'
+                      : 'bg-white/95 border border-gray-100 text-gray-900 self-start mr-auto')
               }`}>
                 <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
               </div>
             ))
           )}
           {isLoading && (
-            <div className="mb-2 px-4 py-2 rounded-2xl bg-white/95 border border-gray-100 text-gray-900 self-start mr-auto max-w-[90%] animate-pulse text-base shadow-sm">
+            <div className={`mb-2 px-4 py-2 rounded-2xl max-w-[90%] animate-pulse text-base shadow-sm self-start mr-auto ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-gray-100' : 'bg-white/95 border border-gray-100 text-gray-900'}`}> 
               {t("thinking")}
             </div>
           )}
@@ -447,22 +454,30 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
         <div className="mb-2 flex flex-col gap-2 items-stretch w-full px-3 pb-3 bg-transparent relative">
           {/* Command completions dropdown - Above input */}
           {showCommandList && filteredCommands.length > 0 && (
-            <div className="absolute left-3 bottom-full mb-2 z-50 bg-white border border-gray-200 rounded-xl shadow-lg px-2 py-1 min-w-[200px] max-w-[300px] text-sm animate-fadeIn">
+            <div className={`absolute left-3 bottom-full mb-2 z-50 rounded-xl shadow-lg px-2 py-1 min-w-[200px] max-w-[300px] text-sm animate-fadeIn ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-gray-100' : 'bg-white border border-gray-200'}`}>
               {filteredCommands.map((c, idx) => (
                 <div
                   key={c.command}
-                  className={`px-2 py-1 hover:bg-blue-50 rounded cursor-pointer ${idx === selectedCommandIndex ? 'bg-blue-100 text-blue-900 font-semibold' : ''}`}
+                  className={`px-2 py-1 rounded cursor-pointer transition-colors duration-150
+                    ${theme === 'dark'
+                      ? idx === selectedCommandIndex
+                        ? 'bg-blue-600 text-white font-semibold'
+                        : 'hover:bg-blue-800 hover:text-white'
+                      : idx === selectedCommandIndex
+                        ? 'bg-blue-100 text-blue-900 font-semibold'
+                        : 'hover:bg-blue-50'}
+                  `}
                   onClick={() => handleInsertCommand(c.command)}
                 >
-                  <span className="font-mono text-blue-700">{c.command}</span> <span className="text-gray-500">{c.label}</span>
+                  <span className={`font-mono ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`}>{c.command}</span> <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}>{c.label}</span>
                 </div>
               ))}
             </div>
           )}
-          <div className="flex flex-row items-center gap-2 w-full bg-white/95 rounded-full shadow-inner border border-gray-200 focus-within:border-blue-400 transition-all px-3 py-2">
+          <div className={`flex flex-row items-center gap-2 w-full rounded-full shadow-inner transition-all px-3 py-2 border focus-within:border-blue-400 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white/95 border-gray-200'}`}>
             <div className="flex-1 flex items-center order-1">
               <textarea
-                className="w-full h-10 p-0 px-3 bg-transparent border-none focus:outline-none text-gray-900 text-base resize-none placeholder-gray-400 font-medium tracking-tight focus:placeholder-gray-300 transition-all rounded-full shadow-none min-h-[2.5rem] max-h-[5rem]"
+                className={`w-full h-10 p-0 px-3 bg-transparent border-none focus:outline-none text-base resize-none placeholder-gray-400 font-medium tracking-tight focus:placeholder-gray-300 transition-all rounded-full shadow-none min-h-[2.5rem] max-h-[5rem] ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}
                 style={{ boxShadow: 'none', background: 'none', border: 'none', fontFamily: 'inherit', letterSpacing: '0.01em', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
                 placeholder={isLoading ? t("waitingResponse") : t("typeMessage")}
                 value={inputPrompt}
@@ -476,7 +491,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
             <div className="flex items-center order-2">
               <button
                 onClick={isInputEmpty ? handleVoiceInput : () => handleSubmit()}
-                className={`p-2 rounded-full border border-gray-200 bg-white hover:bg-blue-100 transition-all duration-200 flex items-center justify-center ${isRecording ? "animate-pulse border-blue-500" : ""} ${isInputEmpty ? '' : 'bg-gradient-to-br from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 shadow-md'}`}
+                className={`p-2 rounded-full border transition-all duration-200 flex items-center justify-center ${isRecording ? "animate-pulse border-blue-500" : ""} ${isInputEmpty ? (theme === 'dark' ? 'border-gray-700 bg-gray-800 hover:bg-blue-900 text-gray-300' : 'border-gray-200 bg-white hover:bg-blue-100') : (theme === 'dark' ? 'bg-gradient-to-br from-blue-700 to-blue-900 text-white hover:from-blue-800 hover:to-blue-950 border-blue-700 shadow-md' : 'bg-gradient-to-br from-blue-500 to-blue-700 text-white hover:from-blue-600 hover:to-blue-800 border-blue-500 shadow-md')}`}
                 disabled={isLoading}
                 title={isInputEmpty ? t("recordVoice") : t("send")}
                 style={{ minWidth: '40px', minHeight: '40px', transition: 'background 0.2s, color 0.2s' }}
@@ -506,9 +521,9 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
             </div>
           </div>
         </div>
-        <div className="mt-auto pt-4 pb-2 text-center text-xs text-gray-500 border-t border-gray-100 bg-gradient-to-r from-white/90 via-blue-50 to-white/90 rounded-b-2xl shadow-inner flex flex-col items-center">
+        <div className={`mt-auto pt-4 pb-2 text-center text-xs border-t rounded-b-2xl shadow-inner flex flex-col items-center ${theme === 'dark' ? 'text-gray-400 border-gray-700 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900' : 'text-gray-500 border-gray-100 bg-gradient-to-r from-white/90 via-blue-50 to-white/90'}`}>
           <div className="flex items-center gap-2 justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="inline-block align-middle text-blue-500"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="#e0e7ef"/><path d="M8 12l2.5 2.5L16 9" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="inline-block align-middle text-blue-500"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill={theme === 'dark' ? '#1e293b' : '#e0e7ef'}/><path d="M8 12l2.5 2.5L16 9" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
             <span className="font-semibold text-primary tracking-wide">{t("poweredByGemini")}</span>
           </div>
         </div>

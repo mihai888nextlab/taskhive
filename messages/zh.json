@@ -24,7 +24,10 @@
     "manager": "经理",
     "user": "用户",
     "loadingTeamMembers": "正在加载团队成员...",
-    "pleaseWaitFetchTeam": "请稍候，正在获取您的团队数据"
+    "pleaseWaitFetchTeam": "请稍候，正在获取您的团队数据",
+    "filterSortButton": "筛选和排序",
+    "filterSortTitle": "筛选和排序选项",
+    "applyFiltersButton": "应用筛选器"
   },
   "TasksPage": {
     "myTasks": "我的任务",
@@ -97,7 +100,10 @@
     "priorityCriticalSubtitle": "紧急",
     "priorityHighSubtitle": "重要",
     "priorityMediumSubtitle": "普通",
-    "priorityLowSubtitle": "可选"
+    "priorityLowSubtitle": "可选",
+    "filterSortButton": "筛选和排序",
+    "filterSortTitle": "筛选和排序选项",
+    "applyFiltersButton": "应用筛选器"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "所有公告",
@@ -542,9 +548,6 @@
     "netProfitLoss": "净利润 / 损失",
     "loadingDeadlines": "正在加载截止日期...",
     "noUpcomingDeadlines": "暂无即将到来的截止日期",
-    "noScheduledTasksOrEvents": "您没有已安排的任务或事件",
-    "addCompany": "添加公司",
-    "registerNewCompany": "注册新公司",
     "companyName": "公司名称",
     "companyNamePlaceholder": "例如 Acme Inc.",
     "companyNameRequired": "公司名称为必填项。",

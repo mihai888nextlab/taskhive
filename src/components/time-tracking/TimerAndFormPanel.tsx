@@ -204,18 +204,30 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
             disabled={false}
           >
             <SelectTrigger
-              className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-200 min-w-[140px]"
+              className={`w-full pl-9 pr-8 text-sm rounded-xl border transition-all duration-200 min-w-[140px] ${
+                theme === 'dark'
+                  ? 'border-gray-700 bg-gray-800 text-white focus:ring-2 focus:ring-green-500 focus:border-green-500'
+                  : 'border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500'
+              }`}
             >
               <SelectValue placeholder={t("selectCategory")} />
             </SelectTrigger>
             <SelectContent
-              className="bg-white border border-gray-300 rounded-lg p-0"
+              className={`rounded-xl border mt-1 ${
+                theme === 'dark'
+                  ? 'bg-gray-800 text-white border-gray-700'
+                  : 'bg-white text-gray-900 border-gray-200'
+              }`}
             >
               {tags.map(tag => (
                 <SelectItem
                   key={tag}
                   value={tag}
-                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                  className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 text-white hover:bg-green-700/20 data-[state=checked]:bg-green-700/40'
+                      : 'bg-white text-gray-900 hover:bg-green-100 data-[state=checked]:bg-green-200'
+                  }`}
                 >
                   {tag}
                 </SelectItem>

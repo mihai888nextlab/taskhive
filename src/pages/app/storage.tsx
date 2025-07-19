@@ -200,7 +200,7 @@ function Storage() {
     <div
       className={`relative min-h-screen transition-all duration-300 ${
         theme === 'dark' 
-          ? 'bg-gray-100' 
+          ? 'bg-gray-900' 
           : 'bg-gray-100'
       } ${dragActive ? "ring-4 ring-blue-400 ring-opacity-50" : ""}`}
       onDragEnter={handleDrag}

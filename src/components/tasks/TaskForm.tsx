@@ -70,13 +70,24 @@ const TaskForm: React.FC<TaskFormProps> = ({
     onPriorityChange(newPriority);
   }, [onPriorityChange]);
 
+  // Priority color classes for light/dark
   const getPriorityColor = (priorityLevel: string) => {
-    switch (priorityLevel) {
-      case 'critical': return 'bg-red-50 text-red-700 border-red-200';
-      case 'high': return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'medium': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'low': return 'bg-gray-50 text-gray-700 border-gray-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+    if (theme === 'dark') {
+      switch (priorityLevel) {
+        case 'critical': return 'bg-red-900 text-red-200 border-red-700';
+        case 'high': return 'bg-orange-900 text-orange-200 border-orange-700';
+        case 'medium': return 'bg-blue-900 text-blue-200 border-blue-700';
+        case 'low': return 'bg-gray-800 text-gray-300 border-gray-700';
+        default: return 'bg-gray-800 text-gray-300 border-gray-700';
+      }
+    } else {
+      switch (priorityLevel) {
+        case 'critical': return 'bg-red-50 text-red-700 border-red-200';
+        case 'high': return 'bg-orange-50 text-orange-700 border-orange-200';
+        case 'medium': return 'bg-blue-50 text-blue-700 border-blue-200';
+        case 'low': return 'bg-gray-50 text-gray-700 border-gray-200';
+        default: return 'bg-gray-50 text-gray-700 border-gray-200';
+      }
     }
   };
 
@@ -194,34 +205,30 @@ Please enhance and expand this existing description while keeping the original i
 
   // Convert string date to Date object for DatePicker
   if (!show) return null;
-  
+
   return (
     <>
-      <div className="flex flex-col md:flex-row h-full bg-gray-50 md:bg-transparent">
+      <div className={`flex flex-col md:flex-row h-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50 md:bg-transparent'}`}>
         <button
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
-            onClick={onCancel}
-            aria-label="Close modal"
-          >
+          className={`absolute top-4 right-4 text-xl font-bold z-10 transition-colors ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
+          onClick={onCancel}
+          aria-label="Close modal"
+        >
           <FaTimes />
         </button>
 
         {/* Left Panel - Form Details */}
-        <div className="w-full md:w-2/5 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none shadow-none md:shadow-lg">
+        <div className={`w-full md:w-2/5 border-b md:border-b-0 md:border-r flex flex-col rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none shadow-none md:shadow-lg ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-900'}`}>
           {/* Header */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-600 rounded-lg shadow-sm">
-                <FaTasks className="text-xl text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {editingTaskId ? t("editTask") : t("createTask")}
-                </h2>
-                <p className="text-gray-600">
-                  {editingTaskId ? t("updateTask") : t("addTask")}
-                </p>
-              </div>
+          <div className={`p-6 border-b flex items-center gap-4 ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-blue-50'}`}>
+            <div className="p-3 bg-blue-600 rounded-lg shadow-sm">
+              <FaTasks className="text-xl text-white" />
+            </div>
+            <div className="flex-1">
+              <h2 className={`text-xl font-bold truncate select-none ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                  data-testid="task-form-title">
+                {editingTaskId ? t('editTask', { default: 'Edit Task' }) : t('createTask', { default: 'Create Task' })}
+              </h2>
             </div>
           </div>
 
@@ -229,20 +236,15 @@ Please enhance and expand this existing description while keeping the original i
           <div className="flex-1 p-6 overflow-y-auto">
             {/* Error Message */}
             {formError && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700 font-medium">{formError}</p>
-              </div>
+              <div className={`mb-4 p-3 rounded-lg border text-sm font-medium ${theme === 'dark' ? 'bg-red-900 border-red-700 text-red-200' : 'bg-red-50 border-red-200 text-red-700'}`}>{formError}</div>
             )}
-
-            {/* Basic Task Info */}
             <div className="space-y-6">
+              {/* Task Title */}
               <div>
-                <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  {t("taskTitle")} *
-                </label>
+                <label className={`block text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("taskTitle")} *</label>
                 <Input
                   type="text"
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
+                  className={`w-full p-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white placeholder-gray-400' : 'border border-gray-300'}`}
                   placeholder={t("enterTaskTitle")}
                   value={taskTitle}
                   onChange={e => onTitleChange(e.target.value)}
@@ -250,11 +252,9 @@ Please enhance and expand this existing description while keeping the original i
                   disabled={loading}
                 />
               </div>
-
+              {/* Deadline */}
               <div>
-                <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  {t("deadline")} *
-                </label>
+                <label className={`block text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("deadline")} *</label>
                 <DatePicker
                   value={deadlineDateObj}
                   onChange={date => {
@@ -270,13 +270,11 @@ Please enhance and expand this existing description while keeping the original i
                   placeholder="mm / dd / yyyy"
                 />
               </div>
-
+              {/* Assign To */}
               <div>
-                <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  {t("assignTo")}
-                </label>
+                <label className={`block text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("assignTo")}</label>
                 <select
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg"
+                  className={`w-full p-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white' : 'border border-gray-300'}`}
                   value={assignedTo}
                   onChange={e => onAssignedToChange(e.target.value)}
                   disabled={loading}
@@ -289,11 +287,9 @@ Please enhance and expand this existing description while keeping the original i
                   ))}
                 </select>
               </div>
-
+              {/* Priority */}
               <div>
-                <label className="block text-gray-900 text-lg font-semibold mb-3">
-                  {t("priorityLevel")}
-                </label>
+                <label className={`block text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("priorityLevel")}</label>
                 <div className="grid grid-cols-2 gap-3">
                   {['critical', 'high', 'medium', 'low'].map((level) => (
                     <button
@@ -303,7 +299,9 @@ Please enhance and expand this existing description while keeping the original i
                       className={`p-3 rounded-lg border transition-all duration-200 text-left ${
                         localPriority === level
                           ? getPriorityColor(level) + ' border-current shadow-sm'
-                          : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'
+                          : theme === 'dark'
+                            ? 'bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-500 hover:bg-gray-700'
+                            : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                       disabled={loading}
                     >
@@ -326,49 +324,38 @@ Please enhance and expand this existing description while keeping the original i
             </div>
           </div>
         </div>
-
         {/* Right Panel - Description + Subtasks */}
-        <div className="flex-1 flex flex-col bg-white rounded-b-3xl md:rounded-r-3xl md:rounded-bl-none shadow-none md:shadow-lg">
+        <div className={`flex-1 flex flex-col rounded-b-3xl md:rounded-r-3xl md:rounded-bl-none shadow-none md:shadow-lg ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
           {/* Description Header */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <label className="block text-gray-900 text-lg font-semibold">
-                {t("taskDescription")}
-              </label>
-              <Button
-                type="button"
-                className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center font-semibold shadow-sm hover:bg-purple-600 transition disabled:opacity-60"
-                onClick={handleGenerateDescription}
-                disabled={!taskTitle || generatingDescription}
-                title={t("generateDescriptionFromTitle")}
-              >
-                {generatingDescription ? <FaSpinner className="animate-spin mr-2" /> : <FaMagic className="mr-2" />}
-                {t("aiGenerate")}
-              </Button>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              {t("provideDetailedInformationAboutTheTask")}
-            </p>
+          <div className={`p-6 border-b flex items-center justify-between ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200'}`}>
+            <label className={`block text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("taskDescription")}</label>
+            <Button
+              type="button"
+              className="px-4 py-2 bg-purple-500 text-white rounded-lg flex items-center font-semibold shadow-sm hover:bg-purple-600 transition disabled:opacity-60"
+              onClick={handleGenerateDescription}
+              disabled={!taskTitle || generatingDescription}
+              title={t("generateDescriptionFromTitle")}
+            >
+              {generatingDescription ? <FaSpinner className="animate-spin mr-2" /> : <FaMagic className="mr-2" />}
+              {t("aiGenerate")}
+            </Button>
           </div>
-
+          <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t("provideDetailedInformationAboutTheTask")}</p>
           {/* Description Content + Subtasks */}
           <div className="flex-1 p-6 flex flex-col">
             <textarea
               rows={6}
-              className="w-full h-auto min-h-[144px] max-h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200 text-lg"
+              className={`w-full h-auto min-h-[144px] max-h-64 p-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all duration-200 text-lg ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white placeholder-gray-400' : 'border border-gray-300'}`}
               placeholder={t("describeTheTaskInDetail")}
               value={taskDescription}
               onChange={e => onDescriptionChange(e.target.value)}
               disabled={loading || generatingDescription}
             />
-
             {/* Subtasks Section - Only for new tasks */}
             {!editingTaskId && (
               <div className="mt-8">
                 <div className="flex items-center justify-between mb-4">
-                  <label className="text-gray-900 text-lg font-semibold">
-                    {t("subtasks")}
-                  </label>
+                  <label className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("subtasks")}</label>
                   <Button
                     type="button"
                     onClick={() => setShowSubtasksModal(true)}
@@ -379,22 +366,20 @@ Please enhance and expand this existing description while keeping the original i
                     {subtasks.length > 0 ? `${t("manage")} (${subtasks.length})` : t("breakDownTask")}
                   </Button>
                 </div>
-
                 {subtasks.length > 0 && (
-                  <div className="p-4 bg-white border border-gray-200 rounded-lg">
+                  <div className={`p-4 rounded border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                     <div className="flex items-center gap-2 mb-3">
                       <FaTasks className="w-4 h-4 text-indigo-600" />
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
                         {subtasks.length} subtask{subtasks.length > 1 ? 's' : ''} {t("ready")}
                       </span>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {/* ↑ max-h-48 (192px) instead of 32 (128px) */}
                       {subtasks.map((subtask, index) => (
-                        <div key={index} className="text-sm text-gray-600 bg-gray-50 p-2 rounded border">
+                        <div key={index} className={`text-sm rounded border p-2 ${theme === 'dark' ? 'text-gray-300 bg-gray-900 border-gray-700' : 'text-gray-600 bg-gray-50 border-gray-200'}`}>
                           <div className="font-medium">{subtask.title}</div>
                           {subtask.description && (
-                            <div className="text-xs text-gray-500 mt-1">{subtask.description}</div>
+                            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>{subtask.description}</div>
                           )}
                         </div>
                       ))}
@@ -404,17 +389,16 @@ Please enhance and expand this existing description while keeping the original i
               </div>
             )}
           </div>
-
           {/* Edit Mode Info */}
           {editingTaskId && (
-            <div className="p-6 border-t border-gray-200 bg-blue-50">
-              <div className="flex items-center gap-2 text-blue-800 mb-2">
+            <div className={`p-6 border-t ${theme === 'dark' ? 'bg-blue-950 border-blue-900 text-blue-200' : 'border-gray-200 bg-blue-50'}`}>
+              <div className={`flex items-center gap-2 mb-2 ${theme === 'dark' ? 'text-blue-200' : 'text-blue-800'}`}>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
                 <span className="text-sm font-medium">{t("editingTaskWithSubtasks")}</span>
               </div>
-              <ul className="text-xs text-blue-700 space-y-1 ml-6">
+              <ul className={`text-xs space-y-1 ml-6 ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`}>
                 <li>• {t("subtasksPreservedAndCanBeEdited")}</li>
                 <li>• {t("deadlineChangesUpdateAllSubtaskDeadlines")}</li>
                 <li>• {t("descriptionChangesAffectMainTaskOnly")}</li>
@@ -423,7 +407,6 @@ Please enhance and expand this existing description while keeping the original i
           )}
         </div>
       </div>
-
       {/* Subtasks Modal */}
       <SubtasksModal
         show={showSubtasksModal}
@@ -435,40 +418,34 @@ Please enhance and expand this existing description while keeping the original i
         onSave={handleSaveSubtasks}
         onCancel={() => setShowSubtasksModal(false)}
       />
-
       {/* Footer - full width */}
-      <div className="p-6 border-t border-gray-200 bg-white rounded-b-3xl">
+      <div className={`p-6 border-t rounded-b-3xl ${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
         <div className="flex gap-4">
           <Button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition-all duration-200"
+            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${theme === 'dark' ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
             disabled={loading}
             variant="ghost"
           >
-            {t("cancel")}
+            {t('cancel', { default: 'Cancel' })}
           </Button>
           <Button
             type="button"
             onClick={handleSubmit}
             disabled={loading || !taskTitle.trim() || !taskDeadline.trim()}
-            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
+            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
               loading || !taskTitle.trim() || !taskDeadline.trim()
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
-            } flex items-center justify-center gap-2`}
+                ? theme === 'dark'
+                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : theme === 'dark'
+                  ? 'bg-blue-700 text-white hover:bg-blue-800 shadow-sm hover:shadow-md'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
+            }`}
           >
-            {loading ? (
-              <>
-                <FaSpinner className="animate-spin" />
-                {editingTaskId ? t("updating") : t("creating")}
-              </>
-            ) : (
-              <>
-                <FaTasks />
-                {editingTaskId ? t("updateTask") : t("createTask")}
-              </>
-            )}
+            {loading ? <FaSpinner className="animate-spin w-4 h-4" /> : null}
+            {editingTaskId ? t('save', { default: 'Save' }) : t('createTask', { default: 'Create Task' })}
           </Button>
         </div>
       </div>
@@ -476,4 +453,4 @@ Please enhance and expand this existing description while keeping the original i
   );
 };
 
-export default React.memo(TaskForm);
+export default TaskForm;

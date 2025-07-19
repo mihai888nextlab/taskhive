@@ -81,18 +81,18 @@ const SessionForm: React.FC<SessionFormProps> = React.memo(({
                 required
               >
                 <SelectTrigger
-                  className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+                  className={`w-full pl-9 pr-8 text-sm rounded-xl border min-w-[140px] transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'}`}
                   style={{ height: "40px" }}
                 >
                   <SelectValue placeholder={t("allCategories")} />
                 </SelectTrigger>
-                <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-                  <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">All Categories</SelectItem>
+                <SelectContent className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} rounded-lg p-0`}>
+                  <SelectItem value="all" className={`${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>All Categories</SelectItem>
                   {tags.map(tag => (
                     <SelectItem
                       key={tag}
                       value={tag}
-                      className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                      className={`${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}
                     >
                       {tag}
                     </SelectItem>

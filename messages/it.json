@@ -25,6 +25,9 @@
     "user": "Utente",
     "loadingTeamMembers": "Caricamento membri del team...",
     "pleaseWaitFetchTeam": "Attendere mentre recuperiamo i dati del team"
+    ,"filterSortButton": "Filtra e Ordina"
+    ,"filterSortTitle": "Opzioni di filtro e ordinamento"
+    ,"applyFiltersButton": "Applica filtri"
   },
   "TasksPage": {
     "myTasks": "I miei compiti",
@@ -98,6 +101,9 @@
     "priorityHighSubtitle": "Importante",
     "priorityMediumSubtitle": "Normale",
     "priorityLowSubtitle": "Utile"
+    ,"filterSortButton": "Filtra e Ordina"
+    ,"filterSortTitle": "Opzioni di filtro e ordinamento"
+    ,"applyFiltersButton": "Applica filtri"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Tutti gli annunci",
@@ -273,6 +279,9 @@
     "total": "Totale",
     "exportCSV": "Esporta CSV",
     "exportPDF": "Esporta PDF"
+    ,"filterSortButton": "Filtra e Ordina"
+    ,"filterSortTitle": "Opzioni di filtro e ordinamento"
+    ,"applyFiltersButton": "Applica filtri"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Registra tempo per il compito",
@@ -320,6 +329,9 @@
     "trackWorkSessions": "Traccia le tue sessioni di lavoro e produttività",
     "timeSessions": "Sessioni di Tempo",
     "viewManageSessions": "Visualizza e gestisci le sessioni di tempo registrate"
+    ,"filterSortButton": "Filtra e Ordina"
+    ,"filterSortTitle": "Opzioni di filtro e ordinamento"
+    ,"applyFiltersButton": "Applica filtri"
   },
   "StoragePage": {
     "storageUsage": "Utilizzo dello spazio",

@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback } from "react";
+import { Button } from "@/components/ui/button";
 import UserCard from "./UserCard";
 import { FaSearch, FaSpinner, FaUsers, FaFilter, FaSort } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
@@ -145,7 +146,7 @@ const UserList: React.FC<UserListProps> = React.memo(({
 
         {/* Filter & Sort Button */}
         <div className="flex w-full lg:w-auto">
-          <button
+          <Button
             type="button"
             className="rounded-xl px-4 py-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white shadow flex items-center gap-2 w-full lg:w-auto"
             onClick={() => setShowFilterModal(true)}
@@ -154,18 +155,23 @@ const UserList: React.FC<UserListProps> = React.memo(({
           >
             <FaFilter className="w-5 h-5" />
             <span className="ml-1">{t("filterSortButton", { default: "Filter & Sort" })}</span>
-          </button>
+          </Button>
         </div>
 
         {/* Modal for filter/sort */}
         {showFilterModal && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-            <div className="relative w-full max-w-lg mx-2 lg:mx-0 lg:rounded-3xl rounded-2xl shadow-lg bg-white border border-gray-200 flex flex-col overflow-hidden animate-fadeInUp">
+            <div className={`relative w-full max-w-lg mx-2 lg:mx-0 lg:rounded-3xl rounded-2xl shadow-lg flex flex-col overflow-hidden animate-fadeInUp
+              ${theme === 'dark' ? 'bg-gray-900 border border-gray-700 text-white' : 'bg-white border border-gray-200'}`}
+            >
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white relative">
-                <h3 className="text-2xl font-bold text-gray-900">{t("filterSortTitle", { default: "Filter & Sort Users" })}</h3>
+              <div className={`flex items-center justify-between p-6 border-b relative
+                ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}
+              >
+                <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("filterSortTitle", { default: "Filter & Sort Users" })}</h3>
                 <button
-                  className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full z-10"
+                  className={`absolute top-6 right-6 text-2xl font-bold z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-colors
+                    ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
                   onClick={() => setShowFilterModal(false)}
                   aria-label="Close"
                   tabIndex={0}
@@ -177,16 +183,19 @@ const UserList: React.FC<UserListProps> = React.memo(({
                 </button>
               </div>
               {/* Modal Content */}
-              <div className="flex-1 p-6 space-y-6 bg-white">
+              <div className={`flex-1 p-6 space-y-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
                 {/* Filter by Role */}
                 <Select value={filterRole} onValueChange={handleFilterRoleChange}>
-                  <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]" style={{ zIndex: 300 }}>
+                  <SelectTrigger
+                    className={`w-full pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 min-w-[140px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
+                    style={{ zIndex: 300 }}
+                  >
                     <SelectValue placeholder={t("role")} />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0 z-[300]">
+                  <SelectContent className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-300'} rounded-lg p-0 z-[300]`}>
                     <SelectItem
                       value="all"
-                      className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                      className={`px-4 py-2 text-sm cursor-pointer transition-colors ${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-gray-800 focus:bg-gray-800 data-[state=checked]:bg-blue-900 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'}`}
                     >
                       {t("all")}
                     </SelectItem>
@@ -194,7 +203,7 @@ const UserList: React.FC<UserListProps> = React.memo(({
                       <SelectItem
                         key={role}
                         value={role}
-                        className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                        className={`px-4 py-2 text-sm cursor-pointer transition-colors ${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-gray-800 focus:bg-gray-800 data-[state=checked]:bg-blue-900 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'}`}
                       >
                         {role.charAt(0).toUpperCase() + role.slice(1)}
                       </SelectItem>
@@ -203,25 +212,28 @@ const UserList: React.FC<UserListProps> = React.memo(({
                 </Select>
                 {/* Sort By */}
                 <Select value={sortBy} onValueChange={handleSortByChange}>
-                  <SelectTrigger className="w-full pl-9 pr-8 py-3 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[160px]" style={{ zIndex: 300 }}>
+                  <SelectTrigger
+                    className={`w-full pl-9 pr-8 py-3 text-sm rounded-xl border transition-all duration-200 min-w-[160px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
+                    style={{ zIndex: 300 }}
+                  >
                     <SelectValue placeholder={t("sortBy")} />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0 z-[300]">
-                    <SelectItem value="firstNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("firstName")}</SelectItem>
-                    <SelectItem value="lastNameAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("lastName")}</SelectItem>
-                    <SelectItem value="roleAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("role")}</SelectItem>
+                  <SelectContent className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-300'} rounded-lg p-0 z-[300]`}>
+                    <SelectItem value="firstNameAsc" className={`px-4 py-2 text-sm cursor-pointer transition-colors ${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-gray-800 focus:bg-gray-800 data-[state=checked]:bg-blue-900 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'}`}>{t("firstName")}</SelectItem>
+                    <SelectItem value="lastNameAsc" className={`px-4 py-2 text-sm cursor-pointer transition-colors ${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-gray-800 focus:bg-gray-800 data-[state=checked]:bg-blue-900 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'}`}>{t("lastName")}</SelectItem>
+                    <SelectItem value="roleAsc" className={`px-4 py-2 text-sm cursor-pointer transition-colors ${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-gray-800 focus:bg-gray-800 data-[state=checked]:bg-blue-900 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'}`}>{t("role")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {/* Modal Footer */}
-              <div className="p-6 border-t border-gray-200 bg-white flex justify-end">
-                <button
+              <div className={`p-6 border-t flex justify-end ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                <Button
                   type="button"
                   className="rounded-xl px-6 py-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white shadow"
                   onClick={() => setShowFilterModal(false)}
                 >
                   {t("applyFiltersButton", { default: "Apply" })}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

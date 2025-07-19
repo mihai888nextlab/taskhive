@@ -107,8 +107,9 @@ const SidebarNav: React.FC<
   };
 
   // Company dropdown rendering (no memoization)
+  const { theme } = require("@/components/ThemeContext").useTheme();
   const companyDropdown = dropdownOpen && (
-    <div className="absolute left-full bottom-0 ml-2 w-full bg-white rounded-2xl shadow-2xl z-50 border border-gray-100 ">
+    <div className={`absolute left-full bottom-0 ml-2 w-full rounded-2xl shadow-2xl z-50 border ${theme === 'dark' ? 'bg-[#23272f] border-gray-800 text-white' : 'bg-white border-gray-100 text-gray-900'}`}>
       <div className="p-2">
         {companiesWithMembers.map((company) => {
           const members = company.members;
@@ -117,7 +118,13 @@ const SidebarNav: React.FC<
             <button
               key={company.id}
               className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition font-medium mb-1 last:mb-0 relative
-                ${isSelected ? "bg-blue-50 shadow border border-blue-200" : "hover:bg-gray-100"}
+                ${isSelected
+                  ? theme === 'dark'
+                    ? 'bg-blue-900 shadow border border-blue-700 text-white'
+                    : 'bg-blue-50 shadow border border-blue-200 text-blue-900'
+                  : theme === 'dark'
+                    ? 'hover:bg-gray-800 text-white'
+                    : 'hover:bg-gray-100 text-gray-900'}
                 cursor-pointer
               `}
               onClick={() => {
@@ -127,15 +134,15 @@ const SidebarNav: React.FC<
               }}
             >
               {/* Avatar/Icon */}
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-200 text-gray-700 font-bold text-lg">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'}`}>
                 {company.name?.[0]?.toUpperCase() || "?"}
               </div>
               <div className="flex flex-col flex-1 min-w-0 text-left">
-                <span className="font-semibold text-gray-900 leading-tight truncate">{company.name}</span>
-                <span className="text-xs text-gray-500 leading-tight truncate">{members} member{members !== 1 ? "s" : ""}</span>
+                <span className={`font-semibold leading-tight truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{company.name}</span>
+                <span className={`text-xs leading-tight truncate ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{members} member{members !== 1 ? "s" : ""}</span>
               </div>
               {isSelected && (
-                <svg className="w-5 h-5 text-blue-500 absolute right-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-400 absolute right-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               )}
@@ -143,16 +150,17 @@ const SidebarNav: React.FC<
           );
         })}
       </div>
-      <div className="w-full border-t border-gray-200 flex bg-white rounded-b-2xl" style={{borderBottomLeftRadius: '1rem', borderBottomRightRadius: '1rem'}}>
+      <div className={`w-full border-t flex rounded-b-2xl ${theme === 'dark' ? 'border-gray-800 bg-[#23272f]' : 'border-gray-200 bg-white'}`} style={{borderBottomLeftRadius: '1rem', borderBottomRightRadius: '1rem'}}>
         <button
-          className="w-full flex items-center gap-2 px-3 py-4 font-bold text-blue-600 hover:bg-blue-50 transition rounded-b-2xl cursor-pointer text-lg"
+          className={`w-full flex items-center gap-2 px-3 py-4 font-bold transition rounded-b-2xl cursor-pointer text-lg
+            ${theme === 'dark' ? 'text-blue-300 hover:bg-blue-900' : 'text-blue-600 hover:bg-blue-50'}`}
           style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, minHeight: '52px'}}
           onClick={() => {
             setDropdownOpen(false);
             setAddCompanyOpen(true);
           }}
         >
-          <FiPlus className="text-blue-500 text-xl" />
+          <FiPlus className={`text-xl ${theme === 'dark' ? 'text-blue-300' : 'text-blue-500'}`} />
           {t("addCompany", { default: "Add Company" })}
         </button>
       </div>

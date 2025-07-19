@@ -92,48 +92,40 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
   const uniqueSkillsToShow = Array.from(new Set(skillsToShow));
 
   return (
-    <div className={`text-${theme === "light" ? "gray-900" : "white"} `}>
+    <div className={theme === "dark" ? "text-white" : "text-gray-900"}>
       <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
         Personal Information
       </h2>
-      <p className="text-gray-300 text-base sm:text-lg mb-6 sm:mb-8 border-b border-gray-200 pb-4 sm:pb-6">
-        Update your personal details. This information will be displayed publicly, so be careful what you share.
-      </p>
+      <p className={`text-base sm:text-lg mb-6 sm:mb-8 border-b pb-4 sm:pb-6 ${theme === 'dark' ? 'text-gray-300 border-gray-700' : 'text-gray-600 border-gray-200'}`}>Update your personal details. This information will be displayed publicly, so be careful what you share.</p>
       <form className="space-y-6 sm:space-y-8 mt-4 sm:mt-6" onSubmit={onSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           <div>
-            <label htmlFor="firstName" className="block text-gray-300 font-medium mb-2">
-              First Name
-            </label>
+            <label htmlFor="firstName" className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>First Name</label>
             <input
               type="text"
               id="firstName"
               name="firstName"
               value={formData.firstName}
               onChange={onInputChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900"
+              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
               placeholder="Enter your first name"
             />
           </div>
           <div>
-            <label htmlFor="lastName" className="block text-gray-300 font-medium mb-2">
-              Last Name
-            </label>
+            <label htmlFor="lastName" className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Last Name</label>
             <input
               type="text"
               id="lastName"
               name="lastName"
               value={formData.lastName}
               onChange={onInputChange}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900"
+              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
               placeholder="Enter your last name"
             />
           </div>
         </div>
         <div>
-          <label className="block text-gray-300 font-medium mb-2">
-            Profile Photo
-          </label>
+          <label className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Profile Photo</label>
           <div className="flex flex-col md:flex-row md:items-center items-center gap-3 sm:gap-4 justify-center md:justify-start md:items-start">
             <img
               src={photoPreview || "/hive-icon.png"}
@@ -145,41 +137,37 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoChange}
-                className="border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 w-32 sm:w-40 md:w-auto"
+                className={`border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 w-32 sm:w-40 md:w-auto ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white' : 'border-gray-300'}`}
               />
-              {uploading && <span className="text-gray-400">Uploading...</span>}
+              {uploading && <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-400'}>Uploading...</span>}
             </div>
           </div>
         </div>
         <div>
-          <label className="block text-gray-300 font-medium mb-2">
-            About Me
-          </label>
+          <label className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>About Me</label>
           <textarea
             id="description"
             name="description"
             value={formData.description}
             onChange={onInputChange}
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-gray-900"
+            className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
             placeholder="Tell us about yourself"
             rows={4}
           />
         </div>
         {/* Skills Section */}
         <div>
-          <label className="block text-gray-300 font-medium mb-2">
-            Skills
-          </label>
+          <label className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Skills</label>
           <div className="flex flex-wrap gap-2 mb-2">
             {skills.map((skill) => (
               <span
                 key={skill}
-                className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center text-sm"
+                className={`px-3 py-1 rounded-full flex items-center text-sm ${theme === 'dark' ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'}`}
               >
                 {skill}
                 <button
                   type="button"
-                  className="ml-2 text-red-500 hover:text-red-700"
+                  className={`ml-2 ${theme === 'dark' ? 'text-red-300 hover:text-red-500' : 'text-red-500 hover:text-red-700'}`}
                   onClick={() => handleSkillRemove(skill)}
                   aria-label="Remove skill"
                 >
@@ -193,7 +181,7 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
               <button
                 key={skill}
                 type="button"
-                className="bg-gray-200 hover:bg-blue-200 text-gray-700 px-3 py-1 rounded-full text-sm"
+                className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${theme === 'dark' ? 'bg-gray-700 hover:bg-blue-900 text-gray-200' : 'bg-gray-200 hover:bg-blue-200 text-gray-700'}`}
                 onClick={() => handleSkillSelect(skill)}
               >
                 {skill}
@@ -205,7 +193,7 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
               type="text"
               value={customSkill}
               onChange={(e) => setCustomSkill(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 text-gray-900"
+              className={`border rounded-md px-2 py-1 ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
               placeholder="Add or search skill"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -216,7 +204,7 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
             />
             <button
               type="button"
-              className="bg-blue-500 text-white px-3 py-1 rounded"
+              className={`px-3 py-1 rounded font-semibold transition-colors duration-200 ${theme === 'dark' ? 'bg-blue-700 hover:bg-blue-800 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
               onClick={handleCustomSkillAdd}
             >
               Add
@@ -224,16 +212,16 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
           </div>
         </div>
         {/* End Skills Section */}
-        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200 mt-6 sm:mt-8">
+        <div className={`flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t mt-6 sm:mt-8 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
           <button
             type="button"
-            className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-all duration-200 font-semibold"
+            className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-200 ${theme === 'dark' ? 'bg-gray-900 border border-gray-700 text-gray-200 hover:bg-gray-800' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-200 font-semibold shadow"
+            className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-200 shadow ${theme === 'dark' ? 'bg-blue-700 hover:bg-blue-800 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
           >
             Save Changes
           </button>

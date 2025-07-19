@@ -25,6 +25,9 @@
     "user": "Benutzer",
     "loadingTeamMembers": "Teammitglieder werden geladen...",
     "pleaseWaitFetchTeam": "Bitte warten Sie, während wir Ihre Teamdaten abrufen",
+    "filterSortButton": "Filtern & Sortieren",
+    "filterSortTitle": "Filter- und Sortieroptionen",
+    "applyFiltersButton": "Filter anwenden",
     "noMatchingUsersFound": "Keine passenden Benutzer gefunden",
     "noTeamMembersYet": "Noch keine Teammitglieder",
     "tryAdjustingSearch": "Versuchen Sie, Ihre Suchkriterien oder Filter anzupassen",
@@ -104,6 +107,15 @@
     "priorityHighSubtitle": "Wichtig",
     "priorityMediumSubtitle": "Normal",
     "priorityLowSubtitle": "Schön zu haben"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Alle Ankündigungen",
@@ -279,6 +291,15 @@
     "total": "Gesamt",
     "exportCSV": "CSV exportieren",
     "exportPDF": "PDF exportieren"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Zeit für Aufgabe erfassen",
@@ -326,6 +347,15 @@
     "trackWorkSessions": "Verfolgen Sie Ihre Arbeitssitzungen und Produktivität",
     "timeSessions": "Zeitsitzungen",
     "viewManageSessions": "Erfasste Zeitsitzungen anzeigen und verwalten"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
+    ,"filterSortButton": "Filtern & Sortieren"
+    ,"filterSortTitle": "Filter- und Sortieroptionen"
+    ,"applyFiltersButton": "Filter anwenden"
   },
   "StoragePage": {
     "storageUsage": "Speichernutzung",
