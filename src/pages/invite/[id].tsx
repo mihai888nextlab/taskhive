@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -17,7 +17,6 @@ const InvitePage: NextPageWithLayout = () => {
   const auth = useAuth();
   const router = useRouter();
   const { theme } = useTheme();
-  const memoizedTheme = useMemo(() => theme, [theme]);
   const { id: inviteId } = router.query;
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState<string>("");
@@ -53,29 +52,33 @@ const InvitePage: NextPageWithLayout = () => {
   }, [inviteId, router]);
 
   if (!auth.isAuthenticated) {
-    return (
-      <AccessDenied theme={memoizedTheme} />
-    );
+    return <AccessDenied theme={theme} />;
   }
 
   return (
     <InviteContent
       status={status}
       message={message}
-      theme={memoizedTheme}
+      theme={theme}
       handleAcceptInvite={handleAcceptInvite}
     />
   );
 };
 
-const AccessDenied = React.memo(function AccessDenied({ theme }: { theme: string }) {
+const AccessDenied = function AccessDenied({ theme }: { theme: string }) {
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
-      <div className={`bg-white rounded-2xl shadow-lg p-8 max-w-md w-full border ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
+    <div
+      className={`min-h-screen flex flex-col items-center justify-center ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}
+    >
+      <div
+        className={`bg-white rounded-2xl shadow-lg p-8 max-w-md w-full border ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}
+      >
         <h1 className="text-2xl font-bold mb-2 text-red-600 flex items-center gap-2">
           <FaTimesCircle className="text-xl" /> Access Denied
         </h1>
-        <p className="mb-4 text-gray-600">You must be logged in to access this page.</p>
+        <p className="mb-4 text-gray-600">
+          You must be logged in to access this page.
+        </p>
         <Link href="/login" className="inline-block">
           <Button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">
             Redirect to Login
@@ -84,9 +87,9 @@ const AccessDenied = React.memo(function AccessDenied({ theme }: { theme: string
       </div>
     </div>
   );
-});
+};
 
-const InviteContent = React.memo(function InviteContent({
+const InviteContent = function InviteContent({
   status,
   message,
   theme,
@@ -98,15 +101,23 @@ const InviteContent = React.memo(function InviteContent({
   handleAcceptInvite: () => void;
 }) {
   return (
-    <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}>
-      <div className={`bg-white rounded-3xl shadow-2xl w-full max-w-md border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} p-8 flex flex-col items-center`}>
+    <div
+      className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}
+    >
+      <div
+        className={`bg-white rounded-3xl shadow-2xl w-full max-w-md border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} p-8 flex flex-col items-center`}
+      >
         <div className="flex items-center gap-4 mb-4">
           <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
             <FaUserPlus className="text-xl text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Company Invitation</h1>
-            <p className="text-gray-600">You have been invited to join a company.</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Company Invitation
+            </h1>
+            <p className="text-gray-600">
+              You have been invited to join a company.
+            </p>
           </div>
         </div>
         {status === "success" && (
@@ -128,11 +139,12 @@ const InviteContent = React.memo(function InviteContent({
           Accept Invitation
         </Button>
         <p className="mt-6 text-xs text-gray-400 text-center">
-          If you have issues accepting the invite, please contact your administrator.
+          If you have issues accepting the invite, please contact your
+          administrator.
         </p>
       </div>
     </div>
   );
-});
+};
 
 export default InvitePage;

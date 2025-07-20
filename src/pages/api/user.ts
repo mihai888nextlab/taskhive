@@ -22,10 +22,7 @@ export function createUserHandler(deps?: {
   const _dbConnect = deps?.dbConnect || dbConnect;
   const _jwtVerify = deps?.jwtVerify || jwt.verify;
 
-  return async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse
-  ) {
+  return async function handler(req: NextApiRequest, res: NextApiResponse) {
     await _dbConnect();
 
     if (req.method !== "GET") {
@@ -58,21 +55,6 @@ export function createUserHandler(deps?: {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
-      const userCompany = await _userCompanyModel.findOne({
-        userId: decodedToken.userId,
-        companyId: decodedToken.companyId,
-      });
-
-      if (!userCompany) {
-        return res.status(404).json({ message: "UserCompany not found" });
-      }
-    
-      const company = await _companyModel.findById(userCompany.companyId);
-
-      if (!company) {
-        return res.status(404).json({ message: "Company not found" });
-      }
 
       const userCompanies = await _userCompanyModel.find({
         userId: decodedToken.userId,
@@ -89,6 +71,33 @@ export function createUserHandler(deps?: {
         })
       );
 
+      if (!decodedToken.companyId) {
+        return res.status(200).json({
+          user: {
+            ...user,
+            role: "",
+            companyId: "",
+            companyName: "",
+            companies: companies,
+          },
+        });
+      }
+
+      const userCompany = await _userCompanyModel.findOne({
+        userId: decodedToken.userId,
+        companyId: decodedToken.companyId,
+      });
+
+      if (!userCompany) {
+        res.status(404).json({ message: "User company not found" });
+      }
+
+      const company = await _companyModel.findById(userCompany.companyId);
+
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+
       return res.status(200).json({
         user: {
           ...user,
@@ -99,6 +108,7 @@ export function createUserHandler(deps?: {
         },
       });
     } catch (error) {
+      console.error("Error fetching user data:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
   };

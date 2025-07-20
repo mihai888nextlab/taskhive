@@ -88,6 +88,7 @@ export default async function handler(
         {
           userId: newUser._id,
           email: newUser.email,
+          password: newUser.password, // Not used for Google login
           role: "",
           companyId: "",
           firstName: newUser.firstName,
@@ -121,60 +122,13 @@ export default async function handler(
       });
     }
 
-    const userCompany = await userCompanyModel.findOne({
-      userId: existingUser._id,
-    });
-
-    if (!userCompany) {
-      const token = sign(
-        {
-          userId: existingUser._id,
-          email: existingUser.email,
-          role: "",
-          companyId: "",
-          firstName: existingUser.firstName,
-          lastName: existingUser.lastName,
-        },
-        JWT_SECRET,
-        { expiresIn: "1d" }
-      );
-
-      res.setHeader(
-        "Set-Cookie",
-        serialize("auth_token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 5 * 60 * 60 * 24,
-          path: "/",
-        })
-      );
-
-      return res.status(201).json({
-        message: "Google login successful.",
-        token,
-        user: {
-          _id: existingUser._id,
-          email: existingUser.email,
-          firstName: existingUser.firstName,
-          lastName: existingUser.lastName,
-        },
-        company: null,
-      });
-    }
-
-    const company = await companyModel.findById(userCompany.companyId);
-
-    if (!company) {
-      return res.status(400).json({ message: "An error occured!" });
-    }
-
     const token = sign(
       {
         userId: existingUser._id,
         email: existingUser.email,
-        role: userCompany.role,
-        companyId: company._id,
+        password: existingUser.password, // Not used for Google login
+        role: "",
+        companyId: "",
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
       },
@@ -202,7 +156,7 @@ export default async function handler(
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
       },
-      company: company,
+      company: null,
     });
   } catch (error: any) {
     console.error("Google login error", error);
