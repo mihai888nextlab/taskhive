@@ -10,6 +10,7 @@ export interface IAnnouncement extends Document {
   category: string;
   pinned: boolean;
   expiresAt?: Date;
+  eventDate?: Date;
   comments?: {
     user: mongoose.Types.ObjectId;
     text: string;
@@ -38,6 +39,12 @@ const AnnouncementSchema = new Schema<IAnnouncement>(
       type: String,
       enum: ["Update", "Event", "Alert"],
       required: true,
+    },
+    eventDate: {
+      type: Date,
+      required: function(this: IAnnouncement) {
+        return this.category === "Event";
+      },
     },
     pinned: { type: Boolean, default: false },
     expiresAt: { type: Date },

@@ -4,6 +4,13 @@ import { NextPageWithLayout } from "@/types";
 import { useTheme } from '@/components/ThemeContext';
 import CalendarPanel from "@/components/calendar/CalendarPanel";
 import CalendarEventsList from "@/components/calendar/CalendarEventsList";
+interface AnnouncementEvent {
+  _id: string;
+  title: string;
+  eventDate: string;
+  category: string;
+  content?: string;
+}
 import "react-calendar/dist/Calendar.css";
 
 interface Task {
@@ -28,6 +35,28 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
   const [loading, setLoading] = useState<boolean>(false);
   const [listError, setListError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [announcementEvents, setAnnouncementEvents] = useState<AnnouncementEvent[]>([]);
+  const fetchAnnouncementEvents = useCallback(async () => {
+    try {
+      const response = await fetch("/api/announcements?category=Event", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch announcement events.");
+      }
+      let data: AnnouncementEvent[] = await response.json();
+      // Only keep those with a valid eventDate
+      data = data.filter(ev => ev.eventDate);
+      // Map content to description for compatibility
+      const mapped = data.map(ev => ({ ...ev, description: ev.content }));
+      setAnnouncementEvents(mapped);
+      localStorage.setItem("announcementEvents", JSON.stringify(mapped));
+    } catch (err) {
+      // Optionally handle error
+    }
+  }, []);
 
   const handleDateChange = useCallback((date: Date | null) => {
     setSelectedDate(date);
@@ -64,31 +93,54 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
 
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks]);
+    fetchAnnouncementEvents();
+  }, [fetchTasks, fetchAnnouncementEvents]);
 
-  const handleTaskDrop = useCallback(async (taskId: string, date: Date) => {
+  // Accepts drag data in the form of 'task:<id>' or 'event:<id>'
+  const handleTaskDrop = useCallback(async (dragData: string, date: Date) => {
     setLoading(true);
     setListError(null);
+    let type = 'task';
+    let itemId = dragData;
+    if (dragData.includes(':')) {
+      const [prefix, id] = dragData.split(':');
+      type = prefix;
+      itemId = id;
+    }
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deadline: date }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update task deadline.");
+      if (type === 'task') {
+        const response = await fetch(`/api/tasks/${itemId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deadline: date }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to update task deadline.");
+        }
+        await fetchTasks();
+      } else if (type === 'event') {
+        const response = await fetch(`/api/announcements/${itemId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ eventDate: date }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to update event date.");
+        }
+        await fetchAnnouncementEvents();
       }
-      await fetchTasks();
     } catch (err) {
       setListError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  }, [fetchTasks]);
+  }, [fetchTasks, fetchAnnouncementEvents]);
 
-  // Memoize deadlines
+  // Memoize deadlines (tasks) and eventDates (announcement events)
   const deadlines = useMemo(() => tasks.map(task => new Date(task.deadline).toDateString()), [tasks]);
+  const eventDates = useMemo(() => announcementEvents.map(ev => new Date(ev.eventDate).toDateString()), [announcementEvents]);
 
   // Responsive: swap order on mobile (calendar first, then events list), keep original on desktop
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
@@ -99,9 +151,10 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
         <CalendarPanel
           selectedDate={selectedDate}
           onDateChange={handleDateChange}
-          deadlines={deadlines}
+          deadlines={[...deadlines, ...eventDates]}
           theme={theme}
           tasks={tasks}
+          announcementEvents={announcementEvents}
           onTaskDrop={handleTaskDrop}
         />
       </div>
@@ -146,6 +199,7 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
           selectedDate={selectedDate}
           loading={loading}
           listError={listError}
+          announcementEvents={announcementEvents}
         />
       </div>
     </div>

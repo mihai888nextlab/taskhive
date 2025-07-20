@@ -39,7 +39,8 @@ export default async function handler(
     });
   }
 
-  // Only admin can delete
+
+  // Only admin can update or delete
   if (
     !user ||
     !userCompany ||
@@ -47,10 +48,33 @@ export default async function handler(
   ) {
     return res
       .status(403)
-      .json({ message: "Only admins can delete announcements." });
+      .json({ message: "Only admins can update or delete announcements." });
   }
 
   const { id } = req.query;
+
+
+  if (req.method === "PUT") {
+    try {
+      const { eventDate } = req.body;
+      if (!eventDate) {
+        return res.status(400).json({ message: "Missing eventDate." });
+      }
+      const updated = await AnnouncementModel.findByIdAndUpdate(
+        id,
+        { eventDate },
+        { new: true }
+      );
+      if (!updated) {
+        return res.status(404).json({ message: "Announcement not found." });
+      }
+      return res.status(200).json(updated);
+    } catch (err: any) {
+      return res
+        .status(500)
+        .json({ message: err.message || "Failed to update event date." });
+    }
+  }
 
   if (req.method === "DELETE") {
     try {

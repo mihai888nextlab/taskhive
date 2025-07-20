@@ -34,11 +34,18 @@ const profileTabs = [
 
 const LANGUAGES = [
   { code: "en", label: "EN", flag: "🇬🇧" },
+  { code: "ru", label: "RU", flag: "🇷🇺" },
+  { code: "no", label: "NO", flag: "🇳🇴" },
+  { code: "sv", label: "SV", flag: "🇸🇪" },
+  { code: "fi", label: "FI", flag: "🇫🇮" },
+  { code: "nl", label: "NL", flag: "🇳🇱" },
+  { code: "hu", label: "HU", flag: "🇭🇺" },
+  { code: "tr", label: "TR", flag: "🇹🇷" },
   { code: "fr", label: "FR", flag: "🇫🇷" },
   { code: "es", label: "ES", flag: "🇪🇸" },
   { code: "pt", label: "PT", flag: "🇵🇹" },
   { code: "ro", label: "RO", flag: "🇷🇴" },
-  { code: "sr", label: "SR", flag: "🇷🇸" }, // Serbian is present here
+  { code: "sr", label: "SR", flag: "🇷🇸" },
   { code: "zh", label: "ZH", flag: "🇨🇳" },
   { code: "hi", label: "HI", flag: "🇮🇳" },
   { code: "ar", label: "AR", flag: "🇸🇦" },

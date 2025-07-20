@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { FaThumbtack, FaTrash, FaRegCommentDots, FaChevronDown, FaChevronRight, FaTimes, FaUser, FaPaperPlane, FaSpinner } from "react-icons/fa";
+import { FaThumbtack, FaTrash, FaRegCommentDots, FaChevronDown, FaChevronRight, FaTimes, FaUser, FaPaperPlane, FaSpinner, FaCalendarAlt } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import styles from "@/styles/markdown.module.css";
@@ -17,6 +17,7 @@ interface Announcement {
   category: string;
   pinned: boolean;
   expiresAt?: string;
+  eventDate?: string;
 }
 
 interface AnnouncementDetailsModalProps {
@@ -158,14 +159,23 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
               
               {/* Category and Meta Info */}
               <div className="flex flex-wrap items-center gap-3">
-                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getCategoryColor(announcement.category)}`}>
+                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getCategoryColor(announcement.category)}`}> 
                   {t(`category${announcement.category}`)}
                 </span>
-                <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {new Date(announcement.createdAt).toLocaleDateString()} • {new Date(announcement.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
+                {announcement.category === 'Event' && announcement.eventDate ? (
+                  <div className={`text-sm flex items-center gap-1.5 ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}> 
+                    <FaCalendarAlt className={`inline-block ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />
+                    <span className="font-semibold">
+                      {t('eventDateLabel')}: {new Date(announcement.eventDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                ) : (
+                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}> 
+                    {new Date(announcement.createdAt).toLocaleDateString()} • {new Date(announcement.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                )}
                 {announcement.expiresAt && (
-                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}> 
                     {t("expires", { date: new Date(announcement.expiresAt).toLocaleDateString() })}
                   </div>
                 )}

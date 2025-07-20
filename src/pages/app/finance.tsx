@@ -24,9 +24,9 @@ const FinancePage = () => {
   const t = useTranslations("FinancePage");
 
   return (
-    <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+    <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
       {/* Header Section - Fixed Height */}
-      <div className={`flex-shrink-0 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} px-2 sm:px-4 lg:px-8 py-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div className={`flex-shrink-0 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} px-2 sm:px-4 lg:px-8 py-4 ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
         <div className="max-w-full mx-auto">
           {/* Summary Cards */}
           <div className="w-full">
@@ -61,17 +61,17 @@ const FinancePage = () => {
                 setActiveTab={logic.setActiveTab}
                 loading={logic.loading}
               />
-              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-fit max-h-full flex flex-col overflow-hidden mx-0 sm:mx-2`}>
+              <div className={`${theme === "dark" ? "bg-gray-700" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-600" : "border-gray-200"} h-fit max-h-full flex flex-col overflow-hidden mx-0 sm:mx-2`}>
                 <div className={`flex-shrink-0 px-4 py-3 ${
                   logic.activeTab === 'expenses' 
-                    ? theme === "dark" ? "bg-red-900/20 border-gray-600" : "bg-red-50 border-gray-200"
-                    : theme === "dark" ? "bg-green-900/20 border-gray-600" : "bg-green-50 border-gray-200"
+                    ? theme === "dark" ? "bg-red-800/20 border-gray-600" : "bg-red-50 border-gray-200"
+                    : theme === "dark" ? "bg-green-800/20 border-gray-600" : "bg-green-50 border-gray-200"
                 } border-b`}>
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${
                       logic.activeTab === 'expenses'
-                        ? theme === 'dark' ? 'bg-red-600' : 'bg-red-500'
-                        : theme === 'dark' ? 'bg-green-600' : 'bg-green-500'
+                        ? theme === 'dark' ? 'bg-red-400' : 'bg-red-500'
+                        : theme === 'dark' ? 'bg-green-400' : 'bg-green-500'
                     }`}>
                       <FaDollarSign className="w-4 h-4 text-white" />
                     </div>
@@ -79,7 +79,7 @@ const FinancePage = () => {
                       <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
                         {t('addExpenseIncome', { type: logic.activeTab === 'expenses' ? t('expenses') : t('income') })}
                       </h2>
-                      <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                      <p className={`text-xs ${theme === "dark" ? "text-gray-200" : "text-gray-600"}`}>
                         {logic.activeTab === 'expenses' 
                           ? t('trackSpendingExpenses')
                           : t('recordIncomeEarnings')
@@ -99,18 +99,18 @@ const FinancePage = () => {
             </div>
             {/* List Column - Responsive */}
             <div className="col-span-1 md:col-span-1 lg:col-span-2 flex flex-col min-w-0">
-              <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[700px] flex flex-col overflow-hidden mx-0 sm:mx-2`}>
+              <div className={`${theme === "dark" ? "bg-gray-700" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-600" : "border-gray-200"} h-full max-h-[700px] flex flex-col overflow-hidden mx-0 sm:mx-2`}>
                 <div className={`flex-shrink-0 px-4 py-3 ${
                   logic.activeTab === 'expenses' 
-                    ? theme === "dark" ? "bg-red-900/20 border-gray-600" : "bg-red-50 border-gray-200"
-                    : theme === "dark" ? "bg-green-900/20 border-gray-600" : "bg-green-50 border-gray-200"
+                    ? theme === "dark" ? "bg-red-800/20 border-gray-600" : "bg-red-50 border-gray-200"
+                    : theme === "dark" ? "bg-green-800/20 border-gray-600" : "bg-green-50 border-gray-200"
                 } border-b`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg ${
                         logic.activeTab === 'expenses'
-                          ? theme === 'dark' ? 'bg-red-600' : 'bg-red-500'
-                          : theme === 'dark' ? 'bg-green-600' : 'bg-green-500'
+                          ? theme === 'dark' ? 'bg-red-400' : 'bg-red-500'
+                          : theme === 'dark' ? 'bg-green-400' : 'bg-green-500'
                       }`}>
                         <FaChartLine className="w-4 h-4 text-white" />
                       </div>
@@ -118,7 +118,7 @@ const FinancePage = () => {
                         <h2 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
                           {t('recent', { type: logic.activeTab === 'expenses' ? t('expenses') : t('income') })}
                         </h2>
-                        <p className={`text-xs ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                        <p className={`text-xs ${theme === "dark" ? "text-gray-200" : "text-gray-600"}`}>
                           {logic.activeTab === 'expenses' 
                             ? t('viewManageRecentExpenses')
                             : t('viewManageRecentIncome')

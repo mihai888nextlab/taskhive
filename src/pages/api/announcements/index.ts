@@ -63,7 +63,7 @@ export default async function handler(
         .status(403)
         .json({ message: "Only admins can create announcements." });
     }
-    const { title, content, category, pinned, expiresAt } = req.body;
+    const { title, content, category, pinned, expiresAt, eventDate } = req.body;
     if (!title || !content || !category) {
       return res
         .status(400)
@@ -76,6 +76,7 @@ export default async function handler(
         category,
         pinned: !!pinned,
         expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+        eventDate: eventDate ? new Date(eventDate) : undefined,
         createdBy: !Array.isArray(user) ? user._id : undefined,
         companyId: decoded.companyId,
       });

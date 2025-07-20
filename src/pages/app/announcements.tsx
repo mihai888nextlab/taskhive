@@ -20,6 +20,7 @@ interface Announcement {
   category: string;
   pinned: boolean;
   expiresAt?: string;
+  eventDate?: string;
 }
 
 const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
@@ -38,6 +39,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [expiresAt, setExpiresAt] = useState("");
   const [activeTab, setActiveTab] = useState<'all' | 'pinned'>('all');
+  const [eventDate, setEventDate] = useState("");
 
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
@@ -123,13 +125,17 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
       setFormError("Title, content, and category are required!");
       return;
     }
+    if (category === "Event" && !eventDate) {
+      setFormError("Event date is required for events!");
+      return;
+    }
     setFormError(null);
     setLoading(true);
     try {
       const res = await fetch("/api/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, category, pinned, expiresAt }),
+        body: JSON.stringify({ title, content, category, pinned, expiresAt, eventDate }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -142,13 +148,14 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
       setCategory("Update");
       setPinned(false);
       setExpiresAt("");
+      setEventDate("");
       setShowForm(false);
     } catch (err: any) {
       setFormError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [title, content, category, pinned, expiresAt, announcements]);
+  }, [title, content, category, pinned, expiresAt, eventDate, announcements]);
 
   // Memoize delete handler
   const handleDelete = useCallback(async (id: string) => {
@@ -359,6 +366,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
               category={category}
               pinned={pinned}
               expiresAt={expiresAt}
+              eventDate={eventDate}
               loading={loading}
               formError={formError}
               theme={theme}
@@ -367,6 +375,7 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
               onCategoryChange={setCategory}
               onPinnedChange={setPinned}
               onExpiresAtChange={setExpiresAt}
+              onEventDateChange={setEventDate}
               onSubmit={handleAddAnnouncement}
               onCancel={() => setShowForm(false)}
             />

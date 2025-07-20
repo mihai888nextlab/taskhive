@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "../ui/textarea";
 import { useTranslations } from "next-intl";
-import AgoraRTM from "agora-rtm-sdk";
 
 interface ChatMessage {
   _id?: string;
@@ -50,6 +49,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
   const [userFiles, setUserFiles] = useState<
     { fileName: string; fileLocation: string; fileSize: number }[]
   >([]);
+  // --- Hive AI mention dropdown state ---
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [mentionOptions] = useState([
+    { label: "Hive", value: "Hive" },
+    // In the future, add more users here
+  ]);
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
+  const textareaRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("CommunicationPage");
 
@@ -224,34 +232,140 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
     [user, conversationId]
   );
 
-  // Memoize handleSendMessage
+  // --- AI mention logic ---
+  // Helper: check if message contains @Hive mention (case-insensitive, with or without space)
+  function extractHiveMentionQuestion(msg: string) {
+    // Match @Hive or @hive at start or after whitespace, and get the rest
+    const match = msg.match(/(^|\s)@hive\b([^]*)/i);
+    if (match) {
+      // Remove the mention and trim
+      return match[2].trim();
+    }
+    return null;
+  }
+
+  // Send message, and if @Hive is mentioned, call AI and send its response as a user message
   const handleSendMessage = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
-      if (
-        newMessageContent.trim() &&
-        user &&
-        socket &&
-        socket.connected &&
-        conversationId
-      ) {
-        const messageData = {
-          conversationId,
-          senderId: user._id,
-          content: newMessageContent.trim(),
-          type: "text" as const,
-        };
-        socket.emit("sendMessage", messageData);
-        setNewMessageContent("");
-        setError(null);
-      } else if (!newMessageContent.trim()) {
+      const trimmed = newMessageContent.trim();
+      if (!trimmed) {
         setError("Message cannot be empty!");
-      } else if (!socket || !socket.connected) {
+        return;
+      }
+      if (!user || !socket || !socket.connected || !conversationId) {
         setError("Chat is not connected. Please try again.");
+        return;
+      }
+      // Always send the user's message first
+      const messageData = {
+        conversationId,
+        senderId: user._id,
+        content: trimmed,
+        type: "text" as const,
+      };
+      socket.emit("sendMessage", messageData);
+      setNewMessageContent("");
+      setError(null);
+
+      // If @Hive is mentioned, extract the question and call AI
+      const aiQuestion = extractHiveMentionQuestion(trimmed);
+      if (aiQuestion) {
+        try {
+          // Optionally, you can show a loading message in the chat
+          const loadingMsg = {
+            conversationId,
+            senderId: user._id,
+            content: "(Hive is thinking...)",
+            type: "text" as const,
+            _id: `hive-thinking-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, loadingMsg]);
+          const response = await fetch("/api/gemini", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: aiQuestion }),
+          });
+          const data = await response.json();
+          // Remove the loading message
+          setMessages((prev) => prev.filter((m) => m._id !== loadingMsg._id));
+          if (!response.ok) {
+            throw new Error(data.message || "Hive AI failed to respond.");
+          }
+          // Send the AI's response as a new message from the user
+          const aiMessageData = {
+            conversationId,
+            senderId: user._id,
+            content: data.response || "(No answer)",
+            type: "text" as const,
+          };
+          socket.emit("sendMessage", aiMessageData);
+        } catch (err) {
+          setMessages((prev) => prev.filter((m) => !m._id?.startsWith("hive-thinking-")));
+          setError("Hive AI could not answer your question.");
+        }
       }
     },
-    [newMessageContent, user, conversationId]
+    [newMessageContent, user, conversationId, socket]
   );
+  // --- Mention dropdown logic ---
+  // Show dropdown when user types @ and allow navigation/selection
+  const handleMentionInputChange = (e: React.ChangeEvent<any>) => {
+    const val = e.target.value;
+    setNewMessageContent(val);
+    // Detect if user is typing @ (at start or after whitespace)
+    const cursor = e.target.selectionStart || 0;
+    const textUpToCursor = val.slice(0, cursor);
+    const atMatch = textUpToCursor.match(/(^|\s)@(\w*)$/);
+    if (atMatch) {
+      setShowMentionDropdown(true);
+      setMentionQuery(atMatch[2] || "");
+      setSelectedMentionIndex(0);
+    } else {
+      setShowMentionDropdown(false);
+      setMentionQuery("");
+    }
+  };
+
+  // Filter mention options by query
+  const filteredMentions = mentionOptions.filter((opt) =>
+    opt.label.toLowerCase().startsWith(mentionQuery.toLowerCase())
+  );
+
+  // Handle mention dropdown keyboard navigation and selection
+  const handleMentionInputKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (showMentionDropdown && filteredMentions.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedMentionIndex((prev) => (prev + 1) % filteredMentions.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedMentionIndex((prev) => (prev - 1 + filteredMentions.length) % filteredMentions.length);
+      } else if (e.key === "Tab" || e.key === "Enter") {
+        e.preventDefault();
+        // Insert the selected mention at the cursor position
+        const mention = filteredMentions[selectedMentionIndex].label;
+        const textarea = textareaRef.current;
+        const cursor = textarea?.selectionStart || 0;
+        const before = newMessageContent.slice(0, cursor).replace(/@(\w*)$/, "");
+        const after = newMessageContent.slice(cursor);
+        const newVal = before + "@" + mention + " " + after;
+        setNewMessageContent(newVal);
+        setShowMentionDropdown(false);
+        setMentionQuery("");
+        setTimeout(() => {
+          if (textarea) {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = (before + "@" + mention + " ").length;
+          }
+        }, 0);
+      } else if (e.key === "Escape") {
+        setShowMentionDropdown(false);
+        setMentionQuery("");
+      }
+    }
+  };
 
   const handleVideoCall = useCallback(() => {
     if (selectedConversation?._id) {
@@ -629,10 +743,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
           {/* Message Input */}
           <div className="flex-1 relative flex items-center">
             <Textarea
+              ref={textareaRef}
               value={newMessageContent}
-              onChange={(e) => setNewMessageContent(e.target.value)}
+              onChange={handleMentionInputChange}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                handleMentionInputKeyDown(e);
+                if (e.key === "Enter" && !e.shiftKey && !showMentionDropdown) {
                   e.preventDefault();
                   handleSendMessage(e);
                 }
@@ -654,6 +770,37 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
               rows={1}
               disabled={!user || loadingMessages}
             />
+            {/* Mention Dropdown */}
+            {showMentionDropdown && filteredMentions.length > 0 && (
+              <div className={`absolute left-0 bottom-full mb-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 animate-fade-in`}>
+                {filteredMentions.map((opt, idx) => (
+                  <div
+                    key={opt.value}
+                    className={`px-4 py-2 cursor-pointer ${idx === selectedMentionIndex ? (theme === "dark" ? "bg-blue-700 text-white" : "bg-blue-100 text-blue-900") : ""}`}
+                    onMouseDown={e => {
+                      e.preventDefault();
+                      // Insert mention on click
+                      const textarea = textareaRef.current;
+                      const cursor = textarea?.selectionStart || 0;
+                      const before = newMessageContent.slice(0, cursor).replace(/@(\w*)$/, "");
+                      const after = newMessageContent.slice(cursor);
+                      const newVal = before + "@" + opt.label + " " + after;
+                      setNewMessageContent(newVal);
+                      setShowMentionDropdown(false);
+                      setMentionQuery("");
+                      setTimeout(() => {
+                        if (textarea) {
+                          textarea.focus();
+                          textarea.selectionStart = textarea.selectionEnd = (before + "@" + opt.label + " ").length;
+                        }
+                      }, 0);
+                    }}
+                  >
+                    <span className="font-semibold">@{opt.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <Button
             type="submit"

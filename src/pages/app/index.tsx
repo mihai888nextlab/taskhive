@@ -43,7 +43,10 @@ const DashboardCard: React.FC<{
       className={`relative ${cardBackground} rounded-2xl border ${borderColor} ${borderHover} transition-colors duration-200 flex flex-col overflow-hidden h-full`}
     >
       {/* Card Header */}
-      <div className={`flex items-center gap-4 p-6 border-b ${headerBg}`}>
+      <div
+        className={`flex items-center gap-4 p-6 border-b ${headerBg}`}
+        style={theme === 'dark' ? { opacity: 0.8 } : undefined}
+      >
         <div className={`p-3 rounded-xl flex-shrink-0 flex items-center justify-center ${iconBg}`}>
           {React.cloneElement(icon, {
             className: `w-5 h-5 ${iconColor}`,
@@ -332,11 +335,13 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
             iconBg={theme === "dark" ? "bg-green-600" : "bg-green-500"}
             iconColor="text-white"
           >
-            <DashboardFinancePreview
-              totalExpenses={totalExpenses}
-              totalIncomes={totalIncomes}
-              profit={profit}
-            />
+            <div style={theme === 'dark' ? { opacity: 0.8 } : undefined}>
+              <DashboardFinancePreview
+                totalExpenses={totalExpenses}
+                totalIncomes={totalIncomes}
+                profit={profit}
+              />
+            </div>
           </DashboardCard>
         </div>
         {/* Users Card */}

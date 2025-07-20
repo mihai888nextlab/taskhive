@@ -26,6 +26,14 @@ import grMessages from "../../messages/gr.json";
 import deMessages from "../../messages/de.json";
 import daMessages from "../../messages/da.json";
 import itMessages from "../../messages/it.json";
+import ruMessages from "../../messages/ru.json";
+import noMessages from "../../messages/no.json";
+import svMessages from "../../messages/sv.json";
+
+import fiMessages from "../../messages/fi.json";
+import nlMessages from "../../messages/nl.json";
+import huMessages from "../../messages/hu.json";
+import trMessages from "../../messages/tr.json";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 // Type for pages with custom layout
@@ -73,6 +81,13 @@ function LanguageConsumerApp({
     de: deMessages,
     da: daMessages,
     it: itMessages,
+    ru: ruMessages,
+    no: noMessages,
+    sv: svMessages,
+    fi: fiMessages,
+    nl: nlMessages,
+    hu: huMessages,
+    tr: trMessages,
   };
   const messages = messagesMap[lang] || enMessages;
 
