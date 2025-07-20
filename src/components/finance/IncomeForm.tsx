@@ -246,7 +246,7 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
             <SelectContent
               className={`rounded-xl border mt-1 ${
                 theme === "dark"
-                  ? "bg-gray-700 text-white border-gray-600"
+                  ? "bg-gray-800 text-white border-gray-700"
                   : "bg-white text-gray-900 border-gray-200"
               }`}
             >
@@ -254,7 +254,11 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
                 <SelectItem
                   key={cat}
                   value={cat}
-                  className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                  className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 text-white hover:bg-green-700/20 data-[state=checked]:bg-green-700/40'
+                      : 'bg-white text-gray-900 hover:bg-green-100 data-[state=checked]:bg-green-200'
+                  }`}
                 >
                   {cat}
                 </SelectItem>

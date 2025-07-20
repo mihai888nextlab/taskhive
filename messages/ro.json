@@ -25,6 +25,9 @@
     "user": "Utilizator",
     "loadingTeamMembers": "Se încarcă membrii echipei...",
     "pleaseWaitFetchTeam": "Te rugăm să aștepți în timp ce preluăm datele echipei"
+    ,"filterSortButton": "Filtrează & Sortează"
+    ,"filterSortTitle": "Opțiuni de filtrare și sortare"
+    ,"applyFiltersButton": "Aplică filtrele"
   },
   "TasksPage": {
     "myTasks": "Sarcinile mele",
@@ -98,6 +101,9 @@
     "priorityHighSubtitle": "Importantă",
     "priorityMediumSubtitle": "Normală",
     "priorityLowSubtitle": "Opțional"
+    ,"filterSortButton": "Filtrează & Sortează"
+    ,"filterSortTitle": "Opțiuni de filtrare și sortare"
+    ,"applyFiltersButton": "Aplică filtrele"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Toate anunțurile",
@@ -273,6 +279,9 @@
     "total": "Total",
     "exportCSV": "Exportă CSV",
     "exportPDF": "Exportă PDF"
+    ,"filterSortButton": "Filtrează & Sortează"
+    ,"filterSortTitle": "Opțiuni de filtrare și sortare"
+    ,"applyFiltersButton": "Aplică filtrele"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Înregistrează timpul pentru sarcină",
@@ -320,6 +329,9 @@
     "trackWorkSessions": "Urmărește sesiunile de lucru și productivitatea",
     "timeSessions": "Sesiuni de timp",
     "viewManageSessions": "Vezi și gestionează sesiunile de timp înregistrate"
+    ,"filterSortButton": "Filtrează & Sortează"
+    ,"filterSortTitle": "Opțiuni de filtrare și sortare"
+    ,"applyFiltersButton": "Aplică filtrele"
   },
   "StoragePage": {
     "storageUsage": "Utilizare stocare",

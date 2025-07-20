@@ -118,44 +118,60 @@ const SettingsPage: NextPageWithLayout = React.memo(() => {
 
   return (
     <>
-    <div className={`flex flex-col md:flex-row min-h-screen bg-gray-100 text-${theme === 'light' ? 'gray-900' : 'white'}`}>
+    <div className={`flex flex-col md:flex-row min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
       <SettingsSidebar
         tabs={memoTabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         theme={theme}
       />
-      <main className={`flex-1 w-full p-2 sm:p-4 md:p-10 bg-${theme === 'light' ? 'white' : 'gray-800'} border-l border-gray-200 md:rounded-lg md:shadow-lg mx-0 md:mx-8 my-2 md:my-8 min-h-[60vh]`}>
+      <main
+        className={`flex-1 w-full p-2 sm:p-4 md:p-10 
+          ${theme === 'dark' ? 'bg-gray-800 border-l border-gray-700 md:rounded-lg md:shadow-lg text-white' : 'bg-white border-l border-gray-200 md:rounded-lg md:shadow-lg text-gray-900'}
+          mx-0 md:mx-8 my-2 md:my-8 min-h-[60vh]`}
+      >
         {activeTab === "profile" && (
           <>
             {saveStatus !== "idle" && (
               <div
-                className={`mb-4 px-4 py-2 rounded ${
+                className={`mb-4 px-4 py-2 rounded font-medium shadow-sm ${
                   saveStatus === "success"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
+                    ? theme === 'dark'
+                      ? 'bg-green-900 text-green-200'
+                      : 'bg-green-100 text-green-800'
+                    : theme === 'dark'
+                      ? 'bg-red-900 text-red-200'
+                      : 'bg-red-100 text-red-800'
                 }`}
               >
                 {saveMessage}
               </div>
             )}
-            <ProfileTab
-              formData={formData}
-              onInputChange={handleInputChange}
-              onSkillsChange={handleSkillsChange}
-              onSubmit={handleSubmit}
-              theme={theme}
-            />
+            <div className={theme === 'dark' ? 'text-white' : ''}>
+              <ProfileTab
+                formData={formData}
+                onInputChange={handleInputChange}
+                onSkillsChange={handleSkillsChange}
+                onSubmit={handleSubmit}
+                theme={theme}
+              />
+            </div>
           </>
         )}
         {activeTab === "security" && (
-          <SecurityTab accountDetails={accountDetails} />
+          <div className={theme === 'dark' ? 'text-white' : ''}>
+            <SecurityTab accountDetails={accountDetails} />
+          </div>
         )}
         {activeTab === "notifications" && (
-          <NotificationsTab />
+          <div className={theme === 'dark' ? 'text-white' : ''}>
+            <NotificationsTab />
+          </div>
         )}
         {activeTab === "appearance" && (
-          <AppearanceTab theme={theme} toggleTheme={toggleTheme} />
+          <div className={theme === 'dark' ? 'text-white' : ''}>
+            <AppearanceTab theme={theme} toggleTheme={toggleTheme} />
+          </div>
         )}
       </main>
     </div>

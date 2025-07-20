@@ -43,7 +43,10 @@ const DashboardCard: React.FC<{
       className={`relative ${cardBackground} rounded-2xl border ${borderColor} ${borderHover} transition-colors duration-200 flex flex-col overflow-hidden h-full`}
     >
       {/* Card Header */}
-      <div className={`flex items-center gap-4 p-6 border-b ${headerBg}`}>
+      <div
+        className={`flex items-center gap-4 p-6 border-b ${headerBg}`}
+        style={theme === 'dark' ? { opacity: 0.8 } : undefined}
+      >
         <div className={`p-3 rounded-xl flex-shrink-0 flex items-center justify-center ${iconBg}`}>
           {React.cloneElement(icon, {
             className: `w-5 h-5 ${iconColor}`,
@@ -180,13 +183,18 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
     { key: "email", header: t("email", { default: "Email" }) },
   ], [t]);
 
+
   if (!currentUser) {
-    return <p className="text-center text-gray-600 mb-8">{t("loadingDashboard", { default: "Loading your dashboard..." })}</p>;
+    return (
+      <div className={`min-h-screen flex items-center justify-center w-full ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+        <p className="text-center text-lg font-medium opacity-80">{t("loadingDashboard", { default: "Loading your dashboard..." })}</p>
+      </div>
+    );
   }
 
   return (
     <div
-      className="sm:p-7 min-h-screen rounded-lg bg-transpare text-gray-900"
+      className={`sm:p-7 min-h-screen rounded-lg ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}
       style={{ maxWidth: '100vw', overflowX: 'hidden' }}
     >
       <Head>
@@ -327,11 +335,13 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
             iconBg={theme === "dark" ? "bg-green-600" : "bg-green-500"}
             iconColor="text-white"
           >
-            <DashboardFinancePreview
-              totalExpenses={totalExpenses}
-              totalIncomes={totalIncomes}
-              profit={profit}
-            />
+            <div style={theme === 'dark' ? { opacity: 0.8 } : undefined}>
+              <DashboardFinancePreview
+                totalExpenses={totalExpenses}
+                totalIncomes={totalIncomes}
+                profit={profit}
+              />
+            </div>
           </DashboardCard>
         </div>
         {/* Users Card */}

@@ -11,6 +11,13 @@ interface Task {
   completed: boolean;
 }
 
+interface AnnouncementEvent {
+  _id: string;
+  title: string;
+  eventDate: string;
+  category: string;
+}
+
 interface CalendarPanelProps {
   selectedDate: Date | null;
   onDateChange: (date: Date | null) => void;
@@ -18,6 +25,7 @@ interface CalendarPanelProps {
   theme: string;
   tasks: Task[];
   onTaskDrop?: (taskId: string, date: Date) => void;
+  announcementEvents?: AnnouncementEvent[];
 }
 
 type ViewMode = 'month' | 'week';
@@ -46,6 +54,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
   theme,
   tasks,
   onTaskDrop,
+  announcementEvents = [],
 }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [currentWeekDate, setCurrentWeekDate] = useState(selectedDate || new Date());
@@ -92,20 +101,23 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
 
   const getCircleColor = useCallback((date: Date) => {
     const dateString = date.toDateString();
-    const tasksForDate = tasks.filter(task => 
-      new Date(task.deadline).toDateString() === dateString
-    );
-    if (tasksForDate.length === 0) return null;
+    const tasksForDate = tasks.filter(task => new Date(task.deadline).toDateString() === dateString);
+    const eventsForDate = announcementEvents.filter(event => event.eventDate && new Date(event.eventDate).toDateString() === dateString);
+    if (tasksForDate.length === 0 && eventsForDate.length === 0) return null;
+    // If there are any incomplete tasks, and the date is in the past, show red
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const taskDate = new Date(date);
-    taskDate.setHours(0, 0, 0, 0);
-    const allCompleted = tasksForDate.every(task => task.completed);
-    if (allCompleted) return '#22C55E';
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
     const hasIncompleteTask = tasksForDate.some(task => !task.completed);
-    if (taskDate < today && hasIncompleteTask) return '#EF4444';
+    if (hasIncompleteTask && targetDate < today) return '#EF4444';
+    // If all tasks are completed, show green
+    if (tasksForDate.length > 0 && tasksForDate.every(task => task.completed)) return '#22C55E';
+    // If only events, show orange
+    if (tasksForDate.length === 0 && eventsForDate.length > 0) return '#FFA500';
+    // Otherwise, show blue for upcoming/incomplete
     return '#4A90E2';
-  }, [tasks]);
+  }, [tasks, announcementEvents]);
 
   // Memoize drag event handlers for week view
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -119,9 +131,9 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>, date: Date) => {
     e.preventDefault();
     e.currentTarget.classList.remove('bg-blue-100', 'border-blue-400');
-    const taskId = e.dataTransfer.getData('text/plain');
-    if (onTaskDrop && taskId) {
-      onTaskDrop(taskId, date);
+    const itemId = e.dataTransfer.getData('text/plain');
+    if (onTaskDrop && itemId) {
+      onTaskDrop(itemId, date);
     }
   }, [onTaskDrop]);
 
@@ -138,7 +150,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
     }
   }, [onTaskDrop]);
 
-  // Memoize week view rendering
+  // Memoize week view rendering (with events)
   const weekView = useMemo(() => (
     <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
       <div className="w-full h-full bg-white rounded-xl shadow-lg p-6 lg:p-8 flex flex-col max-w-none" style={{ minHeight: '520px' }}>
@@ -176,6 +188,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
             const isSelected = selectedDate && weekDays[index].toDateString() === selectedDate.toDateString();
             const hasDeadlines = deadlines.includes(weekDays[index].toDateString());
             const dayTasks = tasks.filter(task => new Date(task.deadline).toDateString() === weekDays[index].toDateString());
+            const dayEvents = announcementEvents.filter(event => event.eventDate && new Date(event.eventDate).toDateString() === weekDays[index].toDateString());
             return (
               <div 
                 key={dayName} 
@@ -184,7 +197,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
                     ? 'border-blue-400 bg-blue-50 shadow-lg scale-[1.02]'
                     : isToday
                     ? 'border-2 border-gray-400 bg-gray-50 shadow-md hover:shadow-lg hover:border-blue-300'
-                    : hasDeadlines
+                    : hasDeadlines || dayEvents.length > 0
                     ? 'border-gray-200 bg-white shadow-md hover:shadow-lg hover:border-blue-300'
                     : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 hover:shadow-md'
                 }`}
@@ -203,14 +216,14 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
                       className={`${
                         isSelected
                           ? 'bg-blue-600 text-white shadow-lg' 
-                          : hasDeadlines && !isToday
+                          : (hasDeadlines || dayEvents.length > 0) && !isToday
                           ? 'text-white shadow-md'
                           : isToday
                           ? 'bg-blue-500 text-white shadow-lg border-2 border-blue-400'
                           : 'text-gray-700 bg-gray-100'
                       } w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200`}
                       style={{
-                        backgroundColor: hasDeadlines && !isSelected && !isToday
+                        backgroundColor: (hasDeadlines || dayEvents.length > 0) && !isSelected && !isToday
                           ? getCircleColor(weekDays[index]) || undefined
                           : undefined
                       }}
@@ -219,78 +232,114 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
                     </div>
                   </div>
                 </div>
-                {/* Tasks Area */}
+                {/* Tasks & Events Area */}
                 <div className="flex-1 p-3 overflow-y-auto">
                   <div className="space-y-2">
-                    {dayTasks.length === 0 ? (
+                    {dayTasks.length === 0 && dayEvents.length === 0 ? (
                       <div className="text-center py-4">
-                        <div className="text-gray-400 text-xs">No tasks</div>
+                        <div className="text-gray-400 text-xs">No tasks or events</div>
                       </div>
                     ) : (
-                      dayTasks.map(task => {
-                        const isOverdue = () => {
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          const taskDate = new Date(task.deadline);
-                          taskDate.setHours(0, 0, 0, 0);
-                          return taskDate < today && !task.completed;
-                        };
-                        return (
-                          <div
-                            key={task._id}
-                            className={`p-2 rounded-lg border-l-4 transition-all duration-200 hover:shadow-sm ${
-                              task.completed
-                                ? 'bg-green-50 border-green-400 text-green-800'
-                                : isOverdue()
-                                ? 'bg-red-50 border-red-400 text-red-800'
-                                : 'bg-blue-50 border-blue-400 text-blue-800'
-                            }`}
-                            title={task.description || task.title}
-                            draggable
-                            onDragStart={e => {
-                              e.dataTransfer.setData('text/plain', task._id);
-                              e.dataTransfer.effectAllowed = 'move';
-                            }}
-                            onClick={e => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            <div className="flex items-start gap-2">
-                              <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1 ${
+                      <>
+                        {/* Tasks */}
+                        {dayTasks.map(task => {
+                          const isOverdue = () => {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const taskDate = new Date(task.deadline);
+                            taskDate.setHours(0, 0, 0, 0);
+                            return taskDate < today && !task.completed;
+                          };
+                          return (
+                            <div
+                              key={task._id}
+                              className={`p-2 rounded-lg border-l-4 transition-all duration-200 hover:shadow-sm ${
                                 task.completed
-                                  ? 'bg-green-500'
+                                  ? 'bg-green-50 border-green-400 text-green-800'
                                   : isOverdue()
-                                  ? 'bg-red-500'
-                                  : 'bg-blue-500'
-                              }`} />
+                                  ? 'bg-red-50 border-red-400 text-red-800'
+                                  : 'bg-blue-50 border-blue-400 text-blue-800'
+                              }`}
+                              title={task.description || task.title}
+                              draggable
+                              onDragStart={e => {
+                                e.dataTransfer.setData('text/plain', task._id);
+                                e.dataTransfer.effectAllowed = 'move';
+                              }}
+                              onClick={e => {
+                                e.stopPropagation();
+                              }}
+                            >
+                              <div className="flex items-start gap-2">
+                                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1 ${
+                                  task.completed
+                                    ? 'bg-green-500'
+                                    : isOverdue()
+                                    ? 'bg-red-500'
+                                    : 'bg-blue-500'
+                                }`} />
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold text-xs leading-tight truncate">
+                                    {task.title}
+                                  </h4>
+                                  {task.description && (
+                                    <p className="text-xs opacity-75 mt-1 line-clamp-2">
+                                      {task.description.length > 30 
+                                        ? `${task.description.substring(0, 30)}...` 
+                                        : task.description
+                                      }
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {/* Announcement Events */}
+                        {dayEvents.map(event => {
+                          // Show description/content preview if present
+                          let description = (event as any).description || (event as any).content || '';
+                          if (description && description.length > 50) {
+                            description = description.substring(0, 50) + '...';
+                          }
+                          return (
+                            <div
+                              key={event._id}
+                              className="p-2 rounded-lg border-l-4 border-orange-400 bg-orange-50 text-orange-900 transition-all duration-200 hover:shadow-sm flex items-start gap-2"
+                              title={event.title}
+                            >
+                              <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1 bg-orange-500" />
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold text-xs leading-tight truncate">
-                                  {task.title}
+                                <h4 className="font-semibold text-xs leading-tight truncate flex items-center gap-1">
+                                  {event.title}
                                 </h4>
-                                {task.description && (
-                                  <p className="text-xs opacity-75 mt-1 line-clamp-2">
-                                    {task.description.length > 30 
-                                      ? `${task.description.substring(0, 30)}...` 
-                                      : task.description
-                                    }
-                                  </p>
+                                {description && (
+                                  <p className="text-xs opacity-75 mt-1 line-clamp-2">{description}</p>
                                 )}
                               </div>
                             </div>
-                          </div>
-                        );
-                      })
+                          );
+                        })}
+                      </>
                     )}
                   </div>
                 </div>
-                {/* Task Summary */}
-                {dayTasks.length > 0 && (
+                {/* Task & Event Summary */}
+                {(dayTasks.length > 0 || dayEvents.length > 0) && (
                   <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
                     <div className="flex items-center justify-center gap-3 text-xs">
-                      <div className="flex items-center gap-1">
-                        <span className="text-gray-600">{dayTasks.length}</span>
-                        <span className="text-gray-500">task{dayTasks.length !== 1 ? 's' : ''}</span>
-                      </div>
+                      {dayTasks.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-gray-600">{dayTasks.length}</span>
+                          <span className="text-gray-500">task{dayTasks.length !== 1 ? 's' : ''}</span>
+                        </div>
+                      )}
+                      {dayEvents.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-orange-600">{dayEvents.length}</span>
+                          <span className="text-orange-500">event{dayEvents.length !== 1 ? 's' : ''}</span>
+                        </div>
+                      )}
                       {dayTasks.filter(t => t.completed).length > 0 && (
                         <div className="flex items-center gap-1">
                           <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
@@ -316,7 +365,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
         </div>
       </div>
     </div>
-  ), [weekDays, selectedDate, deadlines, tasks, handleWeekDateClick, handleDragOver, handleDragLeave, handleDrop, weekStart, formatWeekRange, navigateWeek, handleBackToMonth, getCircleColor]);
+  ), [weekDays, selectedDate, deadlines, tasks, announcementEvents, handleWeekDateClick, handleDragOver, handleDragLeave, handleDrop, weekStart, formatWeekRange, navigateWeek, handleBackToMonth, getCircleColor]);
 
   // Memoize month view rendering
   const monthView = useMemo(() => (

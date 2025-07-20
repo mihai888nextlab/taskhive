@@ -190,21 +190,23 @@ const ExpenseList: React.FC<ExpenseListProps> = React.memo(({
         </div>
         {/* Modal for filter/sort on mobile */}
         {showFilterModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-            <div className="relative w-full max-w-lg mx-2 md:mx-0 md:rounded-3xl rounded-2xl shadow-lg bg-white border border-gray-200 flex flex-col overflow-hidden animate-fadeInUp">
+          <div className={`fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4`}>
+            <div className={`relative w-full max-w-lg mx-2 md:mx-0 md:rounded-3xl rounded-2xl shadow-lg flex flex-col overflow-hidden animate-fadeInUp ${theme === 'dark' ? 'bg-gray-900 border border-gray-700 text-white' : 'bg-white border border-gray-200'}`}>
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
-                <h3 className="text-2xl font-bold text-gray-900">{t("filterSortTitle", { default: "Filter & Sort Expenses" })}</h3>
+              <div className={`flex items-center justify-between p-6 border-b relative ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("filterSortTitle", { default: "Filter & Sort Expenses" })}</h3>
                 <button
-                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                  className={`absolute top-6 right-6 text-2xl font-bold z-10 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-full transition-colors ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
                   onClick={() => setShowFilterModal(false)}
                   aria-label="Close"
+                  tabIndex={0}
+                  type="button"
                 >
                   ×
                 </button>
               </div>
               {/* Modal Content */}
-              <div className="flex-1 p-6 space-y-6 bg-white">
+              <div className={`flex-1 p-6 space-y-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}> 
                 {/* Category Filter */}
                 <Select
                   value={categoryFilter || undefined}
@@ -212,26 +214,20 @@ const ExpenseList: React.FC<ExpenseListProps> = React.memo(({
                   disabled={loading}
                 >
                   <SelectTrigger
-                    className={`w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 min-w-[140px]`}
+                    className={`w-full pl-9 pr-8 text-sm rounded-xl border ${theme === 'dark' ? 'border-gray-700 bg-gray-800 text-white focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-red-500'} transition-all duration-200 min-w-[140px]`}
                     style={{ height: "36px" }}
                   >
                     <SelectValue placeholder={t("allCategories")} />
                   </SelectTrigger>
-                  <SelectContent
-                    className={`rounded-xl border mt-1 ${
-                      theme === "dark"
-                        ? "bg-gray-800 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-200"
-                    }`}
-                  >
-                    <SelectItem value="All" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("allCategories")}</SelectItem>
+                  <SelectContent className={`rounded-xl border mt-1 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-200'}`}> 
+                    <SelectItem value="All" className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-red-700/20 data-[state=checked]:bg-red-700/40' : 'bg-white text-gray-900 hover:bg-red-100 data-[state=checked]:bg-red-200'}`}>{t("allCategories")}</SelectItem>
                     {categories
                       .filter(cat => cat !== "All")
                       .map(cat => (
                         <SelectItem
                           key={cat}
                           value={cat}
-                          className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                          className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-red-700/20 data-[state=checked]:bg-red-700/40' : 'bg-white text-gray-900 hover:bg-red-100 data-[state=checked]:bg-red-200'}`}
                         >
                           {cat}
                         </SelectItem>
@@ -249,22 +245,16 @@ const ExpenseList: React.FC<ExpenseListProps> = React.memo(({
                   disabled={loading}
                 >
                   <SelectTrigger
-                    className={`w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 min-w-[140px]`}
+                    className={`w-full pl-9 pr-8 text-sm rounded-xl border ${theme === 'dark' ? 'border-gray-700 bg-gray-800 text-white focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-red-500'} transition-all duration-200 min-w-[140px]`}
                     style={{ height: "36px" }}
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent
-                    className={`rounded-xl border mt-1 ${
-                      theme === "dark"
-                        ? "bg-gray-800 text-white border-gray-600"
-                        : "bg-white text-gray-900 border-gray-200"
-                    }`}
-                  >
-                    <SelectItem value="date-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("newestFirst")}</SelectItem>
-                    <SelectItem value="date-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("oldestFirst")}</SelectItem>
-                    <SelectItem value="amount-desc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("highestAmount")}</SelectItem>
-                    <SelectItem value="amount-asc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("lowestAmount")}</SelectItem>
+                  <SelectContent className={`rounded-xl border mt-1 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-200'}`}> 
+                    <SelectItem value="date-desc" className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-red-700/20 data-[state=checked]:bg-red-700/40' : 'bg-white text-gray-900 hover:bg-red-100 data-[state=checked]:bg-red-200'}`}>{t("newestFirst")}</SelectItem>
+                    <SelectItem value="date-asc" className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-red-700/20 data-[state=checked]:bg-red-700/40' : 'bg-white text-gray-900 hover:bg-red-100 data-[state=checked]:bg-red-200'}`}>{t("oldestFirst")}</SelectItem>
+                    <SelectItem value="amount-desc" className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-red-700/20 data-[state=checked]:bg-red-700/40' : 'bg-white text-gray-900 hover:bg-red-100 data-[state=checked]:bg-red-200'}`}>{t("highestAmount")}</SelectItem>
+                    <SelectItem value="amount-asc" className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-red-700/20 data-[state=checked]:bg-red-700/40' : 'bg-white text-gray-900 hover:bg-red-100 data-[state=checked]:bg-red-200'}`}>{t("lowestAmount")}</SelectItem>
                   </SelectContent>
                 </Select>
                 {/* Start Date */}
@@ -299,7 +289,7 @@ const ExpenseList: React.FC<ExpenseListProps> = React.memo(({
                 />
               </div>
               {/* Modal Footer */}
-              <div className="p-6 border-t border-gray-200 bg-white flex justify-end">
+              <div className={`p-6 border-t flex justify-end ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
                 <Button
                   type="button"
                   className="rounded-xl px-6 py-2 font-semibold text-sm bg-red-500 hover:bg-red-600 text-white shadow"

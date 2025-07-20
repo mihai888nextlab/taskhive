@@ -24,7 +24,10 @@
     "manager": "مدير",
     "user": "مستخدم",
     "loadingTeamMembers": "جارٍ تحميل أعضاء الفريق...",
-    "pleaseWaitFetchTeam": "يرجى الانتظار أثناء جلب بيانات فريقك"
+    "pleaseWaitFetchTeam": "يرجى الانتظار أثناء جلب بيانات فريقك",
+    "filterSortButton": "تصفية وفرز",
+    "filterSortTitle": "خيارات التصفية والفرز",
+    "applyFiltersButton": "تطبيق الفلاتر"
   },
   "TasksPage": {
     "myTasks": "مهامي",
@@ -96,7 +99,10 @@
     "priorityCriticalSubtitle": "عاجلة",
     "priorityHighSubtitle": "هامة",
     "priorityMediumSubtitle": "عادية",
-    "priorityLowSubtitle": "اختياري"
+    "priorityLowSubtitle": "اختياري",
+    "filterSortButton": "تصفية وفرز",
+    "filterSortTitle": "خيارات التصفية والفرز",
+    "applyFiltersButton": "تطبيق الفلاتر"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "كل الإعلانات",
@@ -271,7 +277,10 @@
     "report": "تقرير",
     "total": "الإجمالي",
     "exportCSV": "تصدير CSV",
-    "exportPDF": "تصدير PDF"
+    "exportPDF": "تصدير PDF",
+    "filterSortButton": "تصفية وفرز",
+    "filterSortTitle": "خيارات التصفية والفرز",
+    "applyFiltersButton": "تطبيق الفلاتر"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "تسجيل الوقت للمهمة",
@@ -318,7 +327,10 @@
     "timeTracker": "متتبع الوقت",
     "trackWorkSessions": "تتبع جلسات العمل والإنتاجية",
     "timeSessions": "جلسات الوقت",
-    "viewManageSessions": "عرض وإدارة جلسات الوقت المسجلة"
+    "viewManageSessions": "عرض وإدارة جلسات الوقت المسجلة",
+    "filterSortButton": "تصفية وفرز",
+    "filterSortTitle": "خيارات التصفية والفرز",
+    "applyFiltersButton": "تطبيق الفلاتر"
   },
   "StoragePage": {
     "storageUsage": "استخدام التخزين",

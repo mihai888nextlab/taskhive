@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useTheme } from "@/components/ThemeContext";
 import { FaPen, FaTrash, FaCheck, FaTimes, FaSignature, FaEye, FaDownload } from "react-icons/fa";
 import FileSigningModal from "@/components/signature/FileSigningModal";
 import { useTranslations } from "next-intl";
@@ -33,20 +34,9 @@ function formatBytes(bytes: number) {
   return bytes + " B";
 }
 
-const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof useTranslations> }> = React.memo(({
-  files,
-  loading,
-  theme,
-  renamingId,
-  renameValue,
-  setRenamingId,
-  setRenameValue,
-  handleDelete,
-  handleRename,
-  getFileIcon,
-  fetchFiles,
-  t,
-}) => {
+const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof useTranslations> }> = React.memo((props) => {
+  const { files, loading, theme: themeProp, renamingId, renameValue, setRenamingId, setRenameValue, handleDelete, handleRename, getFileIcon, fetchFiles, t } = props;
+  const { theme } = useTheme();
   const [signingFile, setSigningFile] = useState<FileType | null>(null);
 
   // Memoize sign file handler
@@ -67,10 +57,10 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
     () => files.map((file) => (
       <div
         key={file._id}
-        className={`group relative p-6 rounded-2xl transition-all duration-300 hover:transform hover:scale-102 ${
-          theme === "dark" 
-            ? "bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 hover:bg-gray-700/70" 
-            : "bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:bg-white/90"
+        className={`group relative p-6 rounded-2xl transition-all duration-300 hover:transform hover:scale-102 max-w-xs ${
+          theme === "dark"
+            ? "bg-gray-800 border border-gray-700 hover:bg-gray-700"
+            : "bg-white border border-gray-200 hover:bg-gray-50"
         }`}
       >
         {/* File Icon */}
@@ -115,7 +105,7 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
               type="text"
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+              className={`w-full p-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleRename(file._id);
                 if (e.key === "Escape") {
@@ -144,7 +134,7 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
             </div>
           </div>
         ) : (
-          <h3 className={`font-semibold text-sm mb-3 truncate group-hover:text-blue-600 transition-colors ${
+          <h3 className={`font-semibold text-sm mb-3 truncate group-hover:text-blue-400 transition-colors ${
             theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
           }`} title={file.fileName}>
             {file.fileName}
@@ -163,7 +153,7 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
               href={file.fileLocation}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-all duration-200"
+              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-white text-xs rounded-lg transition-all duration-200 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'}`}
             >
               <FaEye size={12} />
               {t("view")}
@@ -171,10 +161,9 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
             <a
               href={file.fileLocation}
               download={file.fileName}
-              className="flex items-center justify-center px-3 py-2 bg-gray-500 text-white text-xs rounded-lg hover:bg-gray-600 transition-all duration-200"
+              className={`flex items-center justify-center px-3 py-2 text-white text-xs rounded-lg transition-all duration-200 ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-500 hover:bg-gray-600'}`}
             >
               <FaDownload size={12} />
-              {t("download")}
             </a>
           </div>
         )}
@@ -200,7 +189,7 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
   if (files.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <div className={`p-6 rounded-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} mb-4`}>
+        <div className={`p-6 rounded-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} mb-4`}>
           <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>

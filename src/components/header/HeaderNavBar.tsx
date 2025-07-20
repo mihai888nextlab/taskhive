@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 import { useAIWindow } from "@/contexts/AIWindowContext";
 import { useTranslations } from "next-intl";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/components/ThemeContext";
 
 const SIDEBAR_WIDTH = 300;
 const AI_WINDOW_WIDTH = 420;
@@ -33,11 +34,18 @@ const profileTabs = [
 
 const LANGUAGES = [
   { code: "en", label: "EN", flag: "🇬🇧" },
+  { code: "ru", label: "RU", flag: "🇷🇺" },
+  { code: "no", label: "NO", flag: "🇳🇴" },
+  { code: "sv", label: "SV", flag: "🇸🇪" },
+  { code: "fi", label: "FI", flag: "🇫🇮" },
+  { code: "nl", label: "NL", flag: "🇳🇱" },
+  { code: "hu", label: "HU", flag: "🇭🇺" },
+  { code: "tr", label: "TR", flag: "🇹🇷" },
   { code: "fr", label: "FR", flag: "🇫🇷" },
   { code: "es", label: "ES", flag: "🇪🇸" },
   { code: "pt", label: "PT", flag: "🇵🇹" },
   { code: "ro", label: "RO", flag: "🇷🇴" },
-  { code: "sr", label: "SR", flag: "🇷🇸" }, // Serbian is present here
+  { code: "sr", label: "SR", flag: "🇷🇸" },
   { code: "zh", label: "ZH", flag: "🇨🇳" },
   { code: "hi", label: "HI", flag: "🇮🇳" },
   { code: "ar", label: "AR", flag: "🇸🇦" },
@@ -66,6 +74,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
   const { lang, setLang } = useLanguage();
   // Use HeaderNavBar namespace for translations, fallback to tProp if provided
   const t = tProp || useTranslations("HeaderNavBar");
+  const { theme } = useTheme();
 
   // Close dropdown on route change
   useEffect(() => {
@@ -105,7 +114,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
 
   const languageDropdown = langDropdownOpen && (
     <div
-      className="absolute right-0 mt-2 w-22 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
+      className={`absolute right-0 mt-2 w-22 rounded-xl shadow-lg z-50 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
       style={{
         maxHeight: "260px",
         overflowY: "auto",
@@ -114,8 +123,10 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
       {LANGUAGES.map((language) => (
         <button
           key={language.code}
-          className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 flex items-center justify-between ${
-            language.code === lang ? "font-bold bg-gray-100" : ""
+          className={`w-full text-left px-4 py-2 flex items-center justify-between transition-colors duration-150 ${
+            theme === 'dark'
+              ? `text-gray-200 hover:bg-gray-700 ${language.code === lang ? 'font-bold bg-gray-700' : ''}`
+              : `text-gray-700 hover:bg-gray-100 ${language.code === lang ? 'font-bold bg-gray-100' : ''}`
           }`}
           onClick={() => handleLangChange(language.code)}
         >
@@ -129,18 +140,18 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
   const profileDropdown = dropdownOpen && (
     <div
       id="profile-dropdown-menu"
-      className="absolute right-4 top-14 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-2"
+      className={`absolute right-4 top-14 mt-2 w-56 rounded-xl shadow-lg z-50 py-2 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
     >
-      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-        <div className="font-semibold text-gray-900 dark:text-white">
+      <div className={`px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+        <div className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
           {user?.firstName} {user?.lastName}
         </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">
+        <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
           {user?.email}
         </div>
       </div>
       <button
-        className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+        className={`w-full text-left px-4 py-2 flex items-center transition-colors duration-150 ${theme === 'dark' ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
         onClick={() => {
           setDropdownOpen(false);
           logout();
@@ -148,11 +159,11 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
       >
         <FiLogOut className="mr-2" /> {t("logout")}
       </button>
-      <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
+      <div className={`${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} border-t my-2`} />
       {profileTabs.map((tab) => (
         <button
           key={tab.id}
-          className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+          className={`w-full text-left px-4 py-2 flex items-center transition-colors duration-150 ${theme === 'dark' ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
           onClick={() => handleTabClick(tab.id)}
         >
           {tab.icon}
@@ -164,12 +175,13 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
 
   return (
     <header
-      className="absolute top-0 z-[200] h-14 bg-gray-100 flex items-center px-4"
+      className={`absolute top-0 z-[200] h-14 flex items-center px-4 pt-2 transition-colors duration-200 border-t-0 !mt-0 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}
       style={{
         left: SIDEBAR_WIDTH,
         width: `calc(100vw - ${SIDEBAR_WIDTH}px - ${isAIWindowOpen ? AI_WINDOW_WIDTH : 0}px)`,
-        top: 8,
+        top: 0,
         right: isAIWindowOpen ? AI_WINDOW_WIDTH : 0,
+        marginTop: 0,
         transition: "width 0.3s, right 0.3s",
       }}
     >
@@ -184,7 +196,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
         {/* Language Switcher */}
         <div className="relative">
           <button
-            className="p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-white transition-colors"
+            className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
             title="Change language"
             onClick={() => setLangDropdownOpen((v) => !v)}
           >
@@ -193,7 +205,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
           {languageDropdown}
         </div>
         <button
-          className="p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-white transition-colors"
+          className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
           title={t("notifications")}
         >
           <FiBell className="w-5 h-5" />
@@ -206,7 +218,7 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
           aria-label={t("openProfileMenu", { default: "Open profile menu" })}
           tabIndex={0}
         >
-          <div className="w-9 h-9 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-[#23272f]">
+          <div className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden border-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-900' : 'bg-gray-700 border-[#23272f]'}`}>
             {user?.profileImage &&
             typeof user.profileImage === "object" &&
             user.profileImage.data ? (

@@ -24,7 +24,10 @@
     "manager": "Menadžer",
     "user": "Korisnik",
     "loadingTeamMembers": "Učitavanje članova tima...",
-    "pleaseWaitFetchTeam": "Molimo sačekajte dok preuzimamo podatke o vašem timu"
+    "pleaseWaitFetchTeam": "Molimo sačekajte dok preuzimamo podatke o vašem timu",
+    "filterSortButton": "Филтрирај и Сортирај",
+    "filterSortTitle": "Опције филтрирања и сортирања",
+    "applyFiltersButton": "Примени филтере"
   },
   "TasksPage": {
     "myTasks": "Moji zadaci",
@@ -97,7 +100,10 @@
     "priorityCriticalSubtitle": "Hitno",
     "priorityHighSubtitle": "Važno",
     "priorityMediumSubtitle": "Normalno",
-    "priorityLowSubtitle": "Poželjno"
+    "priorityLowSubtitle": "Poželjno",
+    "filterSortButton": "Филтрирај и Сортирај",
+    "filterSortTitle": "Опције филтрирања и сортирања",
+    "applyFiltersButton": "Примени филтере"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Sva obaveštenja",
@@ -272,7 +278,10 @@
     "report": "Izveštaj",
     "total": "Ukupno",
     "exportCSV": "Izvezi CSV",
-    "exportPDF": "Izvezi PDF"
+    "exportPDF": "Izvezi PDF",
+    "filterSortButton": "Филтрирај и Сортирај",
+    "filterSortTitle": "Опције филтрирања и сортирања",
+    "applyFiltersButton": "Примени филтере"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Evidentiraj vreme za zadatak",
@@ -319,7 +328,10 @@
     "timeTracker": "Praćenje vremena",
     "trackWorkSessions": "Pratite radne sesije i produktivnost",
     "timeSessions": "Sesije vremena",
-    "viewManageSessions": "Pregledajte i upravljajte evidentiranim sesijama vremena"
+    "viewManageSessions": "Pregledajte i upravljajte evidentiranim sesijama vremena",
+    "filterSortButton": "Филтрирај и Сортирај",
+    "filterSortTitle": "Опције филтрирања и сортирања",
+    "applyFiltersButton": "Примени филтере"
   },
   "StoragePage": {
     "storageUsage": "Iskorišćenost skladišta",

@@ -120,13 +120,13 @@ const SessionList: React.FC<SessionListProps> = ({
         </div>
         {/* Modal for filter/sort */}
         {showFilterModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-            <div className="relative w-full max-w-lg mx-2 md:mx-0 md:rounded-3xl rounded-2xl shadow-lg bg-white border border-gray-200 flex flex-col overflow-hidden animate-fadeInUp">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <div className={`relative w-full max-w-lg mx-2 md:mx-0 md:rounded-3xl rounded-2xl shadow-lg flex flex-col overflow-hidden animate-fadeInUp ${theme === 'dark' ? 'bg-gray-900 border border-gray-700' : 'bg-white border border-gray-200'}`}>
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white relative">
-                <h3 className="text-2xl font-bold text-gray-900">{t("filterSortTitle", { default: "Filter & Sort Sessions" })}</h3>
+              <div className={`flex items-center justify-between p-6 border-b relative ${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
+                <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("filterSortTitle", { default: "Filter & Sort Sessions" })}</h3>
                 <button
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+                  className={`absolute top-4 right-4 text-xl font-bold z-10 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-700'}`}
                   onClick={() => setShowFilterModal(false)}
                   aria-label="Close modal"
                   type="button"
@@ -137,7 +137,7 @@ const SessionList: React.FC<SessionListProps> = ({
                 </button>
               </div>
               {/* Modal Content */}
-              <div className="flex-1 p-6 space-y-6 bg-white">
+              <div className={`flex-1 p-6 space-y-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}> 
                 {/* Tag Filter */}
                 <Select
                   value={sessionTagFilter}
@@ -145,18 +145,18 @@ const SessionList: React.FC<SessionListProps> = ({
                   disabled={false}
                 >
                   <SelectTrigger
-                    className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 min-w-[140px]"
+                    className={`w-full pl-9 pr-8 text-sm rounded-xl border transition-all duration-200 min-w-[140px] ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' : 'bg-white border-gray-300 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20'}`}
                     style={{ height: "36px", zIndex: 300 }}
                   >
                     <SelectValue placeholder={t("allCategories")} />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0 z-[300]">
-                    <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("allCategories")}</SelectItem>
+                  <SelectContent className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} rounded-lg p-0 z-[300]`}>
+                    <SelectItem value="all" className={`${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("allCategories")}</SelectItem>
                     {tags.map(tag => (
                       <SelectItem
                         key={tag}
                         value={tag}
-                        className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors"
+                        className={`${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}
                       >
                         {tag}
                       </SelectItem>
@@ -170,21 +170,21 @@ const SessionList: React.FC<SessionListProps> = ({
                   disabled={false}
                 >
                   <SelectTrigger
-                    className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 min-w-[140px]"
+                    className={`w-full pl-9 pr-8 text-sm rounded-xl border transition-all duration-200 min-w-[140px] ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20' : 'bg-white border-gray-300 text-gray-900 focus:border-green-500 focus:ring-2 focus:ring-green-500/20'}`}
                     style={{ height: "36px", zIndex: 300 }}
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0 z-[300]">
-                    <SelectItem value="dateDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("newestFirst")}</SelectItem>
-                    <SelectItem value="dateAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("oldestFirst")}</SelectItem>
-                    <SelectItem value="durationDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("longestDuration")}</SelectItem>
-                    <SelectItem value="durationAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("shortestDuration")}</SelectItem>
+                  <SelectContent className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} rounded-lg p-0 z-[300]`}>
+                    <SelectItem value="dateDesc" className={`${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("newestFirst")}</SelectItem>
+                    <SelectItem value="dateAsc" className={`${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("oldestFirst")}</SelectItem>
+                    <SelectItem value="durationDesc" className={`${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("longestDuration")}</SelectItem>
+                    <SelectItem value="durationAsc" className={`${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("shortestDuration")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {/* Modal Footer */}
-              <div className="p-6 border-t border-gray-200 bg-white flex justify-end">
+              <div className={`p-6 border-t flex justify-end ${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <Button
                   type="button"
                   className="rounded-xl px-6 py-2 font-semibold text-sm bg-green-500 hover:bg-green-600 text-white shadow"

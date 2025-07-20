@@ -15,6 +15,7 @@ interface Announcement {
   category: string;
   pinned: boolean;
   expiresAt?: string;
+  eventDate?: string;
 }
 
 interface AnnouncementCardProps {
@@ -234,7 +235,7 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
               </span>
             </div>
 
-            {/* Date */}
+            {/* Date (Created At) */}
             <div className="flex items-center gap-1.5">
               <FaCalendarAlt className={`w-3 h-3 ${
                 theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
@@ -249,6 +250,20 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
                 })}
               </span>
             </div>
+
+            {/* Event Date (only for Event category) */}
+            {announcement.category === 'Event' && announcement.eventDate && (
+              <div className="flex items-center gap-1.5">
+                <FaCalendarAlt className={`w-3 h-3 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />
+                <span className={`${theme === 'dark' ? 'text-green-300' : 'text-green-700'} font-semibold`}>
+                  Event: {new Date(announcement.eventDate).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Expiry Date */}

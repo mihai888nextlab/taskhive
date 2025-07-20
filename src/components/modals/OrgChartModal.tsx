@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useTheme } from "@/components/ThemeContext";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { v4 as uuidv4 } from "uuid";
 import { FaPlus, FaSave, FaTimes, FaGripVertical, FaBuilding, FaUserTie, FaSitemap } from "react-icons/fa";
@@ -28,6 +29,7 @@ const fixedAdminRole = "admin";
 
 const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
   const t = useTranslations("OrgChartModal");
+  const { theme } = useTheme();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [newDeptName, setNewDeptName] = useState("");
   const [showAddRoleModal, setShowAddRoleModal] = useState(false);
@@ -181,10 +183,10 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[90vh] relative animate-fadeIn overflow-hidden">
+      <div className={`rounded-3xl shadow-2xl w-full max-w-6xl max-h-[98vh] relative animate-fadeIn overflow-hidden ${theme === 'dark' ? 'bg-gray-900 border border-gray-700 text-white' : 'bg-white'}` }>
         {/* Close Button */}
         <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+          className={`absolute top-4 right-4 text-xl font-bold z-10 transition-colors ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
           onClick={onClose}
           aria-label={t("close")}
         >
@@ -192,29 +194,27 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
         </button>
 
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-slate-50">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-slate-600 rounded-xl shadow-lg">
-              <FaSitemap className="text-xl text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{t("organizationChart")}</h2>
-              <p className="text-gray-600">{t("manageTeamStructure")}</p>
-            </div>
+        <div className={`p-6 border-b flex items-center gap-4 ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-slate-50'}` }>
+          <div className="p-3 bg-slate-600 rounded-xl shadow-lg">
+            <FaSitemap className="text-xl text-white" />
+          </div>
+          <div>
+            <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("organizationChart")}</h2>
+            <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{t("manageTeamStructure")}</p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
           {/* Admin Section */}
-          <div className="p-6 border-b border-gray-200 bg-red-50">
+          <div className={`p-6 border-b ${theme === 'dark' ? 'border-gray-700 bg-red-950' : 'border-gray-200 bg-red-50'}`}>
             <div className="max-w-6xl mx-auto">
               <div className="flex items-center gap-3 mb-4">
                 <FaUserTie className="w-5 h-5 text-red-600" />
-                <h3 className="text-lg font-semibold text-red-800">{t("administratorLevel")}</h3>
+                <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-red-200' : 'text-red-800'}`}>{t("administratorLevel")}</h3>
               </div>
               <div className="flex justify-center">
-                <div className="bg-red-100 border-2 border-red-300 text-red-700 px-6 py-2 rounded-xl font-semibold shadow-lg text-lg min-w-full text-center">
+                <div className={`border-2 px-6 py-2 rounded-xl font-semibold shadow-lg text-lg min-w-full text-center ${theme === 'dark' ? 'bg-red-900 border-red-700 text-red-200' : 'bg-red-100 border-red-300 text-red-700'}`}>
                   admin
                 </div>
               </div>
@@ -222,32 +222,24 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
           </div>
 
           {/* Departments Section */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
             <DragDropContext onDragEnd={onDragEnd}>
-              <div className="p-4 h-full overflow-x-auto">
-                <div className="flex gap-6 min-h-0" style={{ minWidth: 'max-content' }}>
+              <div className="p-4 h-full min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
+                <div className="flex gap-6 min-h-0" style={{ minWidth: 'max-content', height: '100%' }}>
                   {departments.map((dept) => (
                     <div 
                       key={dept.id} 
-                      className="bg-white border border-gray-200 rounded-2xl shadow-lg min-w-[320px] max-w-[320px] flex flex-col overflow-hidden"
+                      className={`rounded-2xl shadow-lg min-w-[320px] max-w-[320px] flex flex-col overflow-hidden ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white' : 'bg-white border border-gray-200'}`}
                     >
                       {/* Department Header */}
-                      <div className={`p-4 border-b border-gray-200 ${
-                        dept.id === AVAILABLE_DEPT_ID 
-                          ? 'bg-blue-50' 
-                          : 'bg-slate-50'
-                      }`}>
+                      <div className={`p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} ${dept.id === AVAILABLE_DEPT_ID ? (theme === 'dark' ? 'bg-blue-950' : 'bg-blue-50') : (theme === 'dark' ? 'bg-gray-900' : 'bg-slate-50')}` }>
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${
-                            dept.id === AVAILABLE_DEPT_ID 
-                              ? 'bg-blue-500' 
-                              : 'bg-slate-500'
-                          }`}>
+                          <div className={`p-2 rounded-lg ${dept.id === AVAILABLE_DEPT_ID ? 'bg-blue-500' : (theme === 'dark' ? 'bg-gray-700' : 'bg-slate-500')}`}>
                             <FaBuilding className="w-4 h-4 text-white" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-bold text-gray-900">{dept.name}</h3>
-                            <p className="text-xs text-gray-600">
+                            <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{dept.name}</h3>
+                            <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                               {dept.levels.reduce((acc, level) => acc + level.roles.length, 0)} roles
                             </p>
                           </div>
@@ -255,15 +247,15 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                       </div>
 
                       {/* Levels Container */}
-                      <div className="flex-1 p-4 overflow-y-auto" style={{ maxHeight: '400px' }}>
+                      <div className="flex-1 p-4 overflow-y-auto" style={{ minHeight: 0, maxHeight: '320px', display: 'flex', flexDirection: 'column' }}>
                         <div className="space-y-4">
                           {dept.levels.map((level, idx) => (
-                            <div key={level.id} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                            <div key={level.id} className={`rounded-xl border overflow-hidden ${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
                               {/* Level Header */}
-                              <div className="px-3 py-2 bg-gray-100 border-b border-gray-200">
-                                <h4 className="font-semibold text-sm text-gray-700">
+                              <div className={`px-3 py-2 border-b ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200'}`}>
+                                <h4 className={`font-semibold text-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
                                   {t("addLevel")} {idx + 1}
-                                  <span className="ml-2 text-xs text-gray-500">
+                                  <span className={`ml-2 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
                                     ({level.roles.length} {t("roles")})
                                   </span>
                                 </h4>
@@ -276,13 +268,13 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
                                     className={`p-3 min-h-[60px] transition-all duration-200 ${
-                                      snapshot.isDraggingOver 
-                                        ? 'bg-emerald-100 border-emerald-300' 
-                                        : 'bg-white'
+                                      snapshot.isDraggingOver
+                                        ? (theme === 'dark' ? 'bg-emerald-950 border-emerald-700' : 'bg-emerald-100 border-emerald-300')
+                                        : (theme === 'dark' ? 'bg-gray-900' : 'bg-white')
                                     }`}
                                   >
                                     {level.roles.length === 0 ? (
-                                      <div className="text-center py-4 text-gray-400 text-sm">
+                                      <div className={`text-center py-4 text-sm ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>
                                         {t("dropRolesHere")}
                                       </div>
                                     ) : (
@@ -300,12 +292,12 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                                                 ref={provided.innerRef}
                                                 className={`group flex items-center gap-2 p-3 rounded-lg border cursor-grab transition-all duration-200 ${
                                                   snapshot.isDragging
-                                                    ? "bg-emerald-100 border-emerald-300 shadow-lg transform scale-105"
-                                                    : "bg-emerald-50 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 hover:shadow-md"
+                                                    ? (theme === 'dark' ? 'bg-emerald-950 border-emerald-700 shadow-lg transform scale-105' : 'bg-emerald-100 border-emerald-300 shadow-lg transform scale-105')
+                                                    : (theme === 'dark' ? 'bg-emerald-900 border-emerald-800 hover:bg-emerald-950 hover:border-emerald-700 hover:shadow-md' : 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 hover:shadow-md')
                                                 }`}
                                               >
-                                                <FaGripVertical className="w-3 h-3 text-gray-400 group-hover:text-gray-600" />
-                                                <span className="text-emerald-700 font-medium text-sm flex-1">
+                                                <FaGripVertical className={`w-3 h-3 ${theme === 'dark' ? 'text-gray-500 group-hover:text-gray-300' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                                                <span className={`font-medium text-sm flex-1 ${theme === 'dark' ? 'text-emerald-300' : 'text-emerald-700'}`}>
                                                   {role}
                                                 </span>
                                               </div>
@@ -324,11 +316,11 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                       </div>
 
                       {/* Department Actions */}
-                      <div className="p-4 border-t border-gray-200 bg-gray-50 space-y-2">
+                      <div className={`p-4 border-t space-y-2 ${theme === 'dark' ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-gray-50'}`}>
                         <Button
                           type="button"
                           onClick={() => handleAddLevel(dept.id)}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-all duration-200 text-sm"
+                          className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                         >
                           <FaPlus className="w-3 h-3" />
                           {t("addLevel")}
@@ -337,7 +329,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
                           <Button
                             type="button"
                             onClick={() => setShowAddRoleModal(true)}
-                            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 text-sm"
+                            className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-blue-800 text-white hover:bg-blue-900' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
                           >
                             <FaPlus className="w-3 h-3" />
                             {t("addNewRole")}
@@ -353,7 +345,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50">
+        <div className={`p-6 border-t flex flex-col gap-3 ${theme === 'dark' ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-gray-50'}` }>
           {/* Add Department */}
           <div className="flex gap-3 mb-4">
             <Input
@@ -362,7 +354,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
               value={newDeptName}
               onChange={handleDeptNameChange}
               onKeyPress={(e) => e.key === 'Enter' && handleAddDepartment()}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 text-sm"
+              className={`flex-1 px-3 py-2 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white placeholder-gray-400' : 'border border-gray-300'}`}
             />
             <Button
               type="button"
@@ -370,8 +362,8 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
               disabled={!newDeptName.trim()}
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
                 newDeptName.trim()
-                  ? 'bg-slate-600 hover:bg-slate-700 text-white shadow-sm hover:shadow-md'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? (theme === 'dark' ? 'bg-slate-700 hover:bg-slate-800 text-white shadow-sm hover:shadow-md' : 'bg-slate-600 hover:bg-slate-700 text-white shadow-sm hover:shadow-md')
+                  : (theme === 'dark' ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-300 text-gray-500 cursor-not-allowed')
               }`}
             >
               <FaPlus className="w-3 h-3 inline mr-1" />
@@ -384,7 +376,7 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
             <Button
               type="button"
               onClick={handleModalClose}
-              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
+              className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
               disabled={saving}
             >
               {t("close")}
@@ -395,13 +387,13 @@ const OrgChartModal: React.FC<OrgChartModalProps> = ({ onClose }) => {
               disabled={saving}
               className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
                 saving
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-slate-600 hover:bg-slate-700 text-white shadow-sm hover:shadow-md'
+                  ? (theme === 'dark' ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-gray-300 text-gray-500 cursor-not-allowed')
+                  : (theme === 'dark' ? 'bg-slate-700 hover:bg-slate-800 text-white shadow-sm hover:shadow-md' : 'bg-slate-600 hover:bg-slate-700 text-white shadow-sm hover:shadow-md')
               }`}
             >
               {saving ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                  <div className={`w-3 h-3 border-2 rounded-full animate-spin ${theme === 'dark' ? 'border-gray-500 border-t-transparent' : 'border-gray-400 border-t-transparent'}`}></div>
                   {t("saving")}
                 </div>
               ) : (

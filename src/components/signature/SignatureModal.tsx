@@ -155,28 +155,28 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="w-full z-[300] h-full max-w-4xl mx-auto bg-white rounded-3xl overflow-hidden">
+    <div className="w-full z-[300] h-full max-w-4xl mx-auto bg-white rounded-3xl overflow-hidden dark:bg-gray-900 dark:border-gray-700 border border-gray-200">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200 bg-white rounded-t-3xl">
+      <div className="p-6 border-b border-gray-200 bg-white rounded-t-3xl dark:bg-gray-900 dark:border-gray-700">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-600 rounded-lg">
+          <div className="p-2 bg-blue-600 rounded-lg dark:bg-blue-700">
             <FaSignature className="text-white text-lg" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">{t("signatureManager")}</h2>
-            <p className="text-gray-600 text-sm">{t("createManageSignatures")}</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("signatureManager")}</h2>
+            <p className="text-gray-600 text-sm dark:text-gray-300">{t("createManageSignatures")}</p>
           </div>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-gray-200 bg-white">
+      <div className="flex border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
         <Button
           onClick={() => setActiveTab('select')}
           className={`flex-1 px-6 py-3 font-medium transition-all duration-200 rounded-none border-0 ${
             activeTab === 'select' 
-              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-blue-50'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-400' 
+              : 'text-gray-600 hover:text-gray-900 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800'
           }`}
           variant="ghost"
         >
@@ -189,8 +189,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
           onClick={() => setActiveTab('create')}
           className={`flex-1 px-6 py-3 font-medium transition-all duration-200 rounded-none border-0 ${
             activeTab === 'create' 
-              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-blue-50'
+              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-400' 
+              : 'text-gray-600 hover:text-gray-900 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800'
           }`}
           variant="ghost"
         >
@@ -202,29 +202,81 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
       </div>
 
       {/* Content */}
-      <div className="p-6 overflow-y-auto max-h-[60vh] bg-white rounded-b-3xl">
+      <div className="p-6 overflow-y-auto max-h-[60vh] bg-white rounded-b-3xl dark:bg-gray-900">
         {activeTab === 'select' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">{t("yourSignatures")}</h3>
-              <span className="text-gray-500 bg-gray-100 px-2 py-1 rounded-full text-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("yourSignatures")}</h3>
+              <span className="text-gray-500 bg-gray-100 px-2 py-1 rounded-full text-sm dark:text-gray-300 dark:bg-gray-800">
                 {t("signaturesCount", { count: signatures.length })}
               </span>
             </div>
             
-            {signaturesList}
+            {signatures.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center dark:bg-blue-900">
+                  <FaPencilAlt className="text-2xl text-blue-600 dark:text-blue-300" />
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2 dark:text-white">{t("noSignaturesFound")}</h4>
+                <p className="text-gray-600 mb-6 dark:text-gray-300">{t("createFirstSignature")}</p>
+                <Button
+                  onClick={() => setActiveTab('create')}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-800 transition-all duration-200 font-medium dark:bg-blue-700 dark:hover:bg-blue-900"
+                >
+                  <FaPlus className="text-sm" />
+                  {t("createYourFirstSignature")}
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {signatures.map((signature) => (
+                  <div key={signature._id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800 dark:border-gray-700">
+                    <div className="flex justify-between items-start mb-3">
+                      <h4 className="font-medium text-gray-900 truncate text-sm dark:text-white">{signature.signatureName}</h4>
+                      <Button
+                        onClick={() => deleteSignature(signature._id)}
+                        className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all duration-200 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                        title="Delete signature"
+                        variant="ghost"
+                        size="icon"
+                      >
+                        <FaTrash className="text-xs" />
+                      </Button>
+                    </div>
+                    
+                    <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[80px] flex items-center justify-center dark:bg-gray-900 dark:border-gray-700">
+                      <img
+                        src={signature.signatureUrl}
+                        alt={signature.signatureName}
+                        className="max-w-full max-h-[60px] object-contain"
+                      />
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        onSignatureSelect(signature.signatureUrl);
+                        onClose();
+                      }}
+                      className="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-800 font-medium transition-all duration-200 text-sm dark:bg-blue-700 dark:hover:bg-blue-900"
+                    >
+                      {t("useThisSignature")}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'create' && (
           <div className="max-w-3xl mx-auto">
             <div className="space-y-8">
-              <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <div className="bg-white border border-gray-200 rounded-xl p-6 dark:bg-gray-800 dark:border-gray-700">
                 <Input
                   type="text"
                   value={signatureName}
                   onChange={(e) => setSignatureName(e.target.value)}
-                  className="w-full p-4 mb-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 text-lg"
+                  className="w-full p-4 mb-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 text-lg dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:focus:ring-blue-800 dark:focus:border-blue-800"
                   placeholder={t("enterSignatureName")}
                 />
                 <SignatureCanvas onSignatureChange={setNewSignature} />
@@ -237,7 +289,7 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                     setSignatureName('');
                     setActiveTab('select');
                   }}
-                  className="flex-1 py-4 px-6 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-semibold transition-all duration-200 text-lg border-2 border-gray-200"
+                  className="flex-1 py-4 px-6 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-semibold transition-all duration-200 text-lg border-2 border-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:border-gray-700"
                   variant="ghost"
                 >
                   {t("cancel")}
@@ -247,8 +299,8 @@ const SignatureModal: React.FC<SignatureModalProps> = ({
                   disabled={loading || !newSignature || !signatureName.trim()}
                   className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-200 text-lg border-2 ${
                     loading || !newSignature || !signatureName.trim()
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-200'
-                      : 'bg-blue-600 text-white hover:bg-blue-800 border-blue-600 hover:border-blue-800 shadow-lg hover:shadow-xl'
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-200 dark:bg-gray-800 dark:text-gray-600 dark:border-gray-700'
+                      : 'bg-blue-600 text-white hover:bg-blue-800 border-blue-600 hover:border-blue-800 shadow-lg hover:shadow-xl dark:bg-blue-700 dark:hover:bg-blue-900 dark:border-blue-700 dark:hover:border-blue-900'
                   }`}
                 >
                   {loading ? (

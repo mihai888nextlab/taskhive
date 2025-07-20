@@ -25,6 +25,9 @@
     "user": "Χρήστης",
     "loadingTeamMembers": "Φόρτωση μελών ομάδας...",
     "pleaseWaitFetchTeam": "Παρακαλώ περιμένετε, γίνεται λήψη των δεδομένων της ομάδας σας"
+    ,"filterSortButton": "Φίλτρο & Ταξινόμηση"
+    ,"filterSortTitle": "Επιλογές φιλτραρίσματος και ταξινόμησης"
+    ,"applyFiltersButton": "Εφαρμογή φίλτρων"
   },
   "TasksPage": {
     "myTasks": "Οι εργασίες μου",
@@ -98,6 +101,9 @@
     "priorityHighSubtitle": "Σημαντική",
     "priorityMediumSubtitle": "Κανονική",
     "priorityLowSubtitle": "Επιθυμητή"
+    ,"filterSortButton": "Φίλτρο & Ταξινόμηση"
+    ,"filterSortTitle": "Επιλογές φιλτραρίσματος και ταξινόμησης"
+    ,"applyFiltersButton": "Εφαρμογή φίλτρων"
   },
   "AnnouncementsPage": {
     "announcements": "Ανακοινώσεις",
@@ -186,31 +192,54 @@
     "errorSavingData": "Σφάλμα κατά την αποθήκευση των δεδομένων"
   },
   "TimeTrackingPage": {
-    "timeEntries": "Εγγραφές χρόνου",
-    "project": "Έργο",
-    "task": "Εργασία",
-    "duration": "Διάρκεια",
-    "startTime": "Ώρα έναρξης",
-    "endTime": "Ώρα λήξης",
-    "break": "Διάλειμμα",
-    "notes": "Σημειώσεις",
-    "billable": "Χρεώσιμο",
-    "nonBillable": "Μη χρεώσιμο",
-    "status": "Κατάσταση",
-    "approved": "Εγκεκριμένο",
-    "pending": "Εκκρεμεί",
-    "rejected": "Απορριφθείς",
-    "addTimeEntry": "Προσθήκη εγγραφής χρόνου",
-    "editTimeEntry": "Επεξεργασία εγγραφής χρόνου",
-    "deleteTimeEntry": "Διαγραφή εγγραφής χρόνου",
-    "approveTimeEntry": "Έγκριση εγγραφής χρόνου",
-    "rejectTimeEntry": "Απόρριψη εγγραφής χρόνου",
-    "viewReport": "Προβολή αναφοράς",
-    "generateInvoice": "Δημιουργία τιμολογίου",
-    "loadingEntries": "Φόρτωση εγγραφών...",
-    "noEntriesFound": "Δεν βρέθηκαν εγγραφές",
-    "entrySaved": "Η εγγραφή αποθηκεύτηκε επιτυχώς",
-    "errorSavingEntry": "Σφάλμα κατά την αποθήκευση της εγγραφής"
+    "logTimeForTask": "Καταγραφή χρόνου για εργασία",
+    "title": "Τίτλος",
+    "duration24h": "Διάρκεια (24ωρο)",
+    "hours": "ωω",
+    "minutes": "λλ",
+    "seconds": "δδ",
+    "descriptionOptional": "Περιγραφή (προαιρετικό)",
+    "generateDescription": "Δημιουργία περιγραφής από τον τίτλο",
+    "generate": "Δημιουργία",
+    "describeWorkedOn": "Περιγράψτε τι εργαστήκατε...",
+    "cancel": "Ακύρωση",
+    "logTime": "Καταγραφή χρόνου",
+    "export": "Εξαγωγή",
+    "pomodoro": "Pomodoro",
+    "exit": "Έξοδος",
+    "streak": "{count} ημέρα{count, plural, one {} other {ς}} σερί",
+    "start": "Έναρξη",
+    "stop": "Διακοπή",
+    "reset": "Επαναφορά",
+    "saveSession": "Αποθήκευση συνεδρίας",
+    "savePomodoroSession": "Αποθήκευση συνεδρίας Pomodoro",
+    "workSession": "Συνεδρία εργασίας",
+    "breakTime": "Διάλειμμα",
+    "cycles": "Κύκλοι: {count}",
+    "searchSessions": "Αναζήτηση συνεδριών...",
+    "allCategories": "Όλες οι κατηγορίες",
+    "newestFirst": "Νεότερες πρώτα",
+    "oldestFirst": "Παλαιότερες πρώτα",
+    "longestDuration": "Μεγαλύτερη διάρκεια",
+    "shortestDuration": "Μικρότερη διάρκεια",
+    "noMatchingSessionsFound": "Δεν βρέθηκαν αντίστοιχες συνεδρίες",
+    "noSessionsYet": "Δεν υπάρχουν συνεδρίες ακόμα",
+    "tryAdjustingSearch": "Δοκιμάστε να προσαρμόσετε τα κριτήρια αναζήτησης ή τα φίλτρα",
+    "startFirstSession": "Ξεκινήστε την πρώτη σας συνεδρία παρακολούθησης χρόνου",
+    "logNewSession": "Καταγράψτε νέα συνεδρία",
+    "sessionName": "Όνομα συνεδρίας",
+    "sessionDescription": "Περιγραφή",
+    "tag": "Ετικέτα",
+    "addNotesContext": "Προσθέστε σημειώσεις ή πλαίσιο για αυτή τη συνεδρία...",
+    "selectCategory": "Επιλέξτε κατηγορία",
+    "deleteSession": "Διαγραφή συνεδρίας",
+    "timeTracker": "Χρονομέτρης",
+    "trackWorkSessions": "Παρακολουθήστε τις συνεδρίες εργασίας και την παραγωγικότητά σας",
+    "timeSessions": "Συνεδρίες χρόνου",
+    "viewManageSessions": "Δείτε και διαχειριστείτε τις καταγεγραμμένες συνεδρίες χρόνου σας",
+    "filterSortButton": "Φίλτρο & Ταξινόμηση",
+    "filterSortTitle": "Επιλογές φιλτραρίσματος και ταξινόμησης",
+    "applyFiltersButton": "Εφαρμογή φίλτρων"
   },
   "StoragePage": {
     "files": "Αρχεία",
@@ -511,6 +540,12 @@
     "total": "Σύνολο",
     "exportCSV": "Εξαγωγή CSV",
     "exportPDF": "Εξαγωγή PDF"
+    ,"filterSortButton": "Φίλτρο & Ταξινόμηση"
+    ,"filterSortTitle": "Επιλογές φιλτραρίσματος και ταξινόμησης"
+    ,"applyFiltersButton": "Εφαρμογή φίλτρων"
+    ,"filterSortButton": "Φίλτρο & Ταξινόμηση"
+    ,"filterSortTitle": "Επιλογές φιλτραρίσματος και ταξινόμησης"
+    ,"applyFiltersButton": "Εφαρμογή φίλτρων"
   },
   "AddUserModal": {
     "addNewUser": "Προσθήκη νέου χρήστη",

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -10,12 +10,54 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = React.memo(({ children }) => {
-  const [theme, setTheme] = useState<Theme>('light');
+  const getSystemTheme = () => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  };
+
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = window.localStorage.getItem('theme');
+      if (stored === 'dark' || stored === 'light') return stored as Theme;
+      return getSystemTheme();
+    }
+    return 'light';
+  });
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => {
+        const stored = window.localStorage.getItem('theme');
+        if (!stored) {
+          setTheme(media.matches ? 'dark' : 'light');
+        }
+      };
+      media.addEventListener('change', handleChange);
+      return () => media.removeEventListener('change', handleChange);
+    }
+  }, []);
 
   // Memoize toggleTheme
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setTheme((prev) => {
+      const next = prev === 'light' ? 'dark' : 'light';
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('theme', next);
+      }
+      return next;
+    });
   }, []);
+
+  // Keep localStorage in sync if theme changes elsewhere
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('theme', theme);
+    }
+  }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

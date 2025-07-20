@@ -273,21 +273,23 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
           </Button>
         </div>
         {modalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-            <div className="relative w-full max-w-lg mx-2 md:mx-0 md:rounded-3xl rounded-2xl shadow-lg bg-white border border-gray-200 flex flex-col overflow-hidden animate-fadeInUp">
+          <div className={`fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4`}>
+            <div className={`relative w-full max-w-lg mx-2 md:mx-0 md:rounded-3xl rounded-2xl shadow-lg flex flex-col overflow-hidden animate-fadeInUp ${theme === 'dark' ? 'bg-gray-900 border border-gray-700 text-white' : 'bg-white border border-gray-200'}`}>
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
-                <h3 className="text-2xl font-bold text-gray-900">{t("filterSortTitle", { default: "Filter & Sort Tasks" })}</h3>
+              <div className={`flex items-center justify-between p-6 border-b relative ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("filterSortTitle", { default: "Filter & Sort Tasks" })}</h3>
                 <button
-                  className="text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                  className={`absolute top-6 right-6 text-2xl font-bold z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-colors ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
                   onClick={handleCloseModal}
                   aria-label="Close"
+                  tabIndex={0}
+                  type="button"
                 >
                   ×
                 </button>
               </div>
               {/* Modal Content */}
-              <div className="flex-1 p-6 space-y-6 bg-white">
+              <div className={`flex-1 p-6 space-y-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}> 
                 <div className="flex gap-2">
                   <Select
                     value={filterStatusValue}
@@ -296,16 +298,17 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
                       else setFilterStatus(v as any);
                     }}
                   >
-                    <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[120px]"
+                    <SelectTrigger
+                      className={`w-full pl-9 pr-8 text-sm rounded-xl border transition-all duration-200 min-w-[120px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
                       style={{ height: "36px" }}
                     >
                       <SelectValue placeholder={t("statusAll")} />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-                      <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("statusAll")}</SelectItem>
-                      <SelectItem value="completed" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("completed")}</SelectItem>
-                      <SelectItem value="pending" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("pending")}</SelectItem>
-                      <SelectItem value="overdue" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("overdue")}</SelectItem>
+                    <SelectContent className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border border-gray-300'} rounded-lg p-0`}>
+                      <SelectItem value="all" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("statusAll")}</SelectItem>
+                      <SelectItem value="completed" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("completed")}</SelectItem>
+                      <SelectItem value="pending" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("pending")}</SelectItem>
+                      <SelectItem value="overdue" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("overdue")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select
@@ -315,17 +318,18 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
                       else setFilterPriority(v as any);
                     }}
                   >
-                    <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[120px]"
+                    <SelectTrigger
+                      className={`w-full pl-9 pr-8 text-sm rounded-xl border transition-all duration-200 min-w-[120px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
                       style={{ height: "36px" }}
                     >
                       <SelectValue placeholder={t("priorityAll")} />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-                      <SelectItem value="all" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("priorityAll")}</SelectItem>
-                      <SelectItem value="critical" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("critical")}</SelectItem>
-                      <SelectItem value="high" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("high")}</SelectItem>
-                      <SelectItem value="medium" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("medium")}</SelectItem>
-                      <SelectItem value="low" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("low")}</SelectItem>
+                    <SelectContent className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border border-gray-300'} rounded-lg p-0`}>
+                      <SelectItem value="all" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("priorityAll")}</SelectItem>
+                      <SelectItem value="critical" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("critical")}</SelectItem>
+                      <SelectItem value="high" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("high")}</SelectItem>
+                      <SelectItem value="medium" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("medium")}</SelectItem>
+                      <SelectItem value="low" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("low")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -336,23 +340,24 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
                     else setSortBy(v as any);
                   }}
                 >
-                  <SelectTrigger className="w-full pl-9 pr-8 text-sm rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px]"
+                  <SelectTrigger
+                    className={`w-full pl-9 pr-8 text-sm rounded-xl border transition-all duration-200 min-w-[140px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
                     style={{ height: "36px" }}
                   >
                     <SelectValue placeholder={t("sortNewest")} />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-300 rounded-lg p-0">
-                    <SelectItem value="createdAtDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortNewest")}</SelectItem>
-                    <SelectItem value="deadlineAsc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortDeadline")}</SelectItem>
-                    <SelectItem value="priorityDesc" className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 px-4 py-2 text-sm cursor-pointer transition-colors">{t("sortPriority")}</SelectItem>
+                  <SelectContent className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border border-gray-300'} rounded-lg p-0`}>
+                    <SelectItem value="createdAtDesc" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("sortNewest")}</SelectItem>
+                    <SelectItem value="deadlineAsc" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("sortDeadline")}</SelectItem>
+                    <SelectItem value="priorityDesc" className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-blue-950 focus:bg-blue-950 data-[state=checked]:bg-blue-950 data-[state=checked]:text-blue-300' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}>{t("sortPriority")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {/* Modal Footer */}
-              <div className="p-6 border-t border-gray-200 bg-white flex justify-end">
+              <div className={`p-6 border-t flex justify-end ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}> 
                 <Button
                   type="button"
-                  className="rounded-xl px-6 py-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white shadow"
+                  className={`rounded-xl px-6 py-2 font-semibold text-sm bg-blue-500 hover:bg-blue-600 text-white shadow`}
                   onClick={handleCloseModal}
                 >
                   {t("applyFiltersButton", { default: "Apply" })}

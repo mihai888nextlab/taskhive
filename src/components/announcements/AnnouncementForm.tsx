@@ -35,7 +35,9 @@ const getCategoryColor = (category: string) => {
   return colors[category as keyof typeof colors] || "from-gray-500 to-gray-600";
 };
 
-const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
+
+// --- New: Add eventDate state and handler ---
+const AnnouncementForm: React.FC<AnnouncementFormProps & { eventDate?: string; onEventDateChange?: (v: string) => void }> = ({
   title,
   content,
   category,
@@ -51,6 +53,8 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   onExpiresAtChange,
   onSubmit,
   onCancel,
+  eventDate,
+  onEventDateChange,
 }) => {
   const t = useTranslations("AnnouncementsPage");
   const [generatingContent, setGeneratingContent] = useState(false);
@@ -61,6 +65,12 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
   const handleCategoryChange = useCallback((v: string) => onCategoryChange(v), [onCategoryChange]);
   const handlePinnedChange = useCallback((v: boolean) => onPinnedChange(v), [onPinnedChange]);
   const handleExpiresAtChange = useCallback((v: string) => onExpiresAtChange(v), [onExpiresAtChange]);
+  // Always call the handler directly (it is required for Event category)
+  const handleEventDateChange = useCallback((v: string) => {
+    if (onEventDateChange) {
+      onEventDateChange(v);
+    }
+  }, [onEventDateChange]);
   const handleCancel = useCallback(() => onCancel(), [onCancel]);
   const handleFormSubmit = useCallback((e: React.FormEvent) => onSubmit(e), [onSubmit]);
 
@@ -94,8 +104,14 @@ Write a clear, engaging, and informative announcement for all employees, based o
     }
   }, [title, onContentChange]);
 
-  // Convert string date to Date object for DatePicker
-  const expiresAtDateObj = expiresAt ? new Date(expiresAt) : undefined;
+  // Convert string date to Date object for DatePicker, with fallback for invalid dates
+  function parseDateString(dateStr?: string): Date | undefined {
+    if (!dateStr) return undefined;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? undefined : d;
+  }
+  const expiresAtDateObj = parseDateString(expiresAt);
+  const eventDateObj = parseDateString(eventDate);
 
   return (
     <div className="flex flex-col h-full max-h-[90vh]">
@@ -318,6 +334,33 @@ Write a clear, engaging, and informative announcement for all employees, based o
               <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 {t("optionalExpiryDate")}
               </p>
+              {/* Event Date (only for Event category, right under expiry date, same as expiry date selector) */}
+              {category === 'Event' && (
+                <div className="mt-4">
+                  <label className={`block text-sm font-semibold mb-2 ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {t("eventDate") || "Event Date"}
+                  </label>
+                  <DatePicker
+                    value={eventDateObj}
+                    onChange={date => {
+                      if (date) {
+                        const formatted = date.toISOString().split("T")[0];
+                        handleEventDateChange(formatted);
+                      } else {
+                        handleEventDateChange("");
+                      }
+                    }}
+                    disabled={loading}
+                    className="w-full h-10"
+                    placeholder="mm / dd / yyyy"
+                  />
+                  <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {t("optionalExpiryDate")}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </form>

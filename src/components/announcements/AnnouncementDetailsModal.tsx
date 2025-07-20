@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { FaThumbtack, FaTrash, FaRegCommentDots, FaChevronDown, FaChevronRight, FaTimes, FaUser, FaPaperPlane, FaSpinner } from "react-icons/fa";
+import { FaThumbtack, FaTrash, FaRegCommentDots, FaChevronDown, FaChevronRight, FaTimes, FaUser, FaPaperPlane, FaSpinner, FaCalendarAlt } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import styles from "@/styles/markdown.module.css";
@@ -17,6 +17,7 @@ interface Announcement {
   category: string;
   pinned: boolean;
   expiresAt?: string;
+  eventDate?: string;
 }
 
 interface AnnouncementDetailsModalProps {
@@ -131,17 +132,17 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-3xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden`}>
+      <div className={`rounded-3xl w-full max-w-4xl max-h-[90vh] relative animate-fadeIn overflow-hidden border ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border border-gray-200 text-gray-900'}`}>
         <button
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
-                    onClick={onClose}
-                    aria-label="Close modal"
-                  >
-                  <FaTimes />
-                </button>
+          className={`absolute hover:cursor-pointer top-4 right-4 text-xl font-bold z-10 transition-colors ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
+          onClick={onClose}
+          aria-label="Close modal"
+        >
+          <FaTimes />
+        </button>
 
         {/* Header */}
-        <div className={`p-6 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-750' : 'border-gray-200 bg-gray-50'}`}>
+        <div className={`p-6 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}> 
           <div className="flex items-start justify-between gap-4">
             {/* Title and Meta */}
             <div className="flex-1 min-w-0">
@@ -158,14 +159,23 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
               
               {/* Category and Meta Info */}
               <div className="flex flex-wrap items-center gap-3">
-                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getCategoryColor(announcement.category)}`}>
+                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold border ${getCategoryColor(announcement.category)}`}> 
                   {t(`category${announcement.category}`)}
                 </span>
-                <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {new Date(announcement.createdAt).toLocaleDateString()} • {new Date(announcement.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
+                {announcement.category === 'Event' && announcement.eventDate ? (
+                  <div className={`text-sm flex items-center gap-1.5 ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}> 
+                    <FaCalendarAlt className={`inline-block ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />
+                    <span className="font-semibold">
+                      {t('eventDateLabel')}: {new Date(announcement.eventDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                ) : (
+                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}> 
+                    {new Date(announcement.createdAt).toLocaleDateString()} • {new Date(announcement.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                )}
                 {announcement.expiresAt && (
-                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}> 
                     {t("expires", { date: new Date(announcement.expiresAt).toLocaleDateString() })}
                   </div>
                 )}
@@ -191,7 +201,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
             {isAdmin && (
               <div className="flex gap-2 mr-6">
                 {onPinToggle && (
-                  <button
+                  <Button
                     className={`p-3 rounded-xl transition-all duration-200 ${
                       localPinned
                         ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50'
@@ -203,10 +213,10 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
                     aria-label={localPinned ? "Unpin announcement" : "Pin announcement"}
                   >
                     <FaThumbtack className="w-4 h-4" />
-                  </button>
+                  </Button>
                 )}
                 {onDelete && (
-                  <button
+                  <Button
                     className={`p-3 rounded-xl transition-all duration-200 ${
                       theme === 'dark' 
                         ? 'bg-gray-700 text-gray-400 hover:bg-red-900/30 hover:text-red-400' 
@@ -216,7 +226,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
                     aria-label="Delete announcement"
                   >
                     <FaTrash className="w-4 h-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -227,8 +237,8 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
         <div className="flex-1 overflow-y-auto max-h-[calc(90vh-200px)]">
           <div className="p-6">
             {/* Announcement Content */}
-            <div className={`rounded-2xl p-6 mb-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className={`${styles.markdown} prose max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
+            <div className={`rounded-2xl p-6 mb-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}> 
+              <div className={`${styles.markdown} prose max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}> 
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {announcement.content}
                 </ReactMarkdown>
@@ -309,7 +319,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
 
                   {/* Add Comment Form */}
                   <form onSubmit={handleCommentSubmit} className="mt-6">
-                    <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
                       <div className="flex gap-3">
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                           <FaUser className="w-3 h-3" />
@@ -329,7 +339,7 @@ const AnnouncementDetailsModal: React.FC<AnnouncementDetailsModalProps> = React.
                             maxLength={500}
                           />
                           <div className="flex items-center justify-between mt-3">
-                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}> 
                               {t("characters", { count: commentInput.length })}
                             </div>
                             <Button

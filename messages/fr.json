@@ -25,6 +25,9 @@
     "user": "Utilisateur",
     "loadingTeamMembers": "Chargement des membres de l'équipe...",
     "pleaseWaitFetchTeam": "Veuillez patienter pendant que nous récupérons les données de votre équipe"
+    ,"filterSortButton": "Filtrer & Trier"
+    ,"filterSortTitle": "Options de filtrage et de tri"
+    ,"applyFiltersButton": "Appliquer les filtres"
   },
   "TasksPage": {
     "myTasks": "Mes tâches",
@@ -98,6 +101,9 @@
     "priorityHighSubtitle": "Important",
     "priorityMediumSubtitle": "Normal",
     "priorityLowSubtitle": "Optionnel"
+    ,"filterSortButton": "Filtrer & Trier"
+    ,"filterSortTitle": "Options de filtrage et de tri"
+    ,"applyFiltersButton": "Appliquer les filtres"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Toutes les annonces",
@@ -267,6 +273,9 @@
     "total": "Total",
     "exportCSV": "Exporter CSV",
     "exportPDF": "Exporter PDF",
+    "filterSortButton": "Filtrer & Trier",
+    "filterSortTitle": "Options de filtrage et de tri",
+    "applyFiltersButton": "Appliquer les filtres",
     "addExpenseIncome": "Ajouter {type}",
     "trackSpendingExpenses": "Suivez vos dépenses",
     "recordIncomeEarnings": "Enregistrez vos revenus",
@@ -320,6 +329,9 @@
     "trackWorkSessions": "Suivez vos sessions de travail et votre productivité",
     "timeSessions": "Sessions de temps",
     "viewManageSessions": "Voir et gérer vos sessions enregistrées"
+    ,"filterSortButton": "Filtrer & Trier"
+    ,"filterSortTitle": "Options de filtrage et de tri"
+    ,"applyFiltersButton": "Appliquer les filtres"
   },
   "StoragePage": {
     "storageUsage": "Utilisation du stockage",

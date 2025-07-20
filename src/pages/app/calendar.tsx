@@ -4,6 +4,13 @@ import { NextPageWithLayout } from "@/types";
 import { useTheme } from '@/components/ThemeContext';
 import CalendarPanel from "@/components/calendar/CalendarPanel";
 import CalendarEventsList from "@/components/calendar/CalendarEventsList";
+interface AnnouncementEvent {
+  _id: string;
+  title: string;
+  eventDate: string;
+  category: string;
+  content?: string;
+}
 import "react-calendar/dist/Calendar.css";
 
 interface Task {
@@ -28,6 +35,28 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
   const [loading, setLoading] = useState<boolean>(false);
   const [listError, setListError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [announcementEvents, setAnnouncementEvents] = useState<AnnouncementEvent[]>([]);
+  const fetchAnnouncementEvents = useCallback(async () => {
+    try {
+      const response = await fetch("/api/announcements?category=Event", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch announcement events.");
+      }
+      let data: AnnouncementEvent[] = await response.json();
+      // Only keep those with a valid eventDate
+      data = data.filter(ev => ev.eventDate);
+      // Map content to description for compatibility
+      const mapped = data.map(ev => ({ ...ev, description: ev.content }));
+      setAnnouncementEvents(mapped);
+      localStorage.setItem("announcementEvents", JSON.stringify(mapped));
+    } catch (err) {
+      // Optionally handle error
+    }
+  }, []);
 
   const handleDateChange = useCallback((date: Date | null) => {
     setSelectedDate(date);
@@ -64,44 +93,68 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
 
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks]);
+    fetchAnnouncementEvents();
+  }, [fetchTasks, fetchAnnouncementEvents]);
 
-  const handleTaskDrop = useCallback(async (taskId: string, date: Date) => {
+  // Accepts drag data in the form of 'task:<id>' or 'event:<id>'
+  const handleTaskDrop = useCallback(async (dragData: string, date: Date) => {
     setLoading(true);
     setListError(null);
+    let type = 'task';
+    let itemId = dragData;
+    if (dragData.includes(':')) {
+      const [prefix, id] = dragData.split(':');
+      type = prefix;
+      itemId = id;
+    }
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deadline: date }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update task deadline.");
+      if (type === 'task') {
+        const response = await fetch(`/api/tasks/${itemId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deadline: date }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to update task deadline.");
+        }
+        await fetchTasks();
+      } else if (type === 'event') {
+        const response = await fetch(`/api/announcements/${itemId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ eventDate: date }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to update event date.");
+        }
+        await fetchAnnouncementEvents();
       }
-      await fetchTasks();
     } catch (err) {
       setListError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  }, [fetchTasks]);
+  }, [fetchTasks, fetchAnnouncementEvents]);
 
-  // Memoize deadlines
+  // Memoize deadlines (tasks) and eventDates (announcement events)
   const deadlines = useMemo(() => tasks.map(task => new Date(task.deadline).toDateString()), [tasks]);
+  const eventDates = useMemo(() => announcementEvents.map(ev => new Date(ev.eventDate).toDateString()), [announcementEvents]);
 
   // Responsive: swap order on mobile (calendar first, then events list), keep original on desktop
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   const CalendarPanelSection = (
-    <div className={`flex-1 lg:flex-[4] p-3 sm:p-4 lg:p-6 xl:p-8 rounded-b-lg lg:rounded-r-lg lg:rounded-bl-none flex justify-center items-center w-full overflow-hidden ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} min-h-[400px] lg:min-h-[500px]`}>
+    <div className={`flex-1 lg:flex-[4] p-3 sm:p-4 lg:p-6 xl:p-8 rounded-b-lg lg:rounded-r-lg lg:rounded-bl-none flex justify-center items-center w-full overflow-hidden ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'} min-h-[400px] lg:min-h-[500px]`}>
       <div className="w-full h-full flex items-center justify-center">
         <CalendarPanel
           selectedDate={selectedDate}
           onDateChange={handleDateChange}
-          deadlines={deadlines}
+          deadlines={[...deadlines, ...eventDates]}
           theme={theme}
           tasks={tasks}
+          announcementEvents={announcementEvents}
           onTaskDrop={handleTaskDrop}
         />
       </div>
@@ -109,7 +162,7 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
   );
 
   const EventsListSection = (
-    <div className="flex flex-col justify-between p-4 sm:p-6 lg:p-6 xl:p-8 bg-gray-800 text-white rounded-t-lg lg:rounded-l-lg lg:rounded-tr-none flex-1 lg:flex-[1] min-w-0 w-full min-h-[400px] lg:min-h-[500px]">
+    <div className={`flex flex-col justify-between p-4 sm:p-6 lg:p-6 xl:p-8 rounded-t-lg lg:rounded-l-lg lg:rounded-tr-none flex-1 lg:flex-[1] min-w-0 w-full min-h-[400px] lg:min-h-[500px] ${theme === 'dark' ? 'bg-gray-800 text-white border border-gray-700' : 'bg-white text-gray-900 border border-gray-200'}`}>
       <div className="mb-6 lg:mb-8 flex-shrink-0">
         {selectedDate ? (
           <div>
@@ -146,14 +199,15 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
           selectedDate={selectedDate}
           loading={loading}
           listError={listError}
+          announcementEvents={announcementEvents}
         />
       </div>
     </div>
   );
 
   return (
-    <div className={`bg-${theme === 'light' ? 'white' : 'gray-900'} text-${theme === 'light' ? 'gray-900' : 'white'}`}>
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-gray-100 px-2 sm:px-4 lg:px-6 xl:px-8">
+    <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] px-2 sm:px-4 lg:px-6 xl:px-8">
         <main className="flex flex-col lg:flex-row w-full max-w-[2000px] gap-3 sm:gap-4 lg:gap-6 rounded-lg overflow-hidden min-h-[600px] lg:min-h-[700px] bg-transparent">
           {/* On mobile: calendar first, then events list. On desktop: events list left, calendar right. */}
           {typeof window !== 'undefined' && window.innerWidth < 1024 ? (

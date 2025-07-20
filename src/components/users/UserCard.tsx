@@ -63,7 +63,11 @@ const UserCard: React.FC<UserCardProps> = React.memo(({ user, theme, onClick }) 
 
   return (
     <Card
-      className={`relative p-6 rounded-2xl border border-[#e5e7eb] transition-all duration-150 cursor-pointer group bg-white`}
+      className={`relative p-6 rounded-2xl border transition-all duration-150 cursor-pointer group ${
+        theme === 'dark'
+          ? 'bg-gray-900 border-gray-700 text-white'
+          : 'bg-white border-[#e5e7eb] text-gray-900'
+      }`}
       onClick={handleClick}
     >
       <CardContent className="p-0">
@@ -88,7 +92,7 @@ const UserCard: React.FC<UserCardProps> = React.memo(({ user, theme, onClick }) 
             {/* Name and Role */}
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg leading-tight text-gray-900">
+                <h3 className={`font-semibold text-lg leading-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}> 
                   {user.userId.firstName} {user.userId.lastName}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
@@ -108,8 +112,8 @@ const UserCard: React.FC<UserCardProps> = React.memo(({ user, theme, onClick }) 
         </div>
         {/* Email - now below skills */}
         <div className="flex items-center gap-2 mt-3 mb-3">
-          <FaEnvelope className="w-3 h-3 text-gray-500" />
-          <span className="text-sm truncate text-gray-700">
+          <FaEnvelope className={`w-3 h-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+          <span className={`text-sm truncate ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
             {user.userId.email}
           </span>
         </div>
@@ -120,7 +124,7 @@ const UserCard: React.FC<UserCardProps> = React.memo(({ user, theme, onClick }) 
               <Badge
                 key={index}
                 variant="outline"
-                className="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600"
+                className={`inline-block px-2 py-0.5 text-xs rounded-full ${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-600'}`}
               >
                 {skill}
               </Badge>
@@ -128,14 +132,13 @@ const UserCard: React.FC<UserCardProps> = React.memo(({ user, theme, onClick }) 
             {user.userId.skills.length > 3 && (
               <Badge
                 variant="outline"
-                className="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-500"
+                className={`inline-block px-2 py-0.5 text-xs rounded-full ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}
               >
                 +{user.userId.skills.length - 3}
               </Badge>
             )}
           </div>
         )}
-        
         {/* Hover indicator */}
         <div
           className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-blue-500 transition-all duration-200 pointer-events-none"

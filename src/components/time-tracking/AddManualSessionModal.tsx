@@ -142,37 +142,37 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden">
+    <div className={`fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4`}>
+      <div className={`rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-700`}>
         {/* Close Button */}
         <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+          className="absolute top-4 right-4 text-xl font-bold z-10 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           onClick={onClose}
           aria-label="Close modal"
         >
           <FaTimes />
         </button>
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-blue-50">
+        <div className="p-6 border-b bg-blue-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
+            <div className="p-3 rounded-xl shadow-lg bg-blue-600 dark:bg-blue-700">
               <FaPlus className="text-xl text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{t("logNewSession")}</h2>
-              <p className="text-gray-600">{t("logTimeForTask")}</p>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t("logNewSession")}</h2>
+              <p className="text-gray-600 dark:text-gray-300">{t("logTimeForTask")}</p>
             </div>
           </div>
         </div>
         {/* Content */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4" id="manual-session-form">
           {error && (
-            <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 font-medium text-sm">{error}</p>
+            <div className="mb-2 p-2 rounded-lg bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700"> 
+              <p className="font-medium text-sm text-red-700 dark:text-red-300">{error}</p>
             </div>
           )}
           <div>
-            <label className="block text-gray-900 font-semibold mb-2 text-sm">{t("sessionName")}</label>
+            <label className="block font-semibold mb-2 text-sm text-gray-900 dark:text-white">{t("sessionName")}</label>
             <Input
               type="text"
               value={name}
@@ -180,10 +180,11 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
               required
               placeholder={t("sessionName")}
               disabled={loading}
+              className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
             />
           </div>
           <div>
-            <label className="block text-gray-900 font-semibold mb-2 text-sm">{t("sessionDescription")}</label>
+            <label className="block font-semibold mb-2 text-sm text-gray-900 dark:text-white">{t("sessionDescription")}</label>
             <Textarea
               value={description}
               onChange={handleDescriptionChange}
@@ -191,22 +192,23 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
               placeholder={t("sessionDescription")}
               rows={2}
               disabled={loading}
+              className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
             />
           </div>
           <div>
-            <label className="block text-gray-900 font-semibold mb-2 text-sm">{t("tag")}</label>
+            <label className="block font-semibold mb-2 text-sm text-gray-900 dark:text-white">{t("tag")}</label>
             <Select
               value={tag}
               onValueChange={handleTagChange}
               required
               disabled={loading}
             >
-              <SelectTrigger className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm bg-white">
+              <SelectTrigger className="w-full px-3 py-2 border rounded-lg focus:ring-2 transition-all duration-200 text-sm bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:border-green-500 dark:focus:ring-green-500/20">
                 <SelectValue placeholder={t("selectCategory")} />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-300 rounded-lg shadow-lg p-0 z-[250]">
+              <SelectContent className="bg-white border-gray-300 rounded-lg shadow-lg p-0 z-[250] dark:bg-gray-800 dark:border-gray-700">
                 {tags.map(tagName => (
-                  <SelectItem key={tagName} value={tagName}>
+                  <SelectItem key={tagName} value={tagName} className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 dark:text-white dark:bg-gray-800 dark:hover:bg-green-900 dark:focus:bg-green-900 dark:data-[state=checked]:bg-green-900 dark:data-[state=checked]:text-green-400 px-4 py-2 text-sm cursor-pointer transition-colors">
                     {tagName}
                   </SelectItem>
                 ))}
@@ -214,7 +216,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
             </Select>
           </div>
           <div>
-            <label className="block text-gray-900 font-semibold mb-2 text-sm">{t("duration24h")}</label>
+            <label className="block font-semibold mb-2 text-sm text-gray-900 dark:text-white">{t("duration24h")}</label>
             <div className="flex gap-2 items-center">
               <Input
                 type="number"
@@ -223,10 +225,10 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
                 value={hours}
                 onChange={handleHoursChange}
                 placeholder={t("hours")}
-                className="w-16 text-center"
+                className="w-16 text-center bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
                 disabled={loading}
               />
-              <span className="mx-1 font-bold text-gray-500">:</span>
+              <span className="mx-1 font-bold text-gray-500 dark:text-gray-400">:</span>
               <Input
                 type="number"
                 min={0}
@@ -234,10 +236,10 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
                 value={minutes}
                 onChange={handleMinutesChange}
                 placeholder={t("minutes")}
-                className="w-16 text-center"
+                className="w-16 text-center bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
                 disabled={loading}
               />
-              <span className="mx-1 font-bold text-gray-500">:</span>
+              <span className="mx-1 font-bold text-gray-500 dark:text-gray-400">:</span>
               <Input
                 type="number"
                 min={0}
@@ -245,49 +247,47 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
                 value={seconds}
                 onChange={handleSecondsChange}
                 placeholder={t("seconds")}
-                className="w-16 text-center"
+                className="w-16 text-center bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
                 disabled={loading}
               />
-              <span className="text-xs text-gray-500 ml-2">hh:mm:ss</span>
+              <span className="text-xs text-gray-500 ml-2 dark:text-gray-400">hh:mm:ss</span>
             </div>
           </div>
         </form>
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50">
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClose}
-              className="flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm"
-              disabled={loading}
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              form="manual-session-form"
-              onClick={handleSubmit}
-              disabled={isSaveDisabled}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
-                isSaveDisabled
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md"
-              }`}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <FaSpinner className="animate-spin w-3 h-3" />
-                  {t("saving")}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-2">
-                  <FaPlus className="w-3 h-3" />
-                  {t("saveSession")}
-                </div>
-              )}
-            </Button>
-          </div>
+        <div className="p-6 border-t flex gap-3 bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            className="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+            disabled={loading}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="submit"
+            form="manual-session-form"
+            onClick={handleSubmit}
+            disabled={isSaveDisabled}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
+              isSaveDisabled
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500' 
+                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white'
+            }`}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <FaSpinner className="animate-spin w-3 h-3" />
+                {t("saving")}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <FaPlus className="w-3 h-3" />
+                {t("saveSession")}
+              </div>
+            )}
+          </Button>
         </div>
       </div>
     </div>

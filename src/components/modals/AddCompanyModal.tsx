@@ -88,40 +88,40 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden border border-gray-200 dark:border-gray-700">
         {/* Close Button */}
         <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl font-bold z-10"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 text-xl font-bold z-10"
           onClick={onClose}
           aria-label={t("cancel", { default: "Cancel" })}
         >
           <FaTimes />
         </button>
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-blue-50">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
               <FaBuilding className="text-xl text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {t("addCompany", { default: "Add Company" })}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 {t("registerNewCompany", { default: "Register a new company" })}
               </p>
             </div>
           </div>
         </div>
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 bg-white dark:bg-gray-900">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium">
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-sm font-medium">
               {error}
             </div>
           )}
           <div>
-            <label className="block text-gray-900 font-semibold mb-2 text-sm">
+            <label className="block text-gray-900 dark:text-white font-semibold mb-2 text-sm">
               {t("companyName", { default: "Company Name" })} *
             </label>
             <Input
@@ -133,11 +133,11 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
               onChange={handleCompanyNameChange}
               required
               disabled={loading}
-              className="text-black w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+              className="text-black dark:text-white w-full px-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-800 focus:border-blue-500 dark:focus:border-blue-800 transition-all duration-200 text-sm bg-white dark:bg-gray-900"
             />
           </div>
           <div>
-            <label className="block text-gray-900 font-semibold mb-2 text-sm">
+            <label className="block text-gray-900 dark:text-white font-semibold mb-2 text-sm">
               {t("registrationNumber", { default: "Registration Number" })}
             </label>
             <Input
@@ -148,18 +148,18 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
               value={companyRegNr}
               onChange={handleCompanyRegNrChange}
               disabled={loading}
-              className="text-black w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm"
+              className="text-black dark:text-white w-full px-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-800 focus:border-blue-500 dark:focus:border-blue-800 transition-all duration-200 text-sm bg-white dark:bg-gray-900"
             />
           </div>
         </form>
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50">
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <div className="flex gap-3">
             <Button
               type="button"
               variant="secondary"
               onClick={handleFormClose}
-              className="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300"
+              className="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700"
               disabled={loading}
             >
               {t("cancel", { default: "Cancel" })}
@@ -170,8 +170,8 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
               disabled={loading || !companyName.trim()}
               className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
                 loading || !companyName.trim()
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md"
+                  ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-800 shadow-sm hover:shadow-md"
               }`}
             >
               {loading ? (

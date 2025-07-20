@@ -286,16 +286,16 @@ const UsersPage: NextPageWithLayout = React.memo(() => {
 
   return (
     <div
-      className={`relative min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}
+      className={`relative min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"} pt-10`}
     >
       <div className="px-2 lg:px-4 pt-4 mt-4">
         <div className="max-w-[100vw] mx-auto">
           <Card
-            className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}
+            className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border-t-0 border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}
           >
             {/* Users Header with Action Buttons */}
             <CardHeader
-              className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"} border-b`}
+              className={`p-6 ${theme === "dark" ? "bg-gray-700" : "bg-blue-50"}`}
             >
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -321,43 +321,40 @@ const UsersPage: NextPageWithLayout = React.memo(() => {
                 {user.role === "admin" && (
                   <div className="flex flex-wrap gap-3">
                     <Button
-                      asChild
+                      type="button"
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
                         theme === "dark"
                           ? "bg-blue-600 hover:bg-blue-700 text-white"
                           : "bg-blue-500 hover:bg-blue-600 text-white"
                       }`}
+                      onClick={handleOpenAddUserModal}
                     >
-                      <span onClick={handleOpenAddUserModal}>
-                        <FaUserPlus className="w-4 h-4" />
-                        <span>{t("addUser")}</span>
-                      </span>
+                      <FaUserPlus className="w-4 h-4" />
+                      <span>{t("addUser")}</span>
                     </Button>
                     <Button
-                      asChild
+                      type="button"
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
                         theme === "dark"
                           ? "bg-blue-600 hover:bg-blue-700 text-white"
                           : "bg-blue-500 hover:bg-blue-600 text-white"
                       }`}
+                      onClick={handleOpenAddRoleModal}
                     >
-                      <span onClick={handleOpenAddRoleModal}>
-                        <FaPlus className="w-4 h-4" />
-                        <span>{t("addRole")}</span>
-                      </span>
+                      <FaPlus className="w-4 h-4" />
+                      <span>{t("addRole")}</span>
                     </Button>
                     <Button
-                      asChild
+                      type="button"
                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transform hover:scale-[1.02] transition-all duration-200 ${
                         theme === "dark"
-                          ? "bg-slate-600 hover:bg-slate-700 text-white"
+                          ? "bg-slate-600 hover:bg-slate-750 text-white"
                           : "bg-slate-500 hover:bg-slate-600 text-white"
                       }`}
+                      onClick={handleOpenOrgChartModal}
                     >
-                      <span onClick={handleOpenOrgChartModal}>
-                        <FaSitemap className="w-4 h-4" />
-                        <span>{t("orgChart")}</span>
-                      </span>
+                      <FaSitemap className="w-4 h-4" />
+                      <span>{t("orgChart")}</span>
                     </Button>
                   </div>
                 )}
@@ -365,7 +362,7 @@ const UsersPage: NextPageWithLayout = React.memo(() => {
             </CardHeader>
             {/* Controls */}
             <CardContent
-              className={`p-6 ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"} border-b`}
+              className={`p-6 ${theme === "dark" ? "bg-gray-700" : "bg-gray-50"}`}
             >
               <UserList
                 users={users} // <-- Pass all users here!
