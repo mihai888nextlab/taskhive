@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         } as User);
       } else {
         setUser(null);
-        router.push("/login"); // Redirecționează la login dacă nu este autentificat
+        // router.push("/login"); // Redirecționează la login dacă nu este autentificat
       }
     } catch (err: unknown) {
       console.error("Error fetching user data in AuthProvider:", err);
@@ -154,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (response.ok) {
           await fetchUserData();
-          router.push("/app");
+          router.push("/app/select-company");
           return true;
         } else {
           const errData = await response.json();

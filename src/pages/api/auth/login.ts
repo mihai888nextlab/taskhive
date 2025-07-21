@@ -22,89 +22,13 @@ export default async function handler(
 
   await dbConnect();
 
-  const { email, password, googleToken } = req.body;
+  const { email, password } = req.body;
 
   // Basic validation
   if (!email || !password) {
     return res
       .status(400)
       .json({ message: "All required fields must be filled." });
-  }
-
-  // If googleToken is present, handle Google login
-  if (googleToken) {
-    try {
-      const ticket = await googleClient.verifyIdToken({
-        idToken: googleToken,
-        audience: GOOGLE_CLIENT_ID,
-      });
-      const payload = ticket.getPayload();
-      if (!payload || !payload.email) {
-        return res.status(400).json({ message: "Invalid Google token." });
-      }
-
-      const existingUser = await userModel.findOne({ email: payload.email });
-      if (!existingUser) {
-        return res.status(400).json({
-          message: "No account found for this Google user.",
-        });
-      }
-
-      const userCompany = await userCompanyModel.findOne({
-        userId: existingUser._id,
-      });
-
-      if (!userCompany) {
-        return res.status(400).json({ message: "An error occured!" });
-      }
-
-      const company = await companyModel.findById(userCompany.companyId);
-
-      if (!company) {
-        return res.status(400).json({ message: "An error occured!" });
-      }
-
-      const token = sign(
-        {
-          userId: existingUser._id,
-          email: existingUser.email,
-          role: userCompany.role,
-          companyId: company._id,
-          firstName: existingUser.firstName,
-          lastName: existingUser.lastName,
-        },
-        JWT_SECRET,
-        { expiresIn: "1d" }
-      );
-
-      res.setHeader(
-        "Set-Cookie",
-        serialize("auth_token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 5 * 60 * 60 * 24,
-          path: "/",
-        })
-      );
-
-      return res.status(201).json({
-        message: "Google login successful.",
-        token,
-        user: {
-          _id: existingUser._id,
-          email: existingUser.email,
-          firstName: existingUser.firstName,
-          lastName: existingUser.lastName,
-        },
-        company: company,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: "Google login failed.",
-        error: error.message,
-      });
-    }
   }
 
   try {
