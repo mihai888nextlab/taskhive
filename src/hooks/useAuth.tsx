@@ -22,10 +22,9 @@ interface AuthContextType {
   register: (
     email: string,
     password: string,
+    confirmPassword: string,
     firstName: string,
-    lastName: string,
-    companyName: string,
-    vatNumber?: string
+    lastName: string
   ) => Promise<boolean>; // Adaugă funcție de register
   logout: () => void; // Adaugă funcție de logout
 }
@@ -74,6 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setError(null);
       try {
         let res;
+        setLoadingUser(true);
         if (provider == "google" && credentials.code) {
           res = await fetch("/api/auth/google", {
             method: "POST",
@@ -87,6 +87,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           credentials.email &&
           credentials.password
         ) {
+          if (!credentials.email || !credentials.password) {
+            setError("Email and password are required.");
+            setUser(null);
+            setLoadingUser(false);
+            return false;
+          }
+
           res = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -131,14 +138,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     async (
       email: string,
       password: string,
+      confirmPassword: string,
       firstName: string,
-      lastName: string,
-      companyName: string,
-      vatNumber?: string
+      lastName: string
     ): Promise<boolean> => {
       setLoadingUser(true);
       setError(null);
+
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        setUser(null);
+        setLoadingUser(false);
+        return false;
+      }
+
+      if (!email || !password || !firstName || !lastName) {
+        setError("All fields are required.");
+        setUser(null);
+        setLoadingUser(false);
+        return false;
+      }
+
       try {
+        setLoadingUser(true);
         const response = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -147,8 +169,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             password,
             firstName,
             lastName,
-            companyName,
-            companyRegistrationNumber: vatNumber,
           }),
         });
 

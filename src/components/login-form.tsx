@@ -10,14 +10,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormEvent, useEffect } from "react";
-import {
-  GoogleLogin,
-  GoogleOAuthProvider,
-  useGoogleLogin,
-} from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/router";
-import { GoogleAuth } from "google-auth-library";
 
 export function LoginForm({
   className,
@@ -40,7 +35,6 @@ export function LoginForm({
   }) => void;
 }) {
   const { login, loadingUser, error } = useAuth();
-  const router = useRouter();
 
   const handleGoogleSuccess = async (response: any) => {
     if (response) {
@@ -75,6 +69,7 @@ export function LoginForm({
             Login with your Google account
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="flex items-center gap-2 my-2">
@@ -124,11 +119,32 @@ export function LoginForm({
                   autoComplete="current-password"
                 />
               </div>
+              {error && (
+                <div className="w-full flex justify-center">
+                  <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow mt-4 mb-2 max-w-md text-center flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-red-500 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"
+                      />
+                    </svg>
+                    <span>{error}</span>
+                  </div>
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full py-2"
+                disabled={loadingUser}
               >
-                Login
+                {loadingUser ? "Logging in..." : "Login"}
               </Button>
             </div>
             <div className="text-center text-xs text-gray-400 mt-4">
