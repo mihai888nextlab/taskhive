@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Teamkatalog",
+    "export": "Exportera",
     "teamDirectoryDescription": "Visa och hantera alla teammedlemmar i din organisation",
     "addUser": "Lägg till användare",
     "addRole": "Lägg till roll",
@@ -185,6 +186,7 @@
     "pleaseWaitExpenses": "Vänligen vänta medan vi hämtar dina utgiftsdata",
     "pleaseWaitIncome": "Vänligen vänta medan vi hämtar dina inkomstdata",
     "noExpensesYet": "Inga utgifter ännu",
+    "export": "Exportera",
     "noIncomeYet": "Ingen inkomst ännu",
     "noMatchingExpenses": "Inga matchande utgifter hittades",
     "noMatchingIncome": "Ingen matchande inkomst hittades",
@@ -208,6 +210,7 @@
     "applyFiltersButton": "Använd filter"
   },
   "TasksPage": {
+    "export": "Exportera",
     "myTasks": "Mina uppgifter",
     "myTasksDescription": "Uppgifter tilldelade dig och personliga uppgifter du har skapat",
     "assignedByMe": "Uppgifter tilldelade av mig",
@@ -516,6 +519,7 @@
   },
   "DashboardPage": {
     "tasks": "Uppgifter",
+    "loadingDashboard": "Laddar instrumentpanel...",
     "tasksDescription": "Organisera och följ upp teamets uppgifter och framsteg.",
     "goToTasksPage": "Gå till uppgiftssidan",
     "announcement": "Meddelande",

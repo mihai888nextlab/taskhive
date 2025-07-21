@@ -30,6 +30,7 @@
     ,"applyFiltersButton": "Aplicar filtros"
   },
   "TasksPage": {
+    "export": "Exportar",
     "myTasks": "Mis tareas",
     "myTasksDescription": "Tareas asignadas a ti y tareas personales que has creado",
     "assignedByMe": "Tareas asignadas por mí",
@@ -221,6 +222,7 @@
     "startNewChat": "Inicia un nuevo chat para conectar con tu equipo"
   },
   "FinancePage": {
+    "export": "Exportar",
     "expenses": "Gastos",
     "income": "Ingresos",
     "addExpense": "Agregar gasto",
@@ -513,6 +515,7 @@
   },
   "DashboardPage": {
     "tasks": "Tareas",
+    "loadingDashboard": "Cargando panel...",
     "tasksDescription": "Organiza y controla las asignaciones y el progreso de tu equipo.",
     "goToTasksPage": "Ir a la página de tareas",
     "announcement": "Anuncio",

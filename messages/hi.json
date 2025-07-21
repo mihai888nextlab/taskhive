@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "टीम निर्देशिका",
+    "export": "निर्यात",
     "teamDirectoryDescription": "अपनी संस्था के सभी सदस्यों को देखें और प्रबंधित करें",
     "addUser": "यूज़र जोड़ें",
     "addRole": "भूमिका जोड़ें",
@@ -30,6 +31,7 @@
     ,"applyFiltersButton": "फ़िल्टर लागू करें"
   },
   "TasksPage": {
+    "export": "निर्यात",
     "myTasks": "मेरी कार्य",
     "myTasksDescription": "आपको सौंपे गए कार्य और आपके द्वारा बनाए गए व्यक्तिगत कार्य",
     "assignedByMe": "मेरे द्वारा सौंपे गए कार्य",
@@ -261,6 +263,7 @@
     "pleaseWaitExpenses": "कृपया प्रतीक्षा करें, आपके खर्च डेटा प्राप्त किए जा रहे हैं",
     "pleaseWaitIncome": "कृपया प्रतीक्षा करें, आपकी आय डेटा प्राप्त की जा रही है",
     "noExpensesYet": "अभी तक कोई खर्च नहीं है",
+    "export": "निर्यात",
     "noIncomeYet": "अभी तक कोई आय नहीं है",
     "noMatchingExpenses": "कोई मेल खाने वाला खर्च नहीं मिला",
     "noMatchingIncome": "कोई मेल खाने वाली आय नहीं मिली",
@@ -516,6 +519,7 @@
   },
   "DashboardPage": {
     "tasks": "कार्य",
+    "loadingDashboard": "डैशबोर्ड लोड हो रहा है...",
     "tasksDescription": "अपनी टीम के कार्य और प्रगति को व्यवस्थित और ट्रैक करें।",
     "goToTasksPage": "कार्य पृष्ठ पर जाएँ",
     "announcement": "घोषणा",

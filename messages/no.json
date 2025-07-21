@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Teamkatalog",
+    "export": "Eksporter",
     "teamDirectoryDescription": "Se og administrer alle teammedlemmer i organisasjonen din",
     "addUser": "Legg til bruker",
     "addRole": "Legg til rolle",
@@ -186,6 +187,7 @@
     "pleaseWaitExpenses": "Vennligst vent mens vi henter utgiftsdataene dine",
     "pleaseWaitIncome": "Vennligst vent mens vi henter inntektsdataene dine",
     "noExpensesYet": "Ingen utgifter ennå",
+    "export": "Eksporter",
     "noIncomeYet": "Ingen inntekt ennå",
     "noMatchingExpenses": "Ingen samsvarende utgifter funnet",
     "noMatchingIncome": "Ingen samsvarende inntekt funnet",
@@ -209,6 +211,7 @@
     "applyFiltersButton": "Bruk filtre"
   },
   "TasksPage": {
+    "export": "Eksporter",
     "myTasks": "Mine oppgaver",
     "myTasksDescription": "Oppgaver tildelt deg og personlige oppgaver du har opprettet",
     "assignedByMe": "Oppgaver tildelt av meg",
@@ -518,6 +521,7 @@
   },
   "DashboardPage": {
     "tasks": "Oppgaver",
+    "loadingDashboard": "Laster dashbord...",
     "tasksDescription": "Organiser og følg opp teamets oppgaver og fremdrift.",
     "goToTasksPage": "Gå til oppgavesiden",
     "announcement": "Kunngjøring",

@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Takım Dizini",
+    "export": "Dışa aktar",
     "teamDirectoryDescription": "Organizasyonunuzdaki tüm takım üyelerini görüntüleyin ve yönetin",
     "addUser": "Kullanıcı Ekle",
     "addRole": "Rol Ekle",
@@ -30,6 +31,7 @@
     "applyFiltersButton": "Filtreleri Uygula"
   },
   "TasksPage": {
+    "export": "Dışa aktar",
     "myTasks": "Görevlerim",
     "myTasksDescription": "Size atanan ve oluşturduğunuz kişisel görevler",
     "assignedByMe": "Benim Atadıklarım",
@@ -261,6 +263,7 @@
     "pleaseWaitExpenses": "Gider verileriniz yüklenirken lütfen bekleyin",
     "pleaseWaitIncome": "Gelir verileriniz yüklenirken lütfen bekleyin",
     "noExpensesYet": "Henüz gider yok",
+    "export": "Dışa aktar",
     "noIncomeYet": "Henüz gelir yok",
     "noMatchingExpenses": "Eşleşen gider bulunamadı",
     "noMatchingIncome": "Eşleşen gelir bulunamadı",
@@ -516,6 +519,7 @@
   },
   "DashboardPage": {
     "tasks": "Görevler",
+    "loadingDashboard": "Kontrol paneli yükleniyor...",
     "tasksDescription": "Takımınızın görevlerini ve ilerlemesini organize edin ve takip edin.",
     "goToTasksPage": "Görevler sayfasına git",
     "announcement": "Duyuru",

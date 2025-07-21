@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Tim direktorijum",
+    "export": "Izvoz",
     "teamDirectoryDescription": "Pregledaj i upravljaj svim članovima tvoje organizacije",
     "addUser": "Dodaj korisnika",
     "addRole": "Dodaj ulogu",
@@ -30,6 +31,7 @@
     "applyFiltersButton": "Примени филтере"
   },
   "TasksPage": {
+    "export": "Izvoz",
     "myTasks": "Moji zadaci",
     "myTasksDescription": "Zadaci dodeljeni vama i lični zadaci koje ste kreirali",
     "assignedByMe": "Zadaci koje sam dodelio",
@@ -261,6 +263,7 @@
     "pleaseWaitExpenses": "Molimo sačekajte dok preuzimamo podatke o troškovima",
     "pleaseWaitIncome": "Molimo sačekajte dok preuzimamo podatke o prihodima",
     "noExpensesYet": "Još nema troškova",
+    "export": "Izvoz",
     "noIncomeYet": "Još nema prihoda",
     "noMatchingExpenses": "Nema odgovarajućih troškova",
     "noMatchingIncome": "Nema odgovarajućih prihoda",
@@ -515,6 +518,7 @@
   },
   "DashboardPage": {
     "tasks": "Zadaci",
+    "loadingDashboard": "Učitavanje kontrolne table...",
     "tasksDescription": "Organizujte i pratite zadatke i napredak vašeg tima.",
     "goToTasksPage": "Idi na stranicu zadataka",
     "announcement": "Obaveštenje",

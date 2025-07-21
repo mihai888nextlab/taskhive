@@ -320,15 +320,149 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
     setShowForm(false);
   }, [resetForm]);
 
+  // --- Export Handlers ---
+  // CSV Export
+  const handleExportCSV = useCallback(() => {
+    const allTasks = activeTab === 'my-tasks' ? tasks : assignedTasks;
+    if (!allTasks.length) return;
+    const rows = [
+      ["Title", "Description", "Deadline", "Completed", "Created By", "Created At"],
+      ...allTasks.map(t => [
+        t.title,
+        t.description || "",
+        t.deadline ? new Date(t.deadline).toLocaleString() : "",
+        t.completed ? "Yes" : "No",
+        t.createdBy ? `${t.createdBy.firstName} ${t.createdBy.lastName}` : "",
+        t.createdAt ? new Date(t.createdAt).toLocaleString() : "",
+      ])
+    ];
+    const csv = rows.map(r => r.map(f => `"${String(f).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    // @ts-ignore
+    (window.saveAs || require('file-saver').saveAs)(blob, `tasks_${activeTab}.csv`);
+  }, [tasks, assignedTasks, activeTab]);
+
+  // PDF Export
+  const handleExportPDF = useCallback(() => {
+    const allTasks = activeTab === 'my-tasks' ? tasks : assignedTasks;
+    if (!allTasks.length) return;
+    const jsPDF = require('jspdf').default;
+    const autoTableModule = require('jspdf-autotable');
+    const autoTable = autoTableModule.default || autoTableModule;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    // Header (dark blue, visually consistent)
+    doc.setFillColor(17, 24, 39);
+    doc.rect(0, 0, 210, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.text("Tasks Report", 14, 20);
+    doc.setFontSize(12);
+    doc.setTextColor(34, 34, 34);
+    // Table columns and rows
+    // Only include relevant columns, no Assigned To and no creator email
+    const columns = [
+      { header: "Title", dataKey: "title" },
+      { header: "Description", dataKey: "description" },
+      { header: "Deadline", dataKey: "deadline" },
+      { header: "Completed", dataKey: "completed" },
+      { header: "Created By", dataKey: "createdBy" },
+      { header: "Created At", dataKey: "createdAt" },
+    ];
+    const rows = allTasks.map(t => ({
+      title: t.title,
+      description: (t.description || "").replace(/\r\n|\r|\n/g, "\n"),
+      deadline: t.deadline ? new Date(t.deadline).toLocaleString() : "",
+      completed: t.completed ? "Yes" : "No",
+      createdBy: t.createdBy ? `${t.createdBy.firstName} ${t.createdBy.lastName}` : "",
+      createdAt: t.createdAt ? new Date(t.createdAt).toLocaleString() : "",
+    }));
+    // Adjusted column widths to fit all data
+    const colWidths = {
+      title: 32,
+      description: 60,
+      deadline: 32,
+      completed: 20,
+      createdBy: 32,
+      createdAt: 32,
+    };
+    const totalWidth = Object.values(colWidths).reduce((a, b) => a + b, 0);
+    // Center the table horizontally
+    const margin = (210 - totalWidth) / 2;
+    autoTable(doc, {
+      startY: 38,
+      columns,
+      body: rows,
+      headStyles: {
+        fillColor: [17, 24, 39],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 11,
+        halign: 'left',
+        valign: 'middle',
+        cellPadding: 2.5,
+      },
+      bodyStyles: {
+        fontSize: 10,
+        textColor: 34,
+        cellPadding: 2,
+        halign: 'left',
+        valign: 'top',
+        lineColor: [220, 220, 220],
+        minCellHeight: 7,
+        overflow: 'linebreak',
+        font: 'helvetica',
+      },
+      alternateRowStyles: {
+        fillColor: [241, 245, 249],
+        textColor: 34,
+      },
+      columnStyles: {
+        title: { cellWidth: colWidths.title },
+        description: { cellWidth: colWidths.description },
+        deadline: { cellWidth: colWidths.deadline },
+        completed: { cellWidth: colWidths.completed },
+        createdBy: { cellWidth: colWidths.createdBy },
+        createdAt: { cellWidth: colWidths.createdAt },
+      },
+      margin: { left: margin, right: margin },
+      styles: {
+        font: 'helvetica',
+        fontSize: 10,
+        cellPadding: 2,
+        overflow: 'linebreak',
+        halign: 'left',
+        valign: 'top',
+        minCellHeight: 7,
+        textColor: 34,
+      },
+      didDrawPage: (data: any) => {
+        const pageCount = doc.getNumberOfPages();
+        const pageNumber = doc.getCurrentPageInfo().pageNumber;
+        doc.setFontSize(9);
+        doc.setTextColor(150);
+        doc.text(`Page ${pageNumber} of ${pageCount}`,
+          200, 290, { align: 'right' });
+      },
+      didParseCell: function (data: any) {
+        if (data.column.dataKey === 'description') {
+          data.cell.styles.valign = 'top';
+          data.cell.styles.fontStyle = 'normal';
+        }
+      },
+    });
+    doc.save(`tasks_${activeTab}.pdf`);
+  }, [tasks, assignedTasks, activeTab]);
+
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       {/* Header Section - Outside main container */}
       <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'} ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} px-4 lg:px-8 pt-10`}>
         <div className="max-w-[100vw] mx-auto">
-          {/* Tab Navigation & Create Button */}
+          {/* Header: Tab Navigation and Create Button (no export dropdown here) */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             {/* Tab Buttons */}
-            <div className={`flex rounded-xl p-1 gap-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+            <div className={`flex rounded-xl p-1 gap-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}> 
               <Button
                 type="button"
                 onClick={() => setActiveTab('my-tasks')}
@@ -393,17 +527,63 @@ const TasksPage: NextPageWithLayout = React.memo((props) => {
               <div className="flex flex-col">
                 {/* My Tasks Header - Compact */}
                 <CardHeader className={`p-6 ${theme === "light" ? "bg-blue-50 border-gray-200" : "bg-gray-700 border-gray-600"} border-b`}>
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
-                      <FaTasks className="w-5 h-5 text-white" />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}> 
+                        <FaTasks className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}> 
+                          {t("myTasks")}
+                        </h2>
+                        <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}> 
+                          {t("myTasksDescription")}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
-                        {t("myTasks")}
-                      </h2>
-                      <p className={`text-sm ${theme === "light" ? "text-gray-600" : "text-gray-300"}`}>
-                        {t("myTasksDescription")}
-                      </p>
+                    {/* Export Dropdown Button (moved here) */}
+                    <div className="relative export-dropdown" tabIndex={0}>
+                      <Button
+                        type="button"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200 ${
+                          theme === 'dark' ? 'bg-slate-600 text-white hover:bg-slate-700' : 'bg-slate-500 text-white hover:bg-slate-600'
+                        }`}
+                        title="Export"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        tabIndex={0}
+                        onClick={e => {
+                          const dropdown = (e.currentTarget.parentElement?.querySelector('.export-dropdown-menu') as HTMLElement);
+                          if (dropdown) {
+                            dropdown.classList.toggle('hidden');
+                          }
+                        }}
+                      >
+                        {/* Export Icon */}
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
+                        <span>{t("export")}</span>
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                      </Button>
+                      <div className="export-dropdown-menu absolute z-20 left-0 mt-2 min-w-[120px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hidden">
+                        <button
+                          type="button"
+                          onClick={e => { handleExportPDF(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-xl focus:outline-none"
+                        >
+                          {/* PDF file icon */}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#E53E3E"/><rect x="7" y="6" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="10" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="14" width="6" height="2" rx="1" fill="#fff"/><text x="12" y="19" textAnchor="middle" fontSize="7" fill="#fff" fontWeight="bold">PDF</text></svg>
+                          PDF
+                        </button>
+                        <button
+                          type="button"
+                          onClick={e => { handleExportCSV(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-xl focus:outline-none"
+                        >
+                          {/* CSV file icon */}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#38A169"/><rect x="7" y="6" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="10" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="14" width="6" height="2" rx="1" fill="#fff"/><text x="12" y="19" textAnchor="middle" fontSize="7" fill="#fff" fontWeight="bold">CSV</text></svg>
+                          CSV
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </CardHeader>

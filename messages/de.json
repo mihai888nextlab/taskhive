@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Teamverzeichnis",
+    "export": "Exportieren",
     "teamDirectoryDescription": "Alle Teammitglieder in Ihrer Organisation anzeigen und verwalten",
     "addUser": "Benutzer hinzufügen",
     "addRole": "Rolle hinzufügen",
@@ -36,6 +37,7 @@
     "filteredBy": "Gefiltert nach: {role}"
   },
   "TasksPage": {
+    "export": "Exportieren",
     "myTasks": "Meine Aufgaben",
     "myTasksDescription": "Aufgaben, die Ihnen zugewiesen wurden und persönliche Aufgaben, die Sie erstellt haben",
     "assignedByMe": "Von mir zugewiesene Aufgaben",
@@ -106,16 +108,10 @@
     "priorityCriticalSubtitle": "Dringend",
     "priorityHighSubtitle": "Wichtig",
     "priorityMediumSubtitle": "Normal",
-    "priorityLowSubtitle": "Schön zu haben"
-    ,"filterSortButton": "Filtern & Sortieren"
-    ,"filterSortTitle": "Filter- und Sortieroptionen"
-    ,"applyFiltersButton": "Filter anwenden"
-    ,"filterSortButton": "Filtern & Sortieren"
-    ,"filterSortTitle": "Filter- und Sortieroptionen"
-    ,"applyFiltersButton": "Filter anwenden"
-    ,"filterSortButton": "Filtern & Sortieren"
-    ,"filterSortTitle": "Filter- und Sortieroptionen"
-    ,"applyFiltersButton": "Filter anwenden"
+    "priorityLowSubtitle": "Schön zu haben",
+    "filterSortButton": "Filtern & Sortieren",
+    "filterSortTitle": "Filter- und Sortieroptionen",
+    "applyFiltersButton": "Filter anwenden"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Alle Ankündigungen",
@@ -233,6 +229,7 @@
     "typeMessage": "Nachricht eingeben..."
   },
   "FinancePage": {
+    "export": "Exportieren",
     "expenses": "Ausgaben",
     "income": "Einnahmen",
     "addExpense": "Ausgabe hinzufügen",
@@ -294,12 +291,6 @@
     ,"filterSortButton": "Filtern & Sortieren"
     ,"filterSortTitle": "Filter- und Sortieroptionen"
     ,"applyFiltersButton": "Filter anwenden"
-    ,"filterSortButton": "Filtern & Sortieren"
-    ,"filterSortTitle": "Filter- und Sortieroptionen"
-    ,"applyFiltersButton": "Filter anwenden"
-    ,"filterSortButton": "Filtern & Sortieren"
-    ,"filterSortTitle": "Filter- und Sortieroptionen"
-    ,"applyFiltersButton": "Filter anwenden"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Zeit für Aufgabe erfassen",
@@ -347,12 +338,6 @@
     "trackWorkSessions": "Verfolgen Sie Ihre Arbeitssitzungen und Produktivität",
     "timeSessions": "Zeitsitzungen",
     "viewManageSessions": "Erfasste Zeitsitzungen anzeigen und verwalten"
-    ,"filterSortButton": "Filtern & Sortieren"
-    ,"filterSortTitle": "Filter- und Sortieroptionen"
-    ,"applyFiltersButton": "Filter anwenden"
-    ,"filterSortButton": "Filtern & Sortieren"
-    ,"filterSortTitle": "Filter- und Sortieroptionen"
-    ,"applyFiltersButton": "Filter anwenden"
     ,"filterSortButton": "Filtern & Sortieren"
     ,"filterSortTitle": "Filter- und Sortieroptionen"
     ,"applyFiltersButton": "Filter anwenden"
@@ -539,6 +524,7 @@
   },
   "DashboardPage": {
     "tasks": "Aufgaben",
+    "loadingDashboard": "Dashboard wird geladen...",
     "tasksDescription": "Organisieren und verfolgen Sie die Aufgaben und den Fortschritt Ihres Teams.",
     "goToTasksPage": "Zur Aufgaben-Seite",
     "announcement": "Ankündigung",

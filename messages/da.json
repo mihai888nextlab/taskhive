@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Teamoversigt",
+    "export": "Eksportér",
     "teamDirectoryDescription": "Se og administrer alle teammedlemmer i din organisation",
     "addUser": "Tilføj bruger",
     "addRole": "Tilføj rolle",
@@ -33,6 +34,7 @@
     "filteredBy": "Filtreret efter: {role}"
   },
   "TasksPage": {
+    "export": "Eksportér",
     "myTasks": "Mine opgaver",
     "myTasksDescription": "Opgaver tildelt dig og personlige opgaver du har oprettet",
     "assignedByMe": "Opgaver tildelt af mig",
@@ -264,6 +266,7 @@
     "pleaseWaitExpenses": "Vent venligst mens vi henter dine udgiftsdata",
     "pleaseWaitIncome": "Vent venligst mens vi henter dine indkomstoplysninger",
     "noExpensesYet": "Ingen udgifter endnu",
+    "export": "Eksportér",
     "noIncomeYet": "Ingen indkomst endnu",
     "noMatchingExpenses": "Ingen matchende udgifter fundet",
     "noMatchingIncome": "Ingen matchende indkomst fundet",
@@ -518,6 +521,7 @@
   },
   "DashboardPage": {
     "tasks": "Opgaver",
+    "loadingDashboard": "Indlæser dashboard...",
     "tasksDescription": "Organisér og følg dit teams opgaver og fremskridt.",
     "goToTasksPage": "Gå til opgaveside",
     "announcement": "Meddelelse",

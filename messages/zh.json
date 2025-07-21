@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "团队目录",
+    "export": "导出",
     "teamDirectoryDescription": "查看和管理组织中的所有成员",
     "addUser": "添加用户",
     "addRole": "添加角色",
@@ -30,6 +31,7 @@
     "applyFiltersButton": "应用筛选器"
   },
   "TasksPage": {
+    "export": "导出",
     "myTasks": "我的任务",
     "myTasksDescription": "分配给您的任务和您创建的个人任务",
     "assignedByMe": "我分配的任务",
@@ -221,6 +223,7 @@
     "startNewChat": "开始新的聊天，与您的团队沟通"
   },
   "FinancePage": {
+    "export": "导出",
     "expenses": "支出",
     "income": "收入",
     "addExpense": "添加支出",
@@ -509,6 +512,7 @@
   },
   "DashboardPage": {
     "tasks": "任务",
+    "loadingDashboard": "正在加载仪表板...",
     "tasksDescription": "组织并跟踪您的团队任务和进度。",
     "goToTasksPage": "前往任务页面",
     "announcement": "公告",

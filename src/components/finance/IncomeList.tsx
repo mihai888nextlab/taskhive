@@ -124,8 +124,8 @@ const IncomeList: React.FC<IncomeListProps> = React.memo(({
     <div className="flex flex-col h-full">
       {/* Controls */}
       <div className="flex-shrink-0 p-3">
-        {/* Search, Export Row */}
-        <div className="flex gap-3 items-center">
+        {/* Search and Filter/Sort on same line */}
+        <div className="flex gap-2 items-center w-full">
           <div className="flex-1 relative">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
             <Input
@@ -142,46 +142,9 @@ const IncomeList: React.FC<IncomeListProps> = React.memo(({
               disabled={loading}
             />
           </div>
-          <div className="flex gap-2 items-center">
-            <Button
-              onClick={onExportCSV}
-              disabled={loading}
-              className={`p-2 rounded-xl font-medium transition-all duration-200 h-11 w-11 flex items-center justify-center
-                ${loading
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : theme === 'dark'
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              style={{ height: "36px", width: "36px", minWidth: "36px", minHeight: "36px" }}
-              title={t("exportCSV")}
-              variant="ghost"
-            >
-              <FaFileCsv className="w-4 h-4" />
-            </Button>
-            <Button
-              onClick={onExportPDF}
-              disabled={loading}
-              className={`p-2 rounded-xl font-medium transition-all duration-200 h-11 w-11 flex items-center justify-center
-                ${loading
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : theme === 'dark'
-                    ? 'bg-red-600 text-white hover:bg-red-700'
-                    : 'bg-red-500 text-white hover:bg-red-600'
-                }`}
-              style={{ height: "36px", width: "36px", minWidth: "36px", minHeight: "36px" }}
-              title={t("exportPDF")}
-              variant="ghost"
-            >
-              <FaFilePdf className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-        {/* Filter & Sort Button: on its own row on mobile, inline on desktop */}
-        <div className="flex w-full mt-2 md:mt-0 md:w-auto md:inline-flex md:justify-end">
           <Button
             type="button"
-            className="rounded-xl px-4 py-2 font-semibold text-sm bg-green-500 hover:bg-green-600 text-white shadow flex items-center justify-center gap-2 w-full md:w-auto"
+            className="rounded-xl px-4 py-2 font-semibold text-sm bg-green-500 hover:bg-green-600 text-white shadow flex items-center justify-center gap-2 md:w-auto"
             onClick={() => setShowFilterModal(true)}
             style={{ minWidth: 0, height: 40, justifyContent: 'center' }}
             title={t("filterSortButton", { default: "Filter & Sort" })}

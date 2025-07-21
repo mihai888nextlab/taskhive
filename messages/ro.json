@@ -28,8 +28,10 @@
     ,"filterSortButton": "Filtrează & Sortează"
     ,"filterSortTitle": "Opțiuni de filtrare și sortare"
     ,"applyFiltersButton": "Aplică filtrele"
+    ,"export": "Exportă"
   },
   "TasksPage": {
+    "export": "Exportă",
     "myTasks": "Sarcinile mele",
     "myTasksDescription": "Sarcini atribuite ție și sarcini personale create de tine",
     "assignedByMe": "Sarcini atribuite de mine",
@@ -221,6 +223,7 @@
     "startNewChat": "Începe un chat nou pentru a comunica cu echipa ta"
   },
   "FinancePage": {
+    "export": "Exportă",
     "expenses": "Cheltuieli",
     "income": "Venituri",
     "addExpense": "Adaugă cheltuială",
@@ -515,6 +518,7 @@
   },
   "DashboardPage": {
     "tasks": "Sarcini",
+    "loadingDashboard": "Se încarcă tabloul de bord...",
     "tasksDescription": "Organizează și urmărește atribuțiile și progresul echipei tale.",
     "goToTasksPage": "Mergi la pagina de sarcini",
     "announcement": "Anunț",

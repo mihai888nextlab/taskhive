@@ -1,10 +1,22 @@
 import React, { useMemo, useCallback } from "react";
-import { FaPlay, FaPause, FaStop, FaSave } from "react-icons/fa";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { FaFilePdf } from "react-icons/fa";
+import { saveAs } from "file-saver";
+import { FaPlay, FaPause, FaStop, FaSave, FaDownload } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
+
+interface TimeSession {
+  name: string;
+  description: string;
+  tag?: string;
+  duration: number;
+  createdAt: string;
+}
 
 interface TimerAndFormPanelProps {
   elapsedTime: number;
@@ -27,6 +39,8 @@ interface TimerAndFormPanelProps {
   pomodoroCycles?: number;
   workDuration?: number;
   breakDuration?: number;
+  sessions?: TimeSession[];
+  onExportCSV?: () => void;
 }
 
 const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
@@ -49,8 +63,109 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
   pomodoroCycles = 0,
   workDuration = 25 * 60,
   breakDuration = 5 * 60,
-  ...props
+  sessions = [],
+  onExportCSV,
 }) => {
+  // PDF Export Handler for time sessions
+  const handleExportPDF = useCallback(() => {
+    if (!sessions || sessions.length === 0) {
+      alert("No sessions to export.");
+      return;
+    }
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    // Header (dark blue, like expense list)
+    doc.setFillColor(17, 24, 39);
+    doc.rect(0, 0, 210, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.text("Time Sessions Report", 14, 20);
+    doc.setFontSize(12);
+    doc.setTextColor(34, 34, 34);
+
+    // Table columns
+    const columns = [
+      { header: "Name", dataKey: "name" },
+      { header: "Description", dataKey: "description" },
+      { header: "Tag", dataKey: "tag" },
+      { header: "Duration (h)", dataKey: "duration" },
+      { header: "Date", dataKey: "createdAt" },
+    ];
+
+    // Prepare rows
+    const rows = sessions.map(s => ({
+      name: s.name,
+      description: s.description,
+      tag: s.tag || "General",
+      duration: (s.duration / 3600).toFixed(2),
+      createdAt: s.createdAt ? new Date(s.createdAt).toLocaleString() : "",
+    }));
+
+    autoTable(doc, {
+      startY: 38,
+      columns,
+      body: rows,
+      headStyles: {
+        fillColor: [17, 24, 39],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 12,
+        halign: 'center',
+        valign: 'middle',
+        cellPadding: 3.5,
+        lineWidth: 0.1,
+      },
+      bodyStyles: {
+        fontSize: 11,
+        textColor: 34,
+        cellPadding: 2.5,
+        halign: 'left',
+        valign: 'top',
+        lineColor: [220, 220, 220],
+        minCellHeight: 8,
+        overflow: 'linebreak',
+        font: 'helvetica',
+      },
+      alternateRowStyles: {
+        fillColor: [241, 245, 249],
+        textColor: 34,
+      },
+      columnStyles: {
+        name: { cellWidth: 32, halign: 'left' },
+        description: { cellWidth: 70, halign: 'left' },
+        tag: { cellWidth: 22, halign: 'center' },
+        duration: { cellWidth: 24, halign: 'center' },
+        createdAt: { cellWidth: 38, halign: 'center' },
+      },
+      margin: { left: (210 - (32 + 70 + 22 + 24 + 38)) / 2, right: (210 - (32 + 70 + 22 + 24 + 38)) / 2 },
+      styles: {
+        font: 'helvetica',
+        fontSize: 11,
+        cellPadding: 2.5,
+        overflow: 'linebreak',
+        halign: 'left',
+        valign: 'top',
+        minCellHeight: 8,
+        textColor: 34,
+      },
+      didDrawPage: (data) => {
+        // Footer (jsPDF types workaround)
+        const pageCount = doc.getNumberOfPages();
+        const pageNumber = doc.getCurrentPageInfo().pageNumber;
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(`Page ${pageNumber} of ${pageCount}`,
+          200, 290, { align: 'right' });
+      },
+      didParseCell: function (data) {
+        if (data.column.dataKey === 'description') {
+          data.cell.styles.valign = 'top';
+          data.cell.styles.fontStyle = 'normal';
+        }
+      },
+    });
+    doc.save("time_sessions.pdf");
+  }, [sessions]);
   const t = useTranslations("TimeTrackingPage");
 
   // Memoize formatTime
@@ -108,8 +223,9 @@ const TimerAndFormPanel: React.FC<TimerAndFormPanelProps> = React.memo(({
           </div>
         )}
         
-        {/* Timer Controls */}
-        <div className="flex justify-center gap-2 mb-6">
+      {/* Timer Controls */}
+      <div className="flex justify-center gap-2 mb-6">
+        {/* Export Buttons moved to session list header */}
           <Button
             onClick={onStart}
             disabled={isRunning}

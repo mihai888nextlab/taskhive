@@ -186,8 +186,27 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
 
   if (!currentUser) {
     return (
-      <div className={`min-h-screen flex items-center justify-center w-full ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-        <p className="text-center text-lg font-medium opacity-80">{t("loadingDashboard", { default: "Loading your dashboard..." })}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center w-full bg-transparent">
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          {/* Simple spinner */}
+          <svg className="animate-spin w-12 h-12 text-blue-500 mb-4" viewBox="0 0 50 50">
+            <circle className="opacity-20" cx="25" cy="25" r="20" stroke="currentColor" strokeWidth="6" fill="none" />
+            <path d="M25 5a20 20 0 0 1 20 20" stroke="currentColor" strokeWidth="6" strokeLinecap="round" fill="none" />
+          </svg>
+          <p className="text-center text-lg font-semibold opacity-90 animate-pulse mt-2">{t("loadingDashboard", { default: "Loading your dashboard..." })}</p>
+        </div>
+        <style jsx>{`
+          .animate-spin {
+            animation: spin 1s linear infinite;
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: none; }
+          }
+        `}</style>
       </div>
     );
   }

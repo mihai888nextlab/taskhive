@@ -30,6 +30,7 @@
     ,"applyFiltersButton": "Applica filtri"
   },
   "TasksPage": {
+    "export": "Esporta",
     "myTasks": "I miei compiti",
     "myTasksDescription": "Compiti assegnati a te e compiti personali che hai creato",
     "assignedByMe": "Compiti assegnati da me",
@@ -221,6 +222,7 @@
     "typeMessage": "Scrivi un messaggio..."
   },
   "FinancePage": {
+    "export": "Esporta",
     "expenses": "Spese",
     "income": "Entrate",
     "addExpense": "Aggiungi Spesa",
@@ -515,6 +517,7 @@
   },
   "DashboardPage": {
     "tasks": "Compiti",
+    "loadingDashboard": "Caricamento dashboard...",
     "tasksDescription": "Organizza e traccia gli incarichi e i progressi del tuo team.",
     "goToTasksPage": "Vai alla pagina compiti",
     "announcement": "Annuncio",

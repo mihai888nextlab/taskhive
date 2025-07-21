@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Tiimihakemisto",
+    "export": "Vie",
     "teamDirectoryDescription": "Näytä ja hallitse kaikkia organisaatiosi tiimin jäseniä",
     "addUser": "Lisää käyttäjä",
     "addRole": "Lisää rooli",
@@ -30,6 +31,7 @@
     "applyFiltersButton": "Käytä suodattimia"
   },
   "TasksPage": {
+    "export": "Vie",
     "myTasks": "Omat tehtävät",
     "myTasksDescription": "Sinulle osoitetut ja itse luomasi tehtävät",
     "assignedByMe": "Minun osoittamat tehtävät",
@@ -261,6 +263,7 @@
     "pleaseWaitExpenses": "Odota, haemme menotietosi",
     "pleaseWaitIncome": "Odota, haemme tulotietosi",
     "noExpensesYet": "Ei menoja vielä",
+    "export": "Vie",
     "noIncomeYet": "Ei tuloja vielä",
     "noMatchingExpenses": "Ei löytynyt vastaavia menoja",
     "noMatchingIncome": "Ei löytynyt vastaavia tuloja",

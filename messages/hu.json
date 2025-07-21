@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Csapatkönyvtár",
+    "export": "Exportálás",
     "teamDirectoryDescription": "Az összes csapattag megtekintése és kezelése a szervezetben",
     "addUser": "Felhasználó hozzáadása",
     "addRole": "Szerep hozzáadása",
@@ -30,6 +31,7 @@
     "applyFiltersButton": "Szűrők alkalmazása"
   },
   "TasksPage": {
+    "export": "Exportálás",
     "myTasks": "Saját feladatok",
     "myTasksDescription": "Önnek kiosztott és saját maga által létrehozott feladatok",
     "assignedByMe": "Általam kiosztott feladatok",
@@ -262,6 +264,7 @@
     "pleaseWaitExpenses": "Kérjük, várjon, amíg betöltjük a kiadási adatokat",
     "pleaseWaitIncome": "Kérjük, várjon, amíg betöltjük a bevételi adatokat",
     "noExpensesYet": "Még nincs kiadás",
+    "export": "Exportálás",
     "noIncomeYet": "Még nincs bevétel",
     "noMatchingExpenses": "Nincs megfelelő kiadás",
     "noMatchingIncome": "Nincs megfelelő bevétel",
@@ -517,6 +520,7 @@
   },
   "DashboardPage": {
     "tasks": "Feladatok",
+    "loadingDashboard": "Irányítópult betöltése...",
     "tasksDescription": "Szervezze és kövesse nyomon csapata feladatait és előrehaladását.",
     "goToTasksPage": "Ugrás a feladatok oldalra",
     "announcement": "Közlemény",

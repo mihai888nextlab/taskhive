@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Annuaire de l'équipe",
+    "export": "Exporter",
     "teamDirectoryDescription": "Voir et gérer tous les membres de votre organisation",
     "addUser": "Ajouter un utilisateur",
     "addRole": "Ajouter un rôle",
@@ -30,6 +31,7 @@
     ,"applyFiltersButton": "Appliquer les filtres"
   },
   "TasksPage": {
+    "export": "Exporter",
     "myTasks": "Mes tâches",
     "myTasksDescription": "Tâches qui vous sont assignées et tâches personnelles que vous avez créées",
     "assignedByMe": "Tâches assignées par moi",
@@ -221,6 +223,7 @@
     "startNewChat": "Démarrez une nouvelle discussion pour échanger avec votre équipe"
   },
   "FinancePage": {
+    "export": "Exporter",
     "expenses": "Dépenses",
     "income": "Revenus",
     "addExpense": "Ajouter une dépense",
@@ -516,6 +519,7 @@
   },
   "DashboardPage": {
     "tasks": "Tâches",
+    "loadingDashboard": "Chargement du tableau de bord...",
     "tasksDescription": "Organisez et suivez les missions et le progrès de votre équipe.",
     "goToTasksPage": "Aller à la page des tâches",
     "announcement": "Annonce",

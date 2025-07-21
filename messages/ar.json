@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "دليل الفريق",
+    "export": "تصدير",
     "teamDirectoryDescription": "عرض وإدارة جميع أعضاء فريقك في المنظمة",
     "addUser": "إضافة مستخدم",
     "addRole": "إضافة دور",
@@ -30,6 +31,7 @@
     "applyFiltersButton": "تطبيق الفلاتر"
   },
   "TasksPage": {
+    "export": "تصدير",
     "myTasks": "مهامي",
     "myTasksDescription": "المهام المخصصة لك والمهام الشخصية التي أنشأتها",
     "assignedByMe": "المهام التي كلفتها أنا",
@@ -260,6 +262,7 @@
     "pleaseWaitExpenses": "يرجى الانتظار أثناء جلب بيانات المصروفات",
     "pleaseWaitIncome": "يرجى الانتظار أثناء جلب بيانات الدخل",
     "noExpensesYet": "لا توجد مصروفات بعد",
+    "export": "تصدير",
     "noIncomeYet": "لا يوجد دخل بعد",
     "noMatchingExpenses": "لم يتم العثور على مصروفات مطابقة",
     "noMatchingIncome": "لم يتم العثور على دخل مطابق",
@@ -512,6 +515,7 @@
   },
   "DashboardPage": {
     "tasks": "المهام",
+    "loadingDashboard": "جاري تحميل لوحة المعلومات...",
     "tasksDescription": "نظم وتتبع مهام فريقك وتقدمه.",
     "goToTasksPage": "الانتقال إلى صفحة المهام",
     "announcement": "إعلان",

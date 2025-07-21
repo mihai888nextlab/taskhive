@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Teamoverzicht",
+    "export": "Exporteren",
     "teamDirectoryDescription": "Bekijk en beheer alle teamleden in uw organisatie",
     "addUser": "Gebruiker toevoegen",
     "addRole": "Rol toevoegen",
@@ -30,6 +31,7 @@
     "applyFiltersButton": "Filters toepassen"
   },
   "TasksPage": {
+    "export": "Exporteren",
     "myTasks": "Mijn taken",
     "myTasksDescription": "Taken die aan u zijn toegewezen en persoonlijke taken die u heeft aangemaakt",
     "assignedByMe": "Door mij toegewezen taken",
@@ -262,6 +264,7 @@
     "pleaseWaitExpenses": "Even geduld terwijl we uw uitgaven ophalen",
     "pleaseWaitIncome": "Even geduld terwijl we uw inkomsten ophalen",
     "noExpensesYet": "Nog geen uitgaven",
+    "export": "Exporteren",
     "noIncomeYet": "Nog geen inkomsten",
     "noMatchingExpenses": "Geen overeenkomende uitgaven gevonden",
     "noMatchingIncome": "Geen overeenkomende inkomsten gevonden",
@@ -517,6 +520,7 @@
   },
   "DashboardPage": {
     "tasks": "Taken",
+    "loadingDashboard": "Dashboard laden...",
     "tasksDescription": "Organiseer en volg de taken en voortgang van uw team.",
     "goToTasksPage": "Ga naar takenpagina",
     "announcement": "Aankondiging",

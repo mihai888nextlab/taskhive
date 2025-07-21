@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Каталог команды",
+    "export": "Экспорт",
     "teamDirectoryDescription": "Просмотр и управление всеми участниками вашей организации",
     "addUser": "Добавить пользователя",
     "addRole": "Добавить роль",
@@ -30,6 +31,7 @@
     "applyFiltersButton": "Применить фильтры"
   },
   "TasksPage": {
+    "export": "Экспорт",
     "myTasks": "Мои задачи",
     "myTasksDescription": "Задачи, назначенные вам, и личные задачи, которые вы создали",
     "assignedByMe": "Назначенные мной",
@@ -261,6 +263,7 @@
     "pleaseWaitExpenses": "Пожалуйста, подождите, пока мы получаем данные о расходах",
     "pleaseWaitIncome": "Пожалуйста, подождите, пока мы получаем данные о доходах",
     "noExpensesYet": "Пока нет расходов",
+    "export": "Экспорт",
     "noIncomeYet": "Пока нет доходов",
     "noMatchingExpenses": "Совпадающих расходов не найдено",
     "noMatchingIncome": "Совпадающего дохода не найдено",
@@ -517,6 +520,7 @@
   },
   "DashboardPage": {
     "tasks": "Задачи",
+    "loadingDashboard": "Загрузка панели управления...",
     "tasksDescription": "Организуйте и отслеживайте задачи и прогресс вашей команды.",
     "goToTasksPage": "Перейти к задачам",
     "announcement": "Объявление",

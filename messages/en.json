@@ -1,6 +1,7 @@
 {
   "UsersPage": {
     "teamDirectory": "Team Directory",
+    "export": "Export",
     "teamDirectoryDescription": "View and manage all team members in your organization",
     "addUser": "Add User",
     "addRole": "Add Role",
@@ -30,6 +31,7 @@
     ,"applyFiltersButton": "Apply Filters"
   },
   "TasksPage": {
+    "export": "Export",
     "myTasks": "My Tasks",
     "myTasksDescription": "Tasks assigned to you and personal tasks you've created",
     "assignedByMe": "Tasks Assigned by Me",
@@ -221,6 +223,7 @@
     "typeMessage": "Type a message..."
   },
   "FinancePage": {
+    "export": "Export",
     "expenses": "Expenses",
     "income": "Income",
     "addExpense": "Add Expense",
@@ -516,6 +519,7 @@
   },
   "DashboardPage": {
     "tasks": "Tasks",
+    "loadingDashboard": "Loading dashboard...",
     "tasksDescription": "Organize and track your team's assignments and progress.",
     "goToTasksPage": "Go to tasks page",
     "announcement": "Announcement",
