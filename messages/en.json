@@ -25,10 +25,10 @@
     "manager": "Manager",
     "user": "User",
     "loadingTeamMembers": "Loading team members...",
-    "pleaseWaitFetchTeam": "Please wait while we fetch your team data"
-    ,"filterSortButton": "Filter & Sort"
-    ,"filterSortTitle": "Filter & Sort Options"
-    ,"applyFiltersButton": "Apply Filters"
+    "pleaseWaitFetchTeam": "Please wait while we fetch your team data",
+    "filterSortButton": "Filter & Sort",
+    "filterSortTitle": "Filter & Sort Options",
+    "applyFiltersButton": "Apply Filters"
   },
   "TasksPage": {
     "export": "Export",
@@ -102,10 +102,10 @@
     "priorityCriticalSubtitle": "Urgent",
     "priorityHighSubtitle": "Important",
     "priorityMediumSubtitle": "Normal",
-    "priorityLowSubtitle": "Nice to have"
-    ,"filterSortButton": "Filter & Sort"
-    ,"filterSortTitle": "Filter & Sort Options"
-    ,"applyFiltersButton": "Apply Filters"
+    "priorityLowSubtitle": "Nice to have",
+    "filterSortButton": "Filter & Sort",
+    "filterSortTitle": "Filter & Sort Options",
+    "applyFiltersButton": "Apply Filters"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "All Announcements",
@@ -220,7 +220,8 @@
     "chatNotConnected": "Chat is not connected. Please try again.",
     "yourFiles": "Your Files",
     "noFilesUploaded": "No files uploaded yet",
-    "typeMessage": "Type a message..."
+    "typeMessage": "Type a message...",
+    "loadingConversations": "Loading conversations..."
   },
   "FinancePage": {
     "export": "Export",
@@ -281,10 +282,10 @@
     "report": "Report",
     "total": "Total",
     "exportCSV": "Export CSV",
-    "exportPDF": "Export PDF"
-    ,"filterSortButton": "Filter & Sort"
-    ,"filterSortTitle": "Filter & Sort Options"
-    ,"applyFiltersButton": "Apply Filters"
+    "exportPDF": "Export PDF",
+    "filterSortButton": "Filter & Sort",
+    "filterSortTitle": "Filter & Sort Options",
+    "applyFiltersButton": "Apply Filters"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Log Time for Task",
@@ -331,10 +332,10 @@
     "timeTracker": "Time Tracker",
     "trackWorkSessions": "Track your work sessions and productivity",
     "timeSessions": "Time Sessions",
-    "viewManageSessions": "View and manage your recorded time sessions"
-    ,"filterSortButton": "Filter & Sort"
-    ,"filterSortTitle": "Filter & Sort Options"
-    ,"applyFiltersButton": "Apply Filters"
+    "viewManageSessions": "View and manage your recorded time sessions",
+    "filterSortButton": "Filter & Sort",
+    "filterSortTitle": "Filter & Sort Options",
+    "applyFiltersButton": "Apply Filters"
   },
   "StoragePage": {
     "storageUsage": "Storage Usage",

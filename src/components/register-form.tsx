@@ -10,128 +10,51 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { FormEvent, useEffect, useState, useCallback } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useGoogleLogin } from "@react-oauth/google";
 
-export const RegisterForm: React.FC<
-  React.ComponentProps<"div"> & { googleClientId?: string }
-> = React.memo(function RegisterForm({
+export function RegisterForm({
   className,
-  googleClientId,
+  handleRegister,
+  values,
+  setValues,
   ...props
+}: React.ComponentProps<"div"> & {
+  handleRegister: (e: FormEvent<HTMLFormElement>) => void;
+  values: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+  };
+  setValues: ({
+    firstName,
+    lastName,
+    email,
+    password,
+    confirmPassword,
+  }: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+  }) => void;
 }) {
-  const [values, setValues] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { login, loadingUser, error } = useAuth();
 
-  // Memoize register handler
-  const handleRegister = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setLoading(true);
-      setError(null);
-
-      // Basic client-side validation
-      if (
-        !values.email ||
-        !values.password ||
-        !values.firstName ||
-        !values.lastName
-      ) {
-        setError("All required fields must be filled.");
-        setLoading(false);
-        return;
-      }
-
-      if (values.password !== values.confirmPassword) {
-        setError("Passwords do not match.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: values.email,
-            password: values.password,
-            firstName: values.firstName,
-            lastName: values.lastName,
-            companyName: "Default Company",
-            companyRegistrationNumber: "",
-          }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(
-            data.message || "Registration failed. Please check your details."
-          );
-          setLoading(false);
-          return;
-        }
-
-        // Registration successful, redirect or show success
-        window.location.href = "/app";
-      } catch (err) {
-        setError("An error occurred during registration.");
-        setLoading(false);
-      }
-    },
-    [values]
-  );
-
-  // Memoize Google register handler
-  const handleGoogleRegister = useCallback(async () => {
-    // @ts-ignore
-    if (window.google && window.google.accounts) {
-      // @ts-ignore
-      window.google.accounts.id.prompt();
+  const handleGoogleSuccess = async (response: any) => {
+    if (response) {
+      console.log("Google ID Token:", response);
+      // Apelează funcția de login din hook-ul tău custom useAuth, trimițând ID Token-ul
+      await login("google", { code: response });
     }
-  }, []);
+  };
 
-  // Memoize input change handlers
-  const handleInputChange = useCallback(
-    (field: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setValues({ ...values, [field]: e.target.value });
-    },
-    [values]
-  );
-
-  useEffect(() => {
-    // Load Google Identity Services script
-    if (!(window as any).google) {
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.onload = () => {
-        (window as any).google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: async (response: any) => {
-            // Send token to backend
-            const res = await fetch("/api/auth/register", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ googleToken: response.credential }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-              window.location.href = "/app";
-            } else {
-              alert(data.message || "Google registration failed.");
-            }
-          },
-        });
-      };
-      document.body.appendChild(script);
-    }
-  }, [googleClientId]);
+  const handleGoogleError = () => {
+    console.error("Google Login Failed");
+  };
 
   return (
     <div
@@ -147,29 +70,15 @@ export const RegisterForm: React.FC<
             Create your account
           </CardTitle>
           <CardDescription className="text-gray-400 mb-2">
+            <GoogleAuthButton
+              onLoginSuccess={handleGoogleSuccess}
+              onLoginFailure={handleGoogleError}
+            />
             Register with your Google account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-5">
-            <Button
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2 border-blue-600 text-blue-200 hover:bg-blue-600/10 hover:border-blue-500 transition mb-2"
-              type="button"
-              onClick={handleGoogleRegister}
-            >
-              <span className="w-5 h-5 flex items-center justify-center">
-                <img
-                  src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png"
-                  alt="Google logo"
-                  width={20}
-                  height={20}
-                  style={{ display: "block" }}
-                  referrerPolicy="no-referrer"
-                />
-              </span>
-              <span className="font-semibold">Register with Google</span>
-            </Button>
             <div className="flex items-center gap-2 my-2">
               <div className="flex-1 h-px bg-gray-700" />
               <span className="text-xs text-gray-500">or continue with</span>
@@ -188,7 +97,9 @@ export const RegisterForm: React.FC<
                   type="text"
                   placeholder="First name"
                   value={values.firstName}
-                  onChange={handleInputChange("firstName")}
+                  onChange={(e) =>
+                    setValues({ ...values, firstName: e.target.value })
+                  }
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="given-name"
@@ -206,7 +117,9 @@ export const RegisterForm: React.FC<
                   type="text"
                   placeholder="Last name"
                   value={values.lastName}
-                  onChange={handleInputChange("lastName")}
+                  onChange={(e) =>
+                    setValues({ ...values, lastName: e.target.value })
+                  }
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="family-name"
@@ -224,7 +137,9 @@ export const RegisterForm: React.FC<
                   type="email"
                   placeholder="m@example.com"
                   value={values.email}
-                  onChange={handleInputChange("email")}
+                  onChange={(e) =>
+                    setValues({ ...values, email: e.target.value })
+                  }
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="email"
@@ -241,7 +156,9 @@ export const RegisterForm: React.FC<
                   id="password"
                   type="password"
                   value={values.password}
-                  onChange={handleInputChange("password")}
+                  onChange={(e) =>
+                    setValues({ ...values, password: e.target.value })
+                  }
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="new-password"
@@ -258,23 +175,40 @@ export const RegisterForm: React.FC<
                   id="confirmPassword"
                   type="password"
                   value={values.confirmPassword}
-                  onChange={handleInputChange("confirmPassword")}
+                  onChange={(e) =>
+                    setValues({ ...values, confirmPassword: e.target.value })
+                  }
                   required
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="new-password"
                 />
               </div>
               {error && (
-                <div className="text-red-500 text-xs text-center bg-transparent py-1">
-                  {error}
+                <div className="w-full flex justify-center">
+                  <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow mt-4 mb-2 max-w-md text-center flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-red-500 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"
+                      />
+                    </svg>
+                    <span>{error}</span>
+                  </div>
                 </div>
               )}
               <Button
                 type="submit"
                 className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full py-2"
-                disabled={loading}
+                disabled={loadingUser}
               >
-                {loading ? "Registering..." : "Register"}
+                {loadingUser ? "Registering..." : "Register"}
               </Button>
             </div>
             <div className="text-center text-xs text-gray-400 mt-4">
@@ -299,4 +233,53 @@ export const RegisterForm: React.FC<
       </Card>
     </div>
   );
-});
+}
+
+interface GoogleAuthButtonProps {
+  // You can pass a function to handle the successful response
+  onLoginSuccess: (token: string) => void;
+  onLoginFailure?: (error: any) => void;
+}
+
+const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
+  onLoginSuccess,
+  onLoginFailure,
+}) => {
+  // Use the useGoogleLogin hook
+  const googleLogin = useGoogleLogin({
+    onSuccess: (codeResponse) => {
+      console.log("Google Login Success (Authorization Code):", codeResponse);
+      // codeResponse.code is the authorization code you send to your backend
+      onLoginSuccess(codeResponse.code);
+    },
+    onError: (errorResponse) => {
+      console.error("Google Login Error:", errorResponse);
+      if (onLoginFailure) {
+        onLoginFailure(errorResponse);
+      }
+    },
+    // Crucial: Use 'auth-code' flow for backend verification
+    flow: "auth-code",
+  });
+
+  return (
+    <Button
+      variant="outline"
+      className="w-full flex items-center justify-center gap-2 border-blue-600 text-blue-200 hover:bg-blue-600/10 hover:border-blue-500 transition mb-2"
+      type="button"
+      onClick={() => googleLogin()}
+    >
+      <span className="w-5 h-5 flex items-center justify-center">
+        <img
+          src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png"
+          alt="Google logo"
+          width={20}
+          height={20}
+          style={{ display: "block" }}
+          referrerPolicy="no-referrer"
+        />
+      </span>
+      <span className="font-semibold">Register with Google</span>
+    </Button>
+  );
+};

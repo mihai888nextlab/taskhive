@@ -19,39 +19,14 @@ export default function Login() {
     userEmail: "",
     userPassword: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
 
-    // Basic client-side validation
-    if (!values.userEmail || !values.userPassword) {
-      setError("Both fields are required.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await auth.login("credentials", {
-        email: values.userEmail,
-        password: values.userPassword,
-      });
-      if (!res) {
-        throw new Error("Login failed. Please check your credentials.");
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An error occurred during login.");
-      }
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
+    await auth.login("credentials", {
+      email: values.userEmail,
+      password: values.userPassword,
+    });
   };
 
   return (
