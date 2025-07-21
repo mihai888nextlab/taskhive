@@ -1,4 +1,26 @@
 {
+  "SelectCompany": {
+    "selectCompany": "अपनी कंपनी चुनें",
+    "noCompanies": "आपने अभी तक किसी कंपनी में शामिल नहीं हुए हैं",
+    "chooseCompany": "जारी रखने के लिए एक कंपनी चुनें",
+    "createOrCheckInvitations": "कंपनी बनाएं या निमंत्रण के लिए अपना ईमेल जांचें",
+    "member": "सदस्य",
+    "select": "चुनें",
+    "pendingInvitations": "लंबित निमंत्रण",
+    "status": "स्थिति",
+    "accept": "स्वीकार करें"
+  },
+  "SelectCompany": {
+    "selectCompany": "अपनी कंपनी चुनें",
+    "noCompanies": "आपने अभी तक किसी कंपनी में शामिल नहीं हुए हैं",
+    "chooseCompany": "जारी रखने के लिए एक कंपनी चुनें",
+    "createOrCheckInvitations": "कंपनी बनाएं या निमंत्रण के लिए अपना ईमेल जांचें",
+    "member": "सदस्य",
+    "select": "चुनें",
+    "pendingInvitations": "लंबित निमंत्रण",
+    "status": "स्थिति",
+    "accept": "स्वीकार करें"
+  },
   "UsersPage": {
     "teamDirectory": "टीम निर्देशिका",
     "export": "निर्यात",
@@ -335,9 +357,6 @@
     ,"filterSortButton": "फ़िल्टर और छाँटें"
     ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
     ,"applyFiltersButton": "फ़िल्टर लागू करें"
-    ,"filterSortButton": "फ़िल्टर और छाँटें"
-    ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
-    ,"applyFiltersButton": "फ़िल्टर लागू करें"
   },
   "StoragePage": {
     "storageUsage": "स्टोरेज उपयोग",
@@ -518,6 +537,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "गंभीर",
+    "highPriority": "उच्च प्राथमिकता",
+    "dueToday": "आज देय",
     "tasks": "कार्य",
     "loadingDashboard": "डैशबोर्ड लोड हो रहा है...",
     "tasksDescription": "अपनी टीम के कार्य और प्रगति को व्यवस्थित और ट्रैक करें।",

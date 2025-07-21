@@ -1,4 +1,6 @@
 import HeaderNavBar from "@/components/header/HeaderNavBar";
+import { FaBuilding } from "react-icons/fa";
+import AddCompanyModal from "@/components/modals/AddCompanyModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/router";
@@ -8,11 +10,12 @@ import { useTheme } from "@/components/ThemeContext";
 const SelectCompanyPage = () => {
   const { user, refetchUser } = useAuth();
   const { theme } = useTheme();
-  const t = useTranslations("Navigation");
+  const t = useTranslations("SelectCompany");
   const router = useRouter();
   const [invitations, setInvitations] = useState<
     { _id: string; token: string }[]
   >([]);
+  const [addCompanyOpen, setAddCompanyOpen] = useState(false);
 
   const handleSelectCompany = async (companyId: string) => {
     // TODO: Add your logic to set the active company in context or backend
@@ -85,49 +88,91 @@ const SelectCompanyPage = () => {
       {/* Header NavBar */}
       <HeaderNavBar t={t} />
       <div className={`flex items-center justify-center min-h-screen w-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
-        <div className={`flex flex-col items-center text-center p-6 rounded-lg shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-          <h1 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : ''}`}>
-            {user?.companies?.length
-              ? "Select your company"
-              : "You haven't joined any companies yet"}
-          </h1>
-          <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} mb-6`}>
-            {user?.companies?.length
-              ? "Choose a company to continue"
-              : "Create a company or check your email for invitations"}
-          </p>
-          <div className="flex flex-wrap gap-8 justify-center w-full">
+        <div className={`flex flex-col w-full max-w-[1800px] rounded-2xl border shadow-lg overflow-hidden mx-4
+          ${theme === 'dark' ? 'bg-[#23272f] border-gray-700' : 'bg-white border-gray-200'}`}
+        >
+          {/* Container Header with Better Company Icon */}
+          <div className={`flex items-center gap-4 w-full px-8 py-6 border-b ${theme === 'dark' ? 'bg-blue-50/5 border-blue-800' : 'bg-blue-50 border-blue-200'}`}
+            style={theme === 'dark' ? { opacity: 0.97 } : undefined}
+          >
+            {/* FA Building Icon for Company */}
+            <div className={`p-3 rounded-xl flex items-center justify-center ${theme === 'dark' ? 'bg-blue-700' : 'bg-blue-200'}`} style={{ minWidth: 44, minHeight: 44 }}>
+              <FaBuilding className={`w-8 h-8 ${theme === 'dark' ? 'text-white' : 'text-blue-700'}`} />
+            </div>
+            <div className="flex-1">
+              <h1 className={`text-2xl font-bold mb-1 text-left ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {user?.companies?.length
+                  ? t("selectCompany")
+                  : t("noCompanies")}
+              </h1>
+              <p className={`text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                {user?.companies?.length
+                  ? t("chooseCompany")
+                  : t("createOrCheckInvitations")}
+              </p>
+            </div>
+            {/* Add Company + Button */}
+            <button
+              type="button"
+              className={`ml-auto flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all duration-200 w-12 h-12 aspect-square focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent ${theme === 'dark' ? 'bg-blue-700 hover:bg-blue-800' : ''}`}
+              title={t("addCompany", { default: "Add Company" })}
+              onClick={() => setAddCompanyOpen(true)}
+              style={{ minWidth: '3rem', minHeight: '3rem', width: '3rem', height: '3rem' }}
+            >
+              <span className="text-2xl font-bold">+</span>
+            </button>
+          </div>
+          {/* Cards Grid - improved layout to remove excess right space */}
+          <div className="flex flex-wrap gap-x-8 gap-y-6 justify-center w-full px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100"
+            style={{ minHeight: 0, maxHeight: '80vh' }}
+          >
             {user?.companies?.map((company) => (
-              <div
+              <button
                 key={company.id}
-                className={`border rounded-2xl shadow-lg p-7 flex flex-col items-center w-72 min-w-[260px] max-w-xs bg-opacity-95 transition-all duration-200 hover:scale-[1.03] hover:shadow-xl group ${theme === 'dark' ? 'bg-gray-900 border-gray-700 hover:border-blue-700' : 'bg-white border-gray-200 hover:border-blue-400'}`}
-                style={{ minHeight: 210 }}
+                type="button"
+                className={`rounded-2xl border shadow-sm transition-all duration-200 flex flex-col w-[300px] h-[200px] max-w-none overflow-hidden group cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent
+                  ${theme === 'dark' ? 'bg-[#23272f] border-gray-700 hover:border-blue-600' : 'bg-white border-gray-200 hover:border-blue-400'}`}
+                style={{ minWidth: 260 }}
+                onClick={() => handleSelectCompany(company.id)}
               >
-                <div className={`font-semibold text-lg mb-2 w-full truncate text-center ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
-                  title={company.name}
+                {/* Card Header: Company Name (no icon) */}
+                <div className={`px-6 py-4 border-b ${theme === 'dark' ? 'bg-blue-900 border-blue-800' : 'bg-blue-50 border-blue-200'}`}
+                  style={theme === 'dark' ? { opacity: 0.95 } : undefined}
                 >
-                  {company.name}
+                  <h2
+                    className={`text-lg font-bold truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                    title={company.name}
+                    style={{ textAlign: 'left', flexGrow: 1 }}
+                  >
+                    {company.name}
+                  </h2>
                 </div>
-                <div className={`text-xs mb-4 w-full text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
-                  style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                  title={company.role || 'Member'}
-                >
-                  {company.role || "Member"}
+                {/* Card Content: Role */}
+                <div className={`flex-1 flex flex-col items-center justify-center ${theme === 'dark' ? 'bg-[#1e2530]' : 'bg-white'}`}>
+                  <span className={`text-base font-medium text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                    style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '1.25rem', fontWeight: 600 }}
+                    title={company.role || t("member")}
+                  >
+                    {company.role || t("member")}
+                  </span>
                 </div>
-                <button
-                  className={`px-7 py-2 rounded-xl font-semibold shadow transition text-base w-full mt-auto focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent
-                    ${theme === 'dark' ? 'bg-blue-700 hover:bg-blue-800 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-                  onClick={() => handleSelectCompany(company.id)}
-                >
-                  Select
-                </button>
-              </div>
+                {/* Card Footer: Select Button */}
+                <div className="px-6 pb-4">
+                  <span
+                    className={`w-full block px-7 py-2 rounded-xl font-semibold shadow transition text-base text-center
+                      ${theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-600 text-white'}`}
+                    style={{ pointerEvents: 'none', opacity: 0.95 }}
+                  >
+                    {t("select")}
+                  </span>
+                </div>
+              </button>
             ))}
           </div>
           {/* Example: Display invitations */}
           {invitations.length > 0 && (
             <div className="mt-10 w-full max-w-2xl mx-auto">
-              <h2 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Pending Invitations</h2>
+              <h2 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("pendingInvitations")}</h2>
               <ul className="space-y-3">
                 {invitations.map((inv: any) => (
                   <li
@@ -141,20 +186,27 @@ const SelectCompanyPage = () => {
                       style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                       title={inv.status}
                     >
-                      Status: {inv.status}
+                      {t("status")}: {inv.status}
                     </span>
                     <button
                       className={`px-5 py-1.5 rounded-lg transition text-sm font-semibold mt-1 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-transparent
                         ${theme === 'dark' ? 'bg-green-700 text-white hover:bg-green-800' : 'bg-green-600 text-white hover:bg-green-700'}`}
                       onClick={() => handleAcceptInvitation(inv.token)}
                     >
-                      Accept
+                      {t("accept")}
                     </button>
                   </li>
                 ))}
               </ul>
             </div>
           )}
+          {/* AddCompanyModal */}
+          <AddCompanyModal
+            open={addCompanyOpen}
+            onClose={() => setAddCompanyOpen(false)}
+            userId={user?._id || ""}
+            onCompanyAdded={refetchUser}
+          />
         </div>
       </div>
     </div>

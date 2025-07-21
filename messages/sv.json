@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Välj ditt företag",
+    "noCompanies": "Du har ännu inte gått med i något företag",
+    "chooseCompany": "Välj ett företag för att fortsätta",
+    "createOrCheckInvitations": "Skapa ett företag eller kontrollera din e-post för inbjudningar",
+    "member": "Medlem",
+    "select": "Välj",
+    "pendingInvitations": "Väntande inbjudningar",
+    "status": "Status",
+    "accept": "Acceptera",
+    "logout": "Logga ut",
+    "profile": "Profil",
+    "security": "Säkerhet",
+    "notifications": "Aviseringar",
+    "appearance": "Utseende"
+  },
   "UsersPage": {
     "teamDirectory": "Teamkatalog",
     "export": "Exportera",
@@ -518,6 +534,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Kritisk",
+    "highPriority": "Hög prioritet",
+    "dueToday": "Förfaller idag",
     "tasks": "Uppgifter",
     "loadingDashboard": "Laddar instrumentpanel...",
     "tasksDescription": "Organisera och följ upp teamets uppgifter och framsteg.",

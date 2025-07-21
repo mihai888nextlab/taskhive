@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Επιλέξτε την εταιρεία σας",
+    "noCompanies": "Δεν έχετε ενταχθεί σε καμία εταιρεία ακόμα",
+    "chooseCompany": "Επιλέξτε μια εταιρεία για να συνεχίσετε",
+    "createOrCheckInvitations": "Δημιουργήστε μια εταιρεία ή ελέγξτε το email σας για προσκλήσεις",
+    "member": "Μέλος",
+    "select": "Επιλογή",
+    "pendingInvitations": "Εκκρεμείς προσκλήσεις",
+    "status": "Κατάσταση",
+    "accept": "Αποδοχή",
+    "logout": "Αποσύνδεση",
+    "profile": "Προφίλ",
+    "security": "Ασφάλεια",
+    "notifications": "Ειδοποιήσεις",
+    "appearance": "Εμφάνιση"
+  },
   "UsersPage": {
     "teamDirectory": "Κατάλογος Ομάδας",
     "export": "Εξαγωγή",
@@ -410,6 +426,9 @@
     "logout": "Αποσύνδεση"
   },
   "DashboardPage": {
+    "critical": "Κρίσιμο",
+    "highPriority": "Υψηλή προτεραιότητα",
+    "dueToday": "Λήγει σήμερα",
     "welcome": "Καλώς ήρθατε στην εφαρμογή μας!",
     "loadingDashboard": "Φόρτωση πίνακα ελέγχου...",
     "yourProfile": "Το προφίλ σας",

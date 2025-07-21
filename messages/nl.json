@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Selecteer uw bedrijf",
+    "noCompanies": "U bent nog niet lid van een bedrijf",
+    "chooseCompany": "Kies een bedrijf om verder te gaan",
+    "createOrCheckInvitations": "Maak een bedrijf aan of controleer uw e-mail voor uitnodigingen",
+    "member": "Lid",
+    "select": "Selecteer",
+    "pendingInvitations": "Openstaande uitnodigingen",
+    "status": "Status",
+    "accept": "Accepteer",
+    "logout": "Uitloggen",
+    "profile": "Profiel",
+    "security": "Beveiliging",
+    "notifications": "Meldingen",
+    "appearance": "Uiterlijk"
+  },
   "UsersPage": {
     "teamDirectory": "Teamoverzicht",
     "export": "Exporteren",
@@ -519,6 +535,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Kritiek",
+    "highPriority": "Hoge prioriteit",
+    "dueToday": "Vandaag verschuldigd",
     "tasks": "Taken",
     "loadingDashboard": "Dashboard laden...",
     "tasksDescription": "Organiseer en volg de taken en voortgang van uw team.",

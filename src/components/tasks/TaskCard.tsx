@@ -11,7 +11,7 @@ interface Task {
   description?: string;
   deadline: string;
   completed: boolean;
-  priority: 'critical' | 'high' | 'medium' | 'low'; // Remove string and optional
+  priority: 'critical' | 'high' | 'medium' | 'low';
   userId: any;
   createdAt: string;
   updatedAt: string;
@@ -20,8 +20,9 @@ interface Task {
   isSubtask?: boolean;
   parentTask?: string;
   subtasks?: Task[];
-  important?: boolean; // Keep for backward compatibility
-  assignedTo?: string | { _id: string; firstName?: string; lastName?: string; email?: string }; // Add assignedTo for subtasks
+  important?: boolean;
+  assignedTo?: string | { _id: string; firstName?: string; lastName?: string; email?: string };
+  tags?: string[];
 }
 
 interface TaskCardProps {
@@ -49,10 +50,18 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
   forceAllowEditDelete,
   onShowDetails,
   theme = "light",
+  ...props
 }) => {
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [pendingComplete, setPendingComplete] = useState<null | Task>(null);
   const [showSubtasks, setShowSubtasks] = useState(false);
+  // Translation function for tags (DashboardPage)
+  let t: (key: string, opts?: any) => string = (props as any)?.t || ((key: string, opts?: any) => key);
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { useTranslations } = require('next-intl');
+    t = useTranslations('DashboardPage');
+  } catch (e) {}
 
   // Memoize computed values
   const isOverdue = useMemo(() => isTaskOverdue(task), [isTaskOverdue, task]);
@@ -154,7 +163,7 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
           <FaExclamationTriangle className="w-3 h-3" />
-          Overdue
+          {t("overdue", { default: "Overdue" })}
         </span>
       );
     }
@@ -162,7 +171,7 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
     if (task.priority === 'critical') {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
-          🔥 Critical
+          🔥 {t("critical", { default: "Critical" })}
         </span>
       );
     }
@@ -170,16 +179,16 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
     if (task.priority === 'high') {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
-          ⚡ High Priority
+          ⚡ {t("highPriority", { default: "High Priority" })}
         </span>
       );
     }
 
-    if (isToday && (task.priority === 'medium' || task.priority === 'low')) { // Remove the single medium check
+    if (isToday && (task.priority === 'medium' || task.priority === 'low')) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full">
           <FiCalendar className="w-3 h-3" />
-          Due Today
+          {t("dueToday", { default: "Due Today" })}
         </span>
       );
     }

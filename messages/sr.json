@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Izaberite svoju kompaniju",
+    "noCompanies": "Još niste pristupili nijednoj kompaniji",
+    "chooseCompany": "Izaberite kompaniju za nastavak",
+    "createOrCheckInvitations": "Kreirajte kompaniju ili proverite e-mail za pozivnice",
+    "member": "Član",
+    "select": "Izaberi",
+    "pendingInvitations": "Pozivnice na čekanju",
+    "status": "Status",
+    "accept": "Prihvati",
+    "logout": "Odjava",
+    "profile": "Profil",
+    "security": "Bezbednost",
+    "notifications": "Obaveštenja",
+    "appearance": "Izgled"
+  },
   "UsersPage": {
     "teamDirectory": "Tim direktorijum",
     "export": "Izvoz",
@@ -517,6 +533,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Критично",
+    "highPriority": "Висок приоритет",
+    "dueToday": "Доспева данас",
     "tasks": "Zadaci",
     "loadingDashboard": "Učitavanje kontrolne table...",
     "tasksDescription": "Organizujte i pratite zadatke i napredak vašeg tima.",

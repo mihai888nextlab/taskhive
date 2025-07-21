@@ -13,6 +13,8 @@ import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Import all messages
+import jaMessages from "../../messages/ja.json";
+import koMessages from "../../messages/ko.json";
 import enMessages from "../../messages/en.json";
 import frMessages from "../../messages/fr.json";
 import esMessages from "../../messages/es.json";
@@ -29,11 +31,11 @@ import itMessages from "../../messages/it.json";
 import ruMessages from "../../messages/ru.json";
 import noMessages from "../../messages/no.json";
 import svMessages from "../../messages/sv.json";
-
 import fiMessages from "../../messages/fi.json";
 import nlMessages from "../../messages/nl.json";
 import huMessages from "../../messages/hu.json";
 import trMessages from "../../messages/tr.json";
+import viMessages from "../../messages/vi.json";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 // Type for pages with custom layout
@@ -88,6 +90,9 @@ function LanguageConsumerApp({
     nl: nlMessages,
     hu: huMessages,
     tr: trMessages,
+    ja: jaMessages,
+    ko: koMessages,
+    vi: viMessages,
   };
   const messages = messagesMap[lang] || enMessages;
 

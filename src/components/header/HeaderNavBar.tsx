@@ -34,6 +34,9 @@ const profileTabs = [
 
 const LANGUAGES = [
   { code: "en", label: "EN", flag: "🇬🇧" },
+  { code: "ja", label: "JA", flag: "🇯🇵" },
+  { code: "ko", label: "KO", flag: "🇰🇷" },
+  { code: "vi", label: "VI", flag: "🇻🇳" },
   { code: "ru", label: "RU", flag: "🇷🇺" },
   { code: "no", label: "NO", flag: "🇳🇴" },
   { code: "sv", label: "SV", flag: "🇸🇪" },

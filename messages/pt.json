@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Selecione sua empresa",
+    "noCompanies": "Você ainda não se juntou a nenhuma empresa",
+    "chooseCompany": "Escolha uma empresa para continuar",
+    "createOrCheckInvitations": "Crie uma empresa ou verifique seu e-mail para convites",
+    "member": "Membro",
+    "select": "Selecionar",
+    "pendingInvitations": "Convites pendentes",
+    "status": "Status",
+    "accept": "Aceitar",
+    "logout": "Sair",
+    "profile": "Perfil",
+    "security": "Segurança",
+    "notifications": "Notificações",
+    "appearance": "Aparência"
+  },
   "UsersPage": {
     "teamDirectory": "Diretório da equipe",
     "export": "Exportar",
@@ -325,6 +341,15 @@
     "sessionName": "Nome da sessão",
     "sessionDescription": "Descrição",
     "tag": "Etiqueta",
+    "tag_bug": "Bug",
+    "tag_feature": "Funcionalidade",
+    "tag_improvement": "Melhoria",
+    "tag_research": "Pesquisa",
+    "tag_documentation": "Documentação",
+    "tag_design": "Design",
+    "tag_urgent": "Urgente",
+    "tag_review": "Revisão",
+    "tag_test": "Teste",
     "addNotesContext": "Adicione notas ou contexto para esta sessão...",
     "selectCategory": "Selecionar categoria",
     "deleteSession": "Excluir sessão",
@@ -515,6 +540,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Crítica",
+    "highPriority": "Alta prioridade",
+    "dueToday": "Vence hoje",
     "tasks": "Tarefas",
     "loadingDashboard": "Carregando painel...",
     "tasksDescription": "Organize e acompanhe as atribuições e o progresso da sua equipe.",

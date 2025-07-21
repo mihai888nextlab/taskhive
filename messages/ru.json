@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Выберите вашу компанию",
+    "noCompanies": "Вы еще не присоединились ни к одной компании",
+    "chooseCompany": "Выберите компанию, чтобы продолжить",
+    "createOrCheckInvitations": "Создайте компанию или проверьте электронную почту на наличие приглашений",
+    "member": "Участник",
+    "select": "Выбрать",
+    "pendingInvitations": "Ожидающие приглашения",
+    "status": "Статус",
+    "accept": "Принять",
+    "logout": "Выйти",
+    "profile": "Профиль",
+    "security": "Безопасность",
+    "notifications": "Уведомления",
+    "appearance": "Внешний вид"
+  },
   "UsersPage": {
     "teamDirectory": "Каталог команды",
     "export": "Экспорт",
@@ -519,6 +535,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Критический",
+    "highPriority": "Высокий приоритет",
+    "dueToday": "Срок сегодня",
     "tasks": "Задачи",
     "loadingDashboard": "Загрузка панели управления...",
     "tasksDescription": "Организуйте и отслеживайте задачи и прогресс вашей команды.",

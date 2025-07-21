@@ -184,6 +184,53 @@ export default function Home() {
     );
   });
 
+  // FAQ data
+  const faqs = [
+    {
+      question: "What is TaskHive and who is it for?",
+      answer:
+        "TaskHive is an all-in-one business management platform designed for modern teams, startups, and enterprises. It helps you organize tasks, collaborate, track time, manage finances, and more—all in one place.",
+    },
+    {
+      question: "How does TaskHive help manage tasks and projects?",
+      answer:
+        "You can create, assign, and track tasks with advanced features like priorities, tags, deadlines, subtasks, and progress tracking. TaskHive's dashboard gives you a clear overview of your team's work.",
+    },
+    {
+      question: "Can I collaborate with my team in real-time?",
+      answer:
+        "Yes! TaskHive includes built-in chat, announcements, notifications, and file sharing so your team can communicate and work together instantly.",
+    },
+    {
+      question: "Is my data secure and private on TaskHive?",
+      answer:
+        "Absolutely. TaskHive uses secure authentication, encrypted storage, and privacy-first design to keep your data safe and accessible only to your team.",
+    },
+    {
+      question: "Does TaskHive support finance and time tracking?",
+      answer:
+        "Yes, you can track expenses, incomes, and financial statistics, as well as monitor work sessions and productivity with integrated time tracking tools.",
+    },
+    {
+      question: "Is TaskHive available internationally and in multiple languages?",
+      answer:
+        "Yes, TaskHive is designed for global teams. The platform is fully translated and supports over 20 languages, making it accessible from anywhere in the world.",
+    },
+    {
+      question: "Is TaskHive available on mobile devices?",
+      answer:
+        "TaskHive is fully responsive and works great on desktops, tablets, and smartphones. Mobile apps are coming soon!",
+    },
+    {
+      question: "How do I get started with TaskHive?",
+      answer:
+        "Simply register for an account, create or join a company, and invite your team. You can start managing tasks and collaborating right away.",
+    },
+  ];
+
+  // FAQ Accordion component
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   return (
     <>
       <Head>
@@ -212,8 +259,9 @@ export default function Home() {
       <div className="min-w-full min-h-screen bg-[#18181b] text-white flex flex-col items-center">
         <Header />
         <main className="w-full flex flex-col items-center justify-center">
-          {/* Hero Section */}
+          {/* Hero Section with orange backlight */}
           <section className="w-full flex flex-col items-center justify-center text-center pt-32 md:pt-67 pb-24 md:pb-40 bg-[#18181b] relative overflow-hidden">
+            {/* Hive icon background */}
             <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
               <Image
                 src="/hive-icon.png"
@@ -222,7 +270,23 @@ export default function Home() {
                 style={{ objectFit: "cover" }}
               />
             </div>
-            <div className="relative z-10 flex flex-col items-center w-full px-4 sm:px-0">
+            {/* Orange backlight effect behind heading */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ width: '900px', height: '340px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(59,130,246,0.32) 0%, rgba(59,130,246,0.10) 60%, rgba(30,41,59,0.0) 100%)',
+                filter: 'blur(96px)',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 0,
+                opacity: 0.7,
+                mixBlendMode: 'lighten',
+              }} />
+            </div>
+            <div className="relative z-20 flex flex-col items-center w-full px-4 sm:px-0">
               <span className="uppercase tracking-widest text-primary text-base sm:text-lg md:text-xl font-extrabold mb-4 sm:mb-6 px-3 sm:px-4 py-2 rounded-lg shadow-md border border-primary/30 animate-pulse">
                 The first all-in-one business management tool
               </span>
@@ -239,7 +303,7 @@ export default function Home() {
               <p className="text-primary/80 text-base sm:text-lg md:text-xl font-medium mb-7 sm:mb-10 max-w-xl mx-auto">
                 Powered by advanced AI for smarter, faster teamwork.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8 w-full max-w-xs sm:max-w-none mx-auto">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-4 w-full max-w-xs sm:max-w-none mx-auto">
                 <Link href="/register" className="w-full sm:w-auto">
                   <Button className="bg-primary text-white py-3 px-8 sm:px-10 rounded-full text-base sm:text-lg font-semibold shadow-xl hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-auto">
                     Get Started
@@ -253,6 +317,25 @@ export default function Home() {
                     Learn More
                   </Button>
                 </Link>
+              </div>
+              {/* Down arrow right under the hero buttons */}
+              <style jsx>{`
+                .bounce-arrow {
+                  animation: bounce 1.4s infinite;
+                  display: inline-block;
+                  filter: drop-shadow(0 2px 8px rgba(59,130,246,0.18));
+                  transition: transform 0.2s;
+                }
+                @keyframes bounce {
+                  0%, 100% { transform: translateY(0); }
+                  50% { transform: translateY(16px); }
+                }
+              `}</style>
+              <div className="flex justify-center items-center w-full">
+                <svg className="bounce-arrow" width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M28 40L16 26H40L28 40Z" fill="#3b82f6" fillOpacity="0.85"/>
+                  <path d="M28 40L16 26H40L28 40Z" fill="#fff" fillOpacity="0.7"/>
+                </svg>
               </div>
             </div>
           </section>
@@ -271,9 +354,57 @@ export default function Home() {
               ))}
             </div>
           </div>
+          {/* FAQ Section */}
+          <section className="w-full max-w-3xl mx-auto py-20 px-4">
+            <h2 className="text-3xl font-bold text-center mb-3">Frequently Asked Questions</h2>
+            <p className="text-lg text-gray-400 text-center mb-10">Answers to the most common questions about TaskHive.</p>
+            <div className="flex flex-col gap-4">
+              {faqs.map((faq, idx) => (
+                <div key={idx} className="border-b border-gray-700">
+                  <button
+                    className="w-full text-left py-5 px-2 flex items-center justify-between focus:outline-none group"
+                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                    aria-expanded={openFaq === idx}
+                    aria-controls={`faq-panel-${idx}`}
+                  >
+                    <span className="font-semibold text-lg text-white transition-all duration-150 group-hover:underline group-hover:decoration-white group-hover:underline-offset-4">{faq.question}</span>
+                    <svg
+                      className={`w-6 h-6 text-gray-400 transition-transform duration-200 ${openFaq === idx ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {openFaq === idx && (
+                    <div
+                      id={`faq-panel-${idx}`}
+                      className="pb-6 px-2 text-base text-gray-300 animate-fadeIn"
+                    >
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+          {/* Personalized CTA Section for TaskHive */}
+          <section className="w-full flex flex-col items-center justify-center py-16 bg-[#18181b] text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">
+              Ready to transform your <span className="text-primary bg-primary/10 px-2 py-1 rounded-md">team's productivity</span> ?
+            </h2>
+            <p className="text-base text-gray-400 mb-6 max-w-md mx-auto">Get started with TaskHive for seamless teamwork.</p>
+            <Link href="/register">
+              <Button className="bg-primary text-white py-3 px-8 rounded-lg text-base font-semibold shadow-lg hover:bg-primary-dark transition-colors mb-2">
+                Get Started
+              </Button>
+            </Link>
+          </section>
         </main>
         <Footer />
-      </div>
+    </div>
     </>
   );
 }

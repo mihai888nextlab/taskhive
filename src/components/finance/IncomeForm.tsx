@@ -234,31 +234,17 @@ You are a finance assistant. Write a clear, concise, and professional descriptio
             disabled={loading}
           >
             <SelectTrigger
-              className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
-                theme === "dark"
-                  ? "bg-gray-700 text-white border-gray-600 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
-                  : "bg-white text-gray-900 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
-              }`}
+              className={`w-full pl-9 pr-8 text-sm rounded-xl border transition-all duration-200 min-w-[120px] focus:ring-2 focus:ring-green-500 focus:border-green-500 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
               style={{ height: "36px" }}
             >
               <SelectValue placeholder={t("selectCategory")} />
             </SelectTrigger>
-            <SelectContent
-              className={`rounded-xl border mt-1 ${
-                theme === "dark"
-                  ? "bg-gray-800 text-white border-gray-700"
-                  : "bg-white text-gray-900 border-gray-200"
-              }`}
-            >
+            <SelectContent className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border border-gray-300'} rounded-lg p-0`}>
               {categories.map(cat => (
                 <SelectItem
                   key={cat}
                   value={cat}
-                  className={`px-4 py-2 text-sm cursor-pointer transition-colors rounded-lg ${
-                    theme === 'dark'
-                      ? 'bg-gray-800 text-white hover:bg-green-700/20 data-[state=checked]:bg-green-700/40'
-                      : 'bg-white text-gray-900 hover:bg-green-100 data-[state=checked]:bg-green-200'
-                  }`}
+                  className={`${theme === 'dark' ? 'text-white bg-gray-900 hover:bg-green-950 focus:bg-green-950 data-[state=checked]:bg-green-950 data-[state=checked]:text-green-300' : 'text-gray-900 bg-white hover:bg-green-50 focus:bg-green-100 data-[state=checked]:bg-green-100 data-[state=checked]:text-green-700'} px-4 py-2 text-sm cursor-pointer transition-colors`}
                 >
                   {cat}
                 </SelectItem>

@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Vælg din virksomhed",
+    "noCompanies": "Du har endnu ikke tilsluttet dig nogen virksomhed",
+    "chooseCompany": "Vælg en virksomhed for at fortsætte",
+    "createOrCheckInvitations": "Opret en virksomhed eller tjek din e-mail for invitationer",
+    "member": "Medlem",
+    "select": "Vælg",
+    "pendingInvitations": "Ventende invitationer",
+    "status": "Status",
+    "accept": "Acceptér",
+    "logout": "Log ud",
+    "profile": "Profil",
+    "security": "Sikkerhed",
+    "notifications": "Notifikationer",
+    "appearance": "Udseende"
+  },
   "UsersPage": {
     "teamDirectory": "Teamoversigt",
     "export": "Eksportér",
@@ -328,6 +344,15 @@
     "sessionName": "Sessionsnavn",
     "sessionDescription": "Beskrivelse",
     "tag": "Tag",
+    "tag_bug": "Fejl",
+    "tag_feature": "Funktion",
+    "tag_improvement": "Forbedring",
+    "tag_research": "Forskning",
+    "tag_documentation": "Dokumentation",
+    "tag_design": "Design",
+    "tag_urgent": "Haster",
+    "tag_review": "Gennemgang",
+    "tag_test": "Test",
     "addNotesContext": "Tilføj noter eller kontekst for denne session...",
     "selectCategory": "Vælg kategori",
     "deleteSession": "Slet session",
@@ -520,6 +545,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Kritisk",
+    "highPriority": "Høj prioritet",
+    "dueToday": "Forfalder i dag",
     "tasks": "Opgaver",
     "loadingDashboard": "Indlæser dashboard...",
     "tasksDescription": "Organisér og følg dit teams opgaver og fremskridt.",

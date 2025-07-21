@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Seleziona la tua azienda",
+    "noCompanies": "Non hai ancora aderito a nessuna azienda",
+    "chooseCompany": "Scegli un'azienda per continuare",
+    "createOrCheckInvitations": "Crea un'azienda o controlla la tua email per inviti",
+    "member": "Membro",
+    "select": "Seleziona",
+    "pendingInvitations": "Inviti in sospeso",
+    "status": "Stato",
+    "accept": "Accetta",
+    "logout": "Logout",
+    "profile": "Profilo",
+    "security": "Sicurezza",
+    "notifications": "Notifiche",
+    "appearance": "Aspetto"
+  },
   "UsersPage": {
     "teamDirectory": "Directory del Team",
     "teamDirectoryDescription": "Visualizza e gestisci tutti i membri del team nella tua organizzazione",
@@ -324,6 +340,15 @@
     "sessionName": "Nome Sessione",
     "sessionDescription": "Descrizione",
     "tag": "Tag",
+    "tag_bug": "Bug",
+    "tag_feature": "Funzionalità",
+    "tag_improvement": "Miglioramento",
+    "tag_research": "Ricerca",
+    "tag_documentation": "Documentazione",
+    "tag_design": "Design",
+    "tag_urgent": "Urgente",
+    "tag_review": "Revisione",
+    "tag_test": "Test",
     "addNotesContext": "Aggiungi note o contesto per questa sessione...",
     "selectCategory": "Seleziona categoria",
     "deleteSession": "Elimina Sessione",
@@ -516,6 +541,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Critica",
+    "highPriority": "Alta Priorità",
+    "dueToday": "Scade oggi",
     "tasks": "Compiti",
     "loadingDashboard": "Caricamento dashboard...",
     "tasksDescription": "Organizza e traccia gli incarichi e i progressi del tuo team.",

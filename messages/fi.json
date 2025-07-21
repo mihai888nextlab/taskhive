@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Valitse yrityksesi",
+    "noCompanies": "Et ole liittynyt vielä mihinkään yritykseen",
+    "chooseCompany": "Valitse yritys jatkaaksesi",
+    "createOrCheckInvitations": "Luo yritys tai tarkista sähköpostisi kutsujen varalta",
+    "member": "Jäsen",
+    "select": "Valitse",
+    "pendingInvitations": "Odotettavat kutsut",
+    "status": "Tila",
+    "accept": "Hyväksy",
+    "logout": "Kirjaudu ulos",
+    "profile": "Profiili",
+    "security": "Turvallisuus",
+    "notifications": "Ilmoitukset",
+    "appearance": "Ulkoasu"
+  },
   "UsersPage": {
     "teamDirectory": "Tiimihakemisto",
     "export": "Vie",
@@ -325,6 +341,15 @@
     "sessionName": "Istunnon nimi",
     "sessionDescription": "Kuvaus",
     "tag": "Tunniste",
+    "tag_bug": "Virhe",
+    "tag_feature": "Ominaisuus",
+    "tag_improvement": "Parannus",
+    "tag_research": "Tutkimus",
+    "tag_documentation": "Dokumentaatio",
+    "tag_design": "Suunnittelu",
+    "tag_urgent": "Kiireellinen",
+    "tag_review": "Arviointi",
+    "tag_test": "Testi",
     "addNotesContext": "Lisää muistiinpanoja tai kontekstia tälle istunnolle...",
     "selectCategory": "Valitse kategoria",
     "deleteSession": "Poista istunto",
@@ -518,6 +543,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Kriittinen",
+    "highPriority": "Korkea prioriteetti",
+    "dueToday": "Erääntyy tänään",
     "tasks": "Tehtävät",
     "tasksDescription": "Järjestä ja seuraa tiimisi tehtäviä ja edistymistä.",
     "goToTasksPage": "Siirry tehtäväsivulle",

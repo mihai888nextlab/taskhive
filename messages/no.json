@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Velg ditt firma",
+    "noCompanies": "Du har ikke blitt med i noen firmaer ennå",
+    "chooseCompany": "Velg et firma for å fortsette",
+    "createOrCheckInvitations": "Opprett et selskap eller sjekk e-posten din for invitasjoner",
+    "member": "Medlem",
+    "select": "Velg",
+    "pendingInvitations": "Ventende invitasjoner",
+    "status": "Status",
+    "accept": "Godta",
+    "logout": "Logg ut",
+    "profile": "Profil",
+    "security": "Sikkerhet",
+    "notifications": "Varsler",
+    "appearance": "Utseende"
+  },
   "UsersPage": {
     "teamDirectory": "Teamkatalog",
     "export": "Eksporter",
@@ -520,6 +536,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Kritisk",
+    "highPriority": "Høy prioritet",
+    "dueToday": "Forfaller i dag",
     "tasks": "Oppgaver",
     "loadingDashboard": "Laster dashbord...",
     "tasksDescription": "Organiser og følg opp teamets oppgaver og fremdrift.",

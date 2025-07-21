@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Válassza ki a cégét",
+    "noCompanies": "Még nem csatlakozott egyetlen céghez sem",
+    "chooseCompany": "Válasszon egy céget a folytatáshoz",
+    "createOrCheckInvitations": "Hozzon létre céget vagy ellenőrizze az e-mailjeit meghívásokért",
+    "member": "Tag",
+    "select": "Kiválaszt",
+    "pendingInvitations": "Függő meghívások",
+    "status": "Státusz",
+    "accept": "Elfogad",
+    "logout": "Kijelentkezés",
+    "profile": "Profil",
+    "security": "Biztonság",
+    "notifications": "Értesítések",
+    "appearance": "Megjelenés"
+  },
   "UsersPage": {
     "teamDirectory": "Csapatkönyvtár",
     "export": "Exportálás",
@@ -519,6 +535,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Kritikus",
+    "highPriority": "Magas prioritás",
+    "dueToday": "Ma esedékes",
     "tasks": "Feladatok",
     "loadingDashboard": "Irányítópult betöltése...",
     "tasksDescription": "Szervezze és kövesse nyomon csapata feladatait és előrehaladását.",

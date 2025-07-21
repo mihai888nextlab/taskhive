@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "选择您的公司",
+    "noCompanies": "您尚未加入任何公司",
+    "chooseCompany": "选择公司以继续",
+    "createOrCheckInvitations": "创建公司或检查您的电子邮件以获取邀请",
+    "member": "成员",
+    "select": "选择",
+    "pendingInvitations": "待处理的邀请",
+    "status": "状态",
+    "accept": "接受",
+    "logout": "登出",
+    "profile": "个人资料",
+    "security": "安全",
+    "notifications": "通知",
+    "appearance": "外观"
+  },
   "UsersPage": {
     "teamDirectory": "团队目录",
     "export": "导出",
@@ -322,6 +338,15 @@
     "sessionName": "会话名称",
     "sessionDescription": "描述",
     "tag": "标签",
+    "tag_bug": "错误",
+    "tag_feature": "功能",
+    "tag_improvement": "改进",
+    "tag_research": "研究",
+    "tag_documentation": "文档",
+    "tag_design": "设计",
+    "tag_urgent": "紧急",
+    "tag_review": "审查",
+    "tag_test": "测试",
     "addNotesContext": "为此会话添加备注或背景...",
     "selectCategory": "选择类别",
     "deleteSession": "删除会话",
@@ -511,6 +536,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "关键",
+    "highPriority": "高优先级",
+    "dueToday": "今天到期",
     "tasks": "任务",
     "loadingDashboard": "正在加载仪表板...",
     "tasksDescription": "组织并跟踪您的团队任务和进度。",

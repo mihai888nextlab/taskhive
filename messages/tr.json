@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "Şirketinizi seçin",
+    "noCompanies": "Henüz hiçbir şirkete katılmadınız",
+    "chooseCompany": "Devam etmek için bir şirket seçin",
+    "createOrCheckInvitations": "Bir şirket oluşturun veya davetler için e-postanızı kontrol edin",
+    "member": "Üye",
+    "select": "Seç",
+    "pendingInvitations": "Bekleyen davetler",
+    "status": "Durum",
+    "accept": "Kabul et",
+    "logout": "Çıkış yap",
+    "profile": "Profil",
+    "security": "Güvenlik",
+    "notifications": "Bildirimler",
+    "appearance": "Görünüm"
+  },
   "UsersPage": {
     "teamDirectory": "Takım Dizini",
     "export": "Dışa aktar",
@@ -518,6 +534,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "Kritik",
+    "highPriority": "Yüksek Öncelik",
+    "dueToday": "Bugün teslim",
     "tasks": "Görevler",
     "loadingDashboard": "Kontrol paneli yükleniyor...",
     "tasksDescription": "Takımınızın görevlerini ve ilerlemesini organize edin ve takip edin.",

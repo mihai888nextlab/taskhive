@@ -1,4 +1,20 @@
 {
+  "SelectCompany": {
+    "selectCompany": "اختر شركتك",
+    "noCompanies": "لم تنضم إلى أي شركة بعد",
+    "chooseCompany": "اختر شركة للمتابعة",
+    "createOrCheckInvitations": "أنشئ شركة أو تحقق من بريدك الإلكتروني للدعوات",
+    "member": "عضو",
+    "select": "اختر",
+    "pendingInvitations": "الدعوات المعلقة",
+    "status": "الحالة",
+    "accept": "قبول",
+    "logout": "تسجيل الخروج",
+    "profile": "الملف الشخصي",
+    "security": "الأمان",
+    "notifications": "الإشعارات",
+    "appearance": "المظهر"
+  },
   "UsersPage": {
     "teamDirectory": "دليل الفريق",
     "export": "تصدير",
@@ -514,6 +530,9 @@
     }
   },
   "DashboardPage": {
+    "critical": "حرج",
+    "highPriority": "أولوية عالية",
+    "dueToday": "مستحق اليوم",
     "tasks": "المهام",
     "loadingDashboard": "جاري تحميل لوحة المعلومات...",
     "tasksDescription": "نظم وتتبع مهام فريقك وتقدمه.",
