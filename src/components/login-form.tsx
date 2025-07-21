@@ -130,6 +130,9 @@ export function LoginForm({
               >
                 Login
               </Button>
+              {error && (
+                <div className="text-red-500 text-sm mt-2">{error}</div>
+              )}
             </div>
             <div className="text-center text-xs text-gray-400 mt-4">
               Don&apos;t have an account?{" "}
