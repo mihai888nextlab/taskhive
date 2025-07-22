@@ -202,6 +202,7 @@ export default async function handler(
       The context comes from various parts of an application like tasks, announcements, or user profiles.
       Always try to identify the source of the information you use in your answer (e.g., "According to the task titled '...", "From an announcement about...", "Based on a user's profile...").
       If you cannot find the answer in the provided context, clearly state that you don't know. Do not invent information.
+      Please note that you are not given all the context, you are only given 2 relevant pieces of each source type.
 
       Context:
       ${retrievedContext}

@@ -4,12 +4,28 @@ import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { NextApiRequest, NextApiResponse } from "next";
 import { JWTPayload } from "@/types";
+import userCompanyModel from "@/db/models/userCompanyModel";
+import companyModel from "@/db/models/companyModel";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  console.log("API HIT /api/update-profile");
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  apiKey: GEMINI_API_KEY,
+  model: "text-embedding-004",
+});
+
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 500,
+  chunkOverlap: 100,
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   await dbConnect();
-  console.log("DB Connected");
 
   // Allow only POST requests
   if (req.method !== "POST") {
@@ -40,23 +56,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Build update object only with non-empty fields
     const updateFields: Record<string, any> = {};
-    if (firstName && firstName.trim() !== "") updateFields.firstName = firstName;
+    if (firstName && firstName.trim() !== "")
+      updateFields.firstName = firstName;
     if (lastName && lastName.trim() !== "") updateFields.lastName = lastName;
     if (typeof description === "string") updateFields.description = description;
     if (Array.isArray(skills)) updateFields.skills = skills; // <-- Add this line
 
     const updatedUser = await userModel
-      .findByIdAndUpdate(
-        decoded.userId,
-        updateFields,
-        { new: true }
-      )
+      .findByIdAndUpdate(decoded.userId, updateFields, { new: true })
       .select("-password");
 
     if (!updatedUser) {
       console.log("User not found");
       return res.status(404).json({ message: "User not found" });
     }
+
+    const userCompany = await userCompanyModel.findOne({
+      userId: updatedUser._id,
+      companyId: decoded.companyId,
+    });
+    const company = await companyModel.findById(decoded.companyId);
+
+    // RAG - Update userCompany with new embedding
+    const rawPageContent = `User First Name: ${updatedUser.firstName}. User Last Name: ${updatedUser.lastName}. User Email: ${updatedUser.email}. Company Name: ${company.name}. Role: ${userCompany.role}. User skills: ${updatedUser.skills.join(", ")}. User description: ${updatedUser.description || ""}.`;
+    const chunks = await splitter.createDocuments([rawPageContent]);
+    const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+    const newEmbedding = await embeddings.embedQuery(contentToEmbed);
+    const newMetadata = {
+      source: "user",
+      originalId: updatedUser._id.toString(),
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      email: updatedUser.email,
+    };
+
+    userCompany.pageContent = contentToEmbed;
+    userCompany.embedding = newEmbedding;
+    userCompany.metadata = newMetadata;
+
+    await userCompany.save();
 
     console.log("User updated:", updatedUser);
     return res.status(200).json({ user: updatedUser });
