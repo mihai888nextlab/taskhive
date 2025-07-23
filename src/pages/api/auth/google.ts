@@ -161,7 +161,7 @@ export default async function handler(
   } catch (error: any) {
     console.error("Google login error", error);
     return res.status(500).json({
-      message: "Google login failed.",
+      message: "Google login failed." + JSON.stringify(error),
       error: error.message,
     });
   }
