@@ -38,7 +38,6 @@ export function LoginForm({
 
   const handleGoogleSuccess = async (response: any) => {
     if (response) {
-      console.log("Google ID Token:", response);
       // Apelează funcția de login din hook-ul tău custom useAuth, trimițând ID Token-ul
       await login("google", { code: response });
     }
@@ -196,6 +195,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         onLoginFailure(errorResponse);
       }
     },
+    redirect_uri: `https://www.taskhive.tech/`, // Ensure this matches your backend endpoint
     // Crucial: Use 'auth-code' flow for backend verification
     flow: "auth-code",
   });

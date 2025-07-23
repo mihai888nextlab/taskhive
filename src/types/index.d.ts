@@ -6,6 +6,8 @@ export interface User {
   lastName: string;
   role: string;
   profileImage?: { data?: string } | string | null;
+  description?: string;
+  skills?: string[];
   companyId?: string;
   companyName?: string;
   companies?: { id: string; name: string; role: string }[];
