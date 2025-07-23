@@ -38,7 +38,7 @@ const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({ channelName }) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ channelName, tokenType: "rtm" }),
+          body: JSON.stringify({ channelName }),
         });
 
         if (!response.ok) {
