@@ -36,7 +36,7 @@ export default async function handler(
 
   try {
     const { tokens } = await googleClient.getToken(code);
-    const { id_token, access_token } = tokens;
+    const { id_token } = tokens;
 
     if (!id_token) {
       return res.status(401).json({
@@ -161,7 +161,7 @@ export default async function handler(
   } catch (error: any) {
     console.error("Google login error", error);
     return res.status(500).json({
-      message: "Google login failed." + JSON.stringify(error),
+      message: "Google login failed." + JSON.stringify(error.message),
       error: error.message,
     });
   }
