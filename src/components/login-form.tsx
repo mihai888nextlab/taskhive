@@ -195,6 +195,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         onLoginFailure(errorResponse);
       }
     },
+    redirect_uri: `${window.location.origin}/`, // Ensure this matches your backend endpoint
     // Crucial: Use 'auth-code' flow for backend verification
     flow: "auth-code",
   });
