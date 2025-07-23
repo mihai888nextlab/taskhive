@@ -621,6 +621,12 @@
     "failedToAddCompany": "Firma konnte nicht hinzugefügt werden.",
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten.",
     "adding": "Wird hinzugefügt...",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "timeTracking": "Zeiterfassung",
+    "timeTrackingDescription": "Verfolgen Sie Ihre Arbeitssitzungen und Produktivitätsserien.",
+    "loadingTimeTracking": "Zeiterfassung wird geladen...",
+    "noSessionsYet": "Noch keine Sitzungen.",
+    "startTracking": "Beginnen Sie mit der Zeiterfassung, um Ihre Serie und Sitzungen zu sehen.",
+    "lastSessionDuration": "Dauer"
   }
 }

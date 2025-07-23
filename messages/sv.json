@@ -589,7 +589,13 @@
     "failedToAddCompany": "Kunde inte lägga till företag.",
     "unexpectedError": "Ett oväntat fel uppstod.",
     "adding": "Lägger till...",
-    "cancel": "Avbryt"
+    "cancel": "Avbryt",
+    "timeTracking": "Tidsuppföljning",
+    "timeTrackingDescription": "Följ dina arbetspass och produktivitetsserie.",
+    "loadingTimeTracking": "Laddar tidsuppföljning...",
+    "noSessionsYet": "Inga sessioner ännu.",
+    "startTracking": "Börja följa din tid för att se din serie och sessioner.",
+    "lastSessionDuration": "Varaktighet"
   },
   "AddUserModal": {
     "addNewUser": "Lägg till ny användare",

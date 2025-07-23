@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
-import { useTheme } from '@/components/ThemeContext';
+import { useCalendarPage } from '@/hooks/useCalendar';
 import CalendarPanel from "@/components/calendar/CalendarPanel";
 import CalendarEventsList from "@/components/calendar/CalendarEventsList";
 interface AnnouncementEvent {
@@ -30,117 +30,25 @@ interface Task {
 }
 
 const CalendarPage: NextPageWithLayout = React.memo(() => {
-  const { theme } = useTheme();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [loading, setLoading] = useState<boolean>(false);
-  const [listError, setListError] = useState<string | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [announcementEvents, setAnnouncementEvents] = useState<AnnouncementEvent[]>([]);
-  const fetchAnnouncementEvents = useCallback(async () => {
-    try {
-      const response = await fetch("/api/announcements?category=Event", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch announcement events.");
-      }
-      let data: AnnouncementEvent[] = await response.json();
-      // Only keep those with a valid eventDate
-      data = data.filter(ev => ev.eventDate);
-      // Map content to description for compatibility
-      const mapped = data.map(ev => ({ ...ev, description: ev.content }));
-      setAnnouncementEvents(mapped);
-      localStorage.setItem("announcementEvents", JSON.stringify(mapped));
-    } catch (err) {
-      // Optionally handle error
-    }
-  }, []);
-
-  const handleDateChange = useCallback((date: Date | null) => {
-    setSelectedDate(date);
-  }, []);
-
-  const fetchTasks = useCallback(async () => {
-    setLoading(true);
-    setListError(null);
-    try {
-      const response = await fetch("/api/tasks", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch tasks.");
-      }
-      let data: Task[] = await response.json();
-      data.sort((a, b) => {
-        if (a.completed && !b.completed) return 1;
-        if (!a.completed && b.completed) return -1;
-        const dateA = new Date(a.deadline).getTime();
-        const dateB = new Date(b.deadline).getTime();
-        return dateA - dateB;
-      });
-      setTasks(data);
-      localStorage.setItem("userTasks", JSON.stringify(data));
-    } catch (err) {
-      setListError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchTasks();
-    fetchAnnouncementEvents();
-  }, [fetchTasks, fetchAnnouncementEvents]);
-
-  // Accepts drag data in the form of 'task:<id>' or 'event:<id>'
-  const handleTaskDrop = useCallback(async (dragData: string, date: Date) => {
-    setLoading(true);
-    setListError(null);
-    let type = 'task';
-    let itemId = dragData;
-    if (dragData.includes(':')) {
-      const [prefix, id] = dragData.split(':');
-      type = prefix;
-      itemId = id;
-    }
-    try {
-      if (type === 'task') {
-        const response = await fetch(`/api/tasks/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deadline: date }),
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to update task deadline.");
-        }
-        await fetchTasks();
-      } else if (type === 'event') {
-        const response = await fetch(`/api/announcements/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventDate: date }),
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to update event date.");
-        }
-        await fetchAnnouncementEvents();
-      }
-    } catch (err) {
-      setListError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchTasks, fetchAnnouncementEvents]);
-
-  // Memoize deadlines (tasks) and eventDates (announcement events)
-  const deadlines = useMemo(() => tasks.map(task => new Date(task.deadline).toDateString()), [tasks]);
-  const eventDates = useMemo(() => announcementEvents.map(ev => new Date(ev.eventDate).toDateString()), [announcementEvents]);
+  const {
+    theme,
+    selectedDate,
+    setSelectedDate,
+    loading,
+    setLoading,
+    listError,
+    setListError,
+    tasks,
+    setTasks,
+    announcementEvents,
+    setAnnouncementEvents,
+    fetchAnnouncementEvents,
+    handleDateChange,
+    fetchTasks,
+    handleTaskDrop,
+    deadlines,
+    eventDates,
+  } = useCalendarPage();
 
   // Responsive: swap order on mobile (calendar first, then events list), keep original on desktop
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
@@ -210,7 +118,7 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] px-2 sm:px-4 lg:px-6 xl:px-8">
         <main className="flex flex-col lg:flex-row w-full max-w-[2000px] gap-3 sm:gap-4 lg:gap-6 rounded-lg overflow-hidden min-h-[600px] lg:min-h-[700px] bg-transparent">
           {/* On mobile: calendar first, then events list. On desktop: events list left, calendar right. */}
-          {typeof window !== 'undefined' && window.innerWidth < 1024 ? (
+          {isMobile ? (
             <>
               {CalendarPanelSection}
               {EventsListSection}

@@ -616,7 +616,13 @@
     "failedToAddCompany": "Échec de l'ajout de l'entreprise.",
     "unexpectedError": "Une erreur inattendue s'est produite.",
     "adding": "Ajout...",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "timeTracking": "Suivi du temps",
+    "timeTrackingDescription": "Suivez vos sessions de travail et votre série de productivité.",
+    "loadingTimeTracking": "Chargement du suivi du temps...",
+    "noSessionsYet": "Aucune session pour le moment.",
+    "startTracking": "Commencez à enregistrer votre temps pour voir votre série et vos sessions.",
+    "lastSessionDuration": "Durée"
   },
   "AddUserModal": {
     "addNewUser": "Ajouter un nouvel utilisateur",

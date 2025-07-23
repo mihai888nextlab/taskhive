@@ -6,10 +6,11 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/components/ThemeContext";
+import { FaMoon, FaSun } from "react-icons/fa";
 
 const SelectCompanyPage = () => {
   const { user, refetchUser } = useAuth();
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const t = useTranslations("SelectCompany");
   const router = useRouter();
   const [invitations, setInvitations] = useState<

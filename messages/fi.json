@@ -597,7 +597,13 @@
     "failedToAddCompany": "Yrityksen lisääminen epäonnistui.",
     "unexpectedError": "Tapahtui odottamaton virhe.",
     "adding": "Lisätään...",
-    "cancel": "Peruuta"
+    "cancel": "Peruuta",
+    "timeTracking": "Ajan seuranta",
+    "timeTrackingDescription": "Seuraa työistuntojasi ja tuottavuusputkeasi.",
+    "loadingTimeTracking": "Ladataan ajan seurantaa...",
+    "noSessionsYet": "Ei istuntoja vielä.",
+    "startTracking": "Aloita ajan seuranta nähdäksesi putkesi ja istunnot.",
+    "lastSessionDuration": "Kesto"
   },
   "AddUserModal": {
     "addNewUser": "Lisää uusi käyttäjä",

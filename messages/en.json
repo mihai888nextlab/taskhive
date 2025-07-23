@@ -617,7 +617,13 @@
     "failedToAddCompany": "Failed to add company.",
     "unexpectedError": "An unexpected error occurred.",
     "adding": "Adding...",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "timeTracking": "Time Tracking",
+    "timeTrackingDescription": "Track your work sessions and productivity streak.",
+    "loadingTimeTracking": "Loading time tracking...",
+    "noSessionsYet": "No sessions yet.",
+    "startTracking": "Start tracking your time to see your streak and sessions.",
+    "lastSessionDuration": "Duration"
   },
   "AddUserModal": {
     "addNewUser": "Add New User",

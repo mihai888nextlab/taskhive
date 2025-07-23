@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
+import DashboardAnnouncementPreview from "@/components/dashboard/DashboardAnnouncementPreview";
+import DashboardUsersPreview from "@/components/dashboard/DashboardUsersPreview";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import Statistics from "@/components/dashboard/Statistics";
@@ -6,6 +8,7 @@ import { useTheme } from "@/components/ThemeContext";
 import DashboardFinancePreview from "@/components/dashboard/DashboardFinancePreview";
 import DashboardTaskPreview from "@/components/dashboard/DashboardTaskPreview";
 import DashboardCalendarPreview from "@/components/dashboard/DashboardCalendarPreview";
+import DashboardTimeTrackingPreview from "@/components/dashboard/DashboardTimeTrackingPreview";
 import {
   Table,
   TableHeader,
@@ -22,6 +25,7 @@ import {
   FaArrowRight,
   FaMoneyBillWave,
   FaBullhorn,
+  FaClock,
 } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import ReactMarkdown from "react-markdown";
@@ -112,6 +116,10 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
   const [tasksCardTitle, setTasksCardTitle] = useState(
     t("tasks", { default: "Tasks" })
   );
+
+  // Time tracking preview state
+  const [streak, setStreak] = useState(0);
+  const [sessions, setSessions] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -209,6 +217,39 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
     fetchAnnouncement();
   }, []);
 
+  useEffect(() => {
+    // Fetch time tracking streak and sessions for preview
+    const fetchTimeTrackingPreview = async () => {
+      if (!user?._id) return;
+      try {
+        const res = await fetch(`/api/time-sessions?userId=${user._id}`);
+        if (!res.ok) return;
+        const fetchedSessions = await res.json();
+        if (Array.isArray(fetchedSessions) && fetchedSessions.length > 0) {
+          // Streak: count consecutive days with sessions
+          const days = fetchedSessions.map(s => new Date(s.createdAt).toDateString());
+          const uniqueDays = Array.from(new Set(days)).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+          let streakCount = 1;
+          for (let i = 1; i < uniqueDays.length; i++) {
+            const prev = new Date(uniqueDays[i - 1]);
+            const curr = new Date(uniqueDays[i]);
+            if ((prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24) === 1) {
+              streakCount++;
+            } else {
+              break;
+            }
+          }
+          setStreak(streakCount);
+          setSessions(fetchedSessions.slice(0, 2).map(s => ({ name: s.name, duration: s.duration, tag: s.tag })));
+        } else {
+          setStreak(0);
+          setSessions([]);
+        }
+      } catch {}
+    };
+    fetchTimeTrackingPreview();
+  }, [user]);
+
   // Memoize filtered users for Table
   const filteredTableUsers = useMemo(() => {
     return users
@@ -243,7 +284,6 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
       </Head>
-
       {/* Cards Grid */}
       <div className="w-full flex flex-col gap-5 md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 md:gap-5">
         {/* Tasks Card */}
@@ -281,23 +321,6 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
               userEmail={user?.email}
               setTitle={setTasksCardTitle}
             />
-            {/* Tasks empty state (like tasks page) */}
-            {/* 
-              Example usage:
-              {!hasTasks && (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className={`flex items-center justify-center w-20 h-20 rounded-full mb-4 ${
-                    theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
-                  }`}>
-                    <FaTasks className="text-4xl text-gray-400" />
-                  </div>
-                  <h4 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>No Tasks Found</h4>
-                  <p className={`text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Create your first task to get started
-                  </p>
-                </div>
-              )}
-            */}
           </DashboardCard>
         </div>
         {/* Announcements Card */}
@@ -332,104 +355,13 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
             iconBg={theme === "dark" ? "bg-yellow-600" : "bg-yellow-500"}
             iconColor="text-white"
           >
-            {/* Only render the announcement content, no extra container or heading */}
-            {loadingAnnouncement ? (
-              <div className="flex flex-col justify-center items-center h-32 bg-primary-light/10 rounded-lg animate-pulse">
-                <FaBullhorn className="animate-bounce text-primary text-4xl mb-3" />
-                <span className="text-sm font-medium">
-                  {t("loadingAnnouncement", {
-                    default: "Loading announcement...",
-                  })}
-                </span>
-              </div>
-            ) : announcementError ? (
-              <div className="bg-red-50 border-l-4 border-red-400 text-red-400 p-4 rounded-md shadow-sm text-center font-medium">
-                <p className="mb-1">
-                  {t("failedToLoadAnnouncement", {
-                    default: "Failed to load announcement:",
-                  })}
-                </p>
-                <p className="text-sm italic">{announcementError}</p>
-              </div>
-            ) : !announcementPreview ? (
-              <div className="text-center py-16">
-                <div
-                  className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
-                    theme === "dark" ? "bg-gray-700" : "bg-gray-100"
-                  }`}
-                >
-                  <FaBullhorn className="text-2xl text-gray-400" />
-                </div>
-                <h3
-                  className={`text-lg font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}
-                >
-                  {t("noAnnouncementsYet", { default: "No announcements yet" })}
-                </h3>
-                <p
-                  className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
-                >
-                  {t("checkBackLater", {
-                    default: "Check back later for company updates and news",
-                  })}
-                </p>
-              </div>
-            ) : (
-              <div
-                className={`relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-5 rounded-xl shadow-md border ${announcementPreview.pinned ? (theme === "dark" ? "bg-yellow-900 border-yellow-700" : "bg-gradient-to-r from-yellow-50 to-white border-yellow-200") : theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gradient-to-r from-blue-50 to-white border-primary-light/50"} hover:scale-101 transition-all duration-300 group`}
-                style={{ opacity: announcementPreview.pinned ? 1 : 0.95 }}
-              >
-                <div className="flex-1 pr-0 sm:pr-4 w-full min-w-0">
-                  <span
-                    className={`block font-bold text-lg sm:text-xl leading-tight break-words ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}
-                  >
-                    {announcementPreview.title}
-                  </span>
-                  <div
-                    className={`mt-2 line-clamp-2 break-words ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {announcementPreview.content}
-                    </ReactMarkdown>
-                  </div>
-                  <div className="mt-3 text-xs sm:text-sm font-semibold flex flex-wrap items-center gap-2">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold text-white ${announcementPreview.pinned ? "bg-yellow-500" : "bg-blue-500"}`}
-                    >
-                      {announcementPreview.category}
-                    </span>
-                    {announcementPreview.pinned && (
-                      <span className="ml-2 px-2.5 py-1 bg-yellow-400 text-white text-xs rounded-full font-bold flex items-center gap-1">
-                        <FaBullhorn />
-                        Pinned
-                      </span>
-                    )}
-                    <span
-                      className={
-                        theme === "dark" ? "text-gray-400" : "text-gray-600"
-                      }
-                    >
-                      By {announcementPreview.createdBy?.firstName}{" "}
-                      {announcementPreview.createdBy?.lastName}
-                    </span>
-                    <span
-                      className={
-                        theme === "dark" ? "text-gray-400" : "text-gray-600"
-                      }
-                    >
-                      •{" "}
-                      {new Date(
-                        announcementPreview.createdAt
-                      ).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-                <div className="self-center pl-0 sm:pl-3 mt-3 sm:mt-0 hidden sm:block">
-                  <FaBullhorn
-                    className={`text-3xl sm:text-4xl ${announcementPreview.pinned ? "text-yellow-400" : "text-primary"}`}
-                  />
-                </div>
-              </div>
-            )}
+            <DashboardAnnouncementPreview
+              loadingAnnouncement={loadingAnnouncement}
+              announcementError={announcementError}
+              announcementPreview={announcementPreview}
+              theme={theme}
+              t={t}
+            />
           </DashboardCard>
         </div>
         {/* Finance Card */}
@@ -462,13 +394,11 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
             iconBg={theme === "dark" ? "bg-green-600" : "bg-green-500"}
             iconColor="text-white"
           >
-            <div style={theme === "dark" ? { opacity: 0.8 } : undefined}>
-              <DashboardFinancePreview
-                totalExpenses={totalExpenses}
-                totalIncomes={totalIncomes}
-                profit={profit}
-              />
-            </div>
+            <DashboardFinancePreview
+              totalExpenses={totalExpenses}
+              totalIncomes={totalIncomes}
+              profit={profit}
+            />
           </DashboardCard>
         </div>
         {/* Users Card */}
@@ -501,58 +431,47 @@ const DashboardPage: NextPageWithLayout = React.memo(() => {
             iconBg={theme === "dark" ? "bg-blue-600" : "bg-blue-500"}
             iconColor="text-white"
           >
-            <div className="flex flex-col h-full">
-              {loadingUsers ? (
-                <p className="text-gray-600">
-                  {t("loadingUsers", { default: "Loading users..." })}
-                </p>
-              ) : filteredTableUsers.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>
-                        {t("firstName", { default: "First Name" })}
-                      </TableHead>
-                      <TableHead>
-                        {t("lastName", { default: "Last Name" })}
-                      </TableHead>
-                      <TableHead>{t("email", { default: "Email" })}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTableUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.firstName}</TableCell>
-                        <TableCell>{user.lastName}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-16">
-                  <div
-                    className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
-                      theme === "dark" ? "bg-gray-700" : "bg-gray-100"
-                    }`}
-                  >
-                    <FaUserClock className="text-2xl text-gray-400" />
-                  </div>
-                  <h3
-                    className={`text-lg font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}
-                  >
-                    {t("noTeamMembersYet", { default: "No team members yet" })}
-                  </h3>
-                  <p
-                    className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
-                  >
-                    {t("startByAddingFirstMember", {
-                      default: "Start by adding your first team member",
-                    })}
-                  </p>
-                </div>
-              )}
-            </div>
+            <DashboardUsersPreview
+              loadingUsers={loadingUsers}
+              filteredTableUsers={filteredTableUsers}
+              theme={theme}
+              t={t}
+            />
+          </DashboardCard>
+        </div>
+        {/* Time Tracking Card */}
+        <div
+          className="w-full px-2 flex md:block md:px-0"
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            window.location.href = "/app/time-tracking";
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ")
+              window.location.href = "/app/time-tracking";
+          }}
+          style={{ cursor: "pointer" }}
+          aria-label={t("goToTimeTrackingPage", { default: "Go to time tracking page" })}
+        >
+          <DashboardCard
+            icon={<FaClock />}
+            title={t("timeTracking", { default: "Time Tracking" })}
+            description={t("timeTrackingDescription", { default: "Track your work sessions and productivity streaks." })}
+            headerBg={
+              theme === "dark"
+                ? "bg-blue-900 border-blue-800"
+                : "bg-blue-50 border-blue-200"
+            }
+            iconBg={theme === "dark" ? "bg-blue-600" : "bg-blue-500"}
+            iconColor="text-white"
+          >
+            <DashboardTimeTrackingPreview
+              streak={streak}
+              sessions={sessions}
+              theme={theme}
+              t={t}
+            />
           </DashboardCard>
         </div>
         {/* Calendar Card */}
