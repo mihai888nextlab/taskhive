@@ -13,7 +13,7 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 const googleClient = new OAuth2Client(
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
-  process.env.NEXTAUTH_URL || "http://localhost:3000"
+  process.env.NEXT_PUBLIC_BASE_URL || "https://www.taskhive.tech"
 );
 
 export default async function handler(
