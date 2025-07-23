@@ -1,44 +1,57 @@
 import React from 'react';
-// ...existing code...
 import DashboardLayout from '@/components/sidebar/DashboardLayout';
-import FinanceStatistics from '@/components/FinanceStatistics';
-import { useTheme } from '@/components/ThemeContext';
+import FinanceSummaryCards from '@/components/finance/FinanceSummaryCards';
+import FinanceTabs from '@/components/finance/FinanceTabs';
 import ExpenseForm from '@/components/finance/ExpenseForm';
 import IncomeForm from '@/components/finance/IncomeForm';
 import ExpenseList from '@/components/finance/ExpenseList';
 import IncomeList from '@/components/finance/IncomeList';
-import useFinancePageLogic from '@/components/finance/useFinancePageLogic';
-import FinanceSummaryCards from '@/components/finance/FinanceSummaryCards';
-import FinanceTabs from '@/components/finance/FinanceTabs';
 import CategoryPieChart from '@/components/finance/CategoryPieChart';
 import UndoSnackbar from '@/components/finance/UndoSnackbar';
 import StatsRangeButtons from '@/components/finance/StatsRangeButtons';
 import { FaDollarSign, FaChartLine } from 'react-icons/fa';
-import { useTranslations } from "next-intl";
-
 import MobileListWithFormButton from '@/components/MobileListWithFormButton';
+import { useFinance } from '@/hooks/useFinance';
 
 const FinancePage = () => {
-  const { theme } = useTheme();
-  const logic = useFinancePageLogic();
-  const t = useTranslations("FinancePage");
+  const {
+    theme,
+    t,
+    logic,
+    expenseModalOpen,
+    setExpenseModalOpen,
+    incomeModalOpen,
+    setIncomeModalOpen,
+    selectedExpense,
+    setSelectedExpense,
+    selectedIncome,
+    setSelectedIncome,
+    handleExportPDF,
+    handleExportCSV,
+    search,
+    setSearch,
+    filteredExpenses,
+    filteredIncomes,
+    handleAddExpense,
+    handleAddIncome,
+    showUndo,
+    handleUndo,
+    deletedItem,
+  } = useFinance();
 
   return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
       {/* Header Section - Fixed Height */}
       <div className={`flex-shrink-0 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} px-2 sm:px-4 lg:px-8 py-4 ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
         <div className="max-w-full mx-auto">
-          {/* Summary Cards */}
-          <div className="w-full">
-            <FinanceSummaryCards
-              totalExpenses={logic.totalExpenses}
-              totalIncomes={logic.totalIncomes}
-              profit={logic.profit}
-              expenseTrend={logic.expenseTrend}
-              incomeTrend={logic.incomeTrend}
-              profitTrend={logic.profitTrend}
-            />
-          </div>
+          <FinanceSummaryCards
+            totalExpenses={logic.totalExpenses}
+            totalIncomes={logic.totalIncomes}
+            profit={logic.profit}
+            expenseTrend={logic.expenseTrend}
+            incomeTrend={logic.incomeTrend}
+            profitTrend={logic.profitTrend}
+          />
         </div>
       </div>
 
@@ -155,11 +168,11 @@ const FinancePage = () => {
                           <span>{t("export")}</span>
                           <svg className="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </button>
-                        <div className="export-dropdown-menu absolute z-20 left-0 mt-2 min-w-[110px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hidden">
+                        <div className={`export-dropdown-menu absolute z-20 left-0 mt-2 min-w-[110px] rounded-xl shadow-lg hidden border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                           <button
                             type="button"
-                            onClick={e => { logic.expenseListProps.onExportPDF(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
-                            className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-xl focus:outline-none text-sm"
+                            onClick={e => { handleExportPDF(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
+                            className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-t-xl focus:outline-none text-sm ${theme === 'dark' ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-800 hover:bg-gray-100'}`}
                             disabled={logic.expenseListProps.loading}
                           >
                             {/* PDF file icon */}
@@ -168,8 +181,8 @@ const FinancePage = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={e => { logic.expenseListProps.onExportCSV(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
-                            className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-xl focus:outline-none text-sm"
+                            onClick={e => { handleExportCSV(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
+                            className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-b-xl focus:outline-none text-sm ${theme === 'dark' ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-800 hover:bg-gray-100'}`}
                             disabled={logic.expenseListProps.loading}
                           >
                             {/* CSV file icon */}
@@ -208,11 +221,11 @@ const FinancePage = () => {
                           <span>{t("export")}</span>
                           <svg className="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </button>
-                        <div className="export-dropdown-menu absolute z-20 left-0 mt-2 min-w-[110px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hidden">
+                        <div className={`export-dropdown-menu absolute z-20 left-0 mt-2 min-w-[110px] rounded-xl shadow-lg hidden border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                           <button
                             type="button"
-                            onClick={e => { logic.incomeListProps.onExportPDF(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
-                            className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-xl focus:outline-none text-sm"
+                            onClick={e => { handleExportPDF(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
+                            className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-t-xl focus:outline-none text-sm ${theme === 'dark' ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-800 hover:bg-gray-100'}`}
                             disabled={logic.incomeListProps.loading}
                           >
                             {/* PDF file icon */}
@@ -221,8 +234,8 @@ const FinancePage = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={e => { logic.incomeListProps.onExportCSV(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
-                            className="w-full flex items-center gap-2 px-3 py-1.5 text-left text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-xl focus:outline-none text-sm"
+                            onClick={e => { handleExportCSV(); (e.currentTarget.parentElement as HTMLElement).classList.add('hidden'); }}
+                            className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-b-xl focus:outline-none text-sm ${theme === 'dark' ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-800 hover:bg-gray-100'}`}
                             disabled={logic.incomeListProps.loading}
                           >
                             {/* CSV file icon */}
@@ -249,9 +262,9 @@ const FinancePage = () => {
 
       {/* Undo Snackbar */}
       <UndoSnackbar
-        show={logic.showUndo}
-        onUndo={logic.handleUndo}
-        deletedItem={logic.deletedItem}
+        show={showUndo}
+        onUndo={handleUndo}
+        deletedItem={deletedItem}
       />
     </div>
   );
@@ -260,6 +273,3 @@ const FinancePage = () => {
 FinancePage.getLayout = (page: React.ReactElement) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default React.memo(FinancePage);
-
-// All expensive calculations and event handlers are already memoized with useMemo.
-// The page component is wrapped with React.memo.

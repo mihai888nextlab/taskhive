@@ -585,7 +585,13 @@
     "loadingDeadlines": "Carregando prazos...",
     "noUpcomingDeadlines": "Nenhum prazo próximo",
     "noScheduledTasksOrEvents": "Você não tem tarefas ou eventos agendados",
-    "addCompany": "Adicionar empresa"
+    "addCompany": "Adicionar empresa",
+    "timeTracking": "Rastreamento de tempo",
+    "timeTrackingDescription": "Acompanhe suas sessões de trabalho e sequência de produtividade.",
+    "loadingTimeTracking": "Carregando rastreamento de tempo...",
+    "noSessionsYet": "Ainda não há sessões.",
+    "startTracking": "Comece a rastrear seu tempo para ver sua sequência e sessões.",
+    "lastSessionDuration": "Duração"
   },
   "AddUserModal": {
     "addNewUser": "Adicionar novo usuário",

@@ -80,31 +80,14 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo((props) =
     setDetailsTask(null);
   }, []);
 
-  // Memoize filteredTasks
+  // Memoize filteredTasks: Only show tasks assigned BY the current user
   const filteredTasks = useMemo(() => {
-    let result = [...tasks];
-
-    // Show subtasks assigned to other users
-    result = result.flatMap(task => {
-      if (task.subtasks && Array.isArray(task.subtasks)) {
-        // Only include subtasks assigned to other users
-        return task.subtasks
-          .filter(st => st.userId && typeof st.userId === 'object' && st.userId.email !== currentUserEmail)
-          .map(st => ({
-            ...st,
-            isSubtask: true,
-            parentTask: typeof task._id === 'string' ? task._id : undefined,
-            // Ensure parentTask is string or undefined for type compatibility
-          }));
-      }
-      // Also include the main task, but ensure parentTask is string or undefined
-      return [{
-        ...task,
-        parentTask: typeof task.parentTask === 'object' && task.parentTask && 'title' in task.parentTask
-          ? (task.parentTask._id || undefined)
-          : (typeof task.parentTask === 'string' ? task.parentTask : undefined),
-      }];
-    });
+    // Only include tasks where createdBy.email === currentUserEmail
+    let result = tasks.filter(task =>
+      task.createdBy &&
+      typeof task.createdBy.email === 'string' &&
+      task.createdBy.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()
+    );
 
     // Search
     if (searchValue.trim()) {

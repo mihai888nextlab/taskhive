@@ -602,7 +602,13 @@
     "loadingDeadlines": "Cargando fechas límite...",
     "noUpcomingDeadlines": "No hay fechas límite próximas",
     "noScheduledTasksOrEvents": "No tienes tareas o eventos programados",
-    "addCompany": "Agregar empresa"
+    "addCompany": "Agregar empresa",
+    "timeTracking": "Seguimiento de tiempo",
+    "timeTrackingDescription": "Controla tus sesiones de trabajo y tu racha de productividad.",
+    "loadingTimeTracking": "Cargando seguimiento de tiempo...",
+    "noSessionsYet": "No hay sesiones todavía.",
+    "startTracking": "Comienza a registrar tu tiempo para ver tu racha y sesiones.",
+    "lastSessionDuration": "Duración"
   },
   "AddUserModal": {
     "addNewUser": "Agregar nuevo usuario",

@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { useTheme } from "@/components/ThemeContext";
 import { FaSpinner, FaPlus, FaTimes } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,6 +42,7 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
   onAdded,
 }) => {
   const t = useTranslations("TimeTrackingPage");
+  const { theme } = useTheme();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState(tags[0]);
@@ -143,124 +145,124 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
 
   return (
     <div className={`fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4`}>
-      <div className={`rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden bg-white border border-gray-200 dark:bg-gray-900 dark:border-gray-700`}>
+      <div className={`rounded-3xl shadow-2xl w-full max-w-md relative animate-fadeIn overflow-hidden ${theme === 'dark' ? 'bg-gray-900 border border-gray-700 text-white' : 'bg-white'}`}>
         {/* Close Button */}
         <button
-          className="absolute top-4 right-4 text-xl font-bold z-10 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+          className={`absolute top-4 right-4 text-xl font-bold z-10 transition-colors ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
           onClick={onClose}
           aria-label="Close modal"
         >
           <FaTimes />
         </button>
         {/* Header */}
-        <div className="p-6 border-b bg-blue-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl shadow-lg bg-blue-600 dark:bg-blue-700">
-              <FaPlus className="text-xl text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t("logNewSession")}</h2>
-              <p className="text-gray-600 dark:text-gray-300">{t("logTimeForTask")}</p>
-            </div>
+        <div className={`p-6 border-b flex items-center gap-4 ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+          <div className={`p-3 ${theme === 'dark' ? 'bg-blue-700' : 'bg-blue-600'} rounded-xl shadow-lg`}>
+            <FaPlus className="text-xl text-white" />
+          </div>
+          <div>
+            <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("logNewSession")}</h2>
+            <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{t("logTimeForTask")}</p>
           </div>
         </div>
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4" id="manual-session-form">
+        <div className="p-6">
           {error && (
-            <div className="mb-2 p-2 rounded-lg bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700"> 
-              <p className="font-medium text-sm text-red-700 dark:text-red-300">{error}</p>
+            <div className={`mb-2 p-2 rounded-lg border ${theme === 'dark' ? 'bg-red-900/30 border-red-700' : 'bg-red-50 border-red-200'}`}> 
+              <p className={`font-medium text-sm ${theme === 'dark' ? 'text-red-300' : 'text-red-700'}`}>{error}</p>
             </div>
           )}
-          <div>
-            <label className="block font-semibold mb-2 text-sm text-gray-900 dark:text-white">{t("sessionName")}</label>
-            <Input
-              type="text"
-              value={name}
-              onChange={handleNameChange}
-              required
-              placeholder={t("sessionName")}
-              disabled={loading}
-              className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
-            />
-          </div>
-          <div>
-            <label className="block font-semibold mb-2 text-sm text-gray-900 dark:text-white">{t("sessionDescription")}</label>
-            <Textarea
-              value={description}
-              onChange={handleDescriptionChange}
-              required
-              placeholder={t("sessionDescription")}
-              rows={2}
-              disabled={loading}
-              className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
-            />
-          </div>
-          <div>
-            <label className="block font-semibold mb-2 text-sm text-gray-900 dark:text-white">{t("tag")}</label>
-            <Select
-              value={tag}
-              onValueChange={handleTagChange}
-              required
-              disabled={loading}
-            >
-              <SelectTrigger className="w-full px-3 py-2 border rounded-lg focus:ring-2 transition-all duration-200 text-sm bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:border-green-500 dark:focus:ring-green-500/20">
-                <SelectValue placeholder={t("selectCategory")} />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-gray-300 rounded-lg shadow-lg p-0 z-[250] dark:bg-gray-800 dark:border-gray-700">
-                {tags.map(tagName => (
-                  <SelectItem key={tagName} value={tagName} className="text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700 dark:text-white dark:bg-gray-800 dark:hover:bg-green-900 dark:focus:bg-green-900 dark:data-[state=checked]:bg-green-900 dark:data-[state=checked]:text-green-400 px-4 py-2 text-sm cursor-pointer transition-colors">
-                    {tagName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="block font-semibold mb-2 text-sm text-gray-900 dark:text-white">{t("duration24h")}</label>
-            <div className="flex gap-2 items-center">
+          <form onSubmit={handleSubmit} className="space-y-4" id="manual-session-form">
+            <div>
+              <label className={`block font-semibold mb-2 text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("sessionName")}</label>
               <Input
-                type="number"
-                min={0}
-                max={99}
-                value={hours}
-                onChange={handleHoursChange}
-                placeholder={t("hours")}
-                className="w-16 text-center bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
+                type="text"
+                value={name}
+                onChange={handleNameChange}
+                required
+                placeholder={t("sessionName")}
                 disabled={loading}
+                className={`w-full px-3 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white placeholder-gray-400' : 'bg-white border border-gray-300 text-gray-900 placeholder-gray-400'}`}
               />
-              <span className="mx-1 font-bold text-gray-500 dark:text-gray-400">:</span>
-              <Input
-                type="number"
-                min={0}
-                max={59}
-                value={minutes}
-                onChange={handleMinutesChange}
-                placeholder={t("minutes")}
-                className="w-16 text-center bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
-                disabled={loading}
-              />
-              <span className="mx-1 font-bold text-gray-500 dark:text-gray-400">:</span>
-              <Input
-                type="number"
-                min={0}
-                max={59}
-                value={seconds}
-                onChange={handleSecondsChange}
-                placeholder={t("seconds")}
-                className="w-16 text-center bg-white border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
-                disabled={loading}
-              />
-              <span className="text-xs text-gray-500 ml-2 dark:text-gray-400">hh:mm:ss</span>
             </div>
-          </div>
-        </form>
+            <div>
+              <label className={`block font-semibold mb-2 text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("sessionDescription")}</label>
+              <Textarea
+                value={description}
+                onChange={handleDescriptionChange}
+                required
+                placeholder={t("sessionDescription")}
+                rows={2}
+                disabled={loading}
+                className={`w-full px-3 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white placeholder-gray-400' : 'bg-white border border-gray-300 text-gray-900 placeholder-gray-400'}`}
+              />
+            </div>
+            <div>
+              <label className={`block font-semibold mb-2 text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("tag")}</label>
+              <Select
+                value={tag}
+                onValueChange={handleTagChange}
+                required
+                disabled={loading}
+              >
+                <SelectTrigger className={`w-full px-3 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white' : 'bg-white border border-gray-300'}`}>
+                  <SelectValue placeholder={t("selectCategory")} />
+                </SelectTrigger>
+                <SelectContent className={`${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white' : 'bg-white border border-gray-300'} rounded-lg shadow-lg p-0 z-[250]`}>
+                  {tags.map(tagName => (
+                    <SelectItem key={tagName} value={tagName} className={`px-4 py-2 text-sm cursor-pointer transition-colors ${theme === 'dark' ? 'text-white bg-gray-800 hover:bg-green-900 focus:bg-green-900 data-[state=checked]:bg-green-900 data-[state=checked]:text-green-400' : 'text-gray-900 bg-white hover:bg-blue-50 focus:bg-blue-100 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-700'}`}>
+                      {tagName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className={`block font-semibold mb-2 text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{t("duration24h")}</label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="number"
+                  min={0}
+                  max={99}
+                  value={hours}
+                  onChange={handleHoursChange}
+                  placeholder={t("hours")}
+                  className={`w-16 text-center px-2 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white placeholder-gray-400' : 'bg-white border border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                  disabled={loading}
+                />
+                <span className={`mx-1 font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>:</span>
+                <Input
+                  type="number"
+                  min={0}
+                  max={59}
+                  value={minutes}
+                  onChange={handleMinutesChange}
+                  placeholder={t("minutes")}
+                  className={`w-16 text-center px-2 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white placeholder-gray-400' : 'bg-white border border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                  disabled={loading}
+                />
+                <span className={`mx-1 font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>:</span>
+                <Input
+                  type="number"
+                  min={0}
+                  max={59}
+                  value={seconds}
+                  onChange={handleSecondsChange}
+                  placeholder={t("seconds")}
+                  className={`w-16 text-center px-2 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-800 border border-gray-700 text-white placeholder-gray-400' : 'bg-white border border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                  disabled={loading}
+                />
+                <span className={`text-xs ml-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>hh:mm:ss</span>
+              </div>
+            </div>
+          </form>
+        </div>
         {/* Footer */}
-        <div className="p-6 border-t flex gap-3 bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+        <div className={`p-6 border-t flex gap-3 ${theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}>
           <Button
             type="button"
             variant="secondary"
             onClick={onClose}
-            className="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${theme === 'dark' ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
             disabled={loading}
           >
             {t("cancel")}
@@ -272,8 +274,12 @@ const AddManualSessionModal: React.FC<AddManualSessionModalProps> = React.memo((
             disabled={isSaveDisabled}
             className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
               isSaveDisabled
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500' 
-                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white'
+                ? theme === 'dark'
+                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : theme === 'dark'
+                  ? 'bg-blue-700 text-white hover:bg-blue-800 shadow-sm hover:shadow-md'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md'
             }`}
           >
             {loading ? (

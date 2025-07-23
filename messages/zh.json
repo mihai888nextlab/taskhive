@@ -588,7 +588,13 @@
     "failedToAddCompany": "添加公司失败。",
     "unexpectedError": "发生了意外错误。",
     "adding": "正在添加...",
-    "cancel": "取消"
+    "cancel": "取消",
+    "timeTracking": "时间追踪",
+    "timeTrackingDescription": "跟踪您的工作会话和生产力连续记录。",
+    "loadingTimeTracking": "正在加载时间追踪...",
+    "noSessionsYet": "暂无会话。",
+    "startTracking": "开始追踪您的时间以查看连续记录和会话。",
+    "lastSessionDuration": "时长"
   },
   "AddUserModal": {
     "addNewUser": "添加新用户",

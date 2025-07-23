@@ -588,7 +588,13 @@
     "failedToAddCompany": "Dodavanje kompanije nije uspelo.",
     "unexpectedError": "Došlo je do neočekivane greške.",
     "adding": "Dodavanje...",
-    "cancel": "Otkaži"
+    "cancel": "Otkaži",
+    "timeTracking": "Praćenje vremena",
+    "timeTrackingDescription": "Pratite svoje radne sesije i niz produktivnosti.",
+    "loadingTimeTracking": "Učitavanje praćenja vremena...",
+    "noSessionsYet": "Još nema sesija.",
+    "startTracking": "Počnite da pratite vreme da biste videli svoj niz i sesije.",
+    "lastSessionDuration": "Trajanje"
   },
   "AddUserModal": {
     "addNewUser": "Dodaj novog korisnika",

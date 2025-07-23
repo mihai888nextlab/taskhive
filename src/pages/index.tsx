@@ -1,3 +1,73 @@
+// --- Cookies & Terms Window ---
+function CookiesTermsWindow() {
+  const [open, setOpen] = React.useState(false);
+  const [showTerms, setShowTerms] = React.useState(false);
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const accepted = localStorage.getItem('taskhive_cookies_accepted');
+      if (!accepted) setOpen(true);
+    }
+  }, []);
+  const handleAccept = React.useCallback(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('taskhive_cookies_accepted', '1');
+    }
+    setOpen(false);
+  }, []);
+  if (!open) return null;
+  return (
+    <div className="fixed bottom-6 right-6 z-[9999] max-w-xs w-[340px] bg-[#23272f] border border-accent/30 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 animate-fadeInUp" style={{ maxHeight: 260 }}>
+      <div className="flex items-center justify-between mb-1">
+        <span className="font-semibold text-white text-base">Cookies & Terms</span>
+        <button
+          className="text-gray-400 hover:text-primary text-xl font-bold px-2 py-0.5 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/40"
+          onClick={() => setOpen(false)}
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </div>
+      {!showTerms ? (
+        <>
+          <div className="text-gray-300 text-sm mb-2">
+            This site uses cookies for essential functionality and analytics. By using TaskHive, you agree to our <button className="text-primary underline hover:text-primary-dark font-medium" onClick={() => setShowTerms(true)}>Terms & Conditions</button>.
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button
+              className="bg-primary text-white px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-primary-dark transition"
+              onClick={handleAccept}
+            >Accept</button>
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <div className="text-white font-semibold text-base mb-1">Terms & Conditions</div>
+          <div className="text-gray-300 text-sm max-h-28 overflow-y-auto pr-1">
+            <p className="mb-2">By using TaskHive, you agree to the following terms:</p>
+            <ul className="list-disc pl-5 mb-2">
+              <li>All data you enter or generate in TaskHive is treated as strictly confidential.</li>
+              <li>Your data is never shared or passed to third parties under any circumstances.</li>
+              <li>We do <span className="font-bold text-primary">not</span> collect or store personal information such as names, emails, or contact details for advertising or profiling purposes.</li>
+              <li>Cookies are used only for essential site functionality and basic analytics.</li>
+              <li>You may request deletion of your data at any time.</li>
+            </ul>
+            <p>For any questions, contact us at <a href="mailto:support@taskhive.app" className="text-primary underline">support@taskhive.app</a>.</p>
+          </div>
+          <div className="flex gap-2 justify-end mt-2">
+            <button
+              className="px-4 py-1.5 rounded-lg font-semibold text-sm border border-primary text-primary bg-transparent hover:bg-primary/10 transition"
+              onClick={() => setShowTerms(false)}
+            >Back</button>
+            <button
+              className="bg-primary text-white px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-primary-dark transition"
+              onClick={handleAccept}
+            >Accept</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 import { Kanit } from "next/font/google";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -258,6 +328,7 @@ export default function Home() {
       </Head>
       <div className="min-w-full min-h-screen bg-[#18181b] text-white flex flex-col items-center">
         <Header />
+        <CookiesTermsWindow />
         <main className="w-full flex flex-col items-center justify-center">
           {/* Hero Section with orange backlight */}
           <section className="w-full flex flex-col items-center justify-center text-center pt-32 md:pt-67 pb-24 md:pb-40 bg-[#18181b] relative overflow-hidden">

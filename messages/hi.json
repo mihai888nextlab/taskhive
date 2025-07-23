@@ -582,7 +582,13 @@
     "loadingDeadlines": "समय सीमाएँ लोड हो रही हैं...",
     "noUpcomingDeadlines": "कोई आगामी समय सीमा नहीं है",
     "noScheduledTasksOrEvents": "आपके पास कोई निर्धारित कार्य या इवेंट नहीं है",
-    "addCompany": "कंपनी जोड़ें"
+    "addCompany": "कंपनी जोड़ें",
+    "timeTracking": "समय ट्रैकिंग",
+    "timeTrackingDescription": "अपने कार्य सत्र और उत्पादकता स्ट्रीक को ट्रैक करें।",
+    "loadingTimeTracking": "समय ट्रैकिंग लोड हो रही है...",
+    "noSessionsYet": "अभी तक कोई सत्र नहीं है।",
+    "startTracking": "अपना स्ट्रीक और सत्र देखने के लिए समय ट्रैकिंग शुरू करें।",
+    "lastSessionDuration": "अवधि"
   },
   "AddUserModal": {
     "addNewUser": "नया उपयोगकर्ता जोड़ें",

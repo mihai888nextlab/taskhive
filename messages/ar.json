@@ -574,7 +574,13 @@
     "netProfitLoss": "صافي الربح / الخسارة",
     "loadingDeadlines": "جارٍ تحميل المواعيد النهائية...",
     "noUpcomingDeadlines": "لا توجد مواعيد نهائية قادمة",
-    "noScheduledTasksOrEvents": "لا توجد مهام أو أحداث مجدولة"
+    "noScheduledTasksOrEvents": "لا توجد مهام أو أحداث مجدولة",
+    "timeTracking": "تتبع الوقت",
+    "timeTrackingDescription": "تتبع جلسات عملك وسلسلة الإنتاجية الخاصة بك.",
+    "loadingTimeTracking": "جارٍ تحميل تتبع الوقت...",
+    "noSessionsYet": "لا توجد جلسات بعد.",
+    "startTracking": "ابدأ تتبع وقتك لرؤية السلسلة والجلسات الخاصة بك.",
+    "lastSessionDuration": "المدة"
   },
   "AddUserModal": {
     "addNewUser": "إضافة مستخدم جديد",
