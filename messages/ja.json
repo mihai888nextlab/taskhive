@@ -622,7 +622,8 @@
     "failedToAddCompany": "会社追加に失敗しました。",
     "unexpectedError": "予期せぬエラーが発生しました。",
     "adding": "追加中...",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "multipleSubtasks": "複数のサブタスク"
   },
   "AddUserModal": {
     "addNewUser": "新しいユーザー追加",

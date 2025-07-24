@@ -603,7 +603,8 @@
     "loadingTimeTracking": "Ladataan ajan seurantaa...",
     "noSessionsYet": "Ei istuntoja vielä.",
     "startTracking": "Aloita ajan seuranta nähdäksesi putkesi ja istunnot.",
-    "lastSessionDuration": "Kesto"
+    "lastSessionDuration": "Kesto",
+    "multipleSubtasks": "Useita alitehtäviä"
   },
   "AddUserModal": {
     "addNewUser": "Lisää uusi käyttäjä",

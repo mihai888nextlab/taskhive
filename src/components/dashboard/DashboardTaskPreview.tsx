@@ -256,14 +256,22 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
         );
       }
 
+      const hasMultipleSubtasks = Array.isArray(task.subtasks) && task.subtasks.length > 1;
       return (
         <li
           key={task._id}
-          className={`relative flex items-start justify-between p-5 rounded-xl shadow-sm group cursor-pointer transition-all duration-200 ${borderColor}`}
-          title={isOverdue ? t("taskOverdue", { default: "Task is overdue" }) : isToday ? t("taskDueToday", { default: "Task is due today" }) : t("clickToMarkComplete", { default: "Click to mark as complete" })}
+          className={`relative flex items-start justify-between p-5 rounded-xl shadow-sm group ${hasMultipleSubtasks ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'} transition-all duration-200 ${borderColor}`}
+          title={hasMultipleSubtasks
+            ? t("cannotCompleteParentTask", { default: "Cannot complete a parent task with multiple subtasks" })
+            : isOverdue
+              ? t("taskOverdue", { default: "Task is overdue" })
+              : isToday
+                ? t("taskDueToday", { default: "Task is due today" })
+                : t("clickToMarkComplete", { default: "Click to mark as complete" })}
           style={{ opacity: isOverdue ? 0.9 : 1, background: 'transparent' }}
           onClick={e => {
             e.stopPropagation();
+            if (hasMultipleSubtasks) return;
             if (updatingTaskId !== task._id) handleToggleComplete(task);
           }}
         >
@@ -282,6 +290,12 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
                     {tag}
                   </span>
                 ))
+              )}
+              {/* Show badge if task has multiple subtasks */}
+              {hasMultipleSubtasks && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded-full ml-2">
+                  {t("multipleSubtasks", { default: "Multiple Subtasks" })}
+                </span>
               )}
             </span>
             {task.description && (

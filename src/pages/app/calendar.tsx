@@ -1,9 +1,10 @@
 import React from "react";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
-import { NextPageWithLayout } from "@/types";
-import { useCalendarPage } from '@/hooks/useCalendar';
 import CalendarPanel from "@/components/calendar/CalendarPanel";
 import CalendarEventsList from "@/components/calendar/CalendarEventsList";
+import { useCalendarPage } from "@/hooks/useCalendar";
+import { NextPageWithLayout } from "@/types";
+
 interface AnnouncementEvent {
   _id: string;
   title: string;
@@ -11,7 +12,6 @@ interface AnnouncementEvent {
   category: string;
   content?: string;
 }
-import "react-calendar/dist/Calendar.css";
 
 interface Task {
   _id: string;
@@ -28,6 +28,7 @@ interface Task {
     email: string;
   };
 }
+
 
 const CalendarPage: NextPageWithLayout = React.memo(() => {
   const {
@@ -50,7 +51,6 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
     eventDates,
   } = useCalendarPage();
 
-  // Responsive: swap order on mobile (calendar first, then events list), keep original on desktop
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
 
   const CalendarPanelSection = (
@@ -78,29 +78,19 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
               {selectedDate.getDate()}
             </h1>
             <h2 className="text-xl sm:text-2xl lg:text-2xl xl:text-3xl font-bold mb-2 sm:mb-3 lg:mb-4">
-              {selectedDate.toLocaleDateString(undefined, {
-                weekday: "long",
-              })}
+              {selectedDate.toLocaleDateString(undefined, { weekday: "long" })}
             </h2>
             <p className="text-lg sm:text-xl lg:text-xl xl:text-xl opacity-90">
-              {selectedDate.toLocaleDateString(undefined, {
-                year: "numeric",
-                month: "long",
-              })}
+              {selectedDate.toLocaleDateString(undefined, { year: "numeric", month: "long" })}
             </p>
           </div>
         ) : (
           <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-              No Date Selected
-            </h1>
-            <p className="text-lg sm:text-xl lg:text-xl">
-              Please select a date from the calendar.
-            </p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">No Date Selected</h1>
+            <p className="text-lg sm:text-xl lg:text-xl">Please select a date from the calendar.</p>
           </div>
         )}
       </div>
-      {/* Events list with proper height for scrolling */}
       <div className="flex-1 overflow-hidden min-h-0">
         <CalendarEventsList
           tasks={tasks}
@@ -117,7 +107,6 @@ const CalendarPage: NextPageWithLayout = React.memo(() => {
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] px-2 sm:px-4 lg:px-6 xl:px-8">
         <main className="flex flex-col lg:flex-row w-full max-w-[2000px] gap-3 sm:gap-4 lg:gap-6 rounded-lg overflow-hidden min-h-[600px] lg:min-h-[700px] bg-transparent">
-          {/* On mobile: calendar first, then events list. On desktop: events list left, calendar right. */}
           {isMobile ? (
             <>
               {CalendarPanelSection}

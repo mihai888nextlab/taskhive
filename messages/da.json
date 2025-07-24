@@ -606,6 +606,7 @@
     "failedToAddCompany": "Kunne ikke tilføje virksomhed.",
     "unexpectedError": "Der opstod en uventet fejl.",
     "adding": "Tilføjer...",
-    "cancel": "Annuller"
+    "cancel": "Annuller",
+    "multipleSubtasks": "Flere delopgaver"
   }
 }

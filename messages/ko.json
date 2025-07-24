@@ -622,7 +622,8 @@
     "failedToAddCompany": "회사 추가 실패.",
     "unexpectedError": "예상치 못한 오류가 발생했습니다.",
     "adding": "추가 중...",
-    "cancel": "취소"
+    "cancel": "취소",
+    "multipleSubtasks": "여러 하위 작업"
   },
   "AddUserModal": {
     "addNewUser": "새 사용자 추가",

@@ -476,7 +476,8 @@
     "failedToAddCompany": "Η προσθήκη της εταιρείας απέτυχε.",
     "unexpectedError": "Παρουσιάστηκε απρόσμενο σφάλμα.",
     "adding": "Προσθήκη...",
-    "cancel": "Ακύρωση"
+    "cancel": "Ακύρωση",
+    "multipleSubtasks": "Πολλαπλές υπο-εργασίες"
   },
   "InsightsPage": {
     "tasks": "Εργασίες",

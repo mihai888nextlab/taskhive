@@ -596,7 +596,8 @@
     "failedToAddCompany": "Bedrijf toevoegen mislukt.",
     "unexpectedError": "Er is een onverwachte fout opgetreden.",
     "adding": "Toevoegen...",
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "multipleSubtasks": "Meerdere subtaken"
   },
   "AddUserModal": {
     "addNewUser": "Nieuwe gebruiker toevoegen",

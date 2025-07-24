@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+
+import React from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/hooks/useAuth";
 import VideoCallRoom from "./AgoraVideoCallRoom";
-import { Token } from "aws-sdk";
+import { useAgoraCredentials } from "../../hooks/useAgoraCredentials";
 
 interface AgoraCredentials {
   appId: string;
@@ -18,68 +19,12 @@ interface VideoCallWrapperProps {
 const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({ channelName }) => {
   const router = useRouter();
   const { isAuthenticated, loadingUser } = useAuth();
-
-  const [credentials, setCredentials] = useState<AgoraCredentials | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCredentials = async () => {
-      if (!isAuthenticated || loadingUser) {
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await fetch("/api/agora/generate-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ channelName }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message || "Failed to get video call credentials"
-          );
-        }
-
-        const data = await response.json();
-
-        if (!data.appId || !data.token) {
-          throw new Error("Invalid credentials received from server");
-        }
-
-        setCredentials({
-          appId: data.appId,
-          token: data.token,
-          uid: data.uid || 0,
-          channelName,
-        });
-
-        console.log("Agora credentials fetched successfully");
-      } catch (err) {
-        console.error("Error fetching Agora credentials:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to initialize video call"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCredentials();
-  }, [isAuthenticated, loadingUser, channelName]);
+  const { credentials, loading, error, refetch } = useAgoraCredentials(channelName, isAuthenticated, loadingUser);
 
   const handleLeave = () => {
     router.push("/app");
   };
 
-  // Loading states
   if (loadingUser) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -120,7 +65,7 @@ const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({ channelName }) => {
           <div className="text-red-500 text-xl mb-4">Connection Error</div>
           <p className="text-gray-400 mb-4">{error}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={refetch}
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 mr-2"
           >
             Retry

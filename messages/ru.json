@@ -596,7 +596,8 @@
     "failedToAddCompany": "Не удалось добавить компанию.",
     "unexpectedError": "Произошла непредвиденная ошибка.",
     "adding": "Добавление...",
-    "cancel": "Отмена"
+    "cancel": "Отмена",
+    "multipleSubtasks": "Несколько подзадач"
   },
   "AddUserModal": {
     "addNewUser": "Добавить нового пользователя",

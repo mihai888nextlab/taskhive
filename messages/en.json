@@ -623,7 +623,8 @@
     "loadingTimeTracking": "Loading time tracking...",
     "noSessionsYet": "No sessions yet.",
     "startTracking": "Start tracking your time to see your streak and sessions.",
-    "lastSessionDuration": "Duration"
+    "lastSessionDuration": "Duration",
+    "multipleSubtasks": "Multiple Subtasks"
   },
   "AddUserModal": {
     "addNewUser": "Add New User",

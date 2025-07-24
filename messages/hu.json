@@ -596,7 +596,8 @@
     "failedToAddCompany": "Nem sikerült hozzáadni a céget.",
     "unexpectedError": "Váratlan hiba történt.",
     "adding": "Hozzáadás...",
-    "cancel": "Mégse"
+    "cancel": "Mégse",
+    "multipleSubtasks": "Több alfeladat"
   },
   "AddUserModal": {
     "addNewUser": "Új felhasználó hozzáadása",

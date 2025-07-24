@@ -206,7 +206,7 @@ const StorageFileList: React.FC<StorageFileListProps & { t: ReturnType<typeof us
 
   return (
     <>
-      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 sm:gap-0 w-full">
         {renderedFiles}
       </div>
       {signingFile && signingFile.fileLocation && signingFile.fileType && (
