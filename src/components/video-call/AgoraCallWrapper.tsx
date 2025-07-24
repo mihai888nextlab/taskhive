@@ -14,9 +14,13 @@ interface AgoraCredentials {
 
 interface VideoCallWrapperProps {
   channelName: string;
+  chatName?: string | null; // Optional chat name for display
 }
 
-const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({ channelName }) => {
+const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({
+  channelName,
+  chatName,
+}) => {
   const router = useRouter();
   const { isAuthenticated, loadingUser } = useAuth();
   const { credentials, loading, error, refetch } = useAgoraCredentials(channelName, isAuthenticated, loadingUser);
@@ -97,7 +101,13 @@ const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({ channelName }) => {
     );
   }
 
-  return <VideoCallRoom credentials={credentials} onLeave={handleLeave} />;
+  return (
+    <VideoCallRoom
+      credentials={credentials}
+      onLeave={handleLeave}
+      chatName={chatName}
+    />
+  );
 };
 
 export default VideoCallWrapper;

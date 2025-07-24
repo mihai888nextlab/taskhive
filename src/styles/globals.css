@@ -67,9 +67,9 @@ body {
   }
 }
 
-.active:animate-press {
-  animation: press 0.2s ease-in-out;
-}
+/* .active::animate-press {
+    animation: press 0.2s ease-in-out;
+  } */
 
 /* For Webkit browsers (Chrome, Safari, Edge) */
 .custom-scrollbar::-webkit-scrollbar {
@@ -96,5 +96,14 @@ body {
   scrollbar-color: #888 #f1f1f1; /* thumb color track color */
 }
 
-@keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
-.animate-slideInLeft { animation: slideInLeft 0.3s ease-out; }
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.animate-slideInLeft {
+  animation: slideInLeft 0.3s ease-out;
+}

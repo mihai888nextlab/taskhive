@@ -3,6 +3,8 @@ import { GetServerSideProps, NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { NextPageWithLayout } from "@/types";
+import dbConnect from "@/db/dbConfig";
+import conversationModel from "@/db/models/conversationsModel";
 
 // Dynamically import to avoid SSR issues
 const VideoCallWrapper = dynamic(
@@ -21,10 +23,12 @@ const VideoCallWrapper = dynamic(
 
 interface VideoCallPageProps {
   channelName: string;
+  chatName: string | null;
 }
 
 const VideoCallPage: NextPageWithLayout<VideoCallPageProps> = ({
   channelName,
+  chatName,
 }) => {
   const router = useRouter();
 
@@ -32,24 +36,20 @@ const VideoCallPage: NextPageWithLayout<VideoCallPageProps> = ({
     router.push("/app");
   }, [router]);
 
-  if (!channelName) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">Invalid Channel</div>
-          <p className="text-gray-400 mb-4">Channel name not provided</p>
-          <button
-            onClick={handleGoBack}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-          >
-            Go Back
-          </button>
-        </div>
+  return (
+    <div className="min-h-screen bg-gray-900 flex flex-col">
+      {/* <div className="w-full py-4 px-6 bg-gray-800 text-white text-xl font-semibold shadow flex items-center">
+        {chatName ? (
+          <span>{chatName}</span>
+        ) : (
+          <span className="text-red-400">Unknown Channel</span>
+        )}
+      </div> */}
+      <div className="flex-1">
+        <VideoCallWrapper channelName={channelName} chatName={chatName} />
       </div>
-    );
-  }
-
-  return <VideoCallWrapper channelName={channelName} />;
+    </div>
+  );
 };
 
 export const getServerSideProps: GetServerSideProps<
@@ -57,27 +57,32 @@ export const getServerSideProps: GetServerSideProps<
 > = async (context) => {
   const { channelName } = context.query;
 
-  // Validate channel name
   if (typeof channelName !== "string" || !channelName.trim()) {
     return {
       notFound: true,
     };
   }
 
-  // Optional: Add authentication check here
-  // const authResult = await verifyAuthToken(context.req);
-  // if (!authResult?.userId) {
-  //   return {
-  //     redirect: {
-  //       destination: '/auth/login',
-  //       permanent: false,
-  //     },
-  //   };
-  // }
+  // Fetch chat name from DB
+  await dbConnect();
+  let chatName: string | null = null;
+  try {
+    const convo = await conversationModel
+      .findById(channelName)
+      .select("name")
+      .lean();
+    chatName =
+      convo && typeof convo === "object" && "name" in convo
+        ? (convo as { name?: string }).name || null
+        : null;
+  } catch {
+    chatName = null;
+  }
 
   return {
     props: {
       channelName: channelName.trim(),
+      chatName,
     },
   };
 };
