@@ -424,6 +424,7 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
 const VideoCallRoom: React.FC<VideoCallRoomProps> = ({
   credentials,
   onLeave,
+  chatName,
 }) => {
   const client = useRTCClient(
     AgoraRTC.createClient({ codec: "vp8", mode: "rtc" })
@@ -431,7 +432,11 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({
 
   return (
     <AgoraRTCProvider client={client}>
-      <VideoCallContent credentials={credentials} onLeave={onLeave} />
+      <VideoCallContent
+        credentials={credentials}
+        onLeave={onLeave}
+        chatName={chatName}
+      />
     </AgoraRTCProvider>
   );
 };

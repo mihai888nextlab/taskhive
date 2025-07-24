@@ -38,13 +38,13 @@ const VideoCallPage: NextPageWithLayout<VideoCallPageProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
-      <div className="w-full py-4 px-6 bg-gray-800 text-white text-xl font-semibold shadow flex items-center">
+      {/* <div className="w-full py-4 px-6 bg-gray-800 text-white text-xl font-semibold shadow flex items-center">
         {chatName ? (
           <span>{chatName}</span>
         ) : (
           <span className="text-red-400">Unknown Channel</span>
         )}
-      </div>
+      </div> */}
       <div className="flex-1">
         <VideoCallWrapper channelName={channelName} chatName={chatName} />
       </div>
