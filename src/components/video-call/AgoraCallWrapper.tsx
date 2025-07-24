@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/hooks/useAuth";
 import VideoCallRoom from "./AgoraVideoCallRoom";
-import { Token } from "aws-sdk";
 
 interface AgoraCredentials {
   appId: string;
@@ -13,9 +12,13 @@ interface AgoraCredentials {
 
 interface VideoCallWrapperProps {
   channelName: string;
+  chatName?: string | null; // Optional chat name for display
 }
 
-const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({ channelName }) => {
+const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({
+  channelName,
+  chatName,
+}) => {
   const router = useRouter();
   const { isAuthenticated, loadingUser } = useAuth();
 
@@ -152,7 +155,13 @@ const VideoCallWrapper: React.FC<VideoCallWrapperProps> = ({ channelName }) => {
     );
   }
 
-  return <VideoCallRoom credentials={credentials} onLeave={handleLeave} />;
+  return (
+    <VideoCallRoom
+      credentials={credentials}
+      onLeave={handleLeave}
+      chatName={chatName}
+    />
+  );
 };
 
 export default VideoCallWrapper;

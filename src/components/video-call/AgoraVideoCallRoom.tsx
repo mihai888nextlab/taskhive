@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import AgoraRTC, {
   AgoraRTCProvider,
@@ -21,11 +21,13 @@ interface VideoCallRoomProps {
     channelName: string;
   };
   onLeave: () => void;
+  chatName?: string | null;
 }
 
-const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
+const VideoCallContent: React.FC<VideoCallRoomProps> = ({
   credentials,
   onLeave,
+  chatName,
 }) => {
   const router = useRouter();
   const [micEnabled, setMicEnabled] = useState(true);
@@ -62,8 +64,7 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
   const isConnected = useIsConnected();
   const remoteUsers = useRemoteUsers();
 
-  // Memoize totalParticipants
-  const totalParticipants = useMemo(() => remoteUsers.length + 1, [remoteUsers]);
+  const totalParticipants = remoteUsers.length + 1;
 
   useEffect(() => {
     if (isConnected) {
@@ -71,7 +72,6 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
     }
   }, [isConnected]);
 
-  // Memoize handleLeave
   const handleLeave = useCallback(async () => {
     setIsJoining(false);
     if (localCameraTrack) {
@@ -83,7 +83,6 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
     onLeave();
   }, [localCameraTrack, localMicrophoneTrack, onLeave]);
 
-  // Memoize toggleFullscreen
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
@@ -94,7 +93,6 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
     }
   }, []);
 
-  // Memoize grid layout calculations
   const getGridLayout = useCallback(() => {
     if (totalParticipants === 1) return "grid-cols-1";
     if (totalParticipants === 2) return "grid-cols-2";
@@ -109,9 +107,8 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
     return "grid-rows-3";
   }, [totalParticipants]);
 
-  // Memoize mic/camera toggle handlers
-  const handleMicToggle = useCallback(() => setMicEnabled(m => !m), []);
-  const handleCameraToggle = useCallback(() => setCameraEnabled(c => !c), []);
+  const handleMicToggle = useCallback(() => setMicEnabled((m) => !m), []);
+  const handleCameraToggle = useCallback(() => setCameraEnabled((c) => !c), []);
 
   if (!isConnected) {
     return (
@@ -123,7 +120,7 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
         <div className="mt-6 text-center">
           <p className="text-white text-lg font-medium">Connecting...</p>
           <p className="text-slate-400 text-sm mt-1">
-            Joining {credentials.channelName}
+            Joining {chatName ? chatName : credentials.channelName}
           </p>
         </div>
       </div>
@@ -138,12 +135,13 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
           <div className="flex items-center space-x-4">
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             <h1 className="text-white text-lg font-semibold tracking-tight">
-              {credentials.channelName}
+              {chatName ? chatName : credentials.channelName}
             </h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-slate-300 text-sm font-medium bg-slate-800/50 px-3 py-1 rounded-full">
-              {totalParticipants} participant{totalParticipants !== 1 ? "s" : ""}
+              {totalParticipants} participant
+              {totalParticipants !== 1 ? "s" : ""}
             </div>
             <button
               onClick={toggleFullscreen}
@@ -421,9 +419,9 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = React.memo(({
       `}</style>
     </div>
   );
-});
+};
 
-const VideoCallRoom: React.FC<VideoCallRoomProps> = React.memo(({
+const VideoCallRoom: React.FC<VideoCallRoomProps> = ({
   credentials,
   onLeave,
 }) => {
@@ -436,6 +434,6 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = React.memo(({
       <VideoCallContent credentials={credentials} onLeave={onLeave} />
     </AgoraRTCProvider>
   );
-});
+};
 
-export default React.memo(VideoCallRoom);
+export default VideoCallRoom;
