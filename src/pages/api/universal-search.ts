@@ -19,7 +19,10 @@ const verifyAuthToken = async (req: NextApiRequest, res: NextApiResponse) => {
 
   let decodedToken: JWTPayload | null = null;
   try {
-    decodedToken = jwt.verify(token, process.env.JWT_SECRET || "") as JWTPayload;
+    decodedToken = jwt.verify(
+      token,
+      process.env.JWT_SECRET || ""
+    ) as JWTPayload;
   } catch {
     return null;
   }
@@ -39,6 +42,7 @@ const verifyAuthToken = async (req: NextApiRequest, res: NextApiResponse) => {
 
     let userCompanyDoc = userCompanyModel.findOne({
       userId: decodedToken.userId,
+      companyId: decodedToken.companyId,
     });
     if (typeof (userCompanyDoc as any)?.then === "function") {
       userCompanyDoc = await userCompanyDoc;
@@ -47,7 +51,9 @@ const verifyAuthToken = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // --- FIX: Support both ._doc and plain object for test mocks ---
     const userObj = (user as any)?._doc ? (user as any)._doc : user;
-    const userCompanyObj = (userCompanyDoc as any)?._doc ? (userCompanyDoc as any)._doc : userCompanyDoc;
+    const userCompanyObj = (userCompanyDoc as any)?._doc
+      ? (userCompanyDoc as any)._doc
+      : userCompanyDoc;
     return {
       ...userObj,
       role: userCompanyObj.role,
@@ -103,26 +109,14 @@ export default async function handler(
   const companyUserIds = companyUserRecords.map((u) => u.userId?.toString());
 
   const searchPromises: Promise<any>[] = [
-    // Tasks: assigned to or created by company users
+    // Tasks: search within the user's company
     Task.find({
-      $or: [
-        { 
-          $and: [
-            { userId: { $in: companyUserIds } },
-            { $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }] }
-          ]
-        },
-        { 
-          $and: [
-            { createdBy: { $in: companyUserIds } },
-            { $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }] }
-          ]
-        }
-      ],
+      companyId,
+      $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }],
     })
       .limit(5)
-      .populate('userId', 'firstName lastName email')
-      .populate('createdBy', 'firstName lastName email')
+      .populate("userId", "firstName lastName email")
+      .populate("createdBy", "firstName lastName email")
       .lean()
       .then((tasks) => {
         results.tasks = (tasks || []).map((t: any) => ({ ...t, type: "task" }));
@@ -146,7 +140,8 @@ export default async function handler(
             _id: u.userId?._id ?? u._id,
             userId: u.userId,
             type: "user",
-            fullName: `${u.userId?.firstName || ""} ${u.userId?.lastName || ""}`.trim(),
+            fullName:
+              `${u.userId?.firstName || ""} ${u.userId?.lastName || ""}`.trim(),
             email: u.userId?.email,
             firstName: u.userId?.firstName,
             lastName: u.userId?.lastName,
@@ -155,13 +150,13 @@ export default async function handler(
           }));
       }),
 
-    // Announcements: created by company users
+    // Announcements: search within the user's company
     AnnouncementModel.find({
-      createdBy: { $in: companyUserIds },
+      companyId,
       $or: [{ title: { $regex: regex } }, { content: { $regex: regex } }],
     })
       .limit(5)
-      .populate('createdBy', 'firstName lastName email')
+      .populate("createdBy", "firstName lastName email")
       .lean()
       .then((announcements) => {
         results.announcements = (announcements || []).map((a: any) => ({
@@ -201,7 +196,10 @@ export default async function handler(
       .limit(5)
       .lean()
       .then((expenses) => {
-        results.expenses = (expenses || []).map((e: any) => ({ ...e, type: "expense" }));
+        results.expenses = (expenses || []).map((e: any) => ({
+          ...e,
+          type: "expense",
+        }));
       }),
 
     // Incomes
@@ -217,7 +215,10 @@ export default async function handler(
       .limit(5)
       .lean()
       .then((incomes) => {
-        results.incomes = (incomes || []).map((i: any) => ({ ...i, type: "income" }));
+        results.incomes = (incomes || []).map((i: any) => ({
+          ...i,
+          type: "income",
+        }));
       }),
 
     // Time Sessions: only for company users
@@ -230,14 +231,14 @@ export default async function handler(
       ],
     })
       .limit(5)
-      .populate('userId', 'firstName lastName email')
+      .populate("userId", "firstName lastName email")
       .lean()
       .then((sessions) => {
         results.timeSessions = (sessions || []).map((ts: any) => ({
           ...ts,
           type: "timesession",
         }));
-      })
+      }),
   ];
 
   try {
@@ -247,11 +248,17 @@ export default async function handler(
       results: {
         tasks: Array.isArray(results.tasks) ? results.tasks : [],
         users: Array.isArray(results.users) ? results.users : [],
-        announcements: Array.isArray(results.announcements) ? results.announcements : [],
-        storageFiles: Array.isArray(results.storageFiles) ? results.storageFiles : [],
+        announcements: Array.isArray(results.announcements)
+          ? results.announcements
+          : [],
+        storageFiles: Array.isArray(results.storageFiles)
+          ? results.storageFiles
+          : [],
         expenses: Array.isArray(results.expenses) ? results.expenses : [],
         incomes: Array.isArray(results.incomes) ? results.incomes : [],
-        timeSessions: Array.isArray(results.timeSessions) ? results.timeSessions : [],
+        timeSessions: Array.isArray(results.timeSessions)
+          ? results.timeSessions
+          : [],
       },
     });
   } catch (error) {

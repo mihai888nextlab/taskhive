@@ -98,7 +98,9 @@ export default async function handler(
       privilegeExpire
     );
 
-    return res.status(200).json({ token, appId: AGORA_APP_ID, uid });
+    return res
+      .status(200)
+      .json({ token, appId: AGORA_APP_ID, uid, name: authResult.name });
   } catch (error) {
     console.error("Error generating Agora token:", error);
     return res.status(500).json({ message: "Failed to generate Agora token." });
