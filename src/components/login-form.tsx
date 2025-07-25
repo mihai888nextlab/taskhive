@@ -148,7 +148,7 @@ export function LoginForm({
             </div>
             <div className="text-center text-xs text-gray-400 mt-4">
               Don&apos;t have an account?{" "}
-              <a href="#" className="text-blue-400 hover:underline">
+              <a href="/register" className="text-blue-400 hover:underline">
                 Sign up
               </a>
             </div>

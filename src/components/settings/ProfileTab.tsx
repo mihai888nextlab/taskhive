@@ -126,7 +126,7 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
         </div>
         <div>
           <label className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Profile Photo</label>
-          <div className="flex flex-col md:flex-row md:items-center items-center gap-3 sm:gap-4 justify-center md:justify-start md:items-start">
+          <div className="flex flex-col md:flex-row items-center gap-3 sm:gap-4 justify-center md:justify-start md:items-start">
             <img
               src={photoPreview || "/hive-icon.png"}
               alt="Profile"
