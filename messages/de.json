@@ -627,6 +627,7 @@
     "loadingTimeTracking": "Zeiterfassung wird geladen...",
     "noSessionsYet": "Noch keine Sitzungen.",
     "startTracking": "Beginnen Sie mit der Zeiterfassung, um Ihre Serie und Sitzungen zu sehen.",
-    "lastSessionDuration": "Dauer"
+    "lastSessionDuration": "Dauer",
+    "multipleSubtasks": "Mehrere Teilaufgaben"
   }
 }

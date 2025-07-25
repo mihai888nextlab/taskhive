@@ -110,7 +110,7 @@ const SidebarNav: React.FC<
   const { theme } = require("@/components/ThemeContext").useTheme();
   const companyDropdown = dropdownOpen && (
     <div className={`absolute left-full bottom-0 ml-2 w-full rounded-2xl shadow-2xl z-50 border ${theme === 'dark' ? 'bg-[#23272f] border-gray-800 text-white' : 'bg-white border-gray-100 text-gray-900'}`}>
-      <div className="p-2">
+      <div className="p-2 max-h-[400px] overflow-y-auto">
         {companiesWithMembers.map((company) => {
           const members = company.members;
           const isSelected = selectedCompany.id === company.id;

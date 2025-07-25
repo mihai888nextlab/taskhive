@@ -622,7 +622,8 @@
     "failedToAddCompany": "Thêm công ty thất bại.",
     "unexpectedError": "Đã xảy ra lỗi không mong muốn.",
     "adding": "Đang thêm...",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "multipleSubtasks": "Nhiều nhiệm vụ con"
   },
   "AddUserModal": {
     "addNewUser": "Thêm người dùng mới",

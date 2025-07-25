@@ -580,7 +580,8 @@
     "loadingTimeTracking": "جارٍ تحميل تتبع الوقت...",
     "noSessionsYet": "لا توجد جلسات بعد.",
     "startTracking": "ابدأ تتبع وقتك لرؤية السلسلة والجلسات الخاصة بك.",
-    "lastSessionDuration": "المدة"
+    "lastSessionDuration": "المدة",
+    "multipleSubtasks": "مهام فرعية متعددة"
   },
   "AddUserModal": {
     "addNewUser": "إضافة مستخدم جديد",

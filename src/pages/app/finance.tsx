@@ -41,7 +41,6 @@ const FinancePage = () => {
 
   return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
-      {/* Header Section - Fixed Height */}
       <div className={`flex-shrink-0 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} px-2 sm:px-4 lg:px-8 py-4 ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
         <div className="max-w-full mx-auto">
           <FinanceSummaryCards
@@ -55,19 +54,14 @@ const FinancePage = () => {
         </div>
       </div>
 
-      {/* Main Content - Responsive Grid */}
       <div className="flex-1 px-1 sm:px-2 lg:px-4 py-2 overflow-x-hidden overflow-y-auto w-full">
         <div className="max-w-full mx-auto h-full">
-          {/* Mobile: List first, form toggleable below. Desktop: grid as before */}
           <div className="block md:hidden">
-            {/* List at the top on mobile */}
             <div className="w-full flex flex-col min-w-0">
               <MobileListWithFormButton logic={logic} theme={theme} t={t} />
             </div>
           </div>
-          {/* Desktop/tablet: grid layout as before */}
           <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 h-full">
-            {/* Tabs + Form Column */}
             <div className="col-span-1 flex flex-col gap-4 min-w-0">
               <FinanceTabs
                 activeTab={logic.activeTab}
@@ -110,7 +104,6 @@ const FinancePage = () => {
                 </div>
               </div>
             </div>
-            {/* List Column - Responsive */}
             <div className="col-span-1 md:col-span-1 lg:col-span-2 flex flex-col min-w-0">
               <div className={`${theme === "dark" ? "bg-gray-700" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-600" : "border-gray-200"} h-full max-h-[700px] flex flex-col overflow-hidden mx-0 sm:mx-2`}>
                 <div className={`flex-shrink-0 px-4 py-3 ${
@@ -139,7 +132,6 @@ const FinancePage = () => {
                         </p>
                       </div>
                     </div>
-                    {/* Export Dropdown for Expenses */}
                     {logic.activeTab === 'expenses' && (
                       <div className="relative export-dropdown" tabIndex={0}>
                         <button
@@ -163,7 +155,6 @@ const FinancePage = () => {
                             }
                           }}
                         >
-                          {/* Export Icon */}
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
                           <span>{t("export")}</span>
                           <svg className="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
@@ -175,7 +166,6 @@ const FinancePage = () => {
                             className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-t-xl focus:outline-none text-sm ${theme === 'dark' ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-800 hover:bg-gray-100'}`}
                             disabled={logic.expenseListProps.loading}
                           >
-                            {/* PDF file icon */}
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#E53E3E"/><rect x="7" y="6" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="10" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="14" width="6" height="2" rx="1" fill="#fff"/><text x="12" y="19" textAnchor="middle" fontSize="6" fill="#fff" fontWeight="bold">PDF</text></svg>
                             PDF
                           </button>
@@ -185,14 +175,12 @@ const FinancePage = () => {
                             className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-b-xl focus:outline-none text-sm ${theme === 'dark' ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-800 hover:bg-gray-100'}`}
                             disabled={logic.expenseListProps.loading}
                           >
-                            {/* CSV file icon */}
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#38A169"/><rect x="7" y="6" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="10" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="14" width="6" height="2" rx="1" fill="#fff"/><text x="12" y="19" textAnchor="middle" fontSize="6" fill="#fff" fontWeight="bold">CSV</text></svg>
                             CSV
                           </button>
                         </div>
                       </div>
                     )}
-                    {/* Export Dropdown for Income */}
                     {logic.activeTab === 'incomes' && (
                       <div className="relative export-dropdown" tabIndex={0}>
                         <button
@@ -216,7 +204,6 @@ const FinancePage = () => {
                             }
                           }}
                         >
-                          {/* Export Icon */}
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
                           <span>{t("export")}</span>
                           <svg className="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
@@ -228,7 +215,6 @@ const FinancePage = () => {
                             className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-t-xl focus:outline-none text-sm ${theme === 'dark' ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-800 hover:bg-gray-100'}`}
                             disabled={logic.incomeListProps.loading}
                           >
-                            {/* PDF file icon */}
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#E53E3E"/><rect x="7" y="6" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="10" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="14" width="6" height="2" rx="1" fill="#fff"/><text x="12" y="19" textAnchor="middle" fontSize="6" fill="#fff" fontWeight="bold">PDF</text></svg>
                             PDF
                           </button>
@@ -238,7 +224,6 @@ const FinancePage = () => {
                             className={`w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-b-xl focus:outline-none text-sm ${theme === 'dark' ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-800 hover:bg-gray-100'}`}
                             disabled={logic.incomeListProps.loading}
                           >
-                            {/* CSV file icon */}
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#38A169"/><rect x="7" y="6" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="10" width="10" height="2" rx="1" fill="#fff"/><rect x="7" y="14" width="6" height="2" rx="1" fill="#fff"/><text x="12" y="19" textAnchor="middle" fontSize="6" fill="#fff" fontWeight="bold">CSV</text></svg>
                             CSV
                           </button>
@@ -260,7 +245,6 @@ const FinancePage = () => {
         </div>
       </div>
 
-      {/* Undo Snackbar */}
       <UndoSnackbar
         show={showUndo}
         onUndo={handleUndo}

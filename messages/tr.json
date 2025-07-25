@@ -594,7 +594,8 @@
     "failedToAddCompany": "Şirket eklenemedi.",
     "unexpectedError": "Beklenmeyen bir hata oluştu.",
     "adding": "Ekleniyor...",
-    "cancel": "İptal"
+    "cancel": "İptal",
+    "multipleSubtasks": "Birden fazla alt görev"
   },
   "AddUserModal": {
     "addNewUser": "Yeni Kullanıcı Ekle",

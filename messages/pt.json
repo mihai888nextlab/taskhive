@@ -591,7 +591,8 @@
     "loadingTimeTracking": "Carregando rastreamento de tempo...",
     "noSessionsYet": "Ainda não há sessões.",
     "startTracking": "Comece a rastrear seu tempo para ver sua sequência e sessões.",
-    "lastSessionDuration": "Duração"
+    "lastSessionDuration": "Duração",
+    "multipleSubtasks": "Múltiplas subtarefas"
   },
   "AddUserModal": {
     "addNewUser": "Adicionar novo usuário",

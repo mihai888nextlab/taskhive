@@ -596,7 +596,8 @@
     "failedToAddCompany": "Kunne ikke legge til selskap.",
     "unexpectedError": "En uventet feil oppstod.",
     "adding": "Legger til...",
-    "cancel": "Avbryt"
+    "cancel": "Avbryt",
+    "multipleSubtasks": "Flere deloppgaver"
   },
   "AddUserModal": {
     "addNewUser": "Legg til ny bruker",

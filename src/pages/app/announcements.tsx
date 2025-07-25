@@ -7,8 +7,6 @@ import AnnouncementFormModal from "@/components/announcements/AnnouncementFormMo
 import AnnouncementDetailsModalWrapper from "@/components/announcements/AnnouncementDetailsModalWrapper";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 
-// ...moved to hook...
-
 const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
   const {
     theme,

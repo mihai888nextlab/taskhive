@@ -621,7 +621,8 @@
     "failedToAddCompany": "Adăugarea companiei a eșuat.",
     "unexpectedError": "A apărut o eroare neașteptată.",
     "adding": "Se adaugă...",
-    "cancel": "Anulează"
+    "cancel": "Anulează",
+    "multipleSubtasks": "Mai multe sub-sarcini"
   },
   "AddUserModal": {
     "addNewUser": "Adaugă utilizator nou",

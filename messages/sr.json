@@ -594,7 +594,8 @@
     "loadingTimeTracking": "Učitavanje praćenja vremena...",
     "noSessionsYet": "Još nema sesija.",
     "startTracking": "Počnite da pratite vreme da biste videli svoj niz i sesije.",
-    "lastSessionDuration": "Trajanje"
+    "lastSessionDuration": "Trajanje",
+    "multipleSubtasks": "Više podzadatka"
   },
   "AddUserModal": {
     "addNewUser": "Dodaj novog korisnika",

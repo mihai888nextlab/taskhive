@@ -595,7 +595,8 @@
     "loadingTimeTracking": "Laddar tidsuppföljning...",
     "noSessionsYet": "Inga sessioner ännu.",
     "startTracking": "Börja följa din tid för att se din serie och sessioner.",
-    "lastSessionDuration": "Varaktighet"
+    "lastSessionDuration": "Varaktighet",
+    "multipleSubtasks": "Flera deluppgifter"
   },
   "AddUserModal": {
     "addNewUser": "Lägg till ny användare",

@@ -594,7 +594,8 @@
     "loadingTimeTracking": "正在加载时间追踪...",
     "noSessionsYet": "暂无会话。",
     "startTracking": "开始追踪您的时间以查看连续记录和会话。",
-    "lastSessionDuration": "时长"
+    "lastSessionDuration": "时长",
+    "multipleSubtasks": "多个子任务"
   },
   "AddUserModal": {
     "addNewUser": "添加新用户",
