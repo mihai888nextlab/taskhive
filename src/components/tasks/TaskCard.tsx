@@ -4,6 +4,7 @@ import { FiCalendar, FiUser, FiChevronDown, FiChevronRight } from "react-icons/f
 import TimeTrackingModal from "../time-tracking/TimeTrackingModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface Task {
   _id: string;
@@ -58,8 +59,6 @@ const TaskCard: React.FC<TaskCardProps> = React.memo(({
   // Translation function for tags (DashboardPage)
   let t: (key: string, opts?: any) => string = (props as any)?.t || ((key: string, opts?: any) => key);
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { useTranslations } = require('next-intl');
     t = useTranslations('DashboardPage');
   } catch (e) {}
 
