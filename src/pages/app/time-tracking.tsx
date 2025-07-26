@@ -3,7 +3,6 @@ import ExportDropdown from '@/components/time-tracking/ExportDropdown';
 import { exportTimeSessionsPDF } from '@/utils/exportTimeSessionsPDF';
 import DashboardLayout from '@/components/sidebar/DashboardLayout';
 import { NextPageWithLayout } from "@/types";
-import Loading from "@/components/Loading";
 import TimerAndFormPanel from '@/components/time-tracking/TimerAndFormPanel';
 import SessionList from '@/components/time-tracking/SessionList';
 import TimeTrackingHeader from '@/components/time-tracking/TimeTrackingHeader';
@@ -41,10 +40,6 @@ const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
     handleSaveSession,
     userId,
   } = useTimeTrackingPage();
-
-  if (loading) {
-    return <Loading />;
-  }
 
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>

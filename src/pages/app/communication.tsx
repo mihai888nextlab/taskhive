@@ -3,7 +3,6 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import ConversationList from "@/components/chat/ConversationList";
-import Loading from "@/components/Loading";
 import NewDirectChatModal from "@/components/chat/NewDirectChatModel";
 import NewGroupChatModal from "@/components/chat/NewGroupChatModal";
 import { useCommunication } from "@/hooks/useCommunication";
@@ -34,7 +33,7 @@ const Communication: NextPageWithLayout = () => {
     <div
       className={`relative ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"} p-4 lg:px-8`}
     >
-      {loadingUser && <Loading />}
+      {loadingUser}
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] max-w-8xl mx-auto">
         <div className="w-full lg:w-1/3 xl:w-1/4 min-w-0">
           <ConversationList

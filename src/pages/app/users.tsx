@@ -4,7 +4,6 @@ import { NextPageWithLayout } from "@/types";
 import UsersHeader from "@/components/users/UsersHeader";
 import UsersControls from "@/components/users/UsersControls";
 import UsersListPanel from "@/components/users/UsersListPanel";
-import Loading from "@/components/Loading";
 import { Card } from "@/components/ui/card";
 import { createPortal } from "react-dom";
 import AddUserModal from "@/components/modals/AddUserModal";
@@ -55,10 +54,6 @@ const UsersPage: NextPageWithLayout = () => {
     // TODO: Implement CSV export logic
     alert('Export CSV not implemented');
   };
-
-  if (!user) {
-    return <Loading />;
-  }
 
   return (
     <div

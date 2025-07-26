@@ -152,8 +152,8 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
 
   // Memoize week view rendering (with events)
   const weekView = useMemo(() => (
-    <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
-      <div className="w-full h-full bg-white rounded-xl shadow-lg p-6 lg:p-8 flex flex-col max-w-none" style={{ minHeight: '520px' }}>
+    <div className="w-full h-full flex flex-col items-center justify-center" style={{ maxHeight: '100%', overflowY: 'auto', minHeight: '100%' }}>
+      <div className="w-full h-full bg-white flex flex-col flex-1" style={{ minHeight: '220px', maxWidth: '1050px' }}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
           <button
@@ -192,22 +192,23 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
             return (
               <div 
                 key={dayName} 
-                className={`flex flex-col rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden ${
-                  isSelected
+                className={`flex flex-col rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden min-h-[90px]` +
+                  ` ${isSelected
                     ? 'border-blue-400 bg-blue-50 shadow-lg scale-[1.02]'
                     : isToday
                     ? 'border-2 border-gray-400 bg-gray-50 shadow-md hover:shadow-lg hover:border-blue-300'
                     : hasDeadlines || dayEvents.length > 0
                     ? 'border-gray-200 bg-white shadow-md hover:shadow-lg hover:border-blue-300'
-                    : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 hover:shadow-md'
-                }`}
+                    : 'border-gray-200 bg-gray-50 hover:bg-white hover:border-gray-300 hover:shadow-md'}
+                `}
                 onClick={() => handleWeekDateClick(weekDays[index])}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={e => handleDrop(e, weekDays[index])}
+                style={{ minHeight: 170, maxHeight: 320 }}
               >
                 {/* Day Header */}
-                <div className="p-3 pb-2 bg-white border-b border-gray-100">
+                <div className="px-2 pt-2 pb-1 bg-white border-b border-gray-100 min-h-0">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       {dayName}
@@ -233,7 +234,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
                   </div>
                 </div>
                 {/* Tasks & Events Area */}
-                <div className="flex-1 p-3 overflow-y-auto">
+                <div className="flex-1 px-2 py-1 overflow-y-auto min-h-0">
                   <div className="space-y-2">
                     {dayTasks.length === 0 && dayEvents.length === 0 ? (
                       <div className="text-center py-4">
@@ -369,7 +370,7 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
 
   // Memoize month view rendering
   const monthView = useMemo(() => (
-    <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
+    <div className="w-full h-full flex flex-col flex-1 overflow-x-auto">
       <Calendar
         onChange={(val) => {
           const date = val instanceof Date ? val : null;
@@ -386,27 +387,122 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
           return null;
         }}
         tileContent={({ date, view }) => {
-          const highlight = view === 'month' && deadlines.includes(date.toDateString());
-          const circleColor = getCircleColor(date);
+          if (view !== 'month') return null;
+          const dateString = date.toDateString();
+          const todayString = new Date().toDateString();
+          const isToday = dateString === todayString;
+          const isSelected = selectedDate && dateString === selectedDate.toDateString();
+          const tasksForDate = tasks.filter(task => new Date(task.deadline).toDateString() === dateString);
+          const eventsForDate = announcementEvents.filter(event => event.eventDate && new Date(event.eventDate).toDateString() === dateString);
+          const total = tasksForDate.length + eventsForDate.length;
+          // Render the date number and, if any, lines for each task/event
           return (
-            <>
-              {highlight && circleColor && (
+            <div
+              style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              onDragOver={handleMonthTileDragOver}
+              onDrop={e => handleMonthTileDrop(e, date)}
+              className={[
+                isSelected ? 'calendar-tile--selected' : '',
+                isToday ? 'calendar-tile--today' : '',
+              ].join(' ')}
+            >
+              {/* Render lines for each task/event BEHIND everything */}
+              {total > 0 && (
                 <div
-                  className="highlight-circle-content"
                   style={{
-                    backgroundColor: circleColor,
-                    color: 'white',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 90,
+                    height: 38,
+                    zIndex: 1,
                   }}
                 >
-                  {date.getDate()}
+                  {tasksForDate.map((task, idx) => (
+                    <div
+                      key={task._id}
+                      style={{
+                        height: 6,
+                        borderRadius: 3,
+                        background: task.completed ? '#22C55E' : '#4A90E2',
+                        marginBottom: 3,
+                        width: 86,
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                      }}
+                    />
+                  ))}
+                  {eventsForDate.map((event, idx) => (
+                    <div
+                      key={event._id}
+                      style={{
+                        height: 6,
+                        borderRadius: 3,
+                        background: '#FFA500',
+                        marginBottom: 3,
+                        width: 86,
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                      }}
+                    />
+                  ))}
                 </div>
               )}
-              <div
-                style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'pointer', background: 'transparent' }}
-                onDragOver={handleMonthTileDragOver}
-                onDrop={e => handleMonthTileDrop(e, date)}
+              {/* Square background directly behind the date number, matching state, no shadow */}
+              <span
+                className={[
+                  'calendar-date-square',
+                  isSelected ? 'calendar-date-square--selected' : '',
+                  isToday ? 'calendar-date-square--today' : '',
+                ].join(' ')}
+                style={{
+                  zIndex: 2,
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  pointerEvents: 'none',
+                }}
+                data-bg-square
               />
-            </>
+              <span
+                className={[
+                  'react-calendar__tile',
+                  'text-base',
+                  'font-semibold',
+                  'flex',
+                  'items-center',
+                  'justify-center',
+                  'transition-colors',
+                  'duration-200',
+                  isSelected ? 'text-white' :
+                  isToday ? 'text-blue-800' :
+                  'text-gray-800',
+                ].join(' ')}
+                style={{
+                  zIndex: 3,
+                  position: 'relative',
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  lineHeight: 1,
+                  textAlign: 'center',
+                  padding: '0 8px',
+                  background: 'transparent',
+                }}
+                tabIndex={0}
+              >
+                {date.getDate()}
+              </span>
+            </div>
           );
         }}
         navigationLabel={({ date, label }) => (
@@ -419,10 +515,57 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
   ), [selectedDate, deadlines, getCircleColor, handleMonthDateClick, handleMonthTileDragOver, handleMonthTileDrop]);
 
   return (
-    <div className="w-full flex flex-col justify-center items-center overflow-x-auto">
+    <div className="w-full h-full flex flex-col flex-1 overflow-x-auto">
       {viewMode === 'month' ? monthView : weekView}
       {/* Enhanced Global Styles - Fixed Sunday Column Display */}
       <style jsx global>{`
+        /* Custom calendar date square background, no shadow, and hover/focus via parent tile */
+        .calendar-date-square {
+          background: #fff;
+          transition: background 0.2s;
+          box-shadow: none !important;
+        }
+        /* Use a lighter blue for the selected square background */
+        .calendar-tile--selected .calendar-date-square,
+        .calendar-date-square--selected {
+          background: #60a5fa !important;
+        }
+        .calendar-tile--today .calendar-date-square,
+        .calendar-date-square--today {
+          background: #dbeafe !important;
+        }
+        /* Only apply hover/focus color if not selected */
+        .react-calendar__tile:enabled:hover .calendar-date-square:not(.calendar-date-square--selected):not(.calendar-date-square--today),
+        .react-calendar__tile:enabled:focus .calendar-date-square:not(.calendar-date-square--selected):not(.calendar-date-square--today) {
+          background: #f3f4f6 !important;
+        }
+        /* Ensure selected always wins, even on hover/focus */
+        .calendar-tile--selected .react-calendar__tile:enabled:hover .calendar-date-square,
+        .calendar-tile--selected .react-calendar__tile:enabled:focus .calendar-date-square {
+          background: #2563eb !important;
+        }
+        .calendar-tile--selected .react-calendar__tile,
+        .calendar-tile--selected .react-calendar__tile:enabled:hover,
+        .calendar-tile--selected .react-calendar__tile:enabled:focus {
+          color: #fff !important;
+        }
+        .calendar-tile--today .react-calendar__tile,
+        .calendar-tile--today .react-calendar__tile:enabled:hover,
+        .calendar-tile--today .react-calendar__tile:enabled:focus {
+          color: #1e40af !important;
+        }
+        .react-calendar__tile:enabled:hover .react-calendar__tile,
+        .react-calendar__tile:enabled:focus .react-calendar__tile {
+          color: #000 !important;
+        }
+        .react-calendar-light-theme {
+          border-radius: 0 !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+          max-width: none !important;
+          width: 100% !important;
+          height: 100% !important;
+        }
         .react-calendar__tile.highlight-deadline abbr {
           display: none;
         }
@@ -523,11 +666,17 @@ const CalendarPanel: React.FC<CalendarPanelProps> = React.memo(({
           transform: scale(1.05);
         }
         .react-calendar-light-theme .react-calendar__tile--active {
-          background-color: #2563eb !important;
-          color: white !important;
+          background-color: #bae6fd !important;
+          color: #2563eb !important;
           border-radius: 0.75rem;
           transform: scale(1.05);
-          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        }
+        /* Also update custom selected tile background for consistency */
+        .calendar-tile--selected.react-calendar__tile,
+        .calendar-tile--selected .react-calendar__tile {
+          background-color: #bae6fd !important;
+          color: #2563eb !important;
         }
         .react-calendar-light-theme .react-calendar__tile--now {
           background-color: #dbeafe;

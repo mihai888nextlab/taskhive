@@ -74,7 +74,7 @@ const DashboardCalendarPreview: React.FC<DashboardCalendarPreviewProps> = React.
 
     // Memoize sorted deadlines
     const sortedDeadlines = useMemo(
-      () => deadlines.slice(0, 2).sort((a, b) => a.getTime() - b.getTime()),
+      () => deadlines.slice(0, 3).sort((a, b) => a.getTime() - b.getTime()),
       [deadlines]
     );
 

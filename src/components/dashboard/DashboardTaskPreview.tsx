@@ -48,7 +48,7 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // Removed loading state
   const [error, setError] = useState<string | null>(null);
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
 
@@ -64,7 +64,7 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
 
   // Memoize fetchTasks
   const fetchTasks = useCallback(async () => {
-    setLoading(true);
+    // Removed loading state
     setError(null);
     try {
       const response = await fetch("/api/tasks");
@@ -73,51 +73,23 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
         throw new Error(errorData.message || "Failed to fetch tasks preview.");
       }
       const data: Task[] = await response.json();
-      // Only tasks assigned to me or created by me
-      const relevantTasks = data.filter(
-        (task) =>
-          !task.completed && (
-            String(task.userId) === String(userId) ||
-            task.createdBy?.email?.toLowerCase() === userEmail?.toLowerCase()
-          )
-      );
-      // Find today's and overdue tasks
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      const todayTasks = relevantTasks.filter(task => {
-        const deadline = new Date(task.deadline);
-        deadline.setHours(0, 0, 0, 0);
-        return deadline.getTime() <= now.getTime();
-      });
-      setTodayTasks(todayTasks.slice(0, 5));
-      if (setTitle) {
-        setTitle(todayTasks.length > 0 ? 'Today Tasks' : 'Tasks');
-      }
-      if (setHighlight) {
-        setHighlight(todayTasks.length > 0);
-      }
-      // Sort: overdue first, then priority (critical > high > medium > low), then important, then deadline ascending
+      // Filter out completed tasks, sort by priority and deadline, then take first 2
       const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
-      const sortTasks = (a: Task, b: Task) => {
-        const aOverdue = isTaskOverdue(a);
-        const bOverdue = isTaskOverdue(b);
-        if (aOverdue && !bOverdue) return -1;
-        if (!aOverdue && bOverdue) return 1;
-        const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
-        const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
-        if (aPriority !== bPriority) return bPriority - aPriority;
-        if (!!a.important && !b.important) return -1;
-        if (!a.important && !!b.important) return 1;
-        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-      };
-      relevantTasks.sort(sortTasks);
-      todayTasks.sort(sortTasks);
-      setTasks(todayTasks.length > 0 ? todayTasks.slice(0, 2) : relevantTasks.slice(0, 2));
+      const filteredTasks = data
+        .filter(task => !task.completed)
+        .sort((a, b) => {
+          const aPriority = priorityOrder[a.priority] || 0;
+          const bPriority = priorityOrder[b.priority] || 0;
+          if (aPriority !== bPriority) return bPriority - aPriority; // higher number = higher priority
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        })
+        .slice(0, 2);
+      setTasks(filteredTasks);
     } catch (err) {
       console.error("Error fetching tasks preview:", err);
       setError((err as Error).message);
     } finally {
-      setLoading(false);
+      // Removed loading state
     }
   }, [userId, userEmail, isTaskOverdue, setTitle, setHighlight]);
 
@@ -247,13 +219,6 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
             ⚡ {t("highPriority", { default: "High Priority" })}
           </span>
         );
-      } else if (isToday && (priority === 'medium' || priority === 'low')) {
-        priorityTag = (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full ml-2">
-            <FaArrowRight className="w-3 h-3" />
-            {t("dueToday", { default: "Due Today" })}
-          </span>
-        );
       }
 
       const hasMultipleSubtasks = Array.isArray(task.subtasks) && task.subtasks.length > 1;
@@ -337,12 +302,7 @@ const DashboardTaskPreview: React.FC<DashboardTaskPreviewProps> = ({
   // Clicking a task marks it complete, clicking outside (card) navigates
   return (
     <>
-      {loading ? (
-        <div className="flex flex-col justify-center items-center h-32 bg-primary-light/10 rounded-lg animate-pulse">
-          <FaSpinner className="animate-spin text-primary text-4xl mb-3" />
-          <p className="text-sm font-medium">{t("loadingTasks", { default: "Loading your tasks..." })}</p>
-        </div>
-      ) : error ? (
+      {error ? (
         <div className="bg-red-50 border-l-4 border-red-400 text-red-400 p-4 rounded-md shadow-sm text-center font-medium">
           <p className="mb-1">{t("failedToLoadTasks", { default: "Failed to load tasks:" })}</p>
           <p className="text-sm italic">{error}</p>

@@ -4,7 +4,6 @@ import io from "socket.io-client";
 import { useAuth } from "@/hooks/useAuth";
 import { IUser } from "@/db/models/userModel";
 import { PopulatedConversation } from "./ConversationList";
-import Loading from "@/components/Loading";
 import { BsPaperclip } from "react-icons/bs";
 import FileCard from "@/components/storage/StorageFileCard";
 import { useTheme } from "@/components/ThemeContext";
@@ -499,7 +498,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
       >
         {loadingMessages ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <Loading />
             <p
               className={`mt-4 text-sm ${theme === "light" ? "text-gray-600" : "text-gray-400"}`}
             >

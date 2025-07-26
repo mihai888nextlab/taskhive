@@ -1,13 +1,17 @@
 import React, { useMemo, useCallback } from "react";
+import { FaExclamationTriangle } from "react-icons/fa";
+import { FiCalendar } from "react-icons/fi";
+import TaskCard from "../tasks/TaskCard";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeContext";
-
+// ...existing code...
 interface Task {
   _id: string;
   title: string;
   description?: string;
   deadline: string;
   completed: boolean;
+  priority?: 'critical' | 'high' | 'medium' | 'low';
 }
 
 interface AnnouncementEvent {
@@ -104,98 +108,110 @@ const CalendarEventsList: React.FC<CalendarEventsListProps> = React.memo(
         );
       }
       return eventsForDate.map((item) => {
-        // Use the same styling logic for both tasks and announcement events
-        let isTask = 'deadline' in item;
-        let isCompleted = isTask ? (item as Task).completed : true;
-        let isOverdueEvent = false;
-        let descriptionPreview = '';
+        const isTask = 'deadline' in item;
         if (isTask) {
-          isOverdueEvent = isOverdue(item as Task);
-          descriptionPreview = (item as Task).description
-            ? ((item as Task).description!.length > 50
-                ? (item as Task).description!.substring(0, 50) + '...'
-                : (item as Task).description!)
-            : '';
+          // Render task with TaskCard-like style, but as a list item, without deadline part, with priority badge like TaskCard
+          const task = item as Task;
+          const isCompleted = task.completed;
+          const isOverdueEvent = isOverdue(task);
+          // Priority badge logic (match TaskCard)
+          const deadlineDate = new Date(task.deadline);
+          deadlineDate.setHours(0, 0, 0, 0);
+          const now = new Date();
+          now.setHours(0, 0, 0, 0);
+          const isToday = !isOverdueEvent && deadlineDate.getTime() === now.getTime();
+          let priorityBadge = null;
+          if (isOverdueEvent) {
+            priorityBadge = (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full ml-1">
+                <FaExclamationTriangle className="w-3 h-3" />
+                Overdue
+              </span>
+            );
+          } else if (task.priority === 'critical') {
+            priorityBadge = (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full ml-1">
+                🔥 Critical
+              </span>
+            );
+          } else if (task.priority === 'high') {
+            priorityBadge = (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full ml-1">
+                ⚡ High Priority
+              </span>
+            );
+          } else if (isToday && (task.priority === 'medium' || task.priority === 'low')) {
+            priorityBadge = (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full ml-1">
+                <FiCalendar className="w-3 h-3" />
+                Due Today
+              </span>
+            );
+          }
+          return (
+            <li
+              key={task._id}
+              draggable={enableDragAndDrop}
+              onDragStart={e => handleDragStart(e, task._id, true)}
+              className={`relative p-4 rounded-lg border-l-4 transition-all duration-200 group cursor-pointer flex flex-col gap-1
+                ${theme === 'dark' 
+                  ? 'bg-gray-800 border-gray-700 hover:bg-gray-750' 
+                  : 'bg-white border-gray-200 hover:bg-gray-50'}
+                ${isCompleted ? 'opacity-60' : ''}
+                ${isOverdueEvent ? 'border-l-red-500' : 'border-l-blue-500'}
+              `}
+              title={task.title}
+            >
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h3 className={`font-semibold text-base leading-tight truncate flex-1 ${
+                  isCompleted 
+                    ? 'line-through text-gray-500' 
+                    : theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {task.title}
+                </h3>
+                {priorityBadge}
+              </div>
+              {task.description && (
+                <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{
+                  task.description.length > 80 
+                    ? `${task.description.substring(0, 80)}...`
+                    : task.description
+                }</p>
+              )}
+              <div className="flex items-center gap-3 text-xs mt-1">
+                {isCompleted && (
+                  <span className="text-green-500 font-medium">Completed</span>
+                )}
+              </div>
+            </li>
+          );
         } else {
-          // Announcement event: use description if present, otherwise empty
+          // Keep event rendering as before
+          let descriptionPreview = '';
           if ((item as any).description) {
             descriptionPreview = (item as any).description.length > 50
               ? (item as any).description.substring(0, 50) + '...'
               : (item as any).description;
-          } else {
-            descriptionPreview = '';
           }
-        }
-        // Theme-aware colors (restored to old style)
-        let borderColor = isCompleted
-          ? (isTask
-              ? (theme === 'dark' ? 'border-green-400' : 'border-green-500')
-              : (theme === 'dark' ? 'border-orange-400' : 'border-orange-500'))
-          : isOverdueEvent
-          ? (theme === 'dark' ? 'border-red-400' : 'border-red-500')
-          : (theme === 'dark' ? 'border-blue-400' : 'border-blue-500');
-
-        let bgColor = isCompleted
-          ? (isTask
-              ? (theme === 'dark'
-                  ? 'bg-gray-700 opacity-70 hover:bg-gray-700'
-                  : 'bg-green-100 hover:bg-green-200')
-              : (theme === 'dark'
-                  ? 'bg-orange-500 bg-opacity-80 hover:bg-orange-500'
-                  : 'bg-orange-100 hover:bg-orange-200'))
-          : isOverdueEvent
-          ? (isTask
-              ? (theme === 'dark'
-                  ? 'bg-gray-700 opacity-70 hover:bg-gray-700'
-                  : 'bg-red-100 hover:bg-red-200')
-              : (theme === 'dark'
-                  ? 'bg-red-500 bg-opacity-90 hover:bg-red-600'
-                  : 'bg-red-500 hover:bg-red-600'))
-          : (theme === 'dark'
-              ? 'bg-gray-700 hover:bg-gray-600'
-              : 'bg-white hover:bg-gray-100');
-
-        let textColor = isOverdueEvent
-          ? (isTask
-              ? (theme === 'dark' ? 'text-red-300' : 'text-red-700')
-              : (theme === 'dark' ? 'text-white' : 'text-white'))
-          : isTask
-            ? (theme === 'dark' ? '' : 'text-gray-800')
-            : (theme === 'dark' ? 'text-white' : 'text-orange-900');
-        return (
-          <li
-            key={item._id}
-            className={`p-2 sm:p-3 rounded-lg ${bgColor} ${borderColor} transition-colors cursor-move flex flex-col gap-1`}
-            draggable={enableDragAndDrop}
-            onDragStart={(e) => handleDragStart(e, item._id, isTask)}
-            title={item.title}
-          >
-            <h4 className={`font-semibold text-base sm:text-lg ${textColor} flex items-center gap-2`}>
-              {isOverdueEvent && (
-                <span className="text-red-400 text-xs sm:text-sm mr-1">●</span>
-              )}
-              {item.title}
-              {isTask && (item as Task).completed && (
-                <span className="text-green-400 text-xs sm:text-sm">(Completed)</span>
-              )}
-              {isOverdueEvent && (
-                <span className="text-red-400 text-xs sm:text-sm ml-1">(Overdue)</span>
-              )}
-              {!isTask && (
+          return (
+            <li
+              key={item._id}
+              className={`p-2 sm:p-3 rounded-lg bg-orange-100 hover:bg-orange-200 border-orange-500 transition-colors cursor-move flex flex-col gap-1`}
+              draggable={enableDragAndDrop}
+              onDragStart={(e) => handleDragStart(e, item._id, false)}
+              title={item.title}
+            >
+              <h4 className={`font-semibold text-base sm:text-lg text-orange-900 flex items-center gap-2`}>
+                {item.title}
                 <span className="text-xs bg-orange-700 text-orange-200 px-2 py-0.5 rounded ml-2">Event</span>
+              </h4>
+              {descriptionPreview && (
+                <p className="text-xs sm:text-sm text-orange-900">{descriptionPreview}</p>
               )}
-            </h4>
-            {descriptionPreview && (
-              <p className={`text-xs sm:text-sm ${
-                isOverdueEvent
-                  ? (theme === 'dark' ? 'text-red-200' : 'text-red-700')
-                  : isTask
-                    ? (theme === 'dark' ? 'text-gray-300' : 'text-gray-800')
-                    : (theme === 'dark' ? 'text-orange-100' : 'text-orange-900')
-              }`}>{descriptionPreview}</p>
-            )}
-          </li>
-        );
+            </li>
+          );
+        }
       });
     }, [
       loading,
