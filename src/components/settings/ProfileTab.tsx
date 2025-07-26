@@ -92,72 +92,94 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
   const uniqueSkillsToShow = Array.from(new Set(skillsToShow));
 
   return (
-    <div className={theme === "dark" ? "text-white" : "text-gray-900"}>
-      <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4">
-        Personal Information
-      </h2>
-      <p className={`text-base sm:text-lg mb-6 sm:mb-8 border-b pb-4 sm:pb-6 ${theme === 'dark' ? 'text-gray-300 border-gray-700' : 'text-gray-600 border-gray-200'}`}>Update your personal details. This information will be displayed publicly, so be careful what you share.</p>
-      <form className="space-y-6 sm:space-y-8 mt-4 sm:mt-6" onSubmit={onSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-          <div>
-            <label htmlFor="firstName" className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>First Name</label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={onInputChange}
-              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
-              placeholder="Enter your first name"
-            />
+    <div className={theme === "dark" ? "text-white w-full" : "text-gray-900 w-full"}>
+      {/* Account Section */}
+      <div className="mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl font-bold mb-1">Account</h2>
+        <p className={`text-base mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Real-time information and activities of your property.</p>
+      </div>
+      <form className="space-y-6 sm:space-y-8 mt-4 sm:mt-6 w-full" onSubmit={onSubmit}>
+        {/* Profile Photo + Name Row */}
+        <div className="flex flex-row items-center gap-4 sm:gap-6 mb-4">
+          <img
+            src={photoPreview || "/hive-icon.png"}
+            alt="Profile"
+            className="w-16 h-16 rounded-full object-cover border border-blue-400"
+          />
+          <div className="flex flex-col gap-1 min-w-[140px]">
+            <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Profile picture</span>
+            <span className="text-xs text-gray-400">PNG, JPEG under 15MB</span>
+            <div className="flex gap-2 mt-1">
+              <label className={`px-3 py-1 rounded border cursor-pointer text-sm font-medium ${theme === 'dark' ? 'bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}>Upload new picture
+                <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+              </label>
+              <button type="button" className={`px-3 py-1 rounded border text-sm font-medium ${theme === 'dark' ? 'bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}>Delete</button>
+            </div>
+            {uploading && <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-400'}>Uploading...</span>}
           </div>
-          <div>
-            <label htmlFor="lastName" className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Last Name</label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={onInputChange}
-              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
-              placeholder="Enter your last name"
-            />
-          </div>
-        </div>
-        <div>
-          <label className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Profile Photo</label>
-          <div className="flex flex-col md:flex-row items-center gap-3 sm:gap-4 justify-center md:justify-start md:items-start">
-            <img
-              src={photoPreview || "/hive-icon.png"}
-              alt="Profile"
-              className="w-16 h-16 rounded-full object-cover"
-            />
-            <div className="w-full md:w-auto flex flex-col gap-2 items-center md:items-start">
+          {/* Name Inputs */}
+          <div className="flex flex-row gap-4 flex-1">
+            <div className="flex-1">
+              <label htmlFor="firstName" className="text-xs text-gray-400 mb-1 block">First name</label>
               <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoChange}
-                className={`border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 w-32 sm:w-40 md:w-auto ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white' : 'border-gray-300'}`}
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={onInputChange}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-base ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
+                placeholder="First name"
               />
-              {uploading && <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-400'}>Uploading...</span>}
+            </div>
+            <div className="flex-1">
+              <label htmlFor="lastName" className="text-xs text-gray-400 mb-1 block">Last name</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={onInputChange}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-base ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
+                placeholder="Last name"
+              />
             </div>
           </div>
         </div>
-        <div>
-          <label className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>About Me</label>
+        {/* Contact Email Section (commented out, add to formData if needed) */}
+        {/*
+        <div className="mb-6">
+          <span className={`block font-semibold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Contact email</span>
+          <label htmlFor="email" className="text-xs text-gray-400 mb-1 block">Email</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email || ''}
+              onChange={onInputChange}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-base ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
+              placeholder="Email address"
+            />
+            <button type="button" className={`px-3 py-1 rounded border text-sm font-medium ${theme === 'dark' ? 'bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`}>Add another email</button>
+          </div>
+        </div>
+        */}
+        {/* About Me Section */}
+        <div className="mb-6">
+          <span className={`block font-semibold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>About Me</span>
           <textarea
             id="description"
             name="description"
             value={formData.description}
             onChange={onInputChange}
-            className={`w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-base ${theme === 'dark' ? 'border-gray-700 bg-gray-900 text-white placeholder-gray-400' : 'border-gray-300 text-gray-900'}`}
             placeholder="Tell us about yourself"
             rows={4}
           />
         </div>
-        {/* Skills Section */}
-        <div>
-          <label className={`block font-medium mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Skills</label>
+        {/* Skills Section - moved up */}
+        <div className="mb-6">
+          <span className={`block font-semibold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>Skills</span>
           <div className="flex flex-wrap gap-2 mb-2">
             {skills.map((skill) => (
               <span
@@ -211,7 +233,7 @@ const ProfileTab: React.FC<ProfileTabProps> = React.memo((props) => {
             </button>
           </div>
         </div>
-        {/* End Skills Section */}
+        {/* Save/Cancel Buttons - moved up */}
         <div className={`flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t mt-6 sm:mt-8 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
           <button
             type="button"

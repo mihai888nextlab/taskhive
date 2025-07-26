@@ -101,7 +101,11 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
   const handleTabClick = useCallback(
     (tabId: string) => {
       setDropdownOpen(false);
-      router.push(`/app/settings#${tabId}`);
+      if (router.pathname === '/app/settings') {
+        window.location.hash = tabId;
+      } else {
+        router.push(`/app/settings#${tabId}`);
+      }
     },
     [router]
   );
@@ -143,13 +147,13 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
   const profileDropdown = dropdownOpen && (
     <div
       id="profile-dropdown-menu"
-      className={`absolute right-4 top-14 mt-2 w-56 rounded-xl shadow-lg z-50 py-2 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+      className={`absolute right-4 top-14 mt-2 w-56 rounded-xl shadow-lg z-50 pt-2 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
     >
-      <div className={`px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
-        <div className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+      <div className={`px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}> 
+        <div className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}> 
           {user?.firstName} {user?.lastName}
         </div>
-        <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+        <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}> 
           {user?.email}
         </div>
       </div>
@@ -162,11 +166,16 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
       >
         <FiLogOut className="mr-2" /> {t("logout")}
       </button>
-      <div className={`${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} border-t my-2`} />
-      {profileTabs.map((tab) => (
+      <div className={`${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'} border-t`} />
+      {profileTabs.map((tab, idx) => (
         <button
           key={tab.id}
-          className={`w-full text-left px-4 py-2 flex items-center transition-colors duration-150 ${theme === 'dark' ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
+          className={`w-full text-left px-4 py-2 flex items-center transition-colors duration-150 ${theme === 'dark' ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}${idx === 0 ? ' mt-0' : ''}`}
+          style={{
+            marginTop: idx === 0 ? '0' : '2px',
+            marginBottom: idx === profileTabs.length - 1 ? '0' : '0',
+            paddingBottom: idx === profileTabs.length - 1 ? '0.5rem' : undefined // ensure last button is flush with bottom
+          }}
           onClick={() => handleTabClick(tab.id)}
         >
           {tab.icon}

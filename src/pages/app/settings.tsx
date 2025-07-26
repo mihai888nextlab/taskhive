@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { NextPageWithLayout } from "@/types";
 import { useTheme } from "@/components/ThemeContext";
-import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import ProfileTab from "@/components/settings/ProfileTab";
 import SecurityTab from "@/components/settings/SecurityTab";
 import NotificationsTab from "@/components/settings/NotificationsTab";
@@ -20,6 +18,28 @@ const SettingsPage: NextPageWithLayout = () => {
   const { user, refetchUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("profile");
+
+  // Set tab from hash on load
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && tabs.some(tab => tab.id === hash)) {
+      setActiveTab(hash);
+    }
+    const onHashChange = () => {
+      const newHash = window.location.hash.replace('#', '');
+      if (newHash && tabs.some(tab => tab.id === newHash)) {
+        setActiveTab(newHash);
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  // Update hash when tab changes
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    window.location.hash = tabId;
+  };
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
     "idle"
   );
@@ -39,6 +59,7 @@ const SettingsPage: NextPageWithLayout = () => {
     description: "",
     skills: [],
   });
+
   const [accountDetails, setAccountDetails] = useState<{
     email: string;
     password: string;
@@ -114,99 +135,61 @@ const SettingsPage: NextPageWithLayout = () => {
   }, [activeTab, user]);
 
   return (
-    <>
-      <div
-        className={`flex flex-col md:flex-row min-h-screen ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}
-      >
-        <SettingsSidebar
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          theme={theme}
-        />
-        <main
-          className={`flex-1 w-full p-2 sm:p-4 md:p-10 
-          ${theme === "dark" ? "bg-gray-800 border-l border-gray-700 md:rounded-lg md:shadow-lg text-white" : "bg-white border-l border-gray-200 md:rounded-lg md:shadow-lg text-gray-900"}
-          mx-0 md:mx-8 my-2 md:my-8 min-h-[60vh]`}
-        >
-          {activeTab === "profile" && (
-            <>
-              {saveStatus !== "idle" && (
-                <div
-                  className={`mb-4 px-4 py-2 rounded font-medium shadow-sm ${
-                    saveStatus === "success"
-                      ? theme === "dark"
-                        ? "bg-green-900 text-green-200"
-                        : "bg-green-100 text-green-800"
-                      : theme === "dark"
-                        ? "bg-red-900 text-red-200"
-                        : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {saveMessage}
-                </div>
-              )}
-              <div className={theme === "dark" ? "text-white" : ""}>
-                <ProfileTab
-                  formData={formData}
-                  onInputChange={handleInputChange}
-                  onSkillsChange={handleSkillsChange}
-                  onSubmit={handleSubmit}
-                  theme={theme}
-                />
-              </div>
-            </>
-          )}
-          {activeTab === "security" && (
-            <div className={theme === "dark" ? "text-white" : ""}>
-              <SecurityTab accountDetails={accountDetails} />
-            </div>
-          )}
-          {activeTab === "notifications" && (
-            <div className={theme === "dark" ? "text-white" : ""}>
-              <NotificationsTab />
-            </div>
-          )}
-          {activeTab === "appearance" && (
-            <div className={theme === "dark" ? "text-white" : ""}>
-              <AppearanceTab theme={theme} toggleTheme={toggleTheme} />
-            </div>
-          )}
-        </main>
+    <div className={`relative min-h-screen w-full ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"} pt-6`}>
+      <div className="sticky top-0 z-20">
+        <div className="flex justify-center">
+          <nav
+            className={`flex flex-row items-center justify-between gap-2 md:gap-6 py-4 px-8 rounded-lg shadow-sm mx-4 md:mx-auto ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}
+            style={{ maxWidth: '640px', width: '100%' }}
+          >
+            {tabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors duration-150 text-base md:text-lg focus:outline-none ${activeTab === tab.id ? (theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900 border-b-2 border-blue-500") : (theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-100")}`}
+              onClick={() => handleTabChange(tab.id)}
+            >
+              {tab.label}
+            </button>
+            ))}
+          </nav>
+        </div>
       </div>
-      <style jsx global>{`
-        @media (max-width: 768px) {
-          .settings-sidebar-mobile {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background: inherit;
-            border-bottom: 1px solid #e5e7eb;
-            box-shadow: none;
-            display: flex;
-            flex-direction: row;
-            overflow-x: auto;
-            width: 100vw;
-            max-width: 100vw;
-            padding: 0.5rem 0.5rem 0 0.5rem;
-          }
-          .settings-sidebar-mobile ul {
-            display: flex;
-            flex-direction: row;
-            gap: 0.5rem;
-            width: 100%;
-          }
-          .settings-sidebar-mobile li {
-            min-width: 110px;
-            text-align: center;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            padding: 0.5rem 0.75rem;
-          }
-        }
-      `}</style>
-    </>
+      <main className="w-full py-4 px-2 sm:px-6">
+        {activeTab === "profile" && (
+          <section className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-xl shadow-md p-6 mb-8 border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} w-full max-w-none`}>
+            {saveStatus !== "idle" && (
+              <div className={`mb-4 px-4 py-2 rounded font-medium shadow-sm ${saveStatus === "success" ? theme === "dark" ? "bg-green-900 text-green-200" : "bg-green-100 text-green-800" : theme === "dark" ? "bg-red-900 text-red-200" : "bg-red-100 text-red-800"}`}>
+                {saveMessage}
+              </div>
+            )}
+            <ProfileTab
+              formData={formData}
+              onInputChange={handleInputChange}
+              onSkillsChange={handleSkillsChange}
+              onSubmit={handleSubmit}
+              theme={theme}
+            />
+          </section>
+        )}
+        {activeTab === "security" && (
+          <section className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-xl shadow-md p-6 mb-8 border ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
+            <SecurityTab accountDetails={accountDetails} />
+          </section>
+        )}
+        {activeTab === "notifications" && (
+          <section className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-xl shadow-md p-6 mb-8 border ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
+            <NotificationsTab />
+          </section>
+        )}
+        {activeTab === "appearance" && (
+          <section className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-xl shadow-md p-6 mb-8 border ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
+            <AppearanceTab toggleTheme={toggleTheme} />
+          </section>
+        )}
+      </main>
+    </div>
   );
+  // ...existing code...
 };
 
 export default SettingsPage;

@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTheme } from "@/components/ThemeContext";
 
 interface SecurityTabProps {
   accountDetails: {
@@ -11,60 +12,45 @@ interface SecurityTabProps {
 }
 
 const SecurityTab: React.FC<SecurityTabProps> = React.memo((props) => {
-  // Memoize accountDetails
-  const memoAccountDetails = useMemo(
-    () => props.accountDetails,
-    [props.accountDetails]
-  );
+  const { theme } = useTheme();
+  const memoAccountDetails = useMemo(() => props.accountDetails, [props.accountDetails]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-2 sm:px-4">
-      <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4 text-gray-900 dark:text-white">
-        Security
-      </h2>
-      <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 sm:pb-4">
-        Manage your password and view account details.
-      </p>
-      {memoAccountDetails ? (
-        <div className="space-y-3 sm:space-y-6 mt-2 sm:mt-4">
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1 sm:mb-2">
-              First Name
-            </label>
-            <p className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm sm:text-base">
-              {memoAccountDetails.firstName}
-            </p>
-          </div>
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1 sm:mb-2">
-              Last Name
-            </label>
-            <p className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm sm:text-base">
-              {memoAccountDetails.lastName}
-            </p>
-          </div>
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1 sm:mb-2">
-              Email
-            </label>
-            <p className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm sm:text-base">
-              {memoAccountDetails.email}
-            </p>
-          </div>
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1 sm:mb-2">
-              Account Created
-            </label>
-            <p className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm sm:text-base">
-              {new Date(memoAccountDetails.createdAt).toLocaleDateString()}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <p className="text-gray-500 dark:text-gray-400 italic mt-4 sm:mt-6 text-sm sm:text-base">
-          Loading account details...
-        </p>
-      )}
+    <div className={theme === "dark" ? "text-white w-full" : "text-gray-900 w-full"}>
+      <div className="mb-8 pb-2 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl font-bold mb-1">Security</h2>
+        <p className={`text-base mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Manage your password and view account details.</p>
+      </div>
+      <div className="space-y-8 sm:space-y-12 w-full">
+        {memoAccountDetails ? (
+          <>
+            <div className="flex flex-col gap-4 sm:gap-6">
+              <div className="flex flex-row gap-6">
+                <div className="flex-1">
+                  <label className={`block text-xs text-gray-400 mb-1`}>First name</label>
+                  <div className={`px-3 py-2 border rounded-md text-base ${theme === "dark" ? "border-gray-700 bg-gray-900 text-white" : "border-gray-200 bg-white text-gray-900"}`}>{memoAccountDetails.firstName}</div>
+                </div>
+                <div className="flex-1">
+                  <label className={`block text-xs text-gray-400 mb-1`}>Last name</label>
+                  <div className={`px-3 py-2 border rounded-md text-base ${theme === "dark" ? "border-gray-700 bg-gray-900 text-white" : "border-gray-200 bg-white text-gray-900"}`}>{memoAccountDetails.lastName}</div>
+                </div>
+              </div>
+              <div className="flex flex-row gap-6">
+                <div className="flex-1">
+                  <label className={`block text-xs text-gray-400 mb-1`}>Email</label>
+                  <div className={`px-3 py-2 border rounded-md text-base ${theme === "dark" ? "border-gray-700 bg-gray-900 text-white" : "border-gray-200 bg-white text-gray-900"}`}>{memoAccountDetails.email}</div>
+                </div>
+                <div className="flex-1">
+                  <label className={`block text-xs text-gray-400 mb-1`}>Account created</label>
+                  <div className={`px-3 py-2 border rounded-md text-base ${theme === "dark" ? "border-gray-700 bg-gray-900 text-white" : "border-gray-200 bg-white text-gray-900"}`}>{new Date(memoAccountDetails.createdAt).toLocaleDateString()}</div>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <p className={`italic mt-4 sm:mt-6 text-base ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Loading account details...</p>
+        )}
+      </div>
     </div>
   );
 });

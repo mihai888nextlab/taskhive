@@ -132,7 +132,7 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = () => {
   }
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md mt-4">
+    <div className="p-0">
       <h3 className="text-lg font-semibold mb-2">Push Notifications</h3>
       {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
       {loading && <p className="text-blue-600 text-sm mb-2">Processing...</p>}
