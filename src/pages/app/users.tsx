@@ -4,6 +4,8 @@ import { NextPageWithLayout } from "@/types";
 import UsersHeader from "@/components/users/UsersHeader";
 import UsersControls from "@/components/users/UsersControls";
 import UsersListPanel from "@/components/users/UsersListPanel";
+import SentInvitationsPanel from "@/components/users/SentInvitationsPanel";
+import Loading from "@/components/Loading";
 import { Card } from "@/components/ui/card";
 import { createPortal } from "react-dom";
 import AddUserModal from "@/components/modals/AddUserModal";
@@ -47,12 +49,12 @@ const UsersPage: NextPageWithLayout = () => {
   // Placeholder export handlers
   const handleExportPDF = () => {
     // TODO: Implement PDF export logic
-    alert('Export PDF not implemented');
+    alert("Export PDF not implemented");
   };
 
   const handleExportCSV = () => {
     // TODO: Implement CSV export logic
-    alert('Export CSV not implemented');
+    alert("Export CSV not implemented");
   };
 
   return (
@@ -68,9 +70,11 @@ const UsersPage: NextPageWithLayout = () => {
               theme={theme}
               t={t}
               user={user}
-              onExportClick={e => {
-                const dropdown = (e.currentTarget.parentElement?.querySelector('.export-dropdown-menu') as HTMLElement);
-                if (dropdown) dropdown.classList.toggle('hidden');
+              onExportClick={(e) => {
+                const dropdown = e.currentTarget.parentElement?.querySelector(
+                  ".export-dropdown-menu"
+                ) as HTMLElement;
+                if (dropdown) dropdown.classList.toggle("hidden");
               }}
               onExportPDF={handleExportPDF}
               onExportCSV={handleExportCSV}
@@ -104,6 +108,7 @@ const UsersPage: NextPageWithLayout = () => {
           </Card>
         </div>
       </div>
+      <SentInvitationsPanel theme={theme} t={t} />
       {/* Modals */}
       {addUserModalOpen &&
         typeof window !== "undefined" &&
@@ -147,4 +152,4 @@ UsersPage.getLayout = function getLayout(page: React.ReactElement) {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default React.memo(UsersPage);
+export default UsersPage;

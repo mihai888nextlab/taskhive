@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { useTheme } from "@/components/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
@@ -9,6 +9,7 @@ export function useUsers() {
   const t = useTranslations("UsersPage");
 
   const [users, setUsers] = useState<any[]>([]);
+  const [invitations, setInvitations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
   const [addRoleModalOpen, setAddRoleModalOpen] = useState(false);
@@ -20,7 +21,7 @@ export function useUsers() {
   const [filterRole, setFilterRole] = useState("all");
   const [sortBy, setSortBy] = useState<string | undefined>(undefined);
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = async () => {
     setLoading(true);
     try {
       const response = await fetch("/api/get-users");
@@ -32,9 +33,29 @@ export function useUsers() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  const fetchRoles = useCallback(async () => {
+  const fetchInvitations = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "/api/invitations/fetch-invitations-by-companyId",
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch invitations");
+      const data = await response.json();
+      setInvitations(data.invitations);
+    } catch (error) {
+      console.error("Error fetching invitations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRoles = async () => {
     try {
       const response = await fetch("/api/roles");
       if (!response.ok) throw new Error("Failed to fetch roles");
@@ -43,7 +64,7 @@ export function useUsers() {
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
-  }, []);
+  };
 
   const handleUserClick = useCallback(
     (userId: string) => {
@@ -71,7 +92,7 @@ export function useUsers() {
           const errorText = await response.text();
           return `Failed to add user: ${errorText}`;
         }
-        await fetchUsers();
+        await fetchInvitations();
         setAddUserModalOpen(false);
         return undefined;
       } catch (error) {
@@ -103,8 +124,9 @@ export function useUsers() {
     [fetchRoles]
   );
 
-  const filteredUsers = useMemo(() => {
-    const companyId = user && "companyId" in user ? (user as any).companyId : undefined;
+  const filteredUsers = () => {
+    const companyId =
+      user && "companyId" in user ? (user as any).companyId : undefined;
     const q = search.trim().toLowerCase();
     return users
       .filter((u) => u.companyId === companyId)
@@ -122,20 +144,25 @@ export function useUsers() {
       })
       .sort((a, b) => {
         if (sortBy === "firstNameAsc") {
-          return (a.userId.firstName || "").localeCompare(b.userId.firstName || "");
+          return (a.userId.firstName || "").localeCompare(
+            b.userId.firstName || ""
+          );
         }
         if (sortBy === "lastNameAsc") {
-          return (a.userId.lastName || "").localeCompare(b.userId.lastName || "");
+          return (a.userId.lastName || "").localeCompare(
+            b.userId.lastName || ""
+          );
         }
         if (sortBy === "roleAsc") {
           return (a.role || "").localeCompare(b.role || "");
         }
         return 0;
       });
-  }, [users, user, search, filterRole, sortBy]);
+  };
 
-  const companyId = user && "companyId" in user ? (user as any).companyId : undefined;
-  const companyRoles = useMemo(() => {
+  const companyId =
+    user && "companyId" in user ? (user as any).companyId : undefined;
+  const companyRoles = () => {
     const rolesSet = new Set<string>();
     users.forEach((u) => {
       if (u.companyId === companyId) {
@@ -143,14 +170,24 @@ export function useUsers() {
       }
     });
     return Array.from(rolesSet);
-  }, [users, companyId]);
+  };
 
-  const handleOpenAddUserModal = useCallback(() => setAddUserModalOpen(true), []);
-  const handleOpenAddRoleModal = useCallback(() => setAddRoleModalOpen(true), []);
-  const handleOpenOrgChartModal = useCallback(() => setOrgChartModalOpen(true), []);
+  const handleOpenAddUserModal = useCallback(
+    () => setAddUserModalOpen(true),
+    []
+  );
+  const handleOpenAddRoleModal = useCallback(
+    () => setAddRoleModalOpen(true),
+    []
+  );
+  const handleOpenOrgChartModal = useCallback(
+    () => setOrgChartModalOpen(true),
+    []
+  );
 
   useEffect(() => {
     fetchUsers();
+    fetchInvitations();
     fetchRoles();
   }, [user]);
 
@@ -163,14 +200,24 @@ export function useUsers() {
         setProfileModalOpen(true);
       }
     }
-    window.addEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+    window.addEventListener(
+      "open-user-profile",
+      handleOpenUserProfile as EventListener
+    );
     return () => {
-      window.removeEventListener("open-user-profile", handleOpenUserProfile as EventListener);
+      window.removeEventListener(
+        "open-user-profile",
+        handleOpenUserProfile as EventListener
+      );
     };
   }, [users]);
 
   useLayoutEffect(() => {
-    const modalOpen = addUserModalOpen || addRoleModalOpen || orgChartModalOpen || profileModalOpen;
+    const modalOpen =
+      addUserModalOpen ||
+      addRoleModalOpen ||
+      orgChartModalOpen ||
+      profileModalOpen;
     if (modalOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -184,6 +231,7 @@ export function useUsers() {
   return {
     theme,
     user,
+    invitations,
     users,
     loading,
     addUserModalOpen,
@@ -205,6 +253,7 @@ export function useUsers() {
     sortBy,
     setSortBy,
     fetchUsers,
+    fetchInvitations,
     fetchRoles,
     handleUserClick,
     addUser,
