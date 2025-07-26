@@ -35,6 +35,10 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
   const [isJoining, setIsJoining] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Get local tracks
+  const { localMicrophoneTrack } = useLocalMicrophoneTrack(micEnabled);
+  const { localCameraTrack } = useLocalCameraTrack(cameraEnabled);
+
   // Add debugging
   useEffect(() => {
     console.log("Local camera track:", localCameraTrack);
@@ -43,19 +47,49 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
     console.log("Mic enabled:", micEnabled);
   }, [localCameraTrack, localMicrophoneTrack, cameraEnabled, micEnabled]);
 
+  // Publish local tracks
+  usePublish([localMicrophoneTrack, localCameraTrack]);
+
+  // Join the channel
+  useJoin(
+    {
+      appid: credentials.appId,
+      channel: credentials.channelName,
+      token: credentials.token,
+      uid: credentials.uid,
+    },
+    isJoining
+  );
+
+  const isConnected = useIsConnected();
+  const remoteUsers = useRemoteUsers();
+
+  const totalParticipants = remoteUsers.length + 1;
+
   useEffect(() => {
     if (isConnected) {
       console.log("Successfully connected to Agora channel");
     }
   }, [isConnected]);
 
+  const handleLeave = useCallback(async () => {
+    setIsJoining(false);
+    if (localCameraTrack) {
+      localCameraTrack.close();
+    }
+    if (localMicrophoneTrack) {
+      localMicrophoneTrack.close();
+    }
+    onLeave();
+  }, [localCameraTrack, localMicrophoneTrack, onLeave]);
+
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
-      //setIsFullscreen(true);
+      setIsFullscreen(true);
     } else {
       document.exitFullscreen();
-      //setIsFullscreen(false);
+      setIsFullscreen(false);
     }
   }, []);
 
@@ -72,6 +106,9 @@ const VideoCallContent: React.FC<VideoCallRoomProps> = ({
     if (totalParticipants <= 6) return "grid-rows-2";
     return "grid-rows-3";
   }, [totalParticipants]);
+
+  const handleMicToggle = useCallback(() => setMicEnabled((m) => !m), []);
+  const handleCameraToggle = useCallback(() => setCameraEnabled((c) => !c), []);
 
   if (!isConnected) {
     return (
