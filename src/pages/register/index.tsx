@@ -1,6 +1,5 @@
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import Loading from "@/components/Loading";
 import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { RegisterForm } from "@/components/register-form";
