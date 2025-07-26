@@ -21,7 +21,7 @@ const AnnouncementsHeader: React.FC<AnnouncementsHeaderProps> = ({
   pinnedCount,
   t,
 }) => (
-  <div className={`sticky top-0 z-40 ${theme === 'dark' ? 'bg-gray-900 ' : 'bg-gray-100 '} px-4 lg:px-8 pt-10`}> 
+  <div className={`${theme === 'dark' ? 'bg-gray-900 ' : 'bg-gray-100 '} px-4 lg:px-8 pt-10`}> 
     <div className="max-w-[100vw] mx-auto">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className={`flex rounded-xl p-1 gap-2 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}> 

@@ -44,7 +44,7 @@ const Footer: React.FC = () => {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <a
-                    href="https://drive.google.com/file/d/12ue5y65thsPObFLDn4PQFR94dA3rxMyf/view?usp=sharing"
+                    href="https://drive.google.com/file/d/1RJ9vQE9FNmn8TuUWHsjC3puiKPsX7o1a/view?usp=sharing"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-primary hover:bg-transparent transition-colors"

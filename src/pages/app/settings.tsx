@@ -145,7 +145,15 @@ const SettingsPage: NextPageWithLayout = () => {
             {tabs.map(tab => (
             <button
               key={tab.id}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors duration-150 text-base md:text-lg focus:outline-none ${activeTab === tab.id ? (theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900 border-b-2 border-blue-500") : (theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-100")}`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors duration-150 text-base md:text-lg focus:outline-none
+                ${activeTab === tab.id
+                  ? (theme === "dark"
+                      ? "bg-gray-700 text-white"
+                      : "bg-gray-100 text-gray-900 border-b-2 border-blue-500")
+                  : (theme === "dark"
+                      ? "hover:bg-gray-700 text-white"
+                      : "hover:bg-gray-100 text-gray-900")}
+              `}
               onClick={() => handleTabChange(tab.id)}
             >
               {tab.label}

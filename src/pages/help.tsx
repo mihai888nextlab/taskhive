@@ -9,7 +9,12 @@ import {
   FaTasks,
   FaCalendarAlt,
   FaComments,
+  FaBullhorn,
+  FaUserClock,
+  FaMoneyBillWave,
+  FaClock,
 } from "react-icons/fa";
+import { MdSdStorage, MdSettings } from "react-icons/md";
 
 const HelpSection = React.memo(function HelpSection({
   icon,
@@ -33,7 +38,7 @@ const HelpSection = React.memo(function HelpSection({
 
 export default function Help() {
   return (
-    <div className="min-w-full min-h-screen text-white flex flex-col items-center bg-background relative overflow-hidden">
+    <div className="min-w-full min-h-screen text-white flex flex-col items-center bg-[#18181b] relative overflow-hidden">
       {/* Subtle background pattern/image for theme */}
       <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
         <Image
@@ -53,39 +58,49 @@ export default function Help() {
           </h1>
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 w-full">
             <HelpSection
-              icon={
-                <FaUserShield className="text-4xl text-primary mb-5 drop-shadow" />
-              }
-              title="1. Admin Account"
-              desc="TaskHive allows you to create an admin account for your organization. As an admin, you can manage the structure of your organization and oversee all operations."
+              icon={<FaTasks className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="Task Management"
+              desc="Organize, assign, and track tasks with clarity. Set priorities, deadlines, and monitor progress easily."
             />
             <HelpSection
-              icon={
-                <FaUsers className="text-4xl text-primary mb-5 drop-shadow" />
-              }
-              title="2. Adding Collaborators"
-              desc="You can add multiple collaborators or staff members to your organization. Each collaborator can be assigned specific roles and responsibilities."
+              icon={<FaCalendarAlt className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="Integrated Calendar"
+              desc="Keep up with deadlines and events using a unified calendar. Sync tasks and meetings for your team."
             />
             <HelpSection
-              icon={
-                <FaTasks className="text-4xl text-primary mb-5 drop-shadow" />
-              }
-              title="3. Task Assignment"
-              desc="Tasks can be assigned to collaborators based on the company's hierarchy. The hierarchy is defined using a dynamic organizational chart created by the admin."
+              icon={<FaBullhorn className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="Announcements"
+              desc="Share updates and keep everyone informed. Broadcast news and reminders to your organization."
             />
             <HelpSection
-              icon={
-                <FaCalendarAlt className="text-4xl text-primary mb-5 drop-shadow" />
-              }
-              title="4. Calendar Integration"
-              desc="TaskHive includes an integrated calendar to help you track deadlines and manage schedules effectively."
+              icon={<FaComments className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="Team Communication"
+              desc="Collaborate in real-time with chat and notifications. Discuss projects and share feedback securely."
             />
             <HelpSection
-              icon={
-                <FaComments className="text-4xl text-primary mb-5 drop-shadow" />
-              }
-              title="5. Communication Channels"
-              desc="TaskHive provides communication channels for employees, enabling seamless collaboration and effective communication within the team."
+              icon={<FaUserClock className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="User Management"
+              desc="Manage users, roles, and permissions. Assign responsibilities and control access easily."
+            />
+            <HelpSection
+              icon={<FaMoneyBillWave className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="Finance Tracking"
+              desc="Track expenses, incomes, and financial stats. Get a clear overview and manage budgets."
+            />
+            <HelpSection
+              icon={<FaClock className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="Time Tracking"
+              desc="Monitor work sessions and boost productivity. Log hours and analyze time spent on tasks."
+            />
+            <HelpSection
+              icon={<MdSdStorage className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="File Storage"
+              desc="Upload, organize, and search your files securely. Store documents and assets in one place."
+            />
+            <HelpSection
+              icon={<MdSettings className="text-4xl text-primary mb-5 drop-shadow" />}
+              title="Custom Settings"
+              desc="Personalize your workspace and notifications. Adjust preferences to fit your workflow."
             />
           </section>
         </div>

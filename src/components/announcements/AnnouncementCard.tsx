@@ -237,9 +237,8 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
 
             {/* Date (Created At) */}
             <div className="flex items-center gap-1.5">
-              <FaCalendarAlt className={`w-3 h-3 ${
-                theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-              }`} />
+              {/* Created Icon */}
+              <FaUser className={`w-3 h-3 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
               <span className={`${
                 theme === "dark" ? "text-gray-400" : "text-gray-500"
               }`}>
@@ -268,15 +267,19 @@ const AnnouncementCard: React.FC<AnnouncementCardProps> = React.memo(({
 
           {/* Expiry Date */}
           {announcement.expiresAt && (
-            <div className={`text-xs px-2 py-1 rounded-lg ${
+            <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg ${
               theme === 'dark' 
                 ? 'bg-gray-700 text-gray-400' 
                 : 'bg-gray-100 text-gray-500'
             }`}>
-              Expires: {new Date(announcement.expiresAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              })}
+              {/* Expiry Icon */}
+              <FaCalendarAlt className={`w-3 h-3 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
+              <span>
+                Expires: {new Date(announcement.expiresAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </span>
             </div>
           )}
         </div>

@@ -264,6 +264,8 @@ const TasksPage: NextPageWithLayout = React.memo(() => {
             setAssignedSortBy={setAssignedSortBy}
             handleExportPDF={handleExportPDF}
             handleExportCSV={handleExportCSV}
+            refetchTasks={fetchTasks}
+            refetchAssignedTasks={fetchAssignedTasks}
           />
         </div>
       </div>

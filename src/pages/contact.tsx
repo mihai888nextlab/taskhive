@@ -7,7 +7,7 @@ import Image from "next/image";
 
 function Contact() {
   return (
-    <div className="min-w-full min-h-screen bg-background text-white flex flex-col items-center relative overflow-hidden">
+    <div className="min-w-full min-h-screen bg-[#18181b] text-white flex flex-col items-center relative overflow-hidden">
       {/* Subtle, full-page hive icon background */}
       <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
         <Image

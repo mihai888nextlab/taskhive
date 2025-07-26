@@ -14,6 +14,7 @@ interface TaskListProps {
   loading: boolean;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
+  refetchTasks?: () => void;
   onToggleComplete: (task: Task) => void;
   isTaskOverdue: (task: Task) => boolean;
   theme?: string;
@@ -36,6 +37,7 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
   loading,
   onEdit,
   onDelete,
+  refetchTasks,
   onToggleComplete,
   isTaskOverdue,
   theme = "light",
@@ -239,6 +241,17 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
       : undefined
   })), [filteredTasks]);
 
+  // Wrap onEdit and onDelete to refetch tasks after action
+  const handleEdit = useCallback(async (task: Task) => {
+    await onEdit(task);
+    if (typeof refetchTasks === 'function') refetchTasks();
+  }, [onEdit, refetchTasks]);
+
+  const handleDelete = useCallback(async (id: string) => {
+    await onDelete(id);
+    if (typeof refetchTasks === 'function') refetchTasks();
+  }, [onDelete, refetchTasks]);
+
   if (controlsOnly) {
     // Show search input outside the modal, and a button to open filter/sort modal
     return (
@@ -395,8 +408,8 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
                   task={task}
                   currentUserEmail={currentUserEmail}
                   loading={loading}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
                   onToggleComplete={onToggleComplete}
                   isTaskOverdue={isTaskOverdue}
                   onShowDetails={handleShowDetails}
@@ -412,8 +425,8 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
             open={modalOpen}
             task={detailsTask}
             onClose={handleCloseModal}
-            onEdit={onEdit}
-            onDelete={onDelete}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
             onToggleComplete={onToggleComplete || (() => {})}
             onToggleSubtask={handleSubtaskToggle}
             theme={theme}
@@ -555,4 +568,4 @@ const TaskList: React.FC<TaskListProps> = React.memo(({
   );
 });
 
-export default React.memo(TaskList);
+export default TaskList;

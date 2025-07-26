@@ -65,7 +65,7 @@ const UsersHeader: React.FC<UsersHeaderProps> = ({
           </div>
         </div>
         {/* Action Buttons */}
-        {user.role === "admin" && (
+        {user && user.role === "admin" && (
           <>
             <Button
               type="button"

@@ -3,6 +3,7 @@ import { useTheme } from "@/components/ThemeContext";
 import Image from "next/image";
 import { useAIWindow } from "@/contexts/AIWindowContext";
 import { useTranslations } from "next-intl";
+import { FaTimes } from "react-icons/fa";
 
 // Define the type for handler parameters
 export type CommandHandlerParams = {
@@ -392,12 +393,14 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
                 {t("clear")}
               </button>
             )}
+            {/* Vertically centered close button */}
             <button
+              className={`ml-2 text-2xl font-bold z-10 transition-colors flex items-center justify-center h-10 w-10 rounded-full ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
               onClick={onClose}
-              className={`text-2xl font-bold transition-all ${theme === 'dark' ? 'text-gray-400 hover:text-red-400' : 'text-gray-400 hover:text-red-500'}`}
-              aria-label={t("closeLabel")}
+              aria-label={t("close")}
+              style={{ marginTop: '-6px' }}
             >
-              ✕
+              <FaTimes style={{ verticalAlign: 'middle' }} />
             </button>
           </div>
         </div>

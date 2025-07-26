@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useTheme } from "../ThemeContext";
 import TaskCard from "./TaskCard";
 import TaskDetailsModal from "./TaskDetailsModal";
@@ -15,6 +15,7 @@ interface AssignedTasksListProps {
   loading: boolean;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
+  refetchTasks?: () => void;
   onToggleComplete?: (task: Task) => void;
   isTaskOverdue: (task: Task) => boolean;
   theme?: string;
@@ -38,6 +39,7 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo((props) =
     loading,
     onEdit,
     onDelete,
+    refetchTasks,
     onToggleComplete,
     isTaskOverdue,
     theme: themeProp,
@@ -70,6 +72,27 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo((props) =
   const sortByValue = controlledSortBy !== undefined ? controlledSortBy : sortBy;
 
   // Memoize event handlers
+  // Wrap onEdit and onDelete to refetch tasks after action
+  // Optimistic local state update for tasks
+  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
+
+  useEffect(() => {
+    setLocalTasks(tasks);
+  }, [tasks]);
+
+  const handleEdit = useCallback(async (task: Task) => {
+    // Optimistically update localTasks
+    setLocalTasks(prev => prev.map(t => t._id === task._id ? { ...t, ...task } : t));
+    await onEdit(task);
+    if (refetchTasks) refetchTasks();
+  }, [onEdit, refetchTasks]);
+
+  const handleDelete = useCallback(async (id: string) => {
+    // Optimistically remove from localTasks
+    setLocalTasks(prev => prev.filter(t => t._id !== id));
+    await onDelete(id);
+    if (refetchTasks) refetchTasks();
+  }, [onDelete, refetchTasks]);
   const handleShowDetails = useCallback((task: Task) => {
     setDetailsTask(task);
     setModalOpen(true);
@@ -83,7 +106,7 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo((props) =
   // Memoize filteredTasks: Only show tasks assigned BY the current user
   const filteredTasks = useMemo(() => {
     // Only include tasks where createdBy.email === currentUserEmail
-    let result = tasks.filter(task =>
+    let result = localTasks.filter(task =>
       task.createdBy &&
       typeof task.createdBy.email === 'string' &&
       task.createdBy.email.trim().toLowerCase() === currentUserEmail.trim().toLowerCase()
@@ -152,7 +175,7 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo((props) =
     });
 
     return result;
-  }, [tasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue, currentUserEmail]);
+  }, [localTasks, searchValue, filterStatusValue, filterPriorityValue, sortByValue, isTaskOverdue, currentUserEmail]);
 
   // Memoize taskCards
   const taskCards = useMemo(() => filteredTasks.map(task => ({
@@ -335,18 +358,18 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo((props) =
           ) : (
             <div className="space-y-4">
               {taskCards.map(task => (
-                <TaskCard
-                  key={task._id}
-                  task={task}
-                  currentUserEmail={currentUserEmail}
-                  loading={loading}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onToggleComplete={canUserCompleteTask(task) ? onToggleComplete : undefined}
-                  isTaskOverdue={isTaskOverdue}
-                  onShowDetails={handleShowDetails}
-                  theme={theme}
-                />
+            <TaskCard
+              key={task._id}
+              task={task}
+              currentUserEmail={currentUserEmail}
+              loading={loading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggleComplete={canUserCompleteTask(task) ? onToggleComplete : undefined}
+              isTaskOverdue={isTaskOverdue}
+              onShowDetails={handleShowDetails}
+              theme={theme}
+            />
               ))}
             </div>
           )}
@@ -483,8 +506,8 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo((props) =
         open={modalOpen}
         task={detailsTask}
         onClose={handleCloseModal}
-        onEdit={onEdit}
-        onDelete={onDelete}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
         onToggleComplete={onToggleComplete || (() => {})}
         onToggleSubtask={onToggleComplete}
         theme={theme}
@@ -494,4 +517,4 @@ const AssignedTasksList: React.FC<AssignedTasksListProps> = React.memo((props) =
   );
 });
 
-export default React.memo(AssignedTasksList);
+export default AssignedTasksList;

@@ -6,6 +6,8 @@ import AssignedTasksList from "./AssignedTasksList";
 import { FaTasks, FaUserCheck } from "react-icons/fa";
 
 interface TasksTabPanelProps {
+  refetchTasks?: () => void;
+  refetchAssignedTasks?: () => void;
   theme: string;
   activeTab: 'my-tasks' | 'assigned-tasks';
   t: (key: string) => string;
@@ -67,6 +69,8 @@ const TasksTabPanel: React.FC<TasksTabPanelProps> = ({
   setAssignedSortBy,
   handleExportPDF,
   handleExportCSV,
+  refetchTasks,
+  refetchAssignedTasks,
 }) => (
   <Card className={`${theme === "light" ? "bg-white" : "bg-gray-800"} rounded-2xl border ${theme === "light" ? "border-gray-200" : "border-gray-700"} overflow-hidden mx-2`}>
     {activeTab === 'my-tasks' ? (
@@ -104,6 +108,7 @@ const TasksTabPanel: React.FC<TasksTabPanelProps> = ({
             onFilterPriorityChange={setMyFilterPriority}
             sortBy={mySortBy}
             onSortByChange={setMySortBy}
+            refetchTasks={refetchTasks}
           />
         </CardContent>
         <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
@@ -158,6 +163,7 @@ const TasksTabPanel: React.FC<TasksTabPanelProps> = ({
             onFilterPriorityChange={setAssignedFilterPriority}
             sortBy={assignedSortBy}
             onSortByChange={setAssignedSortBy}
+            refetchTasks={refetchAssignedTasks}
           />
         </CardContent>
         <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
