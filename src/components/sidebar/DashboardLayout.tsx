@@ -99,7 +99,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   return (
     <div className="flex w-full min-h-screen bg-gray-100 relative">
       {loadingUser && (
-        <div className="inset-0 fixed flex flex-col items-center justify-center bg-transparent">
+        <div className="inset-0 fixed flex flex-col items-center justify-center bg-white z-[9999]">
           <div className="flex flex-col items-center gap-4 animate-fade-in">
             {/* Simple spinner */}
             <svg
@@ -124,7 +124,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               />
             </svg>
             <p className="text-center text-lg font-semibold opacity-90 animate-pulse mt-2">
-              {t("loadingDashboard", { default: "Loading your dashboard..." })}
+              Loading your dashboard...
             </p>
           </div>
           <style jsx>{`

@@ -2,8 +2,10 @@ import HeaderNavBar from "@/components/header/HeaderNavBar";
 import { FaBuilding } from "react-icons/fa";
 import AddCompanyModal from "@/components/modals/AddCompanyModal";
 import { useSelectCompany } from "@/hooks/useSelectCompany";
+import { useAuth } from "@/hooks/useAuth";
 
 const SelectCompanyPage = () => {
+  const { loadingUser } = useAuth();
   const {
     user,
     theme,
@@ -20,6 +22,55 @@ const SelectCompanyPage = () => {
     <div
       className={`flex w-full min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}
     >
+      {loadingUser && (
+        <div className="inset-0 fixed flex flex-col items-center justify-center bg-white z-[9999]">
+          <div className="flex flex-col items-center gap-4 animate-fade-in">
+            {/* Simple spinner */}
+            <svg
+              className="animate-spin w-12 h-12 text-blue-500 mb-4"
+              viewBox="0 0 50 50"
+            >
+              <circle
+                className="opacity-20"
+                cx="25"
+                cy="25"
+                r="20"
+                stroke="currentColor"
+                strokeWidth="6"
+                fill="none"
+              />
+              <path
+                d="M25 5a20 20 0 0 1 20 20"
+                stroke="currentColor"
+                strokeWidth="6"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </svg>
+            <p className="text-center text-lg font-semibold opacity-90 animate-pulse mt-2">
+              Loading your dashboard...
+            </p>
+          </div>
+          <style jsx>{`
+            .animate-spin {
+              animation: spin 1s linear infinite;
+            }
+            .animate-fade-in {
+              animation: fadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: translateY(30px);
+              }
+              to {
+                opacity: 1;
+                transform: none;
+              }
+            }
+          `}</style>
+        </div>
+      )}
       <div className="hidden sm:block">
         <HeaderNavBar t={t} />
       </div>
@@ -72,57 +123,61 @@ const SelectCompanyPage = () => {
               <span className="text-xl sm:text-2xl font-bold">+</span>
             </button>
           </div>
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 justify-center w-full px-2 sm:px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100"
-            style={{ minHeight: 0, maxHeight: "80vh" }}
-          >
-            {user?.companies?.map((company) => (
-              <button
-                key={company.id}
-                type="button"
-                className={`rounded-2xl border shadow-sm transition-all duration-200 flex flex-col w-full sm:w-[300px] h-[180px] sm:h-[200px] max-w-none overflow-hidden group cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent ${theme === "dark" ? "bg-[#23272f] border-gray-700 hover:border-blue-600" : "bg-white border-gray-200 hover:border-blue-400"}`}
-                style={{ minWidth: 0 }}
-                onClick={() => handleSelectCompany(company.id)}
-              >
-                <div
-                  className={`px-4 sm:px-6 py-3 sm:py-4 border-b ${theme === "dark" ? "bg-blue-900 border-blue-800" : "bg-blue-50 border-blue-200"}`}
-                  style={theme === "dark" ? { opacity: 0.95 } : undefined}
+          {user?.companies?.length ? (
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 justify-center w-full px-2 sm:px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100"
+              style={{ minHeight: 0, maxHeight: "80vh" }}
+            >
+              {user?.companies?.map((company) => (
+                <button
+                  key={company.id}
+                  type="button"
+                  className={`rounded-2xl border shadow-sm transition-all duration-200 flex flex-col w-full sm:w-[300px] h-[180px] sm:h-[200px] max-w-none overflow-hidden group cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-transparent ${theme === "dark" ? "bg-[#23272f] border-gray-700 hover:border-blue-600" : "bg-white border-gray-200 hover:border-blue-400"}`}
+                  style={{ minWidth: 0 }}
+                  onClick={() => handleSelectCompany(company.id)}
                 >
-                  <h2
-                    className={`text-base sm:text-lg font-bold truncate ${theme === "dark" ? "text-white" : "text-gray-900"}`}
-                    title={company.name}
-                    style={{ textAlign: "left", flexGrow: 1 }}
+                  <div
+                    className={`px-4 sm:px-6 py-3 sm:py-4 border-b ${theme === "dark" ? "bg-blue-900 border-blue-800" : "bg-blue-50 border-blue-200"}`}
+                    style={theme === "dark" ? { opacity: 0.95 } : undefined}
                   >
-                    {company.name}
-                  </h2>
-                </div>
-                <div
-                  className={`flex-1 flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#1e2530]" : "bg-white"}`}
-                >
-                  <span
-                    className={`text-sm sm:text-base font-medium text-center ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
-                    style={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      fontWeight: 600,
-                    }}
-                    title={company.role || t("member")}
+                    <h2
+                      className={`text-base sm:text-lg font-bold truncate ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                      title={company.name}
+                      style={{ textAlign: "left", flexGrow: 1 }}
+                    >
+                      {company.name}
+                    </h2>
+                  </div>
+                  <div
+                    className={`flex-1 flex flex-col items-center justify-center ${theme === "dark" ? "bg-[#1e2530]" : "bg-white"}`}
                   >
-                    {company.role || t("member")}
-                  </span>
-                </div>
-                <div className="px-4 sm:px-6 pb-3 sm:pb-4">
-                  <span
-                    className={`w-full block px-5 sm:px-7 py-2 rounded-xl font-semibold shadow transition text-sm sm:text-base text-center ${theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-600 text-white"}`}
-                    style={{ pointerEvents: "none", opacity: 0.95 }}
-                  >
-                    {t("select")}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
+                    <span
+                      className={`text-sm sm:text-base font-medium text-center ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        fontWeight: 600,
+                      }}
+                      title={company.role || t("member")}
+                    >
+                      {company.role || t("member")}
+                    </span>
+                  </div>
+                  <div className="px-4 sm:px-6 pb-3 sm:pb-4">
+                    <span
+                      className={`w-full block px-5 sm:px-7 py-2 rounded-xl font-semibold shadow transition text-sm sm:text-base text-center ${theme === "dark" ? "bg-blue-600 text-white" : "bg-blue-600 text-white"}`}
+                      style={{ pointerEvents: "none", opacity: 0.95 }}
+                    >
+                      {t("select")}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <></>
+          )}
           {invitations.length > 0 && (
             <div className="mt-8 sm:mt-10 w-full max-w-2xl mx-auto px-2 sm:px-0">
               <h2
