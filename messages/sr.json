@@ -45,6 +45,11 @@
     "filterSortButton": "Филтрирај и Сортирај",
     "filterSortTitle": "Опције филтрирања и сортирања",
     "applyFiltersButton": "Примени филтере"
+    ,"sentInvitations": "Poslate pozivnice",
+    "status": "Status",
+    "actions": "Akcije",
+    "resend": "Ponovo pošalji",
+    "cancel": "Otkaži"
   },
   "TasksPage": {
     "export": "Izvoz",

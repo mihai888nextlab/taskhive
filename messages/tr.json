@@ -45,6 +45,11 @@
     "filterSortButton": "Filtrele & Sırala",
     "filterSortTitle": "Filtreleme & Sıralama Seçenekleri",
     "applyFiltersButton": "Filtreleri Uygula"
+    ,"sentInvitations": "Gönderilen davetler",
+    "status": "Durum",
+    "actions": "Eylemler",
+    "resend": "Yeniden gönder",
+    "cancel": "İptal"
   },
   "TasksPage": {
     "export": "Dışa aktar",

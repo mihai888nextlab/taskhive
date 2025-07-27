@@ -130,7 +130,10 @@ const Storage: React.FC = () => {
       {typeof window !== 'undefined' && (
         <>
           {uploadFileModal && createPortal(
-            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              onClick={e => { if (e.target === e.currentTarget) handleUploadModalClose(); }}
+            >
               <div className="bg-white rounded-3xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
@@ -150,7 +153,10 @@ const Storage: React.FC = () => {
             document.body
           )}
           {signatureModal && createPortal(
-            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              onClick={e => { if (e.target === e.currentTarget) handleSignatureModalClose(); }}
+            >
               <div className="bg-white rounded-3xl p-0 max-w-4xl w-full mx-4 max-h-[90vh] relative animate-fadeIn overflow-hidden">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"
@@ -169,7 +175,10 @@ const Storage: React.FC = () => {
             document.body
           )}
           {fileSigningModal && createPortal(
-            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              onClick={e => { if (e.target === e.currentTarget) handleFileSigningModalClose(); }}
+            >
               <div className="bg-white rounded-3xl p-0 max-w-7xl w-full mx-4 max-h-[90vh] relative animate-fadeIn">
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold z-10"

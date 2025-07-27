@@ -45,6 +45,11 @@
     "filterSortButton": "フィルター＆並び替え",
     "filterSortTitle": "フィルター＆並び替えオプション",
     "applyFiltersButton": "フィルターを適用"
+    ,"sentInvitations": "送信済み招待",
+    "status": "ステータス",
+    "actions": "操作",
+    "resend": "再送信",
+    "cancel": "キャンセル"
   },
   "TasksPage": {
     "export": "エクスポート",

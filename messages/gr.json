@@ -42,6 +42,11 @@
     "user": "Χρήστης",
     "loadingTeamMembers": "Φόρτωση μελών ομάδας...",
     "pleaseWaitFetchTeam": "Παρακαλώ περιμένετε, γίνεται λήψη των δεδομένων της ομάδας σας"
+    ,"sentInvitations": "Απεσταλμένες προσκλήσεις",
+    "status": "Κατάσταση",
+    "actions": "Ενέργειες",
+    "resend": "Επαναποστολή",
+    "cancel": "Ακύρωση"
     ,"filterSortButton": "Φίλτρο & Ταξινόμηση"
     ,"filterSortTitle": "Επιλογές φιλτραρίσματος και ταξινόμησης"
     ,"applyFiltersButton": "Εφαρμογή φίλτρων"

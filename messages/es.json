@@ -44,6 +44,11 @@
     ,"filterSortButton": "Filtrar y Ordenar"
     ,"filterSortTitle": "Opciones de filtrado y ordenación"
     ,"applyFiltersButton": "Aplicar filtros"
+    ,"sentInvitations": "Invitaciones enviadas",
+    "status": "Estado",
+    "actions": "Acciones",
+    "resend": "Reenviar",
+    "cancel": "Cancelar"
   },
   "TasksPage": {
     "export": "Exportar",

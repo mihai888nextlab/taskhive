@@ -45,6 +45,11 @@
     "filterSortButton": "Suodata & lajittele",
     "filterSortTitle": "Suodatus- ja lajitteluvaihtoehdot",
     "applyFiltersButton": "Käytä suodattimia"
+    ,"sentInvitations": "Lähetetyt kutsut",
+    "status": "Tila",
+    "actions": "Toiminnot",
+    "resend": "Lähetä uudelleen",
+    "cancel": "Peruuta"
   },
   "TasksPage": {
     "export": "Vie",

@@ -45,6 +45,11 @@
     "filterSortButton": "Filter och sortera",
     "filterSortTitle": "Filter- och sorteringsalternativ",
     "applyFiltersButton": "Använd filter"
+    ,"sentInvitations": "Skickade inbjudningar",
+    "status": "Status",
+    "actions": "Åtgärder",
+    "resend": "Skicka igen",
+    "cancel": "Avbryt"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Alla meddelanden",

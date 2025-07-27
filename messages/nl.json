@@ -45,6 +45,11 @@
     "filterSortButton": "Filteren & Sorteren",
     "filterSortTitle": "Filter- & Sorteeropties",
     "applyFiltersButton": "Filters toepassen"
+    ,"sentInvitations": "Verzonden uitnodigingen",
+    "status": "Status",
+    "actions": "Acties",
+    "resend": "Opnieuw verzenden",
+    "cancel": "Annuleren"
   },
   "TasksPage": {
     "export": "Exporteren",

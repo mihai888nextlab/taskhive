@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useTheme } from "@/components/ThemeContext";
 import { FaCloudUploadAlt, FaTimes, FaFile, FaImage } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 
@@ -17,6 +18,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
     const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
     const t = useTranslations("StoragePage");
+    const { theme } = useTheme();
 
     useEffect(() => {
       if (droppedFiles && droppedFiles.length > 0) {
@@ -88,30 +90,30 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         {/* Backdrop with blur */}
         <div
-          className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+          className={`absolute inset-0 backdrop-blur-sm cursor-default ${theme === "dark" ? "bg-black/60" : "bg-black/10"}`}
           onClick={handleClose}
         />
 
         {/* Modal */}
-        <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl max-w-full sm:max-w-md w-full border border-white/20 mx-2 dark:bg-gray-900/95 dark:border-gray-700">
+        <div className={`relative ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} rounded-2xl max-w-full sm:max-w-md w-full border mx-2`}>
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-700">
+          <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-4 sm:p-6 border-b ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-2 bg-blue-100 rounded-xl dark:bg-blue-900">
-                <FaCloudUploadAlt className="text-lg sm:text-xl text-blue-600 dark:text-blue-300" />
+              <div className={`p-2 rounded-xl ${theme === "dark" ? "bg-blue-900" : "bg-blue-50"}`}>
+                <FaCloudUploadAlt className={`text-lg sm:text-xl ${theme === "dark" ? "text-blue-300" : "text-blue-600"}`} />
               </div>
               <div>
-                <h2 className="text-base sm:text-xl font-bold text-gray-800 dark:text-white">
+                <h2 className={`text-base sm:text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
                   {t("uploadFile")}
                 </h2>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                <p className={`text-xs sm:text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                   {t("chooseFileToUpload")}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all duration-200 mt-2 sm:mt-0 dark:hover:text-gray-200 dark:hover:bg-gray-800"
+              className={`p-2 rounded-xl transition-all duration-200 mt-2 sm:mt-0 ${theme === "dark" ? "text-gray-200 hover:text-white hover:bg-gray-700" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}
             >
               <FaTimes className="text-base sm:text-lg" />
             </button>
@@ -121,20 +123,20 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
           <div className="p-4 sm:p-6">
             {/* File Input */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-200">
+              <label className={`block text-sm font-medium mb-2 ${theme === "dark" ? "text-gray-200" : "text-gray-700"}`}>
                 {t("selectFile")}
               </label>
               <input
                 type="file"
                 accept="*"
                 onChange={handleFileChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all duration-200 dark:text-gray-300 dark:file:bg-blue-950 dark:file:text-blue-300 dark:hover:file:bg-blue-900"
+                className={`block w-full text-sm ${theme === "dark" ? "text-gray-300 file:bg-blue-950 file:text-blue-300 hover:file:bg-blue-900" : "text-gray-500 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"} file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold transition-all duration-200`}
               />
             </div>
 
             {/* File Preview */}
             {preview && file && (
-              <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200/50 dark:bg-gray-800 dark:border-gray-700">
+              <div className={`mb-6 p-4 rounded-xl border ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-gray-100 border-gray-200"}`}>
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0">
                     {file.type.startsWith("image/") ? (
@@ -144,16 +146,16 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center dark:bg-blue-950">
-                        <FaFile className="text-2xl text-blue-600 dark:text-blue-300" />
+                      <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${theme === "dark" ? "bg-blue-950" : "bg-blue-100"}`}>
+                        <FaFile className={`text-2xl ${theme === "dark" ? "text-blue-300" : "text-blue-600"}`} />
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 truncate dark:text-white">
+                    <p className={`text-sm font-semibold truncate ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
                       {file.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
                       {(file.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
@@ -163,11 +165,11 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
 
             {/* Success Message */}
             {uploadedUrl && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl dark:bg-green-900/30 dark:border-green-700">
+              <div className={`mb-6 p-4 border rounded-xl ${theme === "dark" ? "bg-green-900/30 border-green-700" : "bg-green-100 border-green-200"}`}>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center dark:bg-green-900">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === "dark" ? "bg-green-900" : "bg-green-200"}`}>
                     <svg
-                      className="w-4 h-4 text-green-600 dark:text-green-300"
+                      className={`w-4 h-4 ${theme === "dark" ? "text-green-300" : "text-green-600"}`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -179,10 +181,10 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-green-800 dark:text-green-200">
+                    <p className={`text-sm font-semibold ${theme === "dark" ? "text-green-200" : "text-green-800"}`}>
                       {t("uploadSuccessful")}
                     </p>
-                    <p className="text-xs text-green-600 dark:text-green-300">
+                    <p className={`text-xs ${theme === "dark" ? "text-green-300" : "text-green-600"}`}>
                       {t("fileUploadedSuccessfully")}
                     </p>
                   </div>
@@ -196,13 +198,17 @@ const FileUploadModal: React.FC<FileUploadModalProps> = React.memo(
               disabled={!file || uploading}
               className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 ${
                 !file || uploading
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600" 
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 dark:from-blue-700 dark:to-blue-800 dark:hover:from-blue-800 dark:hover:to-blue-900"
+                  ? theme === "dark"
+                    ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : theme === "dark"
+                    ? "bg-gradient-to-r from-blue-700 to-blue-800 text-white hover:from-blue-800 hover:to-blue-900 transform hover:scale-105"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105"
               }`}
             >
               {uploading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin dark:border-gray-700 dark:border-t-blue-400" />
+                  <div className={`w-4 h-4 border-2 rounded-full animate-spin ${theme === "dark" ? "border-gray-700 border-t-blue-400" : "border-gray-300 border-t-blue-500"}`} />
                   {t("uploading")}
                 </div>
               ) : (

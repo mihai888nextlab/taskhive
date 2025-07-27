@@ -44,7 +44,12 @@
     "pleaseWaitFetchTeam": "يرجى الانتظار أثناء جلب بيانات فريقك",
     "filterSortButton": "تصفية وفرز",
     "filterSortTitle": "خيارات التصفية والفرز",
-    "applyFiltersButton": "تطبيق الفلاتر"
+    "applyFiltersButton": "تطبيق الفلاتر",
+    "sentInvitations": "الدعوات المرسلة",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "resend": "إعادة إرسال",
+    "cancel": "إلغاء"
   },
   "TasksPage": {
     "export": "تصدير",

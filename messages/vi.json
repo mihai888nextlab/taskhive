@@ -45,6 +45,11 @@
     "filterSortButton": "Lọc & Sắp xếp",
     "filterSortTitle": "Tùy chọn Lọc & Sắp xếp",
     "applyFiltersButton": "Áp dụng bộ lọc"
+    ,"sentInvitations": "Lời mời đã gửi",
+    "status": "Trạng thái",
+    "actions": "Hành động",
+    "resend": "Gửi lại",
+    "cancel": "Hủy"
   },
   "TasksPage": {
     "export": "Xuất",

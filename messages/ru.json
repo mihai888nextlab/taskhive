@@ -45,6 +45,11 @@
     "filterSortButton": "Фильтр и сортировка",
     "filterSortTitle": "Параметры фильтрации и сортировки",
     "applyFiltersButton": "Применить фильтры"
+    ,"sentInvitations": "Отправленные приглашения",
+    "status": "Статус",
+    "actions": "Действия",
+    "resend": "Отправить снова",
+    "cancel": "Отмена"
   },
   "TasksPage": {
     "export": "Экспорт",

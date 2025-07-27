@@ -45,6 +45,11 @@
     "filterSortButton": "筛选和排序",
     "filterSortTitle": "筛选和排序选项",
     "applyFiltersButton": "应用筛选器"
+    ,"sentInvitations": "已发送邀请",
+    "status": "状态",
+    "actions": "操作",
+    "resend": "重新发送",
+    "cancel": "取消"
   },
   "TasksPage": {
     "export": "导出",

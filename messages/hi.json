@@ -48,6 +48,11 @@
     "user": "यूज़र",
     "loadingTeamMembers": "टीम सदस्य लोड हो रहे हैं...",
     "pleaseWaitFetchTeam": "कृपया प्रतीक्षा करें, आपकी टीम डेटा प्राप्त की जा रही है"
+    ,"sentInvitations": "भेजे गए निमंत्रण",
+    "status": "स्थिति",
+    "actions": "क्रियाएँ",
+    "resend": "पुनः भेजें",
+    "cancel": "रद्द करें"
     ,"filterSortButton": "फ़िल्टर और छाँटें"
     ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
     ,"applyFiltersButton": "फ़िल्टर लागू करें"

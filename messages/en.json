@@ -44,7 +44,13 @@
     "pleaseWaitFetchTeam": "Please wait while we fetch your team data",
     "filterSortButton": "Filter & Sort",
     "filterSortTitle": "Filter & Sort Options",
+    "startByAddingFirstMember": "Start by adding your first team member.",
     "applyFiltersButton": "Apply Filters"
+    ,"sentInvitations": "Sent Invitations"
+    ,"status": "Status"
+    ,"actions": "Actions"
+    ,"resend": "Resend"
+    ,"cancel": "Cancel"
   },
   "TasksPage": {
     "export": "Export",
@@ -475,6 +481,7 @@
     "loadingInsights": "Loading your insights..."
   },
   "Navigation": {
+    "loadingDashboard": "Loading dashboard...",
     "home": "Home",
     "tasks": "Tasks",
     "announcements": "Announcements",
@@ -544,6 +551,8 @@
     }
   },
   "DashboardPage": {
+    "goToTimeTrackingPage": "Go to time tracking page",
+    "noTeamMembersYet": "No team members yet.",
     "critical": "Critical",
     "highPriority": "High Priority",
     "dueToday": "Due Today",
@@ -586,8 +595,7 @@
     "firstName": "First Name",
     "lastName": "Last Name",
     "email": "Email",
-    "noTeamMembersYet": "No team members yet",
-    "startByAddingFirstMember": "Start by adding your first team member",
+
     "calendar": "Calendar",
     "calendarDescription": "View deadlines, scheduled meetings, and project milestones.",
     "loadingTasks": "Loading your tasks...",

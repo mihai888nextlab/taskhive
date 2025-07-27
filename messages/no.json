@@ -45,6 +45,11 @@
     "filterSortButton": "Filter og sorter",
     "filterSortTitle": "Filter- og sorteringsalternativer",
     "applyFiltersButton": "Bruk filtre"
+    ,"sentInvitations": "Sendte invitasjoner",
+    "status": "Status",
+    "actions": "Handlinger",
+    "resend": "Send på nytt",
+    "cancel": "Avbryt"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Alle kunngjøringer",

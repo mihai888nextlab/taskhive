@@ -45,6 +45,11 @@
     "filterSortButton": "Szűrés & Rendezés",
     "filterSortTitle": "Szűrési & Rendezési lehetőségek",
     "applyFiltersButton": "Szűrők alkalmazása"
+    ,"sentInvitations": "Elküldött meghívók",
+    "status": "Állapot",
+    "actions": "Műveletek",
+    "resend": "Újraküldés",
+    "cancel": "Mégse"
   },
   "TasksPage": {
     "export": "Exportálás",

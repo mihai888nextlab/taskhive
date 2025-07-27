@@ -160,10 +160,17 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ open, onClose, user
 
   if (!open || !user) return null;
 
+  // Handler for backdrop click
+  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     <>
       {typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4" onClick={handleClose}>
           <div className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} rounded-3xl shadow-2xl w-full max-w-2xl relative animate-fadeIn overflow-hidden`}>
             <button
               className={`absolute top-4 right-4 text-xl font-bold z-10 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-700'}`}
