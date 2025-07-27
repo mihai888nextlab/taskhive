@@ -5,7 +5,6 @@ import UsersHeader from "@/components/users/UsersHeader";
 import UsersControls from "@/components/users/UsersControls";
 import UsersListPanel from "@/components/users/UsersListPanel";
 import SentInvitationsPanel from "@/components/users/SentInvitationsPanel";
-import Loading from "@/components/Loading";
 import { Card } from "@/components/ui/card";
 import { createPortal } from "react-dom";
 import AddUserModal from "@/components/modals/AddUserModal";
