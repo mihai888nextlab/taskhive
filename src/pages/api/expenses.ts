@@ -16,17 +16,6 @@ export default async function handler(
   const cookies = cookie.parse(req.headers.cookie || "");
   const token = cookies.auth_token;
 
-  // For GET, allow unauthenticated access (for dashboard preview)
-  if (req.method === "GET") {
-    const { userId, companyId } = req.query;
-    const filter: any = {};
-    if (userId) filter.userId = userId;
-    if (companyId) filter.companyId = companyId;
-    const expenses = await (Expense as any).find(filter).sort({ date: -1 });
-    return res.status(200).json(expenses);
-  }
-
-  // For POST/DELETE, require token
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
   }
@@ -39,6 +28,16 @@ export default async function handler(
     ) as JWTPayload;
   } catch {
     return res.status(401).json({ message: "Invalid token" });
+  }
+
+  if (req.method === "GET") {
+    const userId = decodedToken.userId;
+    const companyId = decodedToken.companyId;
+    const filter: any = {};
+    if (userId) filter.userId = userId;
+    if (companyId) filter.companyId = companyId;
+    const expenses = await (Expense as any).find(filter).sort({ date: -1 });
+    return res.status(200).json(expenses);
   }
 
   if (req.method === "POST") {
