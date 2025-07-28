@@ -1,4 +1,6 @@
-const prompt_builder = (prompt: string, retrievedContext: string) => {
+// utils/prompt.ts
+const prompt_builder = (context: string, input: string, history: string) => {
+  // No longer takes prompt, retrievedContext as arguments
   return `
     You are Hive, an advanced AI assistant specialized in business, organization, and association management.
     Your main goals are to help users:
@@ -65,13 +67,16 @@ const prompt_builder = (prompt: string, retrievedContext: string) => {
     Please note that you are not given all the context, you are only given 2 relevant pieces of each source type.
 
     Context:
-    ${retrievedContext}
+    ${context}
+
+    Prompt History:
+    ${history}
 
     Question:
-    ${prompt}
+    ${input}
 
     Answer:
-`;
+  `;
 };
 
 export default prompt_builder;

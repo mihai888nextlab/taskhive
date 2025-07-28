@@ -6,9 +6,6 @@ import Announcement from "@/db/models/announcementModel";
 import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@/types";
-import userModel from "@/db/models/userModel"; // <-- Add this import
-import AnnouncementModel from "@/db/models/announcementModel";
-import ExpenseModel from "@/db/models/expensesModel";
 import dbConnect from "@/db/dbConfig"; // Add this import
 import {
   ChatGoogleGenerativeAI,
@@ -22,6 +19,14 @@ import prompt_builder from "@/utils/prompt";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
+interface PromptHistoryEntry {
+  userId: string;
+  prompt: string;
+  response: string;
+}
+
+let prompt_history: PromptHistoryEntry[] = [];
+
 const RAG_SOURCES = [
   { model: Task, name: "task", indexName: "tasks_vector_index" }, // Match index names with Atlas config
   {
@@ -34,7 +39,6 @@ const RAG_SOURCES = [
     name: "userCompany",
     indexName: "userCompanies_vector_index",
   },
-  // Add other sources/models here
 ];
 
 export default async function handler(
@@ -43,7 +47,6 @@ export default async function handler(
 ) {
   const { prompt } = req.body;
 
-  // Ensure JSON response header is set
   res.setHeader("Content-Type", "application/json");
 
   if (req.method !== "POST") {
@@ -91,6 +94,25 @@ export default async function handler(
     );
     return res.status(401).json({ message: "Invalid or expired token" });
   }
+
+  // Update prompt_history for the current user
+  const userId = decodedToken.userId;
+  // Get all previous prompts for this user
+  let userPrompts = prompt_history.filter((entry) => entry.userId === userId);
+  // Add the new prompt with an empty response
+  userPrompts.push({ userId, prompt, response: "" });
+  // Keep only the last 3 prompts
+  userPrompts = userPrompts.slice(-3);
+  // Remove all previous prompts for this user from global history
+  prompt_history = prompt_history.filter((entry) => entry.userId !== userId);
+  // Add back the last 3 prompts for this user
+  prompt_history = [...prompt_history, ...userPrompts];
+
+  // Get last 3 history for the current user (format: PROMPT: ... = RESPONSE: ...)
+  const userHistory = userPrompts
+    .map((entry) => `PROMPT: ${entry.prompt} = RESPONSE: ${entry.response}`)
+    .slice(-3)
+    .join("\n");
 
   // Check if API key is defined
   if (!GEMINI_API_KEY) {
@@ -181,8 +203,10 @@ export default async function handler(
       temperature: 0.7, // Adjust for creativity vs. accuracy
     });
 
+    console.log("Retrieved context for LLM:", prompt, userHistory);
+
     const promptTemplate = PromptTemplate.fromTemplate(
-      prompt_builder(prompt, retrievedContext)
+      prompt_builder(retrievedContext, prompt, userHistory)
     );
 
     const chain = RunnableSequence.from([
@@ -201,6 +225,14 @@ export default async function handler(
       question: prompt,
       context: retrievedContext,
     });
+
+    // Add the new prompt and response to history
+    // Update the last prompt for this user with the response
+    userPrompts[userPrompts.length - 1].response = response;
+    // Remove all previous prompts for this user from global history
+    prompt_history = prompt_history.filter((entry) => entry.userId !== userId);
+    // Add back the last 3 prompts for this user (with updated response)
+    prompt_history = [...prompt_history, ...userPrompts];
 
     res.status(200).json({ response });
   } catch (error) {

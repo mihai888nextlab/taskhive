@@ -27,8 +27,9 @@ export function useSelectCompany() {
         body: JSON.stringify({ companyId }),
       });
       if (!res.ok) return;
-      router.reload();
+      refetchUser();
       router.push("/app/");
+      router.reload();
     },
     [router]
   );
