@@ -10,12 +10,13 @@
     "status": "Status",
     "accept": "Accept",
     "logout": "Logout",
-    "profile":"Profile",
-    "security":"Security",
-    "notifications":"Notifications",
-    "appearance":"Appearance"
+    "profile": "Profile",
+    "security": "Security",
+    "notifications": "Notifications",
+    "appearance": "Appearance"
   },
   "UsersPage": {
+    "noInvitations": "No sent invitations found.",
     "teamDirectory": "Team Directory",
     "export": "Export",
     "teamDirectoryDescription": "View and manage all team members in your organization",
@@ -45,14 +46,14 @@
     "filterSortButton": "Filter & Sort",
     "filterSortTitle": "Filter & Sort Options",
     "startByAddingFirstMember": "Start by adding your first team member.",
-    "applyFiltersButton": "Apply Filters"
-    ,"sentInvitations": "Sent Invitations"
-    ,"status": "Status"
-    ,"actions": "Actions"
-    ,"resend": "Resend"
-    ,"cancel": "Cancel"
-    ,"noTeamMembersYet": "No team members yet."
-    ,"cannotCompleteParentTask": "Cannot complete parent task until all subtasks are completed."
+    "applyFiltersButton": "Apply Filters",
+    "sentInvitations": "Sent Invitations",
+    "status": "Status",
+    "actions": "Actions",
+    "resend": "Resend",
+    "cancel": "Cancel",
+    "noTeamMembersYet": "No team members yet.",
+    "cannotCompleteParentTask": "Cannot complete parent task until all subtasks are completed."
   },
   "TasksPage": {
     "export": "Export",

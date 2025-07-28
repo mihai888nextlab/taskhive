@@ -20,78 +20,81 @@ const SentInvitationsPanel = ({ theme, t }: { theme: string; t: any }) => {
               {t("sentInvitations")}
             </h2>
             <div className="mt-4">
-              <table className="w-full">
-                <thead>
-                  <tr
-                    className={`border-b ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}
-                  >
-                    <th
-                      className={`py-2 px-4 text-left text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
-                    >
-                      {t("email")}
-                    </th>
-                    <th
-                      className={`py-2 px-4 text-left text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
-                    >
-                      {t("role")}
-                    </th>
-                    <th
-                      className={`py-2 px-4 text-left text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
-                    >
-                      {t("status")}
-                    </th>
-                    <th
-                      className={`py-2 px-4 text-left text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
-                    >
-                      {t("actions")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invitations.map((invitation) => (
+              {!invitations || invitations.length === 0 ? (
+                <div
+                  className={`py-8 text-center ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
+                >
+                  {t("noInvitations")}
+                </div>
+              ) : (
+                <table className="w-full">
+                  <thead>
                     <tr
-                      key={invitation.id}
                       className={`border-b ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}
                     >
-                      <td
-                        className={`py-2 px-4 text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+                      <th
+                        className={`py-2 px-4 text-left text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
                       >
-                        {invitation.email}
-                      </td>
-                      <td
-                        className={`py-2 px-4 text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+                        {t("email")}
+                      </th>
+                      <th
+                        className={`py-2 px-4 text-left text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
                       >
-                        {invitation.role}
-                      </td>
-                      <td
-                        className={`py-2 px-4 text-sm ${invitation.status === "Pending" ? "text-yellow-500" : "text-green-500"}`}
+                        {t("role")}
+                      </th>
+                      <th
+                        className={`py-2 px-4 text-left text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}
                       >
-                        {invitation.status}
-                      </td>
-                      <td className="py-2 px-4">
-                        {invitation.status === "Pending" && (
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={`${theme === "dark" ? "border-blue-500 text-blue-500 hover:bg-blue-500/10" : "border-blue-600 text-blue-600 hover:bg-blue-600/10"}`}
-                            >
-                              {t("resend")}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={`${theme === "dark" ? "border-red-500 text-red-500 hover:bg-red-500/10" : "border-red-600 text-red-600 hover:bg-red-600/10"}`}
-                            >
-                              {t("cancel")}
-                            </Button>
-                          </div>
-                        )}
-                      </td>
+                        {t("status")}
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {invitations.map((invitation) => (
+                      <tr
+                        key={invitation.id}
+                        className={`border-b ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}
+                      >
+                        <td
+                          className={`py-2 px-4 text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+                        >
+                          {invitation.email}
+                        </td>
+                        <td
+                          className={`py-2 px-4 text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+                        >
+                          {invitation.role}
+                        </td>
+                        <td
+                          className={`py-2 px-4 text-sm ${invitation.status === "Pending" ? "text-yellow-500" : "text-green-500"}`}
+                        >
+                          {invitation.status}
+                        </td>
+                        <td className="py-2 px-4">
+                          {invitation.status === "Pending" && (
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className={`${theme === "dark" ? "border-blue-500 text-blue-500 hover:bg-blue-500/10" : "border-blue-600 text-blue-600 hover:bg-blue-600/10"}`}
+                              >
+                                {t("resend")}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className={`${theme === "dark" ? "border-red-500 text-red-500 hover:bg-red-500/10" : "border-red-600 text-red-600 hover:bg-red-600/10"}`}
+                              >
+                                {t("cancel")}
+                              </Button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </Card>
