@@ -50,6 +50,8 @@
     ,"filterSortButton": "Φίλτρο & Ταξινόμηση"
     ,"filterSortTitle": "Επιλογές φιλτραρίσματος και ταξινόμησης"
     ,"applyFiltersButton": "Εφαρμογή φίλτρων"
+    ,"noTeamMembersYet": "Δεν υπάρχουν μέλη ομάδας ακόμα."
+    ,"startByAddingFirstMember": "Ξεκινήστε προσθέτοντας το πρώτο μέλος της ομάδας σας."
   },
   "TasksPage": {
     "export": "Εξαγωγή",

@@ -47,13 +47,119 @@ const UsersPage: NextPageWithLayout = () => {
 
   // Placeholder export handlers
   const handleExportPDF = () => {
-    // TODO: Implement PDF export logic
-    alert("Export PDF not implemented");
+    // Export users (name, email, role) to PDF with theme matching tasks PDF export
+    Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable')
+    ]).then(([jsPDFModule, autoTableModule]) => {
+      const jsPDF = jsPDFModule.default || jsPDFModule.jsPDF;
+      const autoTable = autoTableModule.default || autoTableModule;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      // Header (dark blue, visually consistent)
+      doc.setFillColor(17, 24, 39);
+      doc.rect(0, 0, 210, 30, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.text("Users Report", 14, 20);
+      doc.setFontSize(12);
+      doc.setTextColor(34, 34, 34);
+      // Table columns and rows
+      const columns = [
+        { header: "Name", dataKey: "name" },
+        { header: "Email", dataKey: "email" },
+        { header: "Role", dataKey: "role" },
+      ];
+      const rows = users.map(u => ({
+        name: `${u.userId.firstName} ${u.userId.lastName}`,
+        email: u.userId.email,
+        role: u.role
+      }));
+      // Adjusted column widths to fit all data
+      const colWidths = {
+        name: 60,
+        email: 70,
+        role: 40,
+      };
+      const totalWidth = Object.values(colWidths).reduce((a, b) => a + b, 0);
+      // Center the table horizontally
+      const margin = (210 - totalWidth) / 2;
+      autoTable(doc, {
+        startY: 38,
+        columns,
+        body: rows,
+        headStyles: {
+          fillColor: [17, 24, 39],
+          textColor: 255,
+          fontStyle: 'bold',
+          fontSize: 11,
+          halign: 'left',
+          valign: 'middle',
+          cellPadding: 2.5,
+        },
+        bodyStyles: {
+          fontSize: 10,
+          textColor: 34,
+          cellPadding: 2,
+          halign: 'left',
+          valign: 'top',
+          lineColor: [220, 220, 220],
+          minCellHeight: 7,
+          overflow: 'linebreak',
+          font: 'helvetica',
+        },
+        alternateRowStyles: {
+          fillColor: [241, 245, 249],
+          textColor: 34,
+        },
+        columnStyles: {
+          name: { cellWidth: colWidths.name },
+          email: { cellWidth: colWidths.email },
+          role: { cellWidth: colWidths.role },
+        },
+        margin: { left: margin, right: margin },
+        styles: {
+          font: 'helvetica',
+          fontSize: 10,
+          cellPadding: 2,
+          overflow: 'linebreak',
+          halign: 'left',
+          valign: 'top',
+          minCellHeight: 7,
+          textColor: 34,
+        },
+        didDrawPage: (data) => {
+          const pageCount = doc.getNumberOfPages();
+          const pageNumber = doc.getCurrentPageInfo().pageNumber;
+          doc.setFontSize(9);
+          doc.setTextColor(150);
+          doc.text(`Page ${pageNumber} of ${pageCount}`,
+            200, 290, { align: 'right' });
+        },
+      });
+      doc.save("users.pdf");
+    }).catch(() => {
+      alert("PDF export failed. Please try again.");
+    });
   };
 
   const handleExportCSV = () => {
-    // TODO: Implement CSV export logic
-    alert("Export CSV not implemented");
+    // Export users (name, email, role) to CSV
+    const columns = ["Name", "Email", "Role"];
+    const rows = users.map(u => [
+      `${u.userId.firstName} ${u.userId.lastName}`,
+      u.userId.email,
+      u.role
+    ]);
+    let csvContent = columns.join(",") + "\n";
+    csvContent += rows.map(r => r.map(field => `"${field}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", "users.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (

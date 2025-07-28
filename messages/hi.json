@@ -10,17 +10,6 @@
     "status": "स्थिति",
     "accept": "स्वीकार करें"
   },
-  "SelectCompany": {
-    "selectCompany": "अपनी कंपनी चुनें",
-    "noCompanies": "आपने अभी तक किसी कंपनी में शामिल नहीं हुए हैं",
-    "chooseCompany": "जारी रखने के लिए एक कंपनी चुनें",
-    "createOrCheckInvitations": "कंपनी बनाएं या निमंत्रण के लिए अपना ईमेल जांचें",
-    "member": "सदस्य",
-    "select": "चुनें",
-    "pendingInvitations": "लंबित निमंत्रण",
-    "status": "स्थिति",
-    "accept": "स्वीकार करें"
-  },
   "UsersPage": {
     "teamDirectory": "टीम निर्देशिका",
     "export": "निर्यात",
@@ -56,6 +45,8 @@
     ,"filterSortButton": "फ़िल्टर और छाँटें"
     ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
     ,"applyFiltersButton": "फ़िल्टर लागू करें"
+    ,"noTeamMembersYet": "कोई टीम सदस्य नहीं हैं।"
+    ,"startByAddingFirstMember": "अपने पहले टीम सदस्य को जोड़कर शुरू करें।"
   },
   "TasksPage": {
     "export": "निर्यात",

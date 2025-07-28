@@ -48,7 +48,9 @@
     "status": "Stato",
     "actions": "Azioni",
     "resend": "Invia di nuovo",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "noTeamMembersYet": "Nessun membro del team.",
+    "startByAddingFirstMember": "Inizia aggiungendo il tuo primo membro del team."
   },
   "TasksPage": {
     "export": "Esporta",

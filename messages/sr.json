@@ -49,7 +49,9 @@
     "status": "Status",
     "actions": "Akcije",
     "resend": "Ponovo pošalji",
-    "cancel": "Otkaži"
+    "cancel": "Otkaži",
+    "noTeamMembersYet": "Nema članova tima.",
+    "startByAddingFirstMember": "Počnite dodavanjem prvog člana tima."
   },
   "TasksPage": {
     "export": "Izvoz",

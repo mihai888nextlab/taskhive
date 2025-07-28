@@ -49,7 +49,9 @@
     "status": "Állapot",
     "actions": "Műveletek",
     "resend": "Újraküldés",
-    "cancel": "Mégse"
+    "cancel": "Mégse",
+    "noTeamMembersYet": "Nincsenek csapattagok.",
+    "startByAddingFirstMember": "Kezdje az első csapattag hozzáadásával."
   },
   "TasksPage": {
     "export": "Exportálás",

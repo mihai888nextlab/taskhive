@@ -50,6 +50,8 @@
     ,"filterSortTitle": "Opțiuni de filtrare și sortare"
     ,"applyFiltersButton": "Aplică filtrele"
     ,"export": "Exportă"
+    ,"noTeamMembersYet": "Niciun membru în echipă."
+    ,"startByAddingFirstMember": "Începe prin a adăuga primul membru al echipei."
   },
   "TasksPage": {
     "export": "Exportă",

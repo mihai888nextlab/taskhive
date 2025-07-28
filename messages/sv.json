@@ -49,7 +49,9 @@
     "status": "Status",
     "actions": "Åtgärder",
     "resend": "Skicka igen",
-    "cancel": "Avbryt"
+    "cancel": "Avbryt",
+    "noTeamMembersYet": "Inga teammedlemmar.",
+    "startByAddingFirstMember": "Börja med att lägga till din första teammedlem."
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Alla meddelanden",
