@@ -49,7 +49,9 @@
     "status": "Trạng thái",
     "actions": "Hành động",
     "resend": "Gửi lại",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "noTeamMembersYet": "Chưa có thành viên nhóm nào.",
+    "startByAddingFirstMember": "Bắt đầu bằng cách thêm thành viên nhóm đầu tiên của bạn."
   },
   "TasksPage": {
     "export": "Xuất",

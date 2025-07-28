@@ -19,7 +19,9 @@ export function useDashboardPage() {
 
   const [announcementPreview, setAnnouncementPreview] = useState<any>(null);
   const [loadingAnnouncement, setLoadingAnnouncement] = useState(true);
+  const [loadingTasks, setLoadingTasks] = useState(true);
   const [announcementError, setAnnouncementError] = useState<string | null>(null);
+  const [tasksError, setTasksError] = useState<string | null>(null);
 
   // Add state for the Tasks card title
   const [tasksCardTitle, setTasksCardTitle] = useState(
@@ -97,6 +99,32 @@ export function useDashboardPage() {
       }
     };
     fetchAnnouncement();
+  }, []);
+
+  // de modificat aici ->->->
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setLoadingTasks(true);
+      setTasksError(null);
+      try {
+        const res = await fetch("/api/announcements");
+        if (!res.ok) throw new Error("Failed to fetch tasks");
+        const data = await res.json();
+        // Sort: pinned first, then by createdAt desc
+        const sorted = [...data].sort(
+          (a, b) =>
+            (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) ||
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setAnnouncementPreview(sorted[0] || null);
+      } catch (e: any) {
+        setAnnouncementError(e.message || "Error loading announcement");
+      } finally {
+        setLoadingAnnouncement(false);
+      }
+    };
+    fetchTasks();
   }, []);
 
   // Memoize filtered users for Table

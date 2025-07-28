@@ -49,7 +49,9 @@
     "status": "Статус",
     "actions": "Действия",
     "resend": "Отправить снова",
-    "cancel": "Отмена"
+    "cancel": "Отмена",
+    "noTeamMembersYet": "Нет участников команды.",
+    "startByAddingFirstMember": "Начните с добавления первого участника команды."
   },
   "TasksPage": {
     "export": "Экспорт",

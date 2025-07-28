@@ -49,7 +49,9 @@
     "status": "Status",
     "actions": "Handlinger",
     "resend": "Send på nytt",
-    "cancel": "Avbryt"
+    "cancel": "Avbryt",
+    "noTeamMembersYet": "Ingen teammedlemmer.",
+    "startByAddingFirstMember": "Start med å legge til ditt første teammedlem."
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Alle kunngjøringer",

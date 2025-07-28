@@ -49,7 +49,9 @@
     "status": "ステータス",
     "actions": "操作",
     "resend": "再送信",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "noTeamMembersYet": "チームメンバーがいません。",
+    "startByAddingFirstMember": "最初のチームメンバーを追加して始めましょう。"
   },
   "TasksPage": {
     "export": "エクスポート",

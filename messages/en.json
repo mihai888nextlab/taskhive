@@ -51,6 +51,8 @@
     ,"actions": "Actions"
     ,"resend": "Resend"
     ,"cancel": "Cancel"
+    ,"noTeamMembersYet": "No team members yet."
+    ,"cannotCompleteParentTask": "Cannot complete parent task until all subtasks are completed."
   },
   "TasksPage": {
     "export": "Export",
@@ -499,7 +501,8 @@
     "security": "Security",
     "appearance": "Appearance",
     "time-tracking": "Time Tracking",
-    "addCompany": "Add Company"
+    "addCompany": "Add Company",
+    "openSidebar": "Open sidebar"
   },
   "AIWindow": {
     "title": "Hive Assistant",
@@ -632,7 +635,9 @@
     "noSessionsYet": "No sessions yet.",
     "startTracking": "Start tracking your time to see your streak and sessions.",
     "lastSessionDuration": "Duration",
-    "multipleSubtasks": "Multiple Subtasks"
+    "multipleSubtasks": "Multiple Subtasks",
+    "startByAddingFirstMember": "Start by adding your first team member.",
+    "cannotCompleteParentTask": "Cannot complete parent task until all subtasks are completed."
   },
   "AddUserModal": {
     "addNewUser": "Add New User",

@@ -49,7 +49,9 @@
     "status": "상태",
     "actions": "동작",
     "resend": "다시 보내기",
-    "cancel": "취소"
+    "cancel": "취소",
+    "noTeamMembersYet": "팀원이 없습니다.",
+    "startByAddingFirstMember": "첫 번째 팀원을 추가하여 시작하세요."
   },
   "TasksPage": {
     "export": "내보내기",

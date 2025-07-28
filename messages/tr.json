@@ -49,7 +49,9 @@
     "status": "Durum",
     "actions": "Eylemler",
     "resend": "Yeniden gönder",
-    "cancel": "İptal"
+    "cancel": "İptal",
+    "noTeamMembersYet": "Takım üyesi yok.",
+    "startByAddingFirstMember": "İlk takım üyenizi ekleyerek başlayın."
   },
   "TasksPage": {
     "export": "Dışa aktar",

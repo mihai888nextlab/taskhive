@@ -49,7 +49,9 @@
     "status": "Status",
     "actions": "Acties",
     "resend": "Opnieuw verzenden",
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "noTeamMembersYet": "Geen teamleden.",
+    "startByAddingFirstMember": "Begin met het toevoegen van je eerste teamlid."
   },
   "TasksPage": {
     "export": "Exporteren",
