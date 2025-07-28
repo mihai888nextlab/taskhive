@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useTheme } from "@/components/ThemeContext";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
+import { Task } from "@/types/task";
 
 export function useDashboardPage() {
   const { user } = useAuth();
@@ -18,9 +19,14 @@ export function useDashboardPage() {
   const [profit, setProfit] = useState(0);
 
   const [announcementPreview, setAnnouncementPreview] = useState<any>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+
   const [loadingAnnouncement, setLoadingAnnouncement] = useState(true);
-  const [loadingTasks, setLoadingTasks] = useState(true);
-  const [announcementError, setAnnouncementError] = useState<string | null>(null);
+  const [loadingTasks, setLoadingTasks] = useState(false);
+
+  const [announcementError, setAnnouncementError] = useState<string | null>(
+    null
+  );
   const [tasksError, setTasksError] = useState<string | null>(null);
 
   // Add state for the Tasks card title
@@ -63,14 +69,36 @@ export function useDashboardPage() {
         if (!response.ok) throw new Error("Failed to fetch finance data");
         const data = await response.json();
         // Only company finances
-        const companyData = data.filter((item: any) => item.companyId === user?.companyId);
-        const expenses = companyData.filter((item: any) => item.type === "expense");
-        const incomes = companyData.filter((item: any) => item.type === "income");
-        setTotalExpenses(expenses.reduce((total: number, expense: any) => total + expense.amount, 0));
-        setTotalIncomes(incomes.reduce((total: number, income: any) => total + income.amount, 0));
+        const companyData = data.filter(
+          (item: any) => item.companyId === user?.companyId
+        );
+        const expenses = companyData.filter(
+          (item: any) => item.type === "expense"
+        );
+        const incomes = companyData.filter(
+          (item: any) => item.type === "income"
+        );
+        setTotalExpenses(
+          expenses.reduce(
+            (total: number, expense: any) => total + expense.amount,
+            0
+          )
+        );
+        setTotalIncomes(
+          incomes.reduce(
+            (total: number, income: any) => total + income.amount,
+            0
+          )
+        );
         setProfit(
-          incomes.reduce((total: number, income: any) => total + income.amount, 0) -
-          expenses.reduce((total: number, expense: any) => total + expense.amount, 0)
+          incomes.reduce(
+            (total: number, income: any) => total + income.amount,
+            0
+          ) -
+            expenses.reduce(
+              (total: number, expense: any) => total + expense.amount,
+              0
+            )
         );
       } catch {}
     };
@@ -101,29 +129,43 @@ export function useDashboardPage() {
     fetchAnnouncement();
   }, []);
 
-  // de modificat aici ->->->
-
   useEffect(() => {
     const fetchTasks = async () => {
-      setLoadingTasks(true);
       setTasksError(null);
+      setLoadingTasks(true);
       try {
-        const res = await fetch("/api/announcements");
-        if (!res.ok) throw new Error("Failed to fetch tasks");
-        const data = await res.json();
-        // Sort: pinned first, then by createdAt desc
-        const sorted = [...data].sort(
-          (a, b) =>
-            (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) ||
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        const response = await fetch("/api/tasks");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to fetch tasks preview."
+          );
+        }
+        const data: Task[] = await response.json();
+        // Filter out completed tasks, sort by priority and deadline, then take first 2
+        const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+        const filteredTasks = data
+          .filter((task) => !task.completed)
+          .sort((a, b) => {
+            const aPriority = priorityOrder[a.priority] || 0;
+            const bPriority = priorityOrder[b.priority] || 0;
+            if (aPriority !== bPriority) return bPriority - aPriority; // higher number = higher priority
+            return (
+              new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+            );
+          })
+          .slice(0, 2);
+        setTasks(filteredTasks);
+      } catch (err) {
+        console.error("Error fetching tasks preview:", err);
+        setTasksError(
+          (err as Error).message || "Failed to fetch tasks preview."
         );
-        setAnnouncementPreview(sorted[0] || null);
-      } catch (e: any) {
-        setAnnouncementError(e.message || "Error loading announcement");
       } finally {
-        setLoadingAnnouncement(false);
+        setLoadingTasks(false);
       }
     };
+
     fetchTasks();
   }, []);
 
@@ -164,6 +206,12 @@ export function useDashboardPage() {
     announcementPreview,
     loadingAnnouncement,
     announcementError,
+    tasks,
+    loadingTasks,
+    setLoadingTasks,
+    tasksError,
+    setTasksError,
+    setTasks,
     tasksCardTitle,
     setTasksCardTitle,
     filteredTableUsers,
