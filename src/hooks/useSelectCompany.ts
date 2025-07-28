@@ -27,9 +27,8 @@ export function useSelectCompany() {
         body: JSON.stringify({ companyId }),
       });
       if (!res.ok) return;
-      refetchUser();
-      router.push("/app/");
-      router.reload();
+      // refetchUser();
+      window.location.href = "/app";
     },
     [router]
   );
