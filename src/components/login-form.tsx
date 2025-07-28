@@ -195,8 +195,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         onLoginFailure(errorResponse);
       }
     },
-    redirect_uri: `https://www.taskhive.tech/api/auth/google`, // Ensure this matches your backend endpoint
-    // Crucial: Use 'auth-code' flow for backend verification
+    redirect_uri: `https://www.taskhive.tech/api/auth/google`,
     flow: "auth-code",
   });
 

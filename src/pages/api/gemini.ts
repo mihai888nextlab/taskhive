@@ -18,6 +18,7 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { PromptTemplate } from "@langchain/core/prompts";
 import UserCompany from "@/db/models/userCompanyModel";
+import prompt_builder from "@/utils/prompt";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -180,7 +181,9 @@ export default async function handler(
       temperature: 0.7, // Adjust for creativity vs. accuracy
     });
 
-    const promptTemplate = PromptTemplate.fromTemplate();
+    const promptTemplate = PromptTemplate.fromTemplate(
+      prompt_builder(prompt, retrievedContext)
+    );
 
     const chain = RunnableSequence.from([
       {

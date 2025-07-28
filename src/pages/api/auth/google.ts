@@ -74,8 +74,8 @@ export default async function handler(
 
       const newUser = new userModel({
         email: payload.email,
-        firstName: payload.given_name || "",
-        lastName: payload.family_name || "",
+        firstName: payload.given_name || "N/A",
+        lastName: payload.family_name || "N/A",
         password: "NOPASSWORD", // Password is not used for Google login
         profileImage: null,
         skills: [],
