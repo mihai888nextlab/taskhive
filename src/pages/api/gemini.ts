@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import Task from "@/db/models/taskModel";
 import Announcement from "@/db/models/announcementModel";
 import * as cookie from "cookie";
@@ -16,6 +16,10 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { PromptTemplate } from "@langchain/core/prompts";
 import UserCompany from "@/db/models/userCompanyModel";
 import prompt_builder from "@/utils/prompt";
+import userModel from "@/db/models/userModel";
+import userCompanyModel from "@/db/models/userCompanyModel";
+import OrgChart from "@/db/models/orgChartModel";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -25,7 +29,135 @@ interface PromptHistoryEntry {
   response: string;
 }
 
+interface CreateTaskPayload {
+  title: string;
+  description?: string;
+  dueDate: string; // YYYY-MM-DD
+  assigneeId: string; // User ID string
+}
+
 let prompt_history: PromptHistoryEntry[] = [];
+
+async function getRolesAndUsersBelowUser(userId: string, companyId: string) {
+  const currentUserCompany = await userCompanyModel.findOne({
+    userId: userId,
+    companyId: companyId,
+  });
+
+  if (
+    !currentUserCompany ||
+    !currentUserCompany.role ||
+    !currentUserCompany.departmentId
+  ) {
+    console.warn(
+      `Current user's role or department not found for userId: ${userId}, companyId: ${companyId}`
+    );
+    return {
+      rolesBelow: [],
+      usersBelow: [],
+      currentUserRole: null,
+      currentUserDepartmentId: null,
+    };
+  }
+
+  const userRole = currentUserCompany.role;
+  const userDepartmentId = currentUserCompany.departmentId;
+
+  // --- ADMIN OVERRIDE ---
+  if (userRole.trim().toLowerCase() === "admin") {
+    const users = await userCompanyModel
+      .find({
+        companyId: companyId,
+        userId: { $ne: userId }, // Exclude current admin
+      })
+      .lean();
+
+    const userIds = users.map((u) => u.userId);
+    const userDetails = await userModel.find({ _id: { $in: userIds } }).lean();
+
+    const usersWithDetails = users.map((u) => {
+      const userInfo = userDetails.find(
+        (ud) => ud && ud._id && ud._id.toString() === u.userId.toString()
+      );
+      return {
+        ...u,
+        user: userInfo || null,
+      };
+    });
+    return { rolesBelow: [], usersBelow: usersWithDetails }; // Admin can see all other users
+  }
+  // --- END ADMIN OVERRIDE ---
+
+  const orgChart = await OrgChart.findOne({ companyId: companyId }).lean();
+  if (!orgChart) {
+    console.warn(`Org chart not found for company ${companyId}`);
+    return { rolesBelow: [], usersBelow: [] };
+  }
+
+  const department = orgChart.departments.find(
+    (d: any) => d.id === userDepartmentId
+  );
+  if (!department) {
+    console.warn(`Department ${userDepartmentId} not found in org chart.`);
+    return { rolesBelow: [], usersBelow: [] };
+  }
+
+  let userLevelIndex = -1;
+  for (let i = 0; i < department.levels.length; i++) {
+    const normalizedRoles = department.levels[i].roles.map((r: string) =>
+      r.trim().toLowerCase()
+    );
+    if (normalizedRoles.includes(userRole.trim().toLowerCase())) {
+      userLevelIndex = i;
+      break;
+    }
+  }
+  if (userLevelIndex === -1) {
+    console.warn(
+      `User's role ${userRole} not found in department ${userDepartmentId}`
+    );
+    return { rolesBelow: [], usersBelow: [] };
+  }
+
+  const rolesBelow: string[] = [];
+  for (let i = userLevelIndex + 1; i < department.levels.length; i++) {
+    rolesBelow.push(...department.levels[i].roles);
+  }
+  const uniqueRolesBelow = Array.from(new Set(rolesBelow));
+
+  const usersBelow = await userCompanyModel
+    .find({
+      role: { $in: uniqueRolesBelow.map((r) => r.toLowerCase()) },
+      departmentId: userDepartmentId,
+      companyId: companyId,
+    })
+    .lean();
+
+  const userIds = usersBelow.map((u) => u.userId);
+  const userDetails = await userModel.find({ _id: { $in: userIds } }).lean();
+
+  const usersWithDetails = usersBelow.map((u) => {
+    const userInfo = userDetails.find((ud) => {
+      return ud && ud._id && ud._id.toString() === u.userId.toString();
+    });
+    return {
+      ...u,
+      user: userInfo || null,
+    };
+  });
+
+  return { rolesBelow: uniqueRolesBelow, usersBelow: usersWithDetails };
+}
+
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  apiKey: GEMINI_API_KEY,
+  model: "text-embedding-004",
+});
+
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 500,
+  chunkOverlap: 100,
+});
 
 const RAG_SOURCES = [
   { model: Task, name: "task", indexName: "tasks_vector_index" }, // Match index names with Atlas config
@@ -226,13 +358,99 @@ export default async function handler(
       context: retrievedContext,
     });
 
-    // Add the new prompt and response to history
-    // Update the last prompt for this user with the response
     userPrompts[userPrompts.length - 1].response = response;
-    // Remove all previous prompts for this user from global history
     prompt_history = prompt_history.filter((entry) => entry.userId !== userId);
-    // Add back the last 3 prompts for this user (with updated response)
     prompt_history = [...prompt_history, ...userPrompts];
+
+    const CREATE_TASK_PREFIX = "CREATE_TASK: ";
+    if (response.startsWith(CREATE_TASK_PREFIX)) {
+      try {
+        const jsonString = response.substring(CREATE_TASK_PREFIX.length);
+        const taskPayload: CreateTaskPayload = JSON.parse(jsonString);
+
+        // --- Validate and Create Task ---
+        if (
+          !taskPayload.title ||
+          !taskPayload.dueDate ||
+          !taskPayload.assigneeId
+        ) {
+          throw new Error("An error occured while creating the task.");
+        }
+        if (!mongoose.Types.ObjectId.isValid(taskPayload.assigneeId)) {
+          throw new Error("An error occured while creating the task.");
+        }
+        const assigneeUser = await userModel.findById(taskPayload.assigneeId);
+        if (!assigneeUser) {
+          throw new Error("An error occured while creating the task.");
+        }
+
+        const { usersBelow } = await getRolesAndUsersBelowUser(
+          decodedToken.userId,
+          decodedToken.companyId
+        );
+
+        const isAssigneeBelow = usersBelow.some(
+          (userCompanyEntry: any) =>
+            userCompanyEntry.userId.toString() ===
+            taskPayload.assigneeId.toString()
+        );
+
+        if (
+          decodedToken.role.trim().toLowerCase() !== "admin" &&
+          !isAssigneeBelow
+        ) {
+          throw new Error(
+            `You can only assign tasks to users below you in your department hierarchy.`
+          );
+        }
+
+        const assignedUserId =
+          taskPayload.assigneeId && taskPayload.assigneeId.trim()
+            ? Types.ObjectId.createFromHexString(taskPayload.assigneeId)
+            : userId;
+
+        // Create the main task first
+        const newTask = await Task.create({
+          title: taskPayload.title.trim(),
+          description: taskPayload.description?.trim() || "",
+          deadline: new Date(taskPayload.dueDate),
+          userId: assignedUserId,
+          createdBy: userId,
+          companyId: decodedToken.companyId,
+          priority: "medium", // to modify !!!   <---------------------
+          isSubtask: false,
+          subtasks: [],
+        });
+
+        // RAG (Retrieval-Augmented Generation) Fields
+        const rawPageContent = `Task Title: ${newTask.title}. Description: ${newTask.description}. Priority: ${newTask.priority}. Completed: ${newTask.completed}. Due Date: ${newTask.deadline?.toLocaleDateString() || "N/A"}.`;
+        const chunks = await splitter.createDocuments([rawPageContent]);
+        const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+        const newEmbedding = await embeddings.embedQuery(contentToEmbed);
+        const newMetadata = {
+          source: "task",
+          originalId: newTask._id,
+          title: newTask.title,
+          completed: newTask.completed,
+          // Add any other relevant fields for the AI or linking
+        };
+
+        newTask.pageContent = contentToEmbed;
+        newTask.embedding = newEmbedding;
+        newTask.metadata = newMetadata;
+
+        await newTask.save(); // Save the updated task with RAG fields
+
+        return res.status(200).json({
+          response: `Task created successfully! Go see it in your TASK LIST.`,
+        });
+      } catch (error) {
+        const err = error as Error;
+        return res.status(200).json({
+          response: err.message || "An error occurred while creating the task.",
+        });
+      }
+    }
 
     res.status(200).json({ response });
   } catch (error) {
