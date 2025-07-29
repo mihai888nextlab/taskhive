@@ -8,7 +8,6 @@ import Image from "next/image";
 function Contact() {
   return (
     <div className="min-w-full min-h-screen bg-[#18181b] text-white flex flex-col items-center relative overflow-hidden">
-      {/* Subtle, full-page hive icon background */}
       <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
         <Image
           src="/hive-icon.png"
@@ -20,7 +19,6 @@ function Contact() {
       <Header />
       <main className="w-full flex flex-col items-center px-2 sm:px-4 pt-20 pb-20 relative z-10">
         <div className="w-full max-w-4xl flex flex-col items-center mt-16 sm:mt-24">
-          {/* Premium accent bar */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-8 w-24 h-2 rounded-full bg-gradient-to-r from-primary/80 via-primary/60 to-primary/80 blur-sm opacity-80" />
           <h1 className=" text-[2.2rem] xs:text-[2.7rem] sm:text-[2.9rem] md:text-[60px] leading-[1.1] text-white text-center mb-10 sm:mb-14 font-bold tracking-tight">
             Contact Us

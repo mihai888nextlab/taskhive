@@ -63,7 +63,7 @@
     "announcementTitle": "Kunngjøringstittel",
     "enterAnnouncementTitle": "Skriv inn kunngjøringstittel...",
     "content": "Innhold",
-    "generate": "Generer",
+    "eventDateLabel": "Dato for hendelse",
     "generateContentFromTitle": "Generer innhold fra tittel",
     "writeAnnouncementContent": "Skriv innholdet til kunngjøringen her... (Markdown støttes)",
     "markdownSupported": "Du kan bruke Markdown for formatering.",
@@ -234,6 +234,7 @@
     "applyFiltersButton": "Bruk filtre"
   },
   "TasksPage": {
+    "generateDescription": "Generer beskrivelse",
     "export": "Eksporter",
     "myTasks": "Mine oppgaver",
     "myTasksDescription": "Oppgaver tildelt deg og personlige oppgaver du har opprettet",

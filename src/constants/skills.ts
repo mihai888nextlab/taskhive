@@ -1,5 +1,4 @@
 export const PREDEFINED_SKILLS = [
-  // Leadership & Management
   "Project Management",
   "Team Leadership",
   "Strategic Planning",
@@ -23,7 +22,6 @@ export const PREDEFINED_SKILLS = [
   "Succession Planning",
   "Organizational Design",
 
-  // Communication & Collaboration
   "Communication",
   "Public Speaking",
   "Presentation Skills",
@@ -34,7 +32,7 @@ export const PREDEFINED_SKILLS = [
   "Vendor Management",
   "Networking",
 
-  // HR & People
+  
   "HR Management",
   "Employee Engagement",
   "Onboarding",
@@ -44,7 +42,7 @@ export const PREDEFINED_SKILLS = [
   "Labor Relations",
   "Compensation & Benefits",
 
-  // Finance & Legal
+  
   "Finance",
   "Financial Analysis",
   "Accounting",
@@ -54,7 +52,7 @@ export const PREDEFINED_SKILLS = [
   "Legal Compliance",
   "Regulatory Affairs",
 
-  // Marketing & Sales
+  
   "Marketing",
   "Digital Marketing",
   "Brand Management",
@@ -66,7 +64,7 @@ export const PREDEFINED_SKILLS = [
   "Copywriting",
   "Event Planning",
 
-  // IT & Digital
+  
   "IT Management",
   "Software Development",
   "UI/UX Design",
@@ -83,7 +81,7 @@ export const PREDEFINED_SKILLS = [
   "Kanban",
   "Technical Support",
 
-  // General & Soft Skills
+  
   "Time Management",
   "Problem Solving",
   "Creativity",

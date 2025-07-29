@@ -45,9 +45,7 @@ const UsersPage: NextPageWithLayout = () => {
     t,
   } = useUsers();
 
-  // Placeholder export handlers
   const handleExportPDF = () => {
-    // Export users (name, email, role) to PDF with theme matching tasks PDF export
     Promise.all([
       import('jspdf'),
       import('jspdf-autotable')
@@ -55,7 +53,6 @@ const UsersPage: NextPageWithLayout = () => {
       const jsPDF = jsPDFModule.default || jsPDFModule.jsPDF;
       const autoTable = autoTableModule.default || autoTableModule;
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      // Header (dark blue, visually consistent)
       doc.setFillColor(17, 24, 39);
       doc.rect(0, 0, 210, 30, 'F');
       doc.setTextColor(255, 255, 255);
@@ -64,7 +61,6 @@ const UsersPage: NextPageWithLayout = () => {
       doc.text("Users Report", 14, 20);
       doc.setFontSize(12);
       doc.setTextColor(34, 34, 34);
-      // Table columns and rows
       const columns = [
         { header: "Name", dataKey: "name" },
         { header: "Email", dataKey: "email" },
@@ -75,14 +71,12 @@ const UsersPage: NextPageWithLayout = () => {
         email: u.userId.email,
         role: u.role
       }));
-      // Adjusted column widths to fit all data
       const colWidths = {
         name: 60,
         email: 70,
         role: 40,
       };
       const totalWidth = Object.values(colWidths).reduce((a, b) => a + b, 0);
-      // Center the table horizontally
       const margin = (210 - totalWidth) / 2;
       autoTable(doc, {
         startY: 38,
@@ -144,7 +138,6 @@ const UsersPage: NextPageWithLayout = () => {
   };
 
   const handleExportCSV = () => {
-    // Export users (name, email, role) to CSV
     const columns = ["Name", "Email", "Role"];
     const rows = users.map(u => [
       `${u.userId.firstName} ${u.userId.lastName}`,

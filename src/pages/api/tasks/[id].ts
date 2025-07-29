@@ -1,8 +1,6 @@
-// src/pages/api/tasks/[id].ts
-
 import { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/db/dbConfig";
-import Task from "@/db/models/taskModel"; // Import your Task model
+import Task from "@/db/models/taskModel";
 import { JWTPayload } from "@/types";
 import jwt from "jsonwebtoken";
 import * as cookie from "cookie";
@@ -11,9 +9,8 @@ import { Types } from "mongoose";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect();
 
-  const { id } = req.query; // Get task ID from URL (e.g., /api/tasks/654321...)
+  const { id } = req.query;
 
-  // --- Authentication Middleware ---
   const cookies = cookie.parse(req.headers.cookie || "");
   const token = cookies.auth_token;
 
@@ -31,35 +28,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ message: "Authentication required: Invalid token" });
   }
 
-  const userId = new Types.ObjectId(decodedToken.userId); // Get the userId from the decoded token
-  // --- End Authentication Middleware ---
-
-  // Validate if 'id' is a valid MongoDB ObjectId format
+  const userId = new Types.ObjectId(decodedToken.userId);
   if (typeof id !== 'string' || !Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid Task ID format." });
   }
 
-  const taskId = new Types.ObjectId(id); // Convert string ID to Mongoose ObjectId
+  const taskId = new Types.ObjectId(id);
 
   if (req.method === "PUT") {
     try {
       const { completed, title, description, deadline, assignedTo, priority, ...otherUpdates } = req.body;
       
-      // Get the current task to check if it's a subtask and preserve subtasks
       const currentTask = await Task.findById(taskId);
       if (!currentTask) {
         return res.status(404).json({ message: "Task not found" });
       }
 
-      // Prepare update data
       const updateData: any = { ...otherUpdates };
       
-      // Handle completion status
       if (completed !== undefined) {
         updateData.completed = completed;
       }
       
-      // Handle other field updates (only if this is a full task edit, not just completion toggle)
       if (title !== undefined) {
         updateData.title = title;
       }
@@ -67,13 +57,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         updateData.description = description;
       }
       
-      // Handle deadline update with cascading to subtasks
       let deadlineChanged = false;
       if (deadline !== undefined) {
         const newDeadline = new Date(deadline);
         updateData.deadline = newDeadline;
         
-        // Check if deadline actually changed
         const currentDeadline = new Date(currentTask.deadline);
         deadlineChanged = newDeadline.getTime() !== currentDeadline.getTime();
       }
@@ -87,9 +75,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         updateData.priority = priority;
       }
 
-      // IMPORTANT: Preserve existing subtasks array for parent tasks
       if (!currentTask.isSubtask && currentTask.subtasks && currentTask.subtasks.length > 0) {
-        updateData.subtasks = currentTask.subtasks; // Keep existing subtasks
+        updateData.subtasks = currentTask.subtasks;
       }
 
       // Update the main task
@@ -111,7 +98,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ message: "Task not found" });
       }
 
-      // CASCADE DEADLINE UPDATE TO SUBTASKS
       if (deadlineChanged && !currentTask.isSubtask && currentTask.subtasks && currentTask.subtasks.length > 0) {
         console.log(`Updating deadline for ${currentTask.subtasks.length} subtasks of task ${taskId}`);
         
@@ -123,18 +109,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           console.log(`Successfully updated deadline for subtasks of task ${taskId}`);
         } catch (subtaskError) {
           console.error(`Error updating subtask deadlines for task ${taskId}:`, subtaskError);
-          // Continue execution - this is not a critical failure
         }
       }
 
-      // If this is a subtask that was just completed or uncompleted, 
-      // check if we need to update the parent task
       if (currentTask.isSubtask && currentTask.parentTask && completed !== undefined) {
         await checkAndUpdateParentTaskCompletion(currentTask.parentTask);
       }
 
-      // If this is a main task and we're trying to mark it as incomplete,
-      // also mark all its subtasks as incomplete
       if (!currentTask.isSubtask && completed === false && currentTask.subtasks && currentTask.subtasks.length > 0) {
         await Task.updateMany(
           { _id: { $in: currentTask.subtasks } },
@@ -142,7 +123,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         );
       }
 
-      // Re-fetch the updated task with populated subtasks to return the latest data
       const finalTask = await Task.findById(taskId)
         .populate('createdBy', 'firstName lastName email')
         .populate('userId', 'firstName lastName email')
@@ -160,7 +140,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).json({ message: "Failed to update task.", error: (error as Error).message });
     }
   } else if (req.method === "DELETE") {
-    // Only allow if userId matches
     const task = await Task.findById(id);
     if (!task) return res.status(404).json({ message: "Task not found" });
 
@@ -181,17 +160,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function checkAndUpdateParentTaskCompletion(parentTaskId: any) {
   try {
-    // Get the parent task with all its subtasks
     const parentTask = await Task.findById(parentTaskId).populate('subtasks');
     
     if (!parentTask || !parentTask.subtasks || parentTask.subtasks.length === 0) {
       return;
     }
 
-    // Check if all subtasks are completed
     const allSubtasksCompleted = parentTask.subtasks.every((subtask: any) => subtask.completed);
     
-    // Update parent task completion status if needed
     if (allSubtasksCompleted && !parentTask.completed) {
       await Task.findByIdAndUpdate(parentTaskId, { completed: true });
       console.log(`Parent task ${parentTaskId} automatically marked as completed`);
@@ -203,5 +179,3 @@ async function checkAndUpdateParentTaskCompletion(parentTaskId: any) {
     console.error('Error updating parent task completion:', error);
   }
 }
-
-// No changes needed. API logic is correct and robust.

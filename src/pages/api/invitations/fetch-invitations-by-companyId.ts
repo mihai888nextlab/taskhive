@@ -37,14 +37,14 @@ export default async function handler(
   try {
     const now = new Date();
     const invitations = await Invitation.find({
-      companyId: decodedToken.companyId, // Filter by companyId
-      status: "pending", // Only pending invitations
+      companyId: decodedToken.companyId,
+      status: "pending",
       $or: [
         { expiresAt: { $exists: false } },
-        { expiresAt: { $gt: now } }, // Not expired
+        { expiresAt: { $gt: now } },
       ],
     })
-      .populate("companyId", "name") // Populate company name
+      .populate("companyId", "name")
       .exec();
 
     return res.status(200).json({ invitations });

@@ -129,6 +129,7 @@
     ,"filterSortButton": "Filtrează & Sortează"
     ,"filterSortTitle": "Opțiuni de filtrare și sortare"
     ,"applyFiltersButton": "Aplică filtrele"
+    ,"generateDescription": "Generează descriere"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Toate anunțurile",
@@ -591,7 +592,8 @@
     "financeDescription": "Monitorizează veniturile, cheltuielile și sănătatea financiară generală.",
     "goToFinancePage": "Mergi la pagina de finanțe",
     "users": "Utilizatori",
-    "usersDescription": "Gestionează conturile de utilizator, rolurile și permisiunile din echipa ta.",
+    "expiresAt": "Expiră la",
+    "eventDateLabel": "Data evenimentului",
     "goToUsersPage": "Mergi la pagina de utilizatori",
     "loadingUsers": "Se încarcă utilizatorii...",
     "firstName": "Prenume",

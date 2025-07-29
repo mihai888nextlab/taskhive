@@ -185,72 +185,157 @@ const HeaderNavBar: React.FC<{ t?: ReturnType<typeof useTranslations> }> = ({
     </div>
   );
 
+  // Responsive: show search icon on mobile, full search bar on desktop
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <header
-      className={`absolute top-0 z-[200] h-14 flex items-center px-4 pt-2 transition-colors duration-200 border-t-0 !mt-0 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}
-      style={{
-        left: SIDEBAR_WIDTH,
-        width: `calc(100vw - ${SIDEBAR_WIDTH}px - ${isAIWindowOpen ? AI_WINDOW_WIDTH : 0}px)`,
-        top: 0,
-        right: isAIWindowOpen ? AI_WINDOW_WIDTH : 0,
-        marginTop: 0,
-        transition: "width 0.3s, right 0.3s",
-      }}
+      className={`absolute top-0 z-30 h-14 flex transition-colors duration-200 border-t-0 !mt-0 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}${isMobile ? ' mobile-header-center' : ''}`}
+      style={
+        isMobile
+          ? {
+              left: 0,
+              right: 0,
+              width: "100vw",
+              top: 0,
+              marginTop: 0,
+              transition: "width 0.3s, right 0.3s",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }
+          : {
+              left: SIDEBAR_WIDTH,
+              width: `calc(100vw - ${SIDEBAR_WIDTH}px - ${isAIWindowOpen ? AI_WINDOW_WIDTH : 0}px)`,
+              top: 0,
+              right: isAIWindowOpen ? AI_WINDOW_WIDTH : 0,
+              marginTop: "12px",
+              transition: "width 0.3s, right 0.3s",
+            }
+      }
     >
-      {/* Center: Search Bar */}
-      <div className="flex-1 flex justify-end">
-        <div className="w-full max-w-xs">
-          <UniversalSearchBar />
-        </div>
-      </div>
-      {/* Right: Icons and Profile */}
-      <div className="flex items-center gap-1 ml-1">
-        {/* Language Switcher */}
-        <div className="relative">
-          <button
-            className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
-            title="Change language"
-            onClick={() => setLangDropdownOpen((v) => !v)}
-          >
-            <span className="font-bold">{lang.toUpperCase()}</span>
-          </button>
-          {languageDropdown}
-        </div>
-        <button
-          className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
-          title={t("notifications")}
-        >
-          <FiBell className="w-5 h-5" />
-        </button>
-        <button
-          className="ml-1 flex items-center focus:outline-none relative"
-          onClick={() => setDropdownOpen((v) => !v)}
-          aria-haspopup="true"
-          aria-expanded={dropdownOpen}
-          aria-label={t("openProfileMenu", { default: "Open profile menu" })}
-          tabIndex={0}
-        >
-          <div className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden border-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-900' : 'bg-gray-700 border-[#23272f]'}`}>
-            {user?.profileImage &&
-            typeof user.profileImage === "object" &&
-            user.profileImage.data ? (
-              <Image
-                src={user.profileImage.data}
-                alt="Profile"
-                width={36}
-                height={36}
-              />
-            ) : user?.firstName ? (
-              <span className="text-white font-bold text-lg">
-                {user.firstName[0].toUpperCase()}
-              </span>
-            ) : (
-              <span className="text-white font-bold text-lg">U</span>
-            )}
-          </div>
-        </button>
-        {/* Dropdown */}
-        {profileDropdown}
+      <div
+        className={`flex ${isMobile ? 'justify-end items-center w-full' : 'flex-1 justify-end items-center'}`}
+        style={isMobile ? { maxWidth: '420px', marginRight: '12px' } : { marginRight: '32px' }}
+      >
+        {isMobile ? (
+          <>
+            <button
+              className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
+              title={t("search", { default: "Search" })}
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("openUniversalSearch"));
+              }}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" fill="none" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            </button>
+            <div className="relative mx-2">
+              <button
+                className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
+                title="Change language"
+                onClick={() => setLangDropdownOpen((v) => !v)}
+              >
+                <span className="font-bold">{lang.toUpperCase()}</span>
+              </button>
+              {languageDropdown}
+            </div>
+            <button
+              className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
+              title={t("notifications")}
+            >
+              <FiBell className="w-5 h-5" />
+            </button>
+            <button
+              className="flex items-center focus:outline-none relative mx-2"
+              onClick={() => setDropdownOpen((v) => !v)}
+              aria-haspopup="true"
+              aria-expanded={dropdownOpen}
+              aria-label={t("openProfileMenu", { default: "Open profile menu" })}
+              tabIndex={0}
+            >
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden border-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-900' : 'bg-gray-700 border-[#23272f]'}`}> 
+                {user?.profileImage &&
+                typeof user.profileImage === "object" &&
+                user.profileImage.data ? (
+                  <Image
+                    src={user.profileImage.data}
+                    alt="Profile"
+                    width={36}
+                    height={36}
+                  />
+                ) : user?.firstName ? (
+                  <span className="text-white font-bold text-lg">
+                    {user.firstName[0].toUpperCase()}
+                  </span>
+                ) : (
+                  <span className="text-white font-bold text-lg">U</span>
+                )}
+              </div>
+            </button>
+            {profileDropdown}
+          </>
+        ) : (
+          <>
+            <div className="w-full max-w-xs">
+              <UniversalSearchBar />
+            </div>
+            <div className="flex items-center gap-1 ml-1">
+              <div className="relative">
+                <button
+                  className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
+                  title="Change language"
+                  onClick={() => setLangDropdownOpen((v) => !v)}
+                >
+                  <span className="font-bold">{lang.toUpperCase()}</span>
+                </button>
+                {languageDropdown}
+              </div>
+              <button
+                className={`p-2 rounded-full transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-300 hover:text-white' : 'hover:bg-gray-200 text-gray-400 hover:text-white'}`}
+                title={t("notifications")}
+              >
+                <FiBell className="w-5 h-5" />
+              </button>
+              <button
+                className="ml-1 flex items-center focus:outline-none relative"
+                onClick={() => setDropdownOpen((v) => !v)}
+                aria-haspopup="true"
+                aria-expanded={dropdownOpen}
+                aria-label={t("openProfileMenu", { default: "Open profile menu" })}
+                tabIndex={0}
+              >
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden border-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-900' : 'bg-gray-700 border-[#23272f]'}`}> 
+                  {user?.profileImage &&
+                  typeof user.profileImage === "object" &&
+                  user.profileImage.data ? (
+                    <Image
+                      src={user.profileImage.data}
+                      alt="Profile"
+                      width={36}
+                      height={36}
+                    />
+                  ) : user?.firstName ? (
+                    <span className="text-white font-bold text-lg">
+                      {user.firstName[0].toUpperCase()}
+                    </span>
+                  ) : (
+                    <span className="text-white font-bold text-lg">U</span>
+                  )}
+                </div>
+              </button>
+              {profileDropdown}
+            </div>
+          </>
+        )}
       </div>
     </header>
   );

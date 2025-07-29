@@ -25,7 +25,6 @@ export function useCalendarPage() {
       setAnnouncementEvents(mapped);
       localStorage.setItem("announcementEvents", JSON.stringify(mapped));
     } catch (err) {
-      // Optionally handle error
     }
   }, []);
 

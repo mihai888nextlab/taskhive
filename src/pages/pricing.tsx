@@ -7,13 +7,10 @@ export default function PricingPage() {
   return (
     <div className="min-w-full min-h-screen bg-[#18181b] text-white flex flex-col items-center relative overflow-hidden">
       <Header />
-      {/* Hero Section with backlight and hive icon background */}
       <main className="w-full flex flex-col items-center justify-center relative px-4 py-16 mt-20">
-        {/* Hive icon background */}
         <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
           <img src="/hive-icon.png" alt="TaskHive" style={{ objectFit: "cover", width: "100%", height: "100%", position: "absolute", left: 0, top: 0 }} />
         </div>
-        {/* Orange backlight effect behind pricing card */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" style={{ width: '700px', height: '260px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{
             width: '100%',

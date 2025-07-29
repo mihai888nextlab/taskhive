@@ -50,7 +50,7 @@ const Header: React.FC = React.memo(() => {
           <Image src="/logo.png" alt="TaskHive Logo" width={180} height={60} className="object-contain hidden md:block" priority />
           <Image src="/logo.png" alt="TaskHive Logo" width={120} height={40} className="object-contain md:hidden" priority />
         </Link>
-        {/* Desktop Nav */}
+        
         <NavigationMenu className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <NavigationMenuList className="flex gap-8 text-base font-medium">
             {pages.map((page) => (
@@ -67,7 +67,7 @@ const Header: React.FC = React.memo(() => {
             ))}
           </NavigationMenuList>
         </NavigationMenu>
-        {/* Desktop Buttons */}
+        
         <div className="hidden sm:flex gap-2">
           <Link href="/login">
             <Button
@@ -86,7 +86,7 @@ const Header: React.FC = React.memo(() => {
             </Button>
           </Link>
         </div>
-        {/* Mobile Hamburger */}
+        
         <button
           className="md:hidden flex items-center justify-center text-white text-3xl ml-2 z-50"
           onClick={handleMobileMenuToggle}
@@ -94,7 +94,7 @@ const Header: React.FC = React.memo(() => {
         >
           {mobileMenuOpen ? <FiX /> : <FiMenu />}
         </button>
-        {/* Mobile Menu Overlay */}
+        
         {mobileMenuOpen && (
           <div className="fixed inset-0 bg-[#18181b]/95 z-40 flex flex-col items-center justify-center gap-8 animate-fade-in">
             <ul className="flex flex-col gap-6 text-2xl font-semibold">

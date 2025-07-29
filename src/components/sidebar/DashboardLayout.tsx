@@ -148,10 +148,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
       )}
 
-      {/* Header NavBar (desktop only) */}
-      <div className="hidden md:block">
-        <HeaderNavBar t={t} />
-      </div>
+      {/* Header NavBar (always visible) */}
+      <HeaderNavBar t={t} />
       {/* Hamburger button for mobile */}
       {user &&
         (!sidebarOpen ? (

@@ -1,16 +1,14 @@
-// pages/api/notifications/send.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import webpush from "web-push";
 import dbConnect from "@/db/dbConfig";
-import PushSubscription from "@/db/models/pushSubscriptionModel"; // Adjust the path to your model
+import PushSubscription from "@/db/models/pushSubscriptionModel";
 import mongoose from "mongoose";
 import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@/types";
 
-// Configure web-push with your VAPID keys
 webpush.setVapidDetails(
-  "mailto:help@taskhive.tech", // Replace with your actual email
+  "mailto:help@taskhive.tech",
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 );
@@ -23,9 +21,6 @@ export default async function handler(
     return res.status(405).json({ message: "Method Not Allowed" });
   }
 
-  // You might want to authenticate this endpoint differently
-  // e.g., only allow internal server calls, or specific roles.
-  // For now, let's assume an authenticated user can trigger a notification for themselves or others.
 
   const cookies = cookie.parse(req.headers.cookie || "");
   const token = cookies.auth_token;
@@ -55,7 +50,7 @@ export default async function handler(
       .json({ message: "Authentication required: Invalid token" });
   }
 
-  const { targetUserId, title, body, icon, url } = req.body; // targetUserId is who to send to
+  const { targetUserId, title, body, icon, url } = req.body;
 
   if (!targetUserId || !title || !body) {
     return res
@@ -66,13 +61,12 @@ export default async function handler(
   await dbConnect();
 
   try {
-    // Find all subscriptions for the target user
     const subscriptions = await PushSubscription.find({
       userId: new mongoose.Types.ObjectId(targetUserId),
     });
 
     if (subscriptions.length === 0) {
-      console.log(`No subscriptions found for user ${targetUserId}.`);
+        console.log(`No subscriptions found for user ${targetUserId}.`);
       return res
         .status(200)
         .json({ message: "No subscriptions found for this user." });
@@ -81,21 +75,19 @@ export default async function handler(
     const notificationPayload = JSON.stringify({
       title: title,
       body: body,
-      icon: icon || "/icons/notification-icon.png", // Default icon
-      url: url || "/", // URL to open when notification is clicked
+        icon: icon || "/icons/notification-icon.png",
+        url: url || "/",
     });
 
     const pushPromises = subscriptions.map(async (sub) => {
       try {
         await webpush.sendNotification(sub.toObject(), notificationPayload);
-        console.log(`Notification sent to ${sub.endpoint}`);
+          console.log(`Notification sent to ${sub.endpoint}`);
       } catch (pushError: any) {
         console.error(
           `Failed to send notification to ${sub.endpoint}:`,
           pushError
         );
-        // If the push service returns a 404 or 410, the subscription is no longer valid
-        // and should be removed from your database.
         if (pushError.statusCode === 404 || pushError.statusCode === 410) {
           console.warn(
             `Removing expired/invalid subscription: ${sub.endpoint}`
@@ -105,7 +97,7 @@ export default async function handler(
       }
     });
 
-    await Promise.allSettled(pushPromises); // Use allSettled to wait for all, even if some fail
+      await Promise.allSettled(pushPromises);
 
     return res
       .status(200)

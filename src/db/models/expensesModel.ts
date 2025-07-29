@@ -1,7 +1,7 @@
-// models/Expense.js
+
 import mongoose from "mongoose";
 
-// Define the Expense and Income interfaces
+
 export interface Expense {
   _id: string;
   title: string;

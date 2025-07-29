@@ -76,7 +76,6 @@ export function useAnnouncements() {
   }, []);
 
   const handleComment = useCallback((id: string, comment: string) => {
-    // Optionally send to backend
   }, []);
 
   const handleExportCSV = useCallback(() => {

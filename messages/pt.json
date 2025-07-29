@@ -129,6 +129,7 @@
     ,"filterSortButton": "Filtrar e Ordenar"
     ,"filterSortTitle": "Opções de filtro e ordenação"
     ,"applyFiltersButton": "Aplicar filtros"
+    ,"generateDescription": "Gerar descrição"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Todos os anúncios",
@@ -190,7 +191,8 @@
     "unpin": "Desafixar",
     "author": "Autor",
     "createdAt": "Criado em",
-    "expiresAt": "Expira em"
+    "expiresAt": "Expira em",
+    "eventDateLabel": "Data do evento"
   },
   "CommunicationPage": {
     "messages": "Mensagens",

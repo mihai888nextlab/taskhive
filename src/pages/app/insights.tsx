@@ -8,7 +8,6 @@ import PieCharts from '../../components/insights/PieCharts';
 import FinanceOverview from '../../components/insights/FinanceOverview';
 import TimeAndTasks from '../../components/insights/TimeAndTasks';
 
-// Types for user statistics
 interface Expense {
   _id: string;
   title: string;

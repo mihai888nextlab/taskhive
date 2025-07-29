@@ -56,7 +56,6 @@ export default async function handler(
     }
 
     try {
-      // ADD THIS CHECK:
       const existingRole = await Role.findOne({
         name,
         companyId: decodedToken?.companyId,

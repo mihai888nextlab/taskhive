@@ -25,7 +25,6 @@ const SelectCompanyPage = () => {
       {loadingUser && (
         <div className="inset-0 fixed flex flex-col items-center justify-center bg-white z-[9999]">
           <div className="flex flex-col items-center gap-4 animate-fade-in">
-            {/* Simple spinner */}
             <svg
               className="animate-spin w-12 h-12 text-blue-500 mb-4"
               viewBox="0 0 50 50"

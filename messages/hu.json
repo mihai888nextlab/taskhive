@@ -129,6 +129,7 @@
     "filterSortButton": "Szűrés & Rendezés",
     "filterSortTitle": "Szűrési & Rendezési lehetőségek",
     "applyFiltersButton": "Szűrők alkalmazása"
+    ,"generateDescription": "Leírás generálása"
   },
   
   "AnnouncementsPage": {
@@ -191,7 +192,8 @@
     "unpin": "Kitűzés visszavonása",
     "author": "Szerző",
     "createdAt": "Létrehozva",
-    "expiresAt": "Lejárat"
+    "expiresAt": "Lejárat",
+    "eventDateLabel": "Esemény dátuma"
   },
   "CommunicationPage": {
     "noConversations": "Nincsenek beszélgetések",

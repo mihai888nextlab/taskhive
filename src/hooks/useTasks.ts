@@ -14,7 +14,7 @@ export function useTasks() {
   const [currentUserEmail, setCurrentUserEmail] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string>("");
 
-  // Form state
+  
   const [showForm, setShowForm] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [taskTitle, setTaskTitle] = useState("");
@@ -24,17 +24,17 @@ export function useTasks() {
   const [priority, setPriority] = useState<'critical' | 'high' | 'medium' | 'low'>('medium');
   const [formError, setFormError] = useState<string | null>(null);
 
-  // UI state
+  
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
 
-  // Controlled state for My Task List
+  
   const [mySearch, setMySearch] = useState("");
   const [myFilterStatus, setMyFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
   const [myFilterPriority, setMyFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all");
   const [mySortBy, setMySortBy] = useState<"createdAtDesc" | "deadlineAsc" | "priorityDesc">("priorityDesc");
 
-  // Controlled state for Assigned Tasks List
+  
   const [assignedSearch, setAssignedSearch] = useState("");
   const [assignedFilterStatus, setAssignedFilterStatus] = useState<"all" | "completed" | "pending" | "overdue">("all");
   const [assignedFilterPriority, setAssignedFilterPriority] = useState<"all" | "critical" | "high" | "medium" | "low">("all");
@@ -59,7 +59,7 @@ export function useTasks() {
       });
       if (!response.ok) throw new Error("Failed to fetch tasks.");
       const data: TaskType[] = await response.json();
-      // Only tasks assigned to me (by id or email)
+      
       const myTasks = data.filter((task) => {
         if (!task.userId) return false;
         if (typeof task.userId === "string") {
@@ -106,7 +106,7 @@ export function useTasks() {
       const data: TaskType[] = await response.json();
       setAssignedTasks(data);
     } catch (err) {
-      // Optionally handle error
+      
     }
   }, []);
 

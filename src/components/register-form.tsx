@@ -44,16 +44,28 @@ export function RegisterForm({
 }) {
   const { login, loadingUser, error } = useAuth();
 
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
   const handleGoogleSuccess = async (response: any) => {
     if (response) {
       console.log("Google ID Token:", response);
-      // Apelează funcția de login din hook-ul tău custom useAuth, trimițând ID Token-ul
       await login("google", { code: response });
     }
   };
 
   const handleGoogleError = () => {
     console.error("Google Login Failed");
+  };
+
+  // Validate password length on change
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setValues({ ...values, password: value });
+    setPasswordError(value.length < 8 ? "Password must be at least 8 characters." : null);
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValues({ ...values, confirmPassword: e.target.value });
   };
 
   return (
@@ -156,13 +168,16 @@ export function RegisterForm({
                   id="password"
                   type="password"
                   value={values.password}
-                  onChange={(e) =>
-                    setValues({ ...values, password: e.target.value })
-                  }
+                  onChange={handlePasswordChange}
                   required
+                  minLength={8}
+                  placeholder="********"
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="new-password"
                 />
+                {passwordError && (
+                  <div className="text-xs text-red-400 mt-1">{passwordError}</div>
+                )}
               </div>
               <div>
                 <Label
@@ -175,10 +190,9 @@ export function RegisterForm({
                   id="confirmPassword"
                   type="password"
                   value={values.confirmPassword}
-                  onChange={(e) =>
-                    setValues({ ...values, confirmPassword: e.target.value })
-                  }
+                  onChange={handleConfirmPasswordChange}
                   required
+                  placeholder="********"
                   className="bg-[#23272f] border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
                   autoComplete="new-password"
                 />
@@ -236,7 +250,6 @@ export function RegisterForm({
 }
 
 interface GoogleAuthButtonProps {
-  // You can pass a function to handle the successful response
   onLoginSuccess: (token: string) => void;
   onLoginFailure?: (error: any) => void;
 }
@@ -245,11 +258,9 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
   onLoginSuccess,
   onLoginFailure,
 }) => {
-  // Use the useGoogleLogin hook
   const googleLogin = useGoogleLogin({
     onSuccess: (codeResponse) => {
       console.log("Google Login Success (Authorization Code):", codeResponse);
-      // codeResponse.code is the authorization code you send to your backend
       onLoginSuccess(codeResponse.code);
     },
     onError: (errorResponse) => {
@@ -258,7 +269,6 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         onLoginFailure(errorResponse);
       }
     },
-    // Crucial: Use 'auth-code' flow for backend verification
     flow: "auth-code",
   });
 

@@ -129,6 +129,7 @@
     "filterSortButton": "Филтрирај и Сортирај",
     "filterSortTitle": "Опције филтрирања и сортирања",
     "applyFiltersButton": "Примени филтере"
+    ,"generateDescription": "Генериши опис"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Sva obaveštenja",
@@ -190,7 +191,8 @@
     "unpin": "Otkači",
     "author": "Autor",
     "createdAt": "Kreirano",
-    "expiresAt": "Ističe"
+    "expiresAt": "Ističe",
+    "eventDateLabel": "Datum događaja"
   },
   "CommunicationPage": {
     "messages": "Poruke",

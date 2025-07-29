@@ -43,7 +43,6 @@ export default async function handler(
     });
   }
 
-  // Only admin can pin/unpin
   if (
     !user ||
     !userCompany ||

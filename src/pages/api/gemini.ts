@@ -6,7 +6,7 @@ import Announcement from "@/db/models/announcementModel";
 import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@/types";
-import dbConnect from "@/db/dbConfig"; // Add this import
+import dbConnect from "@/db/dbConfig";
 import {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
@@ -63,7 +63,6 @@ async function getRolesAndUsersBelowUser(userId: string, companyId: string) {
   const userRole = currentUserCompany.role;
   const userDepartmentId = currentUserCompany.departmentId;
 
-  // --- ADMIN OVERRIDE ---
   if (userRole.trim().toLowerCase() === "admin") {
     const users = await userCompanyModel
       .find({
@@ -84,9 +83,8 @@ async function getRolesAndUsersBelowUser(userId: string, companyId: string) {
         user: userInfo || null,
       };
     });
-    return { rolesBelow: [], usersBelow: usersWithDetails }; // Admin can see all other users
+    return { rolesBelow: [], usersBelow: usersWithDetails };
   }
-  // --- END ADMIN OVERRIDE ---
 
   const orgChart = await OrgChart.findOne({ companyId: companyId }).lean();
   if (!orgChart) {
@@ -177,7 +175,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { prompt } = req.body;
+  const { prompt, assignSubtasks } = req.body;
 
   res.setHeader("Content-Type", "application/json");
 
@@ -227,20 +225,13 @@ export default async function handler(
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 
-  // Update prompt_history for the current user
   const userId = decodedToken.userId;
-  // Get all previous prompts for this user
   let userPrompts = prompt_history.filter((entry) => entry.userId === userId);
-  // Add the new prompt with an empty response
   userPrompts.push({ userId, prompt, response: "" });
-  // Keep only the last 3 prompts
   userPrompts = userPrompts.slice(-3);
-  // Remove all previous prompts for this user from global history
   prompt_history = prompt_history.filter((entry) => entry.userId !== userId);
-  // Add back the last 3 prompts for this user
   prompt_history = [...prompt_history, ...userPrompts];
 
-  // Get last 3 history for the current user (format: PROMPT: ... = RESPONSE: ...)
   const userHistory = userPrompts
     .map((entry) => `PROMPT: ${entry.prompt} = RESPONSE: ${entry.response}`)
     .slice(-3)
@@ -255,6 +246,122 @@ export default async function handler(
 
   try {
     await dbConnect();
+
+      const subtaskEmbeddings = new GoogleGenerativeAIEmbeddings({
+        apiKey: GEMINI_API_KEY,
+        model: "text-embedding-004",
+      });
+      const subtaskChatModel = new ChatGoogleGenerativeAI({
+        apiKey: GEMINI_API_KEY,
+        model: "gemini-2.0-flash",
+        maxOutputTokens: 500,
+        temperature: 0.2,
+      });
+
+    if (assignSubtasks) {
+      const userResults = await UserCompany.collection.aggregate([
+        {
+          $match: { companyId: new mongoose.Types.ObjectId(decodedToken.companyId) }
+        },
+        {
+          $project: {
+            userId: "$userId",
+            firstName: "$firstName",
+            lastName: "$lastName",
+            email: "$email",
+            role: "$role",
+            skills: "$skills"
+          }
+        }
+      ]).toArray();
+
+      const subtasks = assignSubtasks.subtasks || [];
+
+      const ragQuery = subtasks.map((s: any) => `${s.title} ${s.description}`).join(' ');
+      const queryEmbedding = await subtaskEmbeddings.embedQuery(ragQuery);
+
+      let userCompanyObjectId = new mongoose.Types.ObjectId(decodedToken.companyId);
+      const searchPromises = RAG_SOURCES.map(
+        async ({ model, name, indexName }) => {
+          try {
+            const results = await model.collection
+              .aggregate([
+                {
+                  $vectorSearch: {
+                    index: indexName,
+                    queryVector: queryEmbedding,
+                    path: "embedding",
+                    numCandidates: 20,
+                    limit: 3,
+                    filter: {
+                      companyId: userCompanyObjectId,
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    pageContent: 1,
+                    score: { $meta: "vectorSearchScore" },
+                    metadata: 1,
+                  },
+                },
+              ])
+              .toArray();
+            return results.map((r) => ({ ...r, source: name }));
+          } catch (err) {
+            console.error(`Error searching in ${name} collection with index ${indexName}:`, err);
+            return [];
+          }
+        }
+      );
+      const allResults = (await Promise.all(searchPromises)).flat();
+      allResults.sort((a: any, b: any) => b.score - a.score);
+      const topNResults = allResults.slice(0, 5);
+      const ragContext = topNResults
+        .map((r: any) => {
+          const sourceName = r.metadata?.source || r.source || "unknown application data";
+          const originalTitle = r.metadata?.title || r.metadata?.taskTitle || r.metadata?.announcementTitle || r.metadata?.userName || "N/A";
+          const originalId = r.metadata?.originalId || "N/A";
+          return `--- Source: ${sourceName} (ID: ${originalId}, Title: ${originalTitle}) ---\n${r.pageContent}`;
+        })
+        .join("\n\n");
+
+      const usersList = userResults.map(u => {
+        return `UserId: ${u.userId}\nName: ${u.firstName || ''} ${u.lastName || ''}\nRole: ${u.role || ''}\nSkills: ${(u.skills && u.skills.length) ? u.skills.join(', ') : 'None'}`;
+      }).join('\n\n');
+
+      const subtasksList = subtasks.map((s: any, idx: number) => {
+        return `Subtask ${idx + 1}:\nTitle: ${s.title}\nDescription: ${s.description}`;
+      }).join('\n\n');
+
+      const assignmentPrompt = `You are an expert in team task assignment. Your job is to assign each subtask to the best-fit user, based on their role and especially their skills. Skills are the most important factor.\n\nHere is the list of users:\n${usersList}\n\nHere is the list of subtasks:\n${subtasksList}\n\nHere is additional context from the company knowledge base:\n${ragContext}\n\nFor each subtask, select the best user (UserId) who is the most qualified, mostly by skills, then by role. If no user has matching skills, choose the best fit by role.\n\nReturn the assignments in this format:\nSubtask 1: UserId: ...\nSubtask 2: UserId: ...\n...\nOnly return the assignments, nothing else.`;
+
+      const responseObj = await subtaskChatModel.invoke(assignmentPrompt);
+      let responseText = '';
+      if (typeof responseObj === 'string') {
+        responseText = responseObj;
+      } else if (Array.isArray(responseObj)) {
+        responseText = responseObj.map((c: any) => c?.text || c?.content || '').join('\n');
+      } else if (responseObj && typeof responseObj === 'object') {
+        let text = responseObj.text || responseObj.content || '';
+        if (Array.isArray(text)) {
+          responseText = text.map((t: any) => typeof t === 'string' ? t : (t?.text || t?.content || '')).join('\n');
+        } else {
+          responseText = typeof text === 'string' ? text : '';
+        }
+      }
+
+      const assignmentLines = responseText.split(/\r?\n/).filter((l: string) => l.trim().startsWith('Subtask'));
+      const assignments = assignmentLines.map((line: string, idx: number) => {
+        const match = line.match(/Subtask (\d+): UserId: ([^\s]+)/);
+        return {
+          subtaskIndex: idx,
+          userId: match ? match[2] : ""
+        };
+      });
+
+      return res.status(200).json({ assignments });
+    }
 
     const embeddings = new GoogleGenerativeAIEmbeddings({
       apiKey: GEMINI_API_KEY,
@@ -323,7 +430,6 @@ export default async function handler(
           "N/A";
         const originalId = r.metadata?.originalId || "N/A";
 
-        // Provide clear structure and source attribution in the context
         return `--- Source: ${sourceName} (ID: ${originalId}, Title: ${originalTitle}) ---\n${r.pageContent}`;
       })
       .join("\n\n");
@@ -335,7 +441,6 @@ export default async function handler(
       temperature: 0.7, // Adjust for creativity vs. accuracy
     });
 
-    console.log("Retrieved context for LLM:", prompt, userHistory);
 
     const promptTemplate = PromptTemplate.fromTemplate(
       prompt_builder(retrievedContext, prompt, userHistory)
@@ -368,7 +473,6 @@ export default async function handler(
         const jsonString = response.substring(CREATE_TASK_PREFIX.length);
         const taskPayload: CreateTaskPayload = JSON.parse(jsonString);
 
-        // --- Validate and Create Task ---
         if (
           !taskPayload.title ||
           !taskPayload.dueDate ||

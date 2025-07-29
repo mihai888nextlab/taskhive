@@ -187,7 +187,8 @@
     "unpin": "Desfijar",
     "author": "Autor",
     "createdAt": "Creado el",
-    "expiresAt": "Expira el"
+    "expiresAt": "Expira el",
+    "eventDateLabel": "Fecha del evento"
   },
   "CommunicationPage": {
     "messages": "Mensajes",

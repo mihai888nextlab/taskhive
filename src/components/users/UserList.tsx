@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import UserCard from "./UserCard";
-import { FaSearch, FaSpinner, FaUsers, FaFilter, FaSort } from "react-icons/fa";
+import { FaSearch, FaSpinner, FaUsers, FaFilter, FaSort, FaTimes } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -203,27 +203,11 @@ const UserList: React.FC<UserListProps> = ({
                   {t("filterSortTitle", { default: "Filter & Sort Users" })}
                 </h3>
                 <button
-                  className={`absolute top-6 right-6 text-2xl font-bold z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-colors
-                    ${theme === "dark" ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-700"}`}
+                  className={`absolute top-4 right-4 text-xl font-bold z-10 transition-colors ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
                   onClick={() => setShowFilterModal(false)}
-                  aria-label="Close"
-                  tabIndex={0}
-                  type="button"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
+                  aria-label={t("cancel")}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <FaTimes />
                 </button>
               </div>
               {/* Modal Content */}

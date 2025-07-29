@@ -12,7 +12,6 @@ export default async function handler(
 ) {
   await dbConnect();
 
-  // Always parse cookies and token
   const cookies = cookie.parse(req.headers.cookie || "");
   const token = cookies.auth_token;
 
@@ -43,9 +42,7 @@ export default async function handler(
   if (req.method === "POST") {
     const { title, amount, description, type, category, date } = req.body || {};
 
-    // Validate userId
     const userId = decodedToken.userId;
-    // Use mongoose.isValidObjectId if available, otherwise fallback
     const isValidObjectId =
       typeof mongoose.isValidObjectId === "function"
         ? mongoose.isValidObjectId
@@ -54,7 +51,6 @@ export default async function handler(
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    // Ensure saveMock is called in tests by using Expense as a constructor
     const expense = new (Expense as any)({
       userId: decodedToken.userId,
       companyId: decodedToken.companyId,
@@ -83,7 +79,6 @@ export default async function handler(
         .json({ message: "Item ID is required for deletion." });
     }
 
-    // Validate if the ID is a valid MongoDB ObjectId
     const isValidObjectId =
       typeof mongoose.isValidObjectId === "function"
         ? mongoose.isValidObjectId

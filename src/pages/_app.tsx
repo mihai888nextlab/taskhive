@@ -12,7 +12,6 @@ import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import DashboardLayout from "@/components/sidebar/DashboardLayout";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-// Import all messages
 import jaMessages from "../../messages/ja.json";
 import koMessages from "../../messages/ko.json";
 import enMessages from "../../messages/en.json";
@@ -38,7 +37,6 @@ import trMessages from "../../messages/tr.json";
 import viMessages from "../../messages/vi.json";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-// Type for pages with custom layout
 export type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
@@ -96,16 +94,13 @@ function LanguageConsumerApp({
   };
   const messages = messagesMap[lang] || enMessages;
 
-  // Pass locale to pageProps for layouts/pages that need it
   const mergedPageProps = { ...pageProps, locale: lang };
 
-  // Detect if the route is under /app (authenticated area)
   const isAppRoute =
     typeof window !== "undefined"
       ? window.location.pathname.startsWith("/app")
       : (pageProps?.router?.pathname || "").startsWith("/app");
-
-  // Use getLayout if defined, else use DashboardLayout for /app/*, else render page directly
+    
   const getLayout =
     Component.getLayout ||
     ((page: ReactElement) =>

@@ -42,7 +42,7 @@ export default async function handler(
   }
 
   if (req.method === "GET") {
-    // Anyone can view announcements
+    
     const announcements = await AnnouncementModel.find({
       companyId: decoded.companyId,
     })
@@ -52,7 +52,7 @@ export default async function handler(
   }
 
   if (req.method === "POST") {
-    // Only admin can create
+    
     if (
       !user ||
       !userCompany ||
@@ -81,7 +81,7 @@ export default async function handler(
         companyId: decoded.companyId,
       });
 
-      // Only require Gemini for POST
+      
       const { GoogleGenerativeAIEmbeddings } = await import(
         "@langchain/google-genai"
       );
@@ -98,10 +98,10 @@ export default async function handler(
         chunkOverlap: 100,
       });
 
-      // RAG (Retrieval-Augmented Generation) Fields
+      
       const rawPageContent = `Announcement Title: ${announcement.title}. Content: ${announcement.content}. Category: ${announcement.category}. Pinned: ${announcement.pinned}. Expires at: ${announcement.expiresAt?.toLocaleDateString() || "N/A"}.`;
       const chunks = await splitter.createDocuments([rawPageContent]);
-      const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+      const contentToEmbed = chunks[0].pageContent;
       const newEmbedding = await embeddings.embedQuery(contentToEmbed);
       const newMetadata = {
         source: "announcement",
@@ -114,7 +114,7 @@ export default async function handler(
       announcement.embedding = newEmbedding;
       announcement.metadata = newMetadata;
 
-      await announcement.save(); // Save the updated announcement with RAG fields
+      await announcement.save();
 
       await announcement.populate("createdBy", "firstName lastName email");
       return res.status(201).json(announcement);

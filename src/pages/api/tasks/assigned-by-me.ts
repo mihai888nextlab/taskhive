@@ -12,7 +12,6 @@ export default async function handler(
 ) {
   await dbConnect();
 
-  // --- Authentication Middleware ---
   const cookies = cookie.parse(req.headers.cookie || "");
   const token = cookies.auth_token;
 

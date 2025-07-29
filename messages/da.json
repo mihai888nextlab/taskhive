@@ -191,7 +191,8 @@
     "unpin": "Fjern fastgørelse",
     "author": "Forfatter",
     "createdAt": "Oprettet",
-    "expiresAt": "Udløber"
+    "expiresAt": "Udløber",
+    "eventDateLabel": "Begivenhedsdato"
   },
   "CommunicationPage": {
     "noConversations": "Ingen samtaler",

@@ -113,7 +113,8 @@
     "unpin": "Ta bort fästning",
     "author": "Författare",
     "createdAt": "Skapad",
-    "expiresAt": "Utgår"
+    "expiresAt": "Utgår",
+    "eventDateLabel": "Datum för händelse"
   },
   "CommunicationPage": {
     "noConversations": "Inga konversationer",
@@ -308,6 +309,7 @@
     "filterSortButton": "Filter och sortera",
     "filterSortTitle": "Filter- och sorteringsalternativ",
     "applyFiltersButton": "Använd filter"
+    ,"generateDescription": "Generera beskrivning"
   },
   "TimeTrackingPage": {
     "logTimeForTask": "Logga tid för uppgift",

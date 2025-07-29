@@ -8,13 +8,13 @@ export function useFinance() {
   const t = useTranslations('FinancePage');
   const logic = useFinancePageLogic();
 
-  // Modal state for add/edit expense/income
+  
   const [expenseModalOpen, setExpenseModalOpen] = useState(false);
   const [incomeModalOpen, setIncomeModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [selectedIncome, setSelectedIncome] = useState(null);
 
-  // Export handlers
+  
   const handleExportPDF = useCallback(() => {
     if (logic.activeTab === 'expenses') {
       logic.expenseListProps.onExportPDF();
@@ -31,7 +31,7 @@ export function useFinance() {
     }
   }, [logic]);
 
-  // Search/filter state
+  
   const [search, setSearch] = useState('');
   const filteredExpenses = useMemo(() => {
     if (!search.trim()) return logic.expenseListProps.expenses || [];
@@ -49,7 +49,7 @@ export function useFinance() {
     );
   }, [search, logic.incomeListProps.incomes]);
 
-  // Add/edit expense/income handlers
+  
   const handleAddExpense = useCallback((expense: any) => {
     if (logic.expenseFormProps.onSubmit) {
       logic.expenseFormProps.onSubmit(expense);
@@ -64,7 +64,7 @@ export function useFinance() {
     setIncomeModalOpen(false);
   }, [logic]);
 
-  // Undo snackbar state (if needed)
+  
   const showUndo = logic.showUndo;
   const handleUndo = logic.handleUndo;
   const deletedItem = logic.deletedItem;

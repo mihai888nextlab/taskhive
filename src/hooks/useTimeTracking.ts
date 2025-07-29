@@ -44,7 +44,7 @@ export function useTimeTrackingPage() {
     if (user?._id) fetchSessions();
   }, [user, fetchSessions]);
 
-  // Memoize streak calculation
+  
   const streak = useMemo(() => {
     const days = new Set(
       sessions.map(s => new Date(s.createdAt).toDateString())
@@ -58,7 +58,7 @@ export function useTimeTrackingPage() {
     return streak;
   }, [sessions]);
 
-  // Memoize handleExportCSV
+  
   const handleExportCSV = useCallback(() => {
     if (!sessions.length) return;
     const rows = [
@@ -76,20 +76,20 @@ export function useTimeTrackingPage() {
     saveAs(blob, "time_sessions.csv");
   }, [sessions]);
 
-  // Memoize handleDeleteSession
+  
   const handleDeleteSession = useCallback(async (sessionId: string) => {
     if (!user?._id) return;
     await fetch(`/api/time-sessions?id=${sessionId}&userId=${user._id}`, { method: 'DELETE' });
     fetchSessions();
   }, [user, fetchSessions]);
 
-  // Memoize handleSaveSession
+  
   const handleSaveSession = useCallback(async () => {
     await saveSession();
     fetchSessions();
   }, [saveSession, fetchSessions]);
 
-  // Memoize userId
+  
   const userId = useMemo(
     () =>
       user?._id ||

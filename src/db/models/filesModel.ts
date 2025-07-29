@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 export interface IFiles extends mongoose.Document {
   fileName: string;
   fileLocation: string;
-  uploadedBy: mongoose.Types.ObjectId; // Reference to User
+  uploadedBy: mongoose.Types.ObjectId;
 }
 
 const filesSchema = new Schema(

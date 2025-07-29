@@ -1,4 +1,3 @@
-// --- Cookies & Terms Window ---
 function CookiesTermsWindow() {
   const [open, setOpen] = React.useState(false);
   const [showTerms, setShowTerms] = React.useState(false);

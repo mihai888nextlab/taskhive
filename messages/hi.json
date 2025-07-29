@@ -124,6 +124,7 @@
     ,"filterSortButton": "फ़िल्टर और छाँटें"
     ,"filterSortTitle": "फ़िल्टर और छँटाई विकल्प"
     ,"applyFiltersButton": "फ़िल्टर लागू करें"
+    ,"generateDescription": "विवरण उत्पन्न करें"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "सभी घोषणाएँ",
@@ -185,7 +186,8 @@
     "unpin": "पिन हटाएं",
     "author": "लेखक",
     "createdAt": "निर्मित",
-    "expiresAt": "समाप्त"
+    "expiresAt": "समाप्त",
+    "eventDateLabel": "इवेंट की तारीख"
   },
   "CommunicationPage": {
     "messages": "संदेश",

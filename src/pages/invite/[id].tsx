@@ -41,7 +41,6 @@ const InvitePage: NextPageWithLayout = () => {
       const data = await response.json();
       setStatus("success");
       setMessage("Invitation accepted! You have joined the company.");
-      // Optionally redirect after a delay
       setTimeout(() => {
         router.push("/app");
       }, 1800);

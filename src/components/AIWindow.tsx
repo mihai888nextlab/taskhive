@@ -5,21 +5,18 @@ import { useAIWindow } from "@/contexts/AIWindowContext";
 import { useTranslations } from "next-intl";
 import { FaTimes } from "react-icons/fa";
 
-// Define the type for handler parameters
 export type CommandHandlerParams = {
   input: string;
   setChatHistory: React.Dispatch<React.SetStateAction<{ type: 'user' | 'ai'; text: string }[]>>;
   setInputPrompt: React.Dispatch<React.SetStateAction<string>>;
 };
 
-// Use the type in your commands array
 type Command = {
   command: string;
   label: string;
   handler: (params: CommandHandlerParams) => Promise<void>;
 };
 
-// --- Command definitions with handlers ---
 const commands: Command[] = [
   {
     command: '/help',
@@ -111,17 +108,15 @@ const commands: Command[] = [
       setInputPrompt("");
     }
   },
-  // Add more commands here as needed
 ];
 
 interface AIWindowProps {
   isOpen: boolean;
   onClose: () => void;
-  isDesktop?: boolean; // New prop to control desktop mode
-  locale?: string; // Accept locale, but do not pass to useTranslations
+  isDesktop?: boolean;
+  locale?: string;
 }
 
-// Use the correct translation namespace and pass locale
 const AIWindow: React.FC<AIWindowProps> = React.memo(({
   isOpen,
   onClose,
@@ -131,7 +126,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
   const t = useTranslations("AIWindow");
 
   const [inputPrompt, setInputPrompt] = useState("");
-  const { chatHistory, setChatHistory, clearChatHistory } = useAIWindow(); // Add clearChatHistory
+  const { chatHistory, setChatHistory, clearChatHistory } = useAIWindow();
   const [isLoading, setIsLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string | null>(null);
@@ -148,18 +143,16 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
   }, [chatHistory]);
 
   useEffect(() => {
-    // When pendingTranscript is set and recording has ended, submit after a delay
     if (pendingTranscript && !isRecording) {
       submitTimeoutRef.current = setTimeout(() => {
         setInputPrompt(pendingTranscript);
         handleSubmit(pendingTranscript);
         setPendingTranscript(null);
-      }, 1200); // 1.2 seconds delay
+      }, 1200);
     }
     return () => {
       if (submitTimeoutRef.current) clearTimeout(submitTimeoutRef.current);
     };
-    // eslint-disable-next-line
   }, [pendingTranscript, isRecording]);
 
   useEffect(() => {
@@ -168,14 +161,13 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
       const filter = inputPrompt.slice(1).toLowerCase();
       const filtered = commands.filter(c => c.command.slice(1).startsWith(filter));
       setFilteredCommands(filtered);
-      setSelectedCommandIndex(0); // Reset selection on new filter
+      setSelectedCommandIndex(0);
     } else {
       setShowCommandList(false);
     }
   }, [inputPrompt]);
 
   const { theme } = useTheme();
-  // Responsive style: right panel on desktop, modal on mobile
   const panelStyle: React.CSSProperties = useMemo(() => {
     if (isDesktop) {
       return {
@@ -210,12 +202,10 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     }
   }, [isDesktop, theme]);
 
-  // --- Unified command processing ---
   const handleSubmit = useCallback(async (promptOverride?: string) => {
     const promptToSend = typeof promptOverride === "string" ? promptOverride : inputPrompt;
     if (!promptToSend.trim()) return;
 
-    // Try to match a command (ignore leading/trailing spaces and allow for extra spaces after slash)
     const normalizedPrompt = promptToSend.trim().replace(/^\/(\s+)/, '/').replace(/\s+/g, ' ');
     const matched = commands.find(cmd => normalizedPrompt.toLowerCase() === cmd.command.toLowerCase());
     if (matched) {
@@ -248,7 +238,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
       ) {
         setTimeout(() => {
           window.location.reload();
-        }, 1200); // Give user time to see the AI response
+        }, 1200);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
@@ -265,7 +255,6 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     }
   }, [handleSubmit]);
 
-  // --- Web Speech API logic ---
   const handleVoiceInput = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -280,7 +269,6 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     recognition.onstart = () => setIsRecording(true);
     recognition.onend = () => {
       setIsRecording(false);
-      // Submission will be handled by useEffect when pendingTranscript is set
     };
 
     recognition.onresult = (event: any) => {
@@ -296,10 +284,8 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     recognition.start();
   }, []);
 
-  // Add a state to determine if the textarea is empty
   const isInputEmpty = inputPrompt.trim().length === 0;
 
-  // Insert command from quick button or dropdown
   const handleInsertCommand = useCallback((cmd: string, autoSubmit = false) => {
     setInputPrompt(cmd);
     setShowCommandList(false);
@@ -308,7 +294,6 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
     }
   }, [handleSubmit]);
 
-  // Keyboard navigation for command list
   const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (showCommandList && filteredCommands.length > 0) {
       if (e.key === 'ArrowDown') {
@@ -322,7 +307,6 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
         handleInsertCommand(filteredCommands[selectedCommandIndex].command);
       }
     }
-    // Existing Enter-to-submit logic
     if (e.key === 'Enter' && !e.shiftKey && !(showCommandList && filteredCommands.length > 0)) {
       e.preventDefault();
       handleSubmit();
@@ -373,7 +357,6 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
         }
       `}</style>
       <div className="flex flex-col h-full">
-        {/* Header */}
         <div className={`flex justify-between items-center px-5 pt-5 pb-3 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-800 rounded-t-3xl' : 'border-gray-100 bg-white/90 rounded-t-3xl'} shadow-sm`}>
           <div className="flex items-center gap-3">
             <img
@@ -393,7 +376,6 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
                 {t("clear")}
               </button>
             )}
-            {/* Vertically centered close button */}
             <button
               className={`ml-2 text-2xl font-bold z-10 transition-colors flex items-center justify-center h-10 w-10 rounded-full ${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700'}`}
               onClick={onClose}
@@ -406,7 +388,6 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
         </div>
 
 
-        {/* Chat History */}
         <div ref={chatHistoryRef} className={`flex-1 overflow-y-auto px-2 py-4 custom-scrollbar ${theme === 'dark' ? 'bg-gray-900' : 'bg-transparent'}`}> 
           {chatHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
@@ -415,7 +396,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
                 {t("welcomeMessageExclamation")}
               </p>
               <p className={`text-lg text-center font-medium opacity-80 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{t("welcomeMessageSecond")}</p>
-              {/* Quick command buttons - Only show if chat is empty */}
+              
               <div className="flex gap-2 mt-6 px-7 pt-2">
                 {[commands[0], commands[1], commands[3]].map((c) => (
                   <button
@@ -490,7 +471,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
                 rows={1}
               ></textarea>
             </div>
-            {/* Single action button (microphone or submit) on the right, always visible icons */}
+              
             <div className="flex items-center order-2">
               <button
                 onClick={isInputEmpty ? handleVoiceInput : () => handleSubmit()}
@@ -499,14 +480,14 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
                 title={isInputEmpty ? t("recordVoice") : t("send")}
                 style={{ minWidth: '40px', minHeight: '40px', transition: 'background 0.2s, color 0.2s' }}
               >
-                {/* Only show the active icon, not both at once, with a clean fade/scale animation */}
+                
                 <span className="relative block w-6 h-6">
                   <span
                     className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-in-out
                       ${isInputEmpty ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-90 pointer-events-none'}`}
                     style={{ transition: 'opacity 0.3s, transform 0.3s' }}
                   >
-                    {/* Microphone SVG icon - always blue */}
+                    
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={`mx-auto text-blue-600 ${isRecording ? 'animate-pulse' : ''}`}> <rect x="9" y="2" width="6" height="12" rx="3" fill="#2563eb" stroke="none"/> <rect x="9" y="2" width="6" height="12" rx="3" fill="none"/> <path d="M5 10v2a7 7 0 0 0 14 0v-2" stroke="#2563eb" strokeWidth="2.2"/> <line x1="12" y1="22" x2="12" y2="18" stroke="#2563eb" strokeWidth="2.2"/> <line x1="8" y1="22" x2="16" y2="22" stroke="#2563eb" strokeWidth="2.2"/> </svg>
                   </span>
                   <span
@@ -514,7 +495,7 @@ const AIWindow: React.FC<AIWindowProps> = React.memo(({
                       ${!isInputEmpty ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-90 pointer-events-none'}`}
                     style={{ transition: 'opacity 0.3s, transform 0.3s' }}
                   >
-                    {/* Send SVG icon */}
+                    
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-7.5-15-7.5v6l10 1.5-10 1.5v6z" />
                     </svg>

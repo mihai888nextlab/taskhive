@@ -194,7 +194,8 @@
     "unpin": "Lösen",
     "author": "Autor",
     "createdAt": "Erstellt am",
-    "expiresAt": "Läuft ab am"
+    "expiresAt": "Läuft ab am",
+    "eventDateLabel": "Veranstaltungsdatum"
   },
   "CommunicationPage": {
     "noConversations": "Keine Konversationen",

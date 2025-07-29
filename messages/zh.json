@@ -120,7 +120,7 @@
     "editingTaskWithSubtasks": "编辑带有子任务的任务",
     "subtasksPreservedAndCanBeEdited": "子任务已保留，可单独编辑",
     "deadlineChangesUpdateAllSubtaskDeadlines": "截止日期更改将更新所有子任务的截止日期",
-    "descriptionChangesAffectMainTaskOnly": "描述更改仅影响主任务",
+    "generateDescription": "生成描述",
     "searchTasksPlaceholder": "按标题或描述搜索...",
     "priorityCriticalSubtitle": "紧急",
     "priorityHighSubtitle": "重要",
@@ -190,7 +190,8 @@
     "unpin": "取消置顶",
     "author": "作者",
     "createdAt": "创建时间",
-    "expiresAt": "到期时间"
+    "expiresAt": "到期时间",
+    "eventDateLabel": "事件日期"
   },
   "CommunicationPage": {
     "messages": "消息",

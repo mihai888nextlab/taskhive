@@ -1,4 +1,3 @@
-// pages/api/invitations/send.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import { Invitation } from "@/db/models/invitationModel";
 import Company from "@/db/models/companyModel";
@@ -46,13 +45,11 @@ export default async function handler(
         .json({ message: "Authentication required: Invalid token" });
     }
 
-    // Verify user has permission to invite (add your auth logic here)
     const invitingUser = await User.findById(decodedToken.userId);
     if (!invitingUser) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
-    // Check if user is already invited or part of company
     const existingInvitation = await Invitation.findOne({
       email,
       companyId: decodedToken.companyId,
@@ -71,16 +68,13 @@ export default async function handler(
       return res.status(400).json({ message: "User already in company" });
     }
 
-    // Get company details
     const company = await Company.findById(decodedToken.companyId);
     if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    // Generate unique token
     const generatedToken = crypto.randomUUID();
 
-    // Create invitation
     const invitation = new Invitation({
       companyId: decodedToken.companyId,
       email,
@@ -91,7 +85,6 @@ export default async function handler(
 
     await invitation.save();
 
-    // Send email
     await resend.emails.send({
       from: "TaskHive <invitations@taskhive.tech>",
       to: email,

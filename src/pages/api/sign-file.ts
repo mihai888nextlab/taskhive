@@ -45,7 +45,7 @@ export default async function handler(
       normalizedPosition,
       contentDimensions,
       fileType,
-      saveOption = 'new' // Default to creating new copy
+      saveOption = 'new'
     } = req.body;
 
     const hasOldFormat = clickPosition && previewDimensions;
@@ -104,10 +104,8 @@ export default async function handler(
         );
 
         if (saveOption === 'replace') {
-          // Replace the original file
           const uploadedFile = await uploadToS3(signedPdfBuffer, originalFile.fileName, "application/pdf");
           
-          // Update the existing file record
           originalFile.fileLocation = uploadedFile.Location;
           originalFile.fileSize = signedPdfBuffer.length;
           await originalFile.save();
@@ -122,7 +120,6 @@ export default async function handler(
             action: 'replaced'
           });
         } else {
-          // Create new copy (default behavior)
           const signedFileName = `signed_${Date.now()}_${originalFile.fileName}`;
           const uploadedFile = await uploadToS3(signedPdfBuffer, signedFileName, "application/pdf");
 
@@ -241,7 +238,6 @@ async function addSignatureToPdf(
     const firstPage = pages[0];
     const { width: actualPdfWidth, height: actualPdfHeight } = firstPage.getSize();
 
-    // Calculate the scaling factors from iframe to PDF
     const iframeAspectRatio = previewDimensions.width / previewDimensions.height;
     const pdfAspectRatio = actualPdfWidth / actualPdfHeight;
     
@@ -261,28 +257,22 @@ async function addSignatureToPdf(
       offsetY = (previewDimensions.height - scaledPdfHeight) / 2;
     }
     
-    // Convert iframe coordinates to PDF coordinates
     const pdfRelativeX = clickPosition.x - offsetX;
     const pdfRelativeY = clickPosition.y - offsetY;
     
-    // Scale from iframe PDF size to actual PDF size
     const scaleX = actualPdfWidth / scaledPdfWidth;
     const scaleY = actualPdfHeight / scaledPdfHeight;
     
-    // Calculate actual PDF coordinates
     const actualPdfX = Math.max(0, Math.min(scaledPdfWidth, pdfRelativeX)) * scaleX;
     const yOffset = actualPdfHeight * 0.01;
     const actualPdfY = actualPdfHeight - (Math.max(0, Math.min(scaledPdfHeight, pdfRelativeY)) * scaleY) + yOffset;
     
-    // Scale signature size to actual PDF size
     const actualSignatureWidth = (signatureSize.width / scaledPdfWidth) * actualPdfWidth;
     const actualSignatureHeight = (signatureSize.height / scaledPdfHeight) * actualPdfHeight;
     
-    // Center signature on click point
     const signatureX = actualPdfX - (actualSignatureWidth / 2);
     const signatureY = actualPdfY - (actualSignatureHeight / 2);
     
-    // Ensure signature stays within PDF bounds
     const boundedX = Math.max(0, Math.min(actualPdfWidth - actualSignatureWidth, signatureX));
     const boundedY = Math.max(0, Math.min(actualPdfHeight - actualSignatureHeight, signatureY));
 

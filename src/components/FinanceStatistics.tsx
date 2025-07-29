@@ -17,7 +17,7 @@ interface FinanceStatisticsProps {
 const FinanceStatistics: React.FC<FinanceStatisticsProps> = ({ expensesData, incomesData, labels, hideHeader, hideSummary, className }) => {
   const t = useTranslations("InsightsPage");
 
-  // Memoize chart data
+  
   const data = useMemo(() => ({
     labels,
     datasets: [

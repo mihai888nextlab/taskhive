@@ -27,7 +27,6 @@ export default async function handler(
 ) {
   await dbConnect();
 
-  // Allow only POST requests
   if (req.method !== "POST") {
     console.log("Wrong method:", req.method);
     return res.status(405).end();
@@ -54,13 +53,12 @@ export default async function handler(
     const { firstName, lastName, description, skills } = req.body;
     console.log("Updating user:", decoded.userId, firstName, lastName, skills);
 
-    // Build update object only with non-empty fields
     const updateFields: Record<string, any> = {};
     if (firstName && firstName.trim() !== "")
       updateFields.firstName = firstName;
     if (lastName && lastName.trim() !== "") updateFields.lastName = lastName;
     if (typeof description === "string") updateFields.description = description;
-    if (Array.isArray(skills)) updateFields.skills = skills; // <-- Add this line
+    if (Array.isArray(skills)) updateFields.skills = skills;
 
     const updatedUser = await userModel
       .findByIdAndUpdate(decoded.userId, updateFields, { new: true })
@@ -77,10 +75,9 @@ export default async function handler(
     });
     const company = await companyModel.findById(decoded.companyId);
 
-    // RAG - Update userCompany with new embedding
     const rawPageContent = `User First Name: ${updatedUser.firstName}. User Last Name: ${updatedUser.lastName}. User Email: ${updatedUser.email}. Company Name: ${company.name}. Role: ${userCompany.role}. User skills: ${updatedUser.skills.join(", ")}. User description: ${updatedUser.description || ""}.`;
     const chunks = await splitter.createDocuments([rawPageContent]);
-    const contentToEmbed = chunks[0].pageContent; // Take the first chunk
+    const contentToEmbed = chunks[0].pageContent;
     const newEmbedding = await embeddings.embedQuery(contentToEmbed);
     const newMetadata = {
       source: "user",

@@ -16,16 +16,13 @@ export interface IAnnouncement extends Document {
     text: string;
     createdAt: Date;
   }[];
-  // RAG specific fields
-  pageContent?: string; // The text that will be embedded
-  embedding?: number[]; // The vector embedding
+  pageContent?: string;
+  embedding?: number[];
   metadata?: {
-    // Additional info for the LLM/UI
-    source: string; // e.g., 'task'
-    originalId: mongoose.Types.ObjectId; // The _id of this task
+    source: string;
+    originalId: mongoose.Types.ObjectId;
     title?: string;
     status?: string;
-    // ... any other relevant task-specific info
   };
 }
 
@@ -48,7 +45,7 @@ const AnnouncementSchema = new Schema<IAnnouncement>(
     },
     pinned: { type: Boolean, default: false },
     expiresAt: { type: Date },
-    // Optionally, for comments:
+    
     comments: [
       {
         user: { type: Schema.Types.ObjectId, ref: "User" },
@@ -56,7 +53,7 @@ const AnnouncementSchema = new Schema<IAnnouncement>(
         createdAt: { type: Date, default: Date.now },
       },
     ],
-    // RAG specific fields
+    
     pageContent: { type: String },
     embedding: { type: [Number] },
     metadata: { type: mongoose.Schema.Types.Mixed },

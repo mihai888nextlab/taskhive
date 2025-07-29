@@ -1,8 +1,8 @@
-// src/models/PushSubscription.ts
+
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IPushSubscription extends Document {
-  userId: mongoose.Types.ObjectId; // Link to your User model
+  userId: mongoose.Types.ObjectId;
   endpoint: string;
   keys: {
     p256dh: string;
@@ -21,7 +21,7 @@ const PushSubscriptionSchema: Schema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Ensure unique index on endpoint for efficient lookup and preventing duplicates
+
 PushSubscriptionSchema.index({ endpoint: 1 }, { unique: true });
 
 const PushSubscription =

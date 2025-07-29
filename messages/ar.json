@@ -53,6 +53,7 @@
     "cancel": "إلغاء"
   },
   "TasksPage": {
+    "generateDescription": "إنشاء الوصف",
     "export": "تصدير",
     "myTasks": "مهامي",
     "myTasksDescription": "المهام المخصصة لك والمهام الشخصية التي أنشأتها",
@@ -188,7 +189,8 @@
     "unpin": "إلغاء التثبيت",
     "author": "الكاتب",
     "createdAt": "تاريخ الإنشاء",
-    "expiresAt": "ينتهي في"
+    "expiresAt": "ينتهي في",
+    "eventDateLabel": "تاريخ الحدث"
   },
   "CommunicationPage": {
     "messages": "الرسائل",

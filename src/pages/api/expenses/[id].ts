@@ -21,5 +21,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Allow', ['DELETE']);
   res.status(405).end(`Method ${req.method} Not Allowed`);
 }
-
-// This file is empty or not implemented yet.
