@@ -1,4 +1,3 @@
-// pages/api/user.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
@@ -8,17 +7,16 @@ import userCompanyModel from "@/db/models/userCompanyModel";
 import dbConnect from "@/db/dbConfig";
 import companyModel from "@/db/models/companyModel";
 
-// Allow dependency injection for easier Jest testing
 export function createUserHandler(deps?: {
   userModel?: typeof userModel;
   userCompanyModel?: typeof userCompanyModel;
   dbConnect?: typeof dbConnect;
   jwtVerify?: typeof jwt.verify;
-  companyModel?: typeof companyModel; // <-- add this for DI
+  companyModel?: typeof companyModel;
 }) {
   const _userModel = deps?.userModel || userModel;
   const _userCompanyModel = deps?.userCompanyModel || userCompanyModel;
-  const _companyModel = deps?.companyModel || companyModel; // <-- fix variable name
+  const _companyModel = deps?.companyModel || companyModel;
   const _dbConnect = deps?.dbConnect || dbConnect;
   const _jwtVerify = deps?.jwtVerify || jwt.verify;
 
@@ -114,5 +112,4 @@ export function createUserHandler(deps?: {
   };
 }
 
-// Default export for Next.js API route
 export default createUserHandler();

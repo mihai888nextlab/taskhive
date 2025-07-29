@@ -32,7 +32,6 @@ export default async function handler(
   }
 
   try {
-    // Get all userCompany records for this company
     const companyUserRecords = await userCompanyModel
       .find({ companyId: decodedToken.companyId })
       .select("userId createdAt")
@@ -42,17 +41,14 @@ export default async function handler(
       (record) => new Types.ObjectId(record.userId)
     );
 
-    // Total users in company
     const totalUsers = companyUserRecords.length;
 
-    // New users in last 7 days (based on userCompany createdAt)
     const last7Days = new Date();
     last7Days.setDate(last7Days.getDate() - 7);
     const newUsers = companyUserRecords.filter(
       (u) => u.createdAt && new Date(u.createdAt) >= last7Days
     ).length;
 
-    // Total tasks assigned to or created by users in this company
     const totalTasks = await taskModel.countDocuments({
       $or: [
         { userId: { $in: companyUserIds } },
@@ -60,7 +56,6 @@ export default async function handler(
       ],
     });
 
-    // Completed tasks in last 7 days for this company
     const completedTasks = await taskModel.countDocuments({
       $or: [
         { userId: { $in: companyUserIds } },
@@ -70,7 +65,6 @@ export default async function handler(
       updatedAt: { $gte: last7Days },
     });
 
-    // New users per day for last 7 days (array)
     const newUsersData = Array(7).fill(0);
     companyUserRecords.forEach((u) => {
       if (u.createdAt) {
@@ -84,7 +78,6 @@ export default async function handler(
       }
     });
 
-    // Completed tasks per day for last 7 days (array)
     const companyTasks = await taskModel
       .find({
         $or: [

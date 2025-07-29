@@ -40,7 +40,6 @@ export default async function handler(
   }
 
 
-  // Only admin can update or delete
   if (
     !user ||
     !userCompany ||

@@ -21,7 +21,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ message: "Invalid token" });
   }
 
-  // Only admins can update roles
   if (decoded.role !== "admin") {
     return res.status(403).json({ message: "Only admins can update roles" });
   }
@@ -32,7 +31,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Update role in userCompanyModel for the correct company
     const userCompany = await userCompanyModel.findOneAndUpdate(
       { userId, companyId: decoded.companyId },
       { role },
@@ -40,10 +38,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
     if (!userCompany) return res.status(404).json({ message: "UserCompany not found" });
 
-    // Optionally, update role in userModel if you want to keep a global role (not recommended for multi-company)
-    // await userModel.findByIdAndUpdate(userId, { role });
-
-    // Return updated user info
     const user = await userModel.findById(userId).select("-password").lean();
     res.status(200).json({ message: "Role updated", user: { ...user, role: userCompany.role } });
   } catch (error: any) {

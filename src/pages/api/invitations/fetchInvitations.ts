@@ -34,19 +34,19 @@ export default async function handler(
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const email = decodedToken.email; // Assuming email is available in the token
+  const email = decodedToken.email;
 
   try {
     const now = new Date();
     const invitations = await Invitation.find({
       email,
-      status: "pending", // Only pending invitations
+      status: "pending",
       $or: [
         { expiresAt: { $exists: false } },
-        { expiresAt: { $gt: now } }, // Not expired
+        { expiresAt: { $gt: now } },
       ],
     })
-      .populate("companyId", "name") // Populate company name
+      .populate("companyId", "name")
       .exec();
 
     return res.status(200).json({ invitations });

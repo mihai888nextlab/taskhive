@@ -68,7 +68,6 @@ export function useDashboardPage() {
         const response = await fetch("/api/expenses");
         if (!response.ok) throw new Error("Failed to fetch finance data");
         const data = await response.json();
-        // Only company finances
         const companyData = data.filter(
           (item: any) => item.companyId === user?.companyId
         );
@@ -113,7 +112,6 @@ export function useDashboardPage() {
         const res = await fetch("/api/announcements");
         if (!res.ok) throw new Error("Failed to fetch announcements");
         const data = await res.json();
-        // Sort: pinned first, then by createdAt desc
         const sorted = [...data].sort(
           (a, b) =>
             (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) ||
@@ -142,14 +140,13 @@ export function useDashboardPage() {
           );
         }
         const data: Task[] = await response.json();
-        // Filter out completed tasks, sort by priority and deadline, then take first 2
         const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
         const filteredTasks = data
           .filter((task) => !task.completed)
           .sort((a, b) => {
             const aPriority = priorityOrder[a.priority] || 0;
             const bPriority = priorityOrder[b.priority] || 0;
-            if (aPriority !== bPriority) return bPriority - aPriority; // higher number = higher priority
+            if (aPriority !== bPriority) return bPriority - aPriority;
             return (
               new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
             );
@@ -169,7 +166,6 @@ export function useDashboardPage() {
     fetchTasks();
   }, []);
 
-  // Memoize filtered users for Table
   const filteredTableUsers = useMemo(() => {
     return users
       .filter((u) => u.companyId === user?.companyId)
@@ -182,7 +178,6 @@ export function useDashboardPage() {
       }));
   }, [users, user]);
 
-  // Memoize Table columns
   const tableColumns = useMemo(
     () => [
       { key: "firstName", header: t("firstName", { default: "First Name" }) },

@@ -129,6 +129,7 @@
     "filterSortButton": "Фильтр и сортировка",
     "filterSortTitle": "Параметры фильтрации и сортировки",
     "applyFiltersButton": "Применить фильтры"
+    ,"generateDescription": "Сгенерировать описание"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Все объявления",
@@ -190,7 +191,8 @@
     "unpin": "Открепить",
     "author": "Автор",
     "createdAt": "Создано",
-    "expiresAt": "Истекает"
+    "expiresAt": "Истекает",
+    "eventDateLabel": "Дата события"
   },
   "CommunicationPage": {
     "noConversations": "Нет разговоров",

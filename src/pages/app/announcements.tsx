@@ -59,6 +59,12 @@ const AnnouncementsPage: NextPageWithLayout = React.memo(() => {
     handleCloseModal,
   } = useAnnouncements();
 
+  React.useEffect(() => {
+    if (activeTab !== 'pinned') {
+      setActiveTab('pinned');
+    }
+  }, []);
+
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <AnnouncementsHeader

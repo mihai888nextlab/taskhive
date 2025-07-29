@@ -39,7 +39,6 @@ const HelpSection = React.memo(function HelpSection({
 export default function Help() {
   return (
     <div className="min-w-full min-h-screen text-white flex flex-col items-center bg-[#18181b] relative overflow-hidden">
-      {/* Subtle background pattern/image for theme */}
       <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
         <Image
           src="/hive-icon.png"
@@ -51,7 +50,6 @@ export default function Help() {
       <Header />
       <main className="w-full flex flex-col items-center mt-20 sm:mt-32 mb-10 sm:mb-20 px-2 sm:px-6 relative z-10">
         <div className="w-full max-w-5xl flex flex-col items-center justify-center">
-          {/* Premium accent bar */}
           <div className="absolute left-1/2 -translate-x-1/2 -top-8 w-24 h-2 rounded-full bg-gradient-to-r from-primary/80 via-primary/60 to-primary/80 blur-sm opacity-80" />
           <h1 className=" text-[2.2rem] xs:text-[2.7rem] sm:text-[2.9rem] md:text-[60px] leading-[1.1] text-white text-center mb-10 sm:mb-14 border-b-4 border-accent pb-3 sm:pb-5 animate-fade-in font-bold tracking-tight">
             How TaskHive Works

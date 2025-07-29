@@ -1,8 +1,7 @@
-// pages/api/conversations.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/db/dbConfig";
 import conversationsModel from "@/db/models/conversationsModel";
-import { Types } from "mongoose"; // For ObjectId casting
+import { Types } from "mongoose";
 import { JWTPayload } from "@/types";
 import * as cookie from "cookie";
 import jwt from "jsonwebtoken";
@@ -29,19 +28,17 @@ export default async function handler(
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const currentUserId = decodedToken.userId; // Assuming user.id is available in session
+  const currentUserId = decodedToken.userId;
 
-  // GET: Fetch conversations for the current user
   if (req.method === "GET") {
     try {
-      // Find conversations where the current user is a participant
       const conversations = await conversationsModel
         .find({
           participants: { $in: [new Types.ObjectId(currentUserId)] },
           companyId: decodedToken.companyId,
         })
-        .populate("participants", "firstName lastName email") // Populate participant details
-        .sort({ updatedAt: -1 }) // Sort by last updated
+        .populate("participants", "firstName lastName email")
+        .sort({ updatedAt: -1 })
         .exec();
 
       res.status(200).json({ conversations });
@@ -51,11 +48,9 @@ export default async function handler(
     }
   }
 
-  // POST: Create a new direct or group conversation
   else if (req.method === "POST") {
-    const { type, participants, name } = req.body; // participants should be array of user IDs
+    const { type, participants, name } = req.body;
 
-    // Add current user to participants if not already included
     const allParticipants = Array.from(
       new Set([...participants, currentUserId])
     );
@@ -74,13 +69,12 @@ export default async function handler(
     }
 
     try {
-      // For direct chats, check if a conversation already exists between these two users
       if (type === "direct" && allParticipants.length === 2) {
         const existingDirectConvo = await conversationsModel.findOne({
           type: "direct",
           participants: {
             $all: allParticipants.map((id) => new Types.ObjectId(id)),
-            $size: 2, // Ensure it's exactly these two participants
+            $size: 2,
           },
         });
 

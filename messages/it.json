@@ -128,6 +128,7 @@
     ,"filterSortButton": "Filtra e Ordina"
     ,"filterSortTitle": "Opzioni di filtro e ordinamento"
     ,"applyFiltersButton": "Applica filtri"
+    ,"generateDescription": "Genera descrizione"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Tutti gli annunci",
@@ -169,7 +170,7 @@
     "tryAdjustingSearchOrFilters": "Prova a modificare la ricerca o i filtri",
     "checkBackLater": "Torna più tardi per aggiornamenti e notizie aziendali",
     "announcement": "annuncio",
-    "announcements": "annunci",
+    "eventDateLabel": "Data dell'evento",
     "searchAnnouncementsPlaceholder": "Cerca annunci...",
     "searchingFor": "Ricerca di \"{search}\"",
     "categoryLabel": "Categoria: {category}",

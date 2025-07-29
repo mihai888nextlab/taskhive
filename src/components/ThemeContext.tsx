@@ -26,7 +26,6 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = React.memo(({ ch
     return 'light';
   });
 
-  // Listen for system theme changes
   useEffect(() => {
     if (typeof window !== 'undefined' && window.matchMedia) {
       const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -41,7 +40,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = React.memo(({ ch
     }
   }, []);
 
-  // Memoize toggleTheme
+  
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
       const next = prev === 'light' ? 'dark' : 'light';
@@ -52,7 +51,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = React.memo(({ ch
     });
   }, []);
 
-  // Keep localStorage in sync if theme changes elsewhere
+  
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('theme', theme);

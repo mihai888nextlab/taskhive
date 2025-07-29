@@ -87,7 +87,6 @@ export default async function handler(
 
     const lowercaseRole = invitation.role.toLowerCase();
 
-    // 1. Fetch the org chart for the company
     const orgChart = await OrgChart.findOne({
       companyId: invitation.companyId,
     }).lean();
@@ -95,10 +94,8 @@ export default async function handler(
       return res.status(404).json({ message: "Org chart not found." });
     }
 
-    // 2. Find the department containing the role
     let departmentId: string | null = null;
     if (lowercaseRole == "admin") {
-      // If the role is admin, we can assign it to the default department
       departmentId = "admin-department";
     } else {
       for (const dept of orgChart.departments) {
@@ -123,19 +120,17 @@ export default async function handler(
         .json({ message: "Role is not assigned to any department." });
     }
 
-    // 3. Now create the userCompany with departmentId
     const newUserCompany = new userCompanyModel({
       userId: decodedToken.userId,
       companyId: invitation.companyId,
       role: lowercaseRole,
-      departmentId, // <-- THIS MUST BE PRESENT!
+      departmentId,
       permissions: ["all"],
     });
     await newUserCompany.save();
 
     const company = await companyModel.findById(invitation.companyId);
 
-    // RAG (Retrieval-Augmented Generation) Fields
     const rawPageContent = `User First Name: ${decodedToken.firstName}. User Last Name: ${decodedToken.lastName}. User Email: ${decodedToken.email}. Company Name: ${company.name}. Role: ${lowercaseRole}.`;
     const chunks = await splitter.createDocuments([rawPageContent]);
     const contentToEmbed = chunks[0].pageContent; // Take the first chunk

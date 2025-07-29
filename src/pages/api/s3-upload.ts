@@ -33,17 +33,16 @@ export default async function handler(
   ) as JWTPayload;
 
   try {
-    const { file, fileName, fileType } = req.body; // Asigură-te că frontend-ul trimite corect
-    const buffer = Buffer.from(file, "base64"); // Dacă trimiți base64 din frontend
+    const { file, fileName, fileType } = req.body;
+    const buffer = Buffer.from(file, "base64");
 
     const newFileName = Date.now() + fileName;
 
     const uploadParams = {
       Bucket: process.env.S3_BUCKET_NAME!,
-      Key: newFileName, // Numele fișierului
-      Body: buffer, // Trebuie să ai un `Body` valid!
+      Key: newFileName,
+      Body: buffer,
       ContentType: fileType,
-      //ACL: "public-read",
     };
 
     await s3.send(new PutObjectCommand(uploadParams));
@@ -53,7 +52,7 @@ export default async function handler(
       fileType,
       fileLocation: `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${newFileName}`,
       uploadedBy: decodedToken.userId,
-      fileSize: buffer.length, // Dimensiunea fișierului în octeți
+      fileSize: buffer.length,
     });
 
     return res.status(200).json({

@@ -49,7 +49,6 @@ const verifyAuthToken = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     if (!userCompanyDoc) return null;
 
-    // --- FIX: Support both ._doc and plain object for test mocks ---
     const userObj = (user as any)?._doc ? (user as any)._doc : user;
     const userCompanyObj = (userCompanyDoc as any)?._doc
       ? (userCompanyDoc as any)._doc
@@ -77,12 +76,10 @@ export default async function handler(
   const { q } = req.query;
   const searchTerm = typeof q === "string" ? q.trim() : "";
 
-  // --- FIX: Move authentication logic AFTER checking for empty search term ---
   if (!searchTerm) {
     return res.status(200).json({ results: [] });
   }
 
-  // Now require authentication for actual search
   const authResult = await verifyAuthToken(req, res);
   if (!authResult || !authResult._id || !authResult.companyId) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -101,7 +98,6 @@ export default async function handler(
     timeSessions: [],
   };
 
-  // --- FIX: Ensure companyUserRecords is always an array ---
   let companyUserRecords = await userCompanyModel.find({ companyId }).lean();
   if (!Array.isArray(companyUserRecords)) {
     companyUserRecords = [];
@@ -109,7 +105,6 @@ export default async function handler(
   const companyUserIds = companyUserRecords.map((u) => u.userId?.toString());
 
   const searchPromises: Promise<any>[] = [
-    // Tasks: search within the user's company
     Task.find({
       companyId,
       $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }],
@@ -122,7 +117,6 @@ export default async function handler(
         results.tasks = (tasks || []).map((t: any) => ({ ...t, type: "task" }));
       }),
 
-    // Users
     userCompanyModel
       .find({ companyId })
       .populate("userId", "firstName lastName email profileImage description")
@@ -150,7 +144,6 @@ export default async function handler(
           }));
       }),
 
-    // Announcements: search within the user's company
     AnnouncementModel.find({
       companyId,
       $or: [{ title: { $regex: regex } }, { content: { $regex: regex } }],
@@ -165,7 +158,6 @@ export default async function handler(
         }));
       }),
 
-    // Storage Files
     StorageFileModel.find({
       companyId,
       $or: [
@@ -183,7 +175,6 @@ export default async function handler(
         }));
       }),
 
-    // Expenses
     ExpenseModel.find({
       companyId,
       type: "expense",
@@ -202,7 +193,6 @@ export default async function handler(
         }));
       }),
 
-    // Incomes
     ExpenseModel.find({
       companyId,
       type: "income",
@@ -220,8 +210,7 @@ export default async function handler(
           type: "income",
         }));
       }),
-
-    // Time Sessions: only for company users
+      
     TimeSessionModel.find({
       userId: { $in: companyUserIds },
       $or: [
@@ -243,7 +232,6 @@ export default async function handler(
 
   try {
     await Promise.all(searchPromises);
-    // Ensure all result keys are present and are arrays, even if empty
     return res.status(200).json({
       results: {
         tasks: Array.isArray(results.tasks) ? results.tasks : [],

@@ -17,7 +17,6 @@ interface TaskStatisticsProps {
 const TaskStatistics: React.FC<TaskStatisticsProps> = ({ completed, total, last7Days, hideHeader, hideSummary, className }) => {
   const t = useTranslations("InsightsPage");
 
-  // Memoize chart data
   const data = useMemo(() => ({
     labels: ['6d ago', '5d ago', '4d ago', '3d ago', '2d ago', 'Yesterday', 'Today'],
     datasets: [

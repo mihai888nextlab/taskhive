@@ -1,5 +1,5 @@
 import React, { useState, InputHTMLAttributes, useCallback } from "react";
-/** @jsx React.createElement */
+
 
 interface FloatingLabelInputProps
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -22,7 +22,7 @@ const FloatingLabelInput: React.FC<FloatingLabelInputProps> = React.memo(
     const [inputValue, setInputValue] = useState<string>("");
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
-    // Memoize handlers
+    
     const handleInputChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);

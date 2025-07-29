@@ -129,6 +129,7 @@
     "filterSortButton": "Filtrele & Sırala",
     "filterSortTitle": "Filtreleme & Sıralama Seçenekleri",
     "applyFiltersButton": "Filtreleri Uygula"
+    ,"generateDescription": "Açıklama oluştur"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Tüm Duyurular",
@@ -261,7 +262,8 @@
     "category": "Kategori",
     "selectCategory": "Kategori seç",
     "saving": "Kaydediliyor...",
-    "trackSpending": "Harcamalarınızı ve giderlerinizi takip edin",
+    "expiresAt": "Bitiş Tarihi",
+    "eventDateLabel": "Etkinlik tarihi",
     "trackSpendingExpenses": "Harcamalarınızı ve giderlerinizi takip edin",
     "recordIncome": "Gelir ve kazançlarınızı kaydedin",
     "recordIncomeEarnings": "Gelir ve kazançlarınızı kaydedin",

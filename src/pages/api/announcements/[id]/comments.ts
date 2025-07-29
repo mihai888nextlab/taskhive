@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   switch (method) {
     case 'GET': {
-      // Get all comments for this announcement
+      
       const announcement = await AnnouncementModel.findById(id).populate({
         path: 'comments.user',
         select: 'firstName lastName email',
@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ comments });
     }
     case 'POST': {
-      // Add a new comment (JWT cookie auth)
+      
       const cookies = cookie.parse(req.headers.cookie || "");
       const token = cookies.auth_token;
       if (!token) {

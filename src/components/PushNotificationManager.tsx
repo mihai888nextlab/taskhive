@@ -1,11 +1,9 @@
-// components/PushNotificationManager.tsx
-import React, { useEffect, useState, useCallback } from "react";
-import { useAuth } from "@/hooks/useAuth"; // Your authentication hook
-import { urlBase64ToUint8Array } from "@/utils/webPushUtils"; // Utility function (see below)
 
-interface PushNotificationManagerProps {
-  // You might pass a prop to trigger subscription, or do it automatically
-}
+import React, { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { urlBase64ToUint8Array } from "@/utils/webPushUtils";
+
+interface PushNotificationManagerProps {}
 
 const PushNotificationManager: React.FC<PushNotificationManagerProps> = () => {
   const { user, isAuthenticated, loadingUser } = useAuth();
@@ -14,10 +12,8 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // VAPID Public Key from environment variable
   const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
-  // Function to register the service worker
   const registerServiceWorker = useCallback(async () => {
     if ("serviceWorker" in navigator) {
       try {
@@ -37,7 +33,6 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = () => {
     }
   }, []);
 
-  // Function to subscribe for push notifications
   const subscribeToPush = useCallback(async () => {
     if (!VAPID_PUBLIC_KEY) {
       setError("VAPID Public Key is not configured.");
@@ -54,7 +49,6 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = () => {
       const registration = await registerServiceWorker();
       if (!registration) return;
 
-      // Check current notification permission status
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
         setError("Notification permission denied.");
@@ -67,18 +61,17 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = () => {
       const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
       const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true, // Required by browsers
+        userVisibleOnly: true,
         applicationServerKey: convertedVapidKey,
       });
 
       console.log("Push Subscription created:", subscription);
 
-      // Send the subscription to your backend
       const res = await fetch("/api/notifications/subscribe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user._id}`, // Or your actual auth token
+          Authorization: `Bearer ${user._id}`,
         },
         body: JSON.stringify(subscription),
       });
@@ -101,7 +94,6 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = () => {
     }
   }, [isAuthenticated, user?._id, VAPID_PUBLIC_KEY, registerServiceWorker]);
 
-  // Check initial subscription status on component mount
   useEffect(() => {
     if (loadingUser || !isAuthenticated || !user?._id) return;
 
@@ -126,9 +118,8 @@ const PushNotificationManager: React.FC<PushNotificationManagerProps> = () => {
     checkSubscriptionStatus();
   }, [loadingUser, isAuthenticated, user?._id]);
 
-  // Optional: A button to trigger subscription manually
   if (loadingUser || !isAuthenticated) {
-    return null; // Don't show manager until user is loaded/authenticated
+    return null;
   }
 
   return (

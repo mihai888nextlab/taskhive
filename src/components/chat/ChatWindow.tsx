@@ -613,13 +613,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedConversation }) => {
                           </p>
                         )}
                         <div
-                          className={`inline-block px-3 py-2 rounded-2xl transition-all duration-200 ${
+                          className={`inline-block px-3 py-2 rounded-2xl transition-all duration-200 break-words whitespace-pre-wrap ${
                             isSender
                               ? `${theme === "dark" ? "bg-blue-600" : "bg-blue-500"} text-white rounded-br-md`
                               : theme === "light"
                                 ? "bg-white border border-gray-200 text-gray-900 rounded-bl-md"
                                 : "bg-gray-700 text-white rounded-bl-md"
                           }`}
+                          style={{ maxWidth: "500px", wordBreak: "break-word" }}
                         >
                           {msg.type === "file" ? (
                             (() => {

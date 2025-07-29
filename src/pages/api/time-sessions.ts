@@ -23,21 +23,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ message: "Failed to create session" });
     }
   } else if (req.method === "GET") {
-    // --- FIX: Always use .find as a static method on the constructor, not on the instance ---
     let userId = (req.query as any).userId;
     if (Array.isArray(userId)) userId = userId[0];
     if (!userId || typeof userId !== "string") {
       return res.status(400).json({ message: "User ID is required" });
     }
     try {
-      // Use the constructor's static find method for mocks and real model
       const sessions = await (TimeSession as any).find({ userId }).exec();
       return res.status(200).json(sessions);
     } catch (err) {
       return res.status(500).json({ message: "Failed to fetch sessions" });
     }
   } else if (req.method === "DELETE") {
-    // --- FIX: Always use .findByIdAndDelete as a static method on the constructor, not on the instance ---
     let id = (req.query as any).id;
     if (Array.isArray(id)) id = id[0];
     if (!id || typeof id !== "string") {

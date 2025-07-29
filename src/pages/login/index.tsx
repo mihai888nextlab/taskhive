@@ -31,7 +31,6 @@ export default function Login() {
 
   return (
     <div className="min-w-full min-h-screen flex flex-col items-center bg-[#18181b] text-white relative overflow-hidden">
-      {/* Subtle background pattern/image for theme */}
       <div className="absolute inset-0 pointer-events-none select-none opacity-5 z-0">
         <Image
           src="/hive-icon.png"

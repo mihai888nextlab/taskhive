@@ -1,7 +1,6 @@
-// src/pages/api/complete-task.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/db/dbConfig";
-import taskModel from "@/db/models/taskModel"; // Adjust the path if necessary
+import taskModel from "@/db/models/taskModel";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   await dbConnect();
@@ -10,11 +9,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { taskId } = req.body;
 
     try {
-      // Update the task to mark it as completed
       const updatedTask = await taskModel.findByIdAndUpdate(
         taskId,
         { completed: true },
-        { new: true } // Return the updated document
+        { new: true }
       );
 
       if (!updatedTask) {

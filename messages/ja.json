@@ -129,6 +129,7 @@
     "filterSortButton": "フィルター＆並び替え",
     "filterSortTitle": "フィルター＆並び替えオプション",
     "applyFiltersButton": "フィルターを適用"
+    ,"generateDescription": "説明を生成"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "すべてのお知らせ",
@@ -190,7 +191,8 @@
     "unpin": "ピン解除",
     "author": "作成者",
     "createdAt": "作成日",
-    "expiresAt": "有効期限"
+    "expiresAt": "有効期限",
+    "eventDateLabel": "イベント日"
   },
   "CommunicationPage": {
     "noConversations": "会話なし",

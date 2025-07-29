@@ -17,7 +17,7 @@ const userCompanySchema = new Schema(
     role: { type: String, required: true },
     departmentId: { type: String, required: true },
     permissions: [{ type: String }],
-    // RAG specific fields
+    
     pageContent: { type: String },
     embedding: { type: [Number] },
     metadata: { type: mongoose.Schema.Types.Mixed },

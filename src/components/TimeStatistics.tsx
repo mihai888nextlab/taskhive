@@ -1,4 +1,4 @@
-// src/components/TimeStatistics.tsx
+
 import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface TimeStatisticsProps {
-    last7DaysHours: number[]; // Array of hours worked for the last 7 days
+    last7DaysHours: number[];
     hideHeader?: boolean;
     hideSummary?: boolean;
     className?: string;
@@ -16,7 +16,7 @@ interface TimeStatisticsProps {
 const TimeStatistics: React.FC<TimeStatisticsProps> = ({ last7DaysHours, hideHeader, hideSummary, className }) => {
     const t = useTranslations("InsightsPage");
 
-    // Memoize chart data
+    
     const data = useMemo(() => ({
         labels: ['6d ago', '5d ago', '4d ago', '3d ago', '2d ago', 'Yesterday', 'Today'],
         datasets: [

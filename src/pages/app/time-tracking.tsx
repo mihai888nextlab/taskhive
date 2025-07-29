@@ -43,15 +43,11 @@ const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
 
   return (
     <div className={`relative min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
-      {/* Main Content */}
       <div className="px-2 lg:px-4 py-4 mt-3">
         <div className="max-w-[100vw] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-            
-            {/* Timer Column */}
             <div className="lg:col-span-1">
               <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} overflow-hidden mx-2`}>
-                {/* Timer Header */}
                 <div className={`px-4 py-3 ${
                   theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-blue-50 border-gray-200"
                 } border-b flex items-center justify-between`}>
@@ -80,7 +76,6 @@ const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
                   </Button>
                 </div>
 
-                {/* Timer Content */}
                 <div className="p-4">
                   <TimerAndFormPanel
                     elapsedTime={elapsedTime}
@@ -107,7 +102,6 @@ const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
                   />
                 </div>
 
-                {/* Timer Footer */}
                 <div className={`px-4 py-3 ${
                   theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"
                 } border-t`}>
@@ -119,10 +113,8 @@ const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
               </div>
             </div>
 
-            {/* Sessions List Column */}
             <div className="lg:col-span-2">
               <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[900px] flex flex-col overflow-hidden mx-2`}>
-                {/* Sessions Header */}
                 <div className={`flex-shrink-0 px-4 py-3 ${
                   theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-green-50 border-gray-200"
                 } border-b flex items-center justify-between`}>
@@ -141,7 +133,6 @@ const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
                       </p>
                     </div>
                   </div>
-                  {/* Export Dropdown Button */}
                   {sessions && sessions.length > 0 && (
                     <ExportDropdown
                       loading={loading}
@@ -153,7 +144,6 @@ const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
                   )}
                 </div>
 
-                {/* Sessions List */}
                 <div className="flex-1 min-h-0 overflow-hidden">
                   <SessionList
                     sessions={sessions}
@@ -172,7 +162,6 @@ const TimeTrackingPage: NextPageWithLayout = React.memo(() => {
           </div>
         </div>
       </div>
-      {/* Manual Add Modal */}
       {manualModalOpen && userId && (
         <AddManualSessionModal
           open={manualModalOpen}

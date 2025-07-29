@@ -17,7 +17,6 @@ import {
 import Head from "next/head";
 import { useDashboardPage } from "@/hooks/useDashboardPage";
 
-// Generic card wrapper for consistent UI
 const DashboardCard: React.FC<{
   icon: React.ReactElement<any>;
   title: string;
@@ -102,7 +101,6 @@ const DashboardPage: React.FC & {
     tableColumns,
   } = useDashboardPage();
 
-  // Time tracking preview state
   const [streak, setStreak] = React.useState(0);
   const [sessions, setSessions] = React.useState<any[]>([]);
 

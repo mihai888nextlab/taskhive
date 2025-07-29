@@ -44,14 +44,13 @@ export default async function handler(
       });
     }
 
-    // 2. Verify the ID Token (optional but good practice, getToken often verifies implicitly)
-    // oAuth2Client.verifyIdToken also takes the audience.
+    
     const ticket = await googleClient.verifyIdToken({
       idToken: id_token,
-      audience: GOOGLE_CLIENT_ID, // Ensure the audience matches your client ID
+      audience: GOOGLE_CLIENT_ID,
     });
 
-    const payload = ticket.getPayload(); // This payload contains user info
+    const payload = ticket.getPayload();
 
     if (!payload || !payload.email) {
       return res.status(400).json({ message: "Invalid Google token." });
@@ -62,7 +61,6 @@ export default async function handler(
       type: "google",
     });
     if (!existingUser) {
-      // If user does not exist, create a new user
 
       const emailExists = await userModel.findOne({ email: payload.email });
       if (emailExists) {
@@ -76,7 +74,7 @@ export default async function handler(
         email: payload.email,
         firstName: payload.given_name || "N/A",
         lastName: payload.family_name || "N/A",
-        password: "NOPASSWORD", // Password is not used for Google login
+        password: "NOPASSWORD",
         profileImage: null,
         skills: [],
         description: "",
@@ -88,7 +86,7 @@ export default async function handler(
         {
           userId: newUser._id,
           email: newUser.email,
-          password: newUser.password, // Not used for Google login
+          password: newUser.password,
           role: "",
           companyId: "",
           firstName: newUser.firstName,
@@ -126,7 +124,7 @@ export default async function handler(
       {
         userId: existingUser._id,
         email: existingUser.email,
-        password: existingUser.password, // Not used for Google login
+        password: existingUser.password,
         role: "",
         companyId: "",
         firstName: existingUser.firstName,

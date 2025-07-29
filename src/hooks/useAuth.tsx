@@ -5,28 +5,28 @@ import {
   createContext,
   useCallback,
 } from "react";
-import { useRouter } from "next/router"; // Pentru redirecționare
+import { useRouter } from "next/router";
 import { User } from "@/types";
 
 interface AuthContextType {
   user: User | null;
   loadingUser: boolean;
   error: string | null;
-  isAuthenticated: boolean; // O nouă proprietate utilă
-  hasCompany: boolean; // O nouă proprietate utilă pentru a verifica dacă utilizatorul are o companie
-  refetchUser: () => Promise<void>; // Funcție pentru a re-fetch-ui manual
+  isAuthenticated: boolean;
+  hasCompany: boolean;
+  refetchUser: () => Promise<void>;
   login: (
     provider: string,
     credentials: { email?: string; password?: string; code?: string }
-  ) => Promise<boolean>; // Adaugă funcție de login
+  ) => Promise<boolean>;
   register: (
     email: string,
     password: string,
     confirmPassword: string,
     firstName: string,
     lastName: string
-  ) => Promise<boolean>; // Adaugă funcție de register
-  logout: () => void; // Adaugă funcție de logout
+  ) => Promise<boolean>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,16 +53,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         } as User);
       } else {
         setUser(null);
-        // router.push("/login"); // Redirecționează la login dacă nu este autentificat
+        
       }
     } catch (err: unknown) {
       console.error("Error fetching user data in AuthProvider:", err);
       setUser(null);
-      //setError(err.message || 'Failed to load user data.');
+      
     } finally {
       setLoadingUser(false);
     }
-  }, []); // Dependențe goale, deoarece nu se bazează pe props sau state din acest scope
+  }, []);
 
   const login = useCallback(
     async (
@@ -203,7 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = useCallback(
     async (redirectUrl: string = "/login") => {
       try {
-        await fetch("/api/auth/logout", { method: "POST" }); // Ajustează acest endpoint!
+        await fetch("/api/auth/logout", { method: "POST" });
       } catch (err) {
         console.error("Error during logout API call:", err);
       } finally {
@@ -216,10 +216,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     fetchUserData();
-  }, [fetchUserData]); // Rulează o singură dată la montare
+  }, [fetchUserData]);
 
   const isAuthenticated = user !== null;
-  const hasCompany = user?.companyId ? true : false; // Verifică dacă utilizatorul are o companie
+  const hasCompany = user?.companyId ? true : false;
 
   return (
     <AuthContext.Provider

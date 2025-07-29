@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log("Generate subtasks API called with method:", req.method);
@@ -29,65 +30,62 @@ Generate subtasks that:
 - Follow a logical sequence
 - Each subtask should be 3-8 words maximum
 
-Return the response as a JSON array of objects with "title" and "description" fields for each subtask.
+IMPORTANT: Output ONLY a valid JSON array of objects, starting with [ and ending with ].
+Do NOT include any explanation, markdown, code block, or extra text before or after the array.
+Each object must have both "title" and "description" fields.
 Example format:
 [
   {"title": "Research requirements", "description": "Gather all necessary information and requirements"},
   {"title": "Create initial draft", "description": "Develop the first version of the deliverable"}
 ]
-
-Only return the JSON array, no explanations or additional text.`;
+`;
 
     console.log("Calling Gemini API...");
     
-    // Call your existing Gemini API endpoint
-    const geminiRes = await fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/gemini`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        // Forward the authentication cookie
-        "cookie": req.headers.cookie || ""
-      },
-      body: JSON.stringify({ prompt }),
-    });
-
-    console.log("Gemini API response status:", geminiRes.status);
-    const geminiData = await geminiRes.json();
-    console.log("Gemini API response data:", geminiData);
-    
-    if (!geminiData.response) {
-      throw new Error("No response from AI service");
+    // Use Gemini API directly
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    if (!GEMINI_API_KEY) {
+      throw new Error("Gemini API key is missing");
     }
-
-    // Try to parse the JSON response from your Gemini API
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const result = await model.generateContent(prompt);
+    const aiResponse = result.response.text();
+    console.log("Raw Gemini response:", aiResponse);
     let subtasks;
+    // Try to extract the first JSON array from the response
+    function extractJsonArray(text: string): string | null {
+      const match = text.match(/\[\s*{[\s\S]*?}\s*\]/);
+      return match ? match[0] : null;
+    }
+    let jsonArrayString = extractJsonArray(aiResponse);
     try {
-      // Your Gemini API returns the subtasks as a JSON string in the response field
-      subtasks = JSON.parse(geminiData.response);
+      if (jsonArrayString) {
+        subtasks = JSON.parse(jsonArrayString);
+      } else {
+        subtasks = JSON.parse(aiResponse);
+      }
       console.log("Parsed subtasks:", subtasks);
-      
       if (!Array.isArray(subtasks)) {
         throw new Error("Response is not an array");
       }
+      // Filter only valid subtasks with both title and description
+      subtasks = subtasks.filter(
+        (item: any) => typeof item === "object" && item.title && item.description
+      );
     } catch (parseError) {
       console.error("Failed to parse JSON:", parseError);
-      console.log("Raw response that failed to parse:", geminiData.response);
-      
-      // Fallback: create default subtasks based on the task title
+      console.log("Raw response that failed to parse:", aiResponse);
       subtasks = generateSmartSubtasks(title, description);
       console.log("Using fallback subtasks:", subtasks);
     }
-
-    // Validate and limit subtasks
-    if (!Array.isArray(subtasks)) {
+    if (!Array.isArray(subtasks) || subtasks.length === 0) {
       subtasks = generateSmartSubtasks(title, description);
     }
-    
     subtasks = subtasks.slice(0, 5).map(subtask => ({
       title: (subtask.title || "Subtask").substring(0, 100),
       description: (subtask.description || "").substring(0, 500)
     }));
-
     console.log("Final subtasks to return:", subtasks);
     res.status(200).json({ subtasks });
   } catch (error) {

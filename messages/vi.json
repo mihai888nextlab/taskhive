@@ -129,6 +129,7 @@
     "filterSortButton": "Lọc & Sắp xếp",
     "filterSortTitle": "Tùy chọn Lọc & Sắp xếp",
     "applyFiltersButton": "Áp dụng bộ lọc"
+    ,"generateDescription": "Tạo mô tả"
   },
   "AnnouncementsPage": {
     "allAnnouncements": "Tất cả thông báo",
@@ -190,7 +191,8 @@
     "unpin": "Bỏ ghim",
     "author": "Tác giả",
     "createdAt": "Ngày tạo",
-    "expiresAt": "Ngày hết hạn"
+    "expiresAt": "Ngày hết hạn",
+    "eventDateLabel": "Ngày diễn ra sự kiện"
   },
   "CommunicationPage": {
     "noConversations": "Không có cuộc trò chuyện nào",

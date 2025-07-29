@@ -189,7 +189,8 @@
     "unpin": "Poista kiinnitys",
     "author": "Tekijä",
     "createdAt": "Luotu",
-    "expiresAt": "Vanhentuu"
+    "expiresAt": "Vanhentuu",
+    "eventDateLabel": "Tapahtuman päivämäärä"
   },
   "CommunicationPage": {
     "noConversations": "Ei keskusteluja",

@@ -31,15 +31,11 @@ export default async function handler(
 
   if (req.method === "GET") {
     try {
-      // TODO: Verify if the session user is a participant of this conversationId
-      // You'll need to fetch the conversation and check its participants array.
-      // If not authorized, return 403 Forbidden.
-
       const messages = await messagesModel
         .find({ conversationId })
-        .sort({ timestamp: 1 }) // Oldest first
-        .limit(50) // Limit number of messages
-        .populate("senderId", "firstName lastName email") // Populate sender details for display
+        .sort({ timestamp: 1 })
+        .limit(50)
+        .populate("senderId", "firstName lastName email")
         .exec();
 
       const transformedMessages = messages.map((msg: any) => {

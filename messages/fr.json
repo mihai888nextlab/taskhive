@@ -54,6 +54,7 @@
     "startByAddingFirstMember": "Commencez par ajouter votre premier membre d'équipe."
   },
   "TasksPage": {
+    "generateDescription": "Générer la description",
     "export": "Exporter",
     "myTasks": "Mes tâches",
     "myTasksDescription": "Tâches qui vous sont assignées et tâches personnelles que vous avez créées",
@@ -209,6 +210,8 @@
     "availableTeamMembers": "Membres disponibles",
     "loadingTeamMembers": "Chargement des membres...",
     "noTeamMembers": "Aucun membre",
+    "announcementDeleted": "L'annonce a été supprimée avec succès",
+    "eventDateLabel": "Date de l'événement",
     "noOtherUsersAvailable": "Aucun autre utilisateur disponible",
     "noResultsFound": "Aucun résultat trouvé",
     "tryDifferentSearch": "Essayez une autre recherche",

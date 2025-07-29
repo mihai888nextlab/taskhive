@@ -7,7 +7,7 @@ import userCompanyModel from "@/db/models/userCompanyModel";
 import * as cookie from "cookie";
 import { JWTPayload } from "@/types";
 import jwt from "jsonwebtoken";
-import OrgChart from "@/db/models/orgChartModel"; // Import the OrgChart model
+import OrgChart from "@/db/models/orgChartModel";
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,7 +21,6 @@ export default async function handler(
 
   const { email, password, firstName, lastName, role } = req.body;
 
-  // Basic validation
   if (!email || !password || !firstName || !lastName || !role) {
     return res
       .status(400)
@@ -88,10 +87,8 @@ export default async function handler(
       return res.status(404).json({ message: "Company not found" });
     }
 
-    // Convert role to lowercase before saving
     const lowercaseRole = role.toLowerCase();
 
-    // 1. Fetch the org chart for the company
     const orgChart = await OrgChart.findOne({
       companyId: savedCompany._id,
     }).lean();
@@ -99,7 +96,6 @@ export default async function handler(
       return res.status(404).json({ message: "Org chart not found." });
     }
 
-    // 2. Find the department containing the role
     let departmentId: string | null = null;
     for (const dept of orgChart.departments) {
       for (const level of dept.levels) {
@@ -121,12 +117,11 @@ export default async function handler(
         .json({ message: "Role is not assigned to any department." });
     }
 
-    // 3. Now create the userCompany with departmentId
     const newUserCompany = new userCompanyModel({
       userId: savedUser._id,
       companyId: savedCompany._id,
       role: lowercaseRole,
-      departmentId, // <-- THIS MUST BE PRESENT!
+      departmentId,
       permissions: ["all"],
     });
     console.log("Creating userCompany with:", {

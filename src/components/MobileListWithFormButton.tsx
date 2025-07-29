@@ -9,7 +9,7 @@ const MobileListWithFormButton = ({ logic, theme, t }: any) => {
   const [showFormModal, setShowFormModal] = useState(false);
   return (
     <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} rounded-2xl border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} h-full max-h-[500px] flex flex-col overflow-hidden mx-0 sm:mx-2 mb-4`}>
-      {/* List Header with + button */}
+      
       <div className={`flex-shrink-0 px-4 py-3 flex items-center justify-between ${
         logic.activeTab === 'expenses'
           ? (theme === "dark" ? "bg-red-900/20 border-gray-600" : "bg-red-50 border-gray-200")
@@ -29,7 +29,7 @@ const MobileListWithFormButton = ({ logic, theme, t }: any) => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Toggle button for switching between expenses and income */}
+          
           <button
             className={`px-3 py-1 rounded-full text-xs font-semibold focus:outline-none transition-colors ${logic.activeTab === 'expenses' ? (theme === 'dark' ? 'bg-red-600 text-white' : 'bg-red-500 text-white') : (theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-700')}`}
             onClick={() => logic.setActiveTab('expenses')}
@@ -54,7 +54,7 @@ const MobileListWithFormButton = ({ logic, theme, t }: any) => {
         </div>
       </div>
 
-      {/* Modal for Form */}
+      
       {showFormModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm">
           <div className={`relative w-full max-w-md mx-auto ${theme === "dark" ? "bg-gray-900" : "bg-white"} rounded-2xl shadow-lg border ${theme === "dark" ? "border-gray-700" : "border-gray-200"} p-4`}>
@@ -89,7 +89,7 @@ const MobileListWithFormButton = ({ logic, theme, t }: any) => {
         </div>
       )}
 
-      {/* List Content */}
+      
       <div className="flex-1 min-h-0 overflow-x-auto overflow-y-auto">
         {logic.activeTab === 'expenses' ? (
           <ExpenseList {...logic.expenseListProps} />

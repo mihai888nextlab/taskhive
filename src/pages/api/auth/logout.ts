@@ -7,7 +7,7 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     try {
-      // Clear the authentication cookie or session
+      
       res.setHeader(
         "Set-Cookie",
         cookie.serialize("auth_token", "", {
@@ -19,15 +19,15 @@ export default async function handler(
         })
       );
 
-      // Respond with success
+      
       res.status(200).json({ message: "Logout successful" });
-      // redirect("/login"); // Redirect to login page after logout
+      
     } catch (error) {
       console.error("Error during logout:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   } else {
-    // Handle unsupported HTTP methods
+    
     res.setHeader("Allow", ["POST"]);
     res.status(405).json({ message: "Method not allowed" });
   }

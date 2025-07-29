@@ -18,7 +18,7 @@ interface Task {
   description?: string;
   deadline: string;
   completed: boolean;
-  priority: 'critical' | 'high' | 'medium' | 'low'; // Changed from important
+  priority: 'critical' | 'high' | 'medium' | 'low';
   userId: string | TaskUser | null;
   createdAt: string;
   updatedAt: string;
@@ -88,8 +88,6 @@ const TasksPage: NextPageWithLayout = React.memo(() => {
     isTaskOverdue,
   } = useTasks();
 
-  // --- Export Handlers ---
-  // CSV Export
   const handleExportCSV = React.useCallback(() => {
     const allTasks = activeTab === 'my-tasks' ? tasks : assignedTasks;
     if (!allTasks.length) return;
@@ -110,7 +108,6 @@ const TasksPage: NextPageWithLayout = React.memo(() => {
     (window.saveAs || require('file-saver').saveAs)(blob, `tasks_${activeTab}.csv`);
   }, [tasks, assignedTasks, activeTab]);
 
-  // PDF Export
   const handleExportPDF = React.useCallback(() => {
     const allTasks = activeTab === 'my-tasks' ? tasks : assignedTasks;
     if (!allTasks.length) return;
@@ -118,7 +115,6 @@ const TasksPage: NextPageWithLayout = React.memo(() => {
     const autoTableModule = require('jspdf-autotable');
     const autoTable = autoTableModule.default || autoTableModule;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    // Header (dark blue, visually consistent)
     doc.setFillColor(17, 24, 39);
     doc.rect(0, 0, 210, 30, 'F');
     doc.setTextColor(255, 255, 255);
@@ -127,8 +123,6 @@ const TasksPage: NextPageWithLayout = React.memo(() => {
     doc.text("Tasks Report", 14, 20);
     doc.setFontSize(12);
     doc.setTextColor(34, 34, 34);
-    // Table columns and rows
-    // Only include relevant columns, no Assigned To and no creator email
     const columns = [
       { header: "Title", dataKey: "title" },
       { header: "Description", dataKey: "description" },
@@ -145,7 +139,6 @@ const TasksPage: NextPageWithLayout = React.memo(() => {
       createdBy: t.createdBy ? `${t.createdBy.firstName} ${t.createdBy.lastName}` : "",
       createdAt: t.createdAt ? new Date(t.createdAt).toLocaleString() : "",
     }));
-    // Adjusted column widths to fit all data
     const colWidths = {
       title: 32,
       description: 60,
@@ -155,7 +148,6 @@ const TasksPage: NextPageWithLayout = React.memo(() => {
       createdAt: 32,
     };
     const totalWidth = Object.values(colWidths).reduce((a, b) => a + b, 0);
-    // Center the table horizontally
     const margin = (210 - totalWidth) / 2;
     autoTable(doc, {
       startY: 38,

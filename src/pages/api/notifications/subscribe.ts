@@ -1,4 +1,3 @@
-// pages/api/notifications/subscribe.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/db/dbConfig";
 import PushSubscription from "@/db/models/pushSubscriptionModel";
@@ -37,10 +36,9 @@ export default async function handler(
       .json({ message: "Authentication required: Invalid token" });
   }
 
-  const userId = decodedToken.userId; // Extract userId from the decoded token
-  const subscription = req.body; // This is the PushSubscription object
+  const userId = decodedToken.userId;
+  const subscription = req.body;
 
-  // Basic validation for the subscription object
   if (
     !subscription ||
     !subscription.endpoint ||
@@ -52,11 +50,10 @@ export default async function handler(
   }
 
   try {
-    // Find and update if exists, otherwise create new
     const existingSubscription = await PushSubscription.findOneAndUpdate(
-      { endpoint: subscription.endpoint }, // Find by endpoint (which should be unique)
-      { userId, ...subscription }, // Update with new data (e.g., if userId changes for same endpoint)
-      { upsert: true, new: true, setDefaultsOnInsert: true } // Create if not found, return new doc
+      { endpoint: subscription.endpoint },
+      { userId, ...subscription },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
     console.log(
@@ -67,7 +64,6 @@ export default async function handler(
       .json({ message: "Subscription saved successfully." });
   } catch (error: any) {
     if (error.code === 11000) {
-      // Duplicate key error (endpoint is unique)
       console.warn(
         `Duplicate subscription attempt for endpoint: ${subscription.endpoint}`
       );

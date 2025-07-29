@@ -129,6 +129,7 @@
     "filterSortButton": "Filteren & Sorteren",
     "filterSortTitle": "Filter- & Sorteeropties",
     "applyFiltersButton": "Filters toepassen"
+    ,"generateDescription": "Beschrijving genereren"
   },
   
   "AnnouncementsPage": {
@@ -191,7 +192,8 @@
     "unpin": "Losmaken",
     "author": "Auteur",
     "createdAt": "Aangemaakt op",
-    "expiresAt": "Vervalt op"
+    "expiresAt": "Vervalt op",
+    "eventDateLabel": "Evenementdatum"
   },
   "CommunicationPage": {
     "noConversations": "Geen gesprekken",

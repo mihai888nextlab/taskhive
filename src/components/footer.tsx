@@ -12,9 +12,9 @@ const Footer: React.FC = () => {
   return (
     <footer className="w-full bg-[#18181b] border-t border-accent/30 mt-20 pt-10 pb-6 text-white">
       <div className="max-w-7xl mx-auto relative px-4 sm:px-8 flex flex-col items-center">
-        {/* Top section: stacked on mobile, row on desktop */}
+        
         <div className="w-full flex flex-col md:flex-row items-stretch md:items-start justify-between gap-8 md:gap-10">
-          {/* Left: Logo and slogan */}
+          
           <div className="flex flex-col items-center md:items-start mb-6 md:mb-0 z-10 w-full md:w-auto">
             <Link href="/" className="mb-3">
               <Image
@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
               Organize. Achieve. Thrive.
             </p>
           </div>
-          {/* Center: Nav links */}
+          
           <NavigationMenu className="flex flex-wrap gap-4 sm:gap-6 text-gray-300 text-base font-medium justify-center items-center w-full md:w-auto md:absolute left-1/2 md:-translate-x-1/2 top-0 md:top-1/2 md:-mt-4 py-4 md:py-0 z-20">
             <NavigationMenuList className="flex flex-col sm:flex-row gap-2 sm:gap-6 justify-center items-center w-full">
               <NavigationMenuItem>
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
-          {/* Right: Authors and copyright */}
+          
           <div className="flex flex-col items-center md:items-end text-gray-400 text-xs mt-6 md:mt-0 z-10 w-full md:w-auto">
             <div className="flex items-center gap-1 flex-wrap justify-center md:justify-end">
               <span>Made by</span>

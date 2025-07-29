@@ -38,7 +38,7 @@ export function LoginForm({
 
   const handleGoogleSuccess = async (response: any) => {
     if (response) {
-      // Apelează funcția de login din hook-ul tău custom useAuth, trimițând ID Token-ul
+  
       await login("google", { code: response });
     }
   };
@@ -171,7 +171,7 @@ export function LoginForm({
 }
 
 interface GoogleAuthButtonProps {
-  // You can pass a function to handle the successful response
+  
   onLoginSuccess: (token: string) => void;
   onLoginFailure?: (error: any) => void;
 }
@@ -182,11 +182,11 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
 }) => {
   const router = useRouter(); // For redirecting after login (optional)
 
-  // Use the useGoogleLogin hook
+  
   const googleLogin = useGoogleLogin({
     onSuccess: (codeResponse) => {
       console.log("Google Login Success (Authorization Code):", codeResponse);
-      // codeResponse.code is the authorization code you send to your backend
+      
       onLoginSuccess(codeResponse.code);
     },
     onError: (errorResponse) => {

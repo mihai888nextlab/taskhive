@@ -27,23 +27,6 @@ const AnnouncementsHeader: React.FC<AnnouncementsHeaderProps> = ({
         <div className={`flex rounded-xl p-1 gap-2 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}> 
           <Button
             type="button"
-            onClick={() => setActiveTab('all')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === 'all'
-                ? theme === 'dark'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-500 text-white'
-                : theme === 'dark'
-                  ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
-            variant="ghost"
-          >
-            <FaBullhorn className="w-4 h-4" />
-            <span>{t("allAnnouncements")}</span>
-          </Button>
-          <Button
-            type="button"
             onClick={() => setActiveTab('pinned')}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
               activeTab === 'pinned'
@@ -58,6 +41,23 @@ const AnnouncementsHeader: React.FC<AnnouncementsHeaderProps> = ({
           >
             <FaThumbtack className="w-4 h-4" />
             <span>{t("pinnedAnnouncements")} ({pinnedCount})</span>
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setActiveTab('all')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'all'
+                ? theme === 'dark'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-500 text-white'
+                : theme === 'dark'
+                  ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+            variant="ghost"
+          >
+            <FaBullhorn className="w-4 h-4" />
+            <span>{t("allAnnouncements")}</span>
           </Button>
         </div>
         <div className="flex flex-wrap gap-3 items-center">

@@ -39,9 +39,9 @@ export default async function handler(
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const userId = decodedToken.userId; // Assuming user.id is available in session
+  const userId = decodedToken.userId;
 
-  // Basic validation
+  
   if (!userId) {
     return res
       .status(400)
@@ -74,29 +74,29 @@ export default async function handler(
         userId: existingUser._id,
         email: existingUser.email,
         password: existingUser.password,
-        role: userCompany.role, // 'admin'
+        role: userCompany.role,
         companyId: company._id,
-        firstName: existingUser.firstName, // Include for client-side convenience
-        lastName: existingUser.lastName, // Include for client-side convenience
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
       },
       JWT_SECRET,
-      { expiresIn: "1d" } // Token expires in 1 hour
+      { expiresIn: "1d" }
     );
 
     res.setHeader(
       "Set-Cookie",
       serialize("auth_token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use secure in production
-        sameSite: "lax", // Or 'strict' for more security
-        maxAge: 5 * 60 * 60 * 24, // 1 day (in seconds) - matches token expiration
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 5 * 60 * 60 * 24,
         path: "/",
       })
     );
 
     res.status(201).json({
       message: "User and company registered successfully.",
-      token, // Return the JWT token
+      token,
       user: {
         _id: existingUser._id,
         email: existingUser.email,

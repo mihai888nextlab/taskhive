@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 
 export interface ITimeSession extends mongoose.Document {
-  userId: mongoose.Types.ObjectId; // Reference to the user
-  name: string; // Name of the session
-  description: string; // Description of the session
-  duration: number; // Duration in seconds
-  createdAt: Date; // Timestamp of when the session was created
+  userId: mongoose.Types.ObjectId;
+  name: string;
+  description: string;
+  duration: number;
+  createdAt: Date;
   cycles?: number;
 }
 
@@ -19,7 +19,6 @@ const timeSessionSchema = new mongoose.Schema({
   cycles: { type: Number, default: 1 },
 });
 
-// Check if the model already exists to avoid overwriting
 const TimeSession = mongoose.models.TimeSession || mongoose.model('TimeSession', timeSessionSchema);
 
 export default TimeSession;

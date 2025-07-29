@@ -14,12 +14,12 @@ export interface IUser extends mongoose.Document {
     uploadedAt: Date;
     fileName?: string;
   };
-  googleId?: string; // <-- Add this line
+  googleId?: string;
 }
 
 const profileImageSchema = new Schema(
   {
-    data: { type: String, required: true }, // base64 string
+    data: { type: String, required: true },
     contentType: { type: String, required: true },
     uploadedAt: { type: Date, default: Date.now },
     fileName: { type: String },
@@ -36,7 +36,7 @@ const userSchema = new Schema(
     profileImage: { type: profileImageSchema, default: null },
     skills: { type: [String], default: [] },
     description: { type: String, default: "" },
-    googleId: { type: String, default: null }, // <-- Add this line
+    googleId: { type: String, default: null },
   },
   { timestamps: true }
 );

@@ -12,7 +12,6 @@ import { useTheme } from '@/components/ThemeContext';
 import { useStorage } from '@/hooks/useStorage';
 import { FaFile, FaFileImage, FaFilePdf, FaFileArchive, FaFileAlt } from 'react-icons/fa';
 
-// ...existing code...
 const Storage: React.FC = () => {
   const { theme } = useTheme();
   const {
@@ -53,7 +52,6 @@ const Storage: React.FC = () => {
     handleFileSigningModalClose,
   } = useStorage();
 
-  // Utility for file icon
   const getFileIcon = (fileName: string): React.ReactElement => {
     const ext = fileName.split('.').pop()?.toLowerCase();
     if (["jpg", "jpeg", "png", "gif", "bmp", "svg"].includes(ext || "")) return <FaFileImage className="text-blue-400" />;
@@ -63,7 +61,6 @@ const Storage: React.FC = () => {
     return <FaFile />;
   };
 
-  // Utility for formatting bytes
   const formatBytes = (bytes: number) => {
     if (bytes >= 1024 * 1024 * 1024)
       return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
@@ -85,7 +82,6 @@ const Storage: React.FC = () => {
       onDrop={handleDrop}
     >
       <div className="max-w-full mx-auto px-2 sm:px-4 py-4 sm:py-8 w-full">
-        {/* Header Section */}
         <div className="mb-4">
           <StorageHeader
             usedStorage={usedStorage}
@@ -97,7 +93,6 @@ const Storage: React.FC = () => {
           />
         </div>
 
-        {/* Search and Sort */}
         <div className="mb-4">
           <StorageSearchSort
             search={search}
@@ -126,7 +121,6 @@ const Storage: React.FC = () => {
 
       {dragActive && <StorageDragOverlay />}
 
-      {/* Render Modals using React Portal - UPDATED TO MATCH TASK FORM STYLE */}
       {typeof window !== 'undefined' && (
         <>
           {uploadFileModal && createPortal(

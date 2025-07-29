@@ -1,37 +1,34 @@
-// src/db/models/taskModel.ts
+
 
 import mongoose, { Schema, Document, Types } from "mongoose";
 
-// Define the Task interface for TypeScript
+
 export interface ITask extends Document {
   title: string;
   description?: string;
   deadline: Date;
   completed: boolean;
-  userId: Types.ObjectId; // Link to the User model (assignee)
+  userId: Types.ObjectId;
   companyId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
-  createdBy: Types.ObjectId; // Assigner
+  createdBy: Types.ObjectId;
   priority: "critical" | "high" | "medium" | "low";
-  // Subtask fields
+  
   parentTask?: Types.ObjectId;
   isSubtask: boolean;
   subtasks?: Types.ObjectId[];
-  // RAG specific fields
-  pageContent?: string; // The text that will be embedded
-  embedding?: number[]; // The vector embedding
+  pageContent?: string;
+  embedding?: number[];
   metadata?: {
-    // Additional info for the LLM/UI
-    source: string; // e.g., 'task'
-    originalId: mongoose.Types.ObjectId; // The _id of this task
+    source: string;
+    originalId: mongoose.Types.ObjectId;
     title?: string;
     status?: string;
-    // ... any other relevant task-specific info
   };
-  tags?: string[]; // <-- Add this line
-  assignedTo?: Types.ObjectId; // Assignee (for both main tasks and subtasks)
-  assignedBy?: Types.ObjectId; // Assigner (for both main tasks and subtasks)
+  tags?: string[];
+  assignedTo?: Types.ObjectId;
+  assignedBy?: Types.ObjectId;
 }
 
 const TaskSchema: Schema = new Schema(
@@ -60,8 +57,8 @@ const TaskSchema: Schema = new Schema(
     },
     companyId: {
       type: Schema.Types.ObjectId,
-      ref: "Company", // Optional reference to the 'Company' model
-      required: true, // Not required for all tasks
+      ref: "Company",
+      required: true,
     },
     createdBy: {
       type: Schema.Types.ObjectId,
@@ -73,7 +70,7 @@ const TaskSchema: Schema = new Schema(
       enum: ["critical", "high", "medium", "low"],
       default: "medium",
     },
-    // Subtask fields
+    
     parentTask: {
       type: Schema.Types.ObjectId,
       ref: "Task",
@@ -89,22 +86,22 @@ const TaskSchema: Schema = new Schema(
         ref: "Task",
       },
     ],
-    // RAG specific fields
+    
     pageContent: { type: String },
     embedding: { type: [Number] },
     metadata: { type: mongoose.Schema.Types.Mixed },
-    tags: [{ type: String }], // <-- Add this line
+    tags: [{ type: String }],
     assignedTo: {
       type: Schema.Types.ObjectId,
       ref: "User",
       default: null,
-      // Used for both main tasks and subtasks
+      
     },
     assignedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
       default: null,
-      // Used for both main tasks and subtasks
+      
     },
   },
   {
@@ -112,7 +109,7 @@ const TaskSchema: Schema = new Schema(
   }
 );
 
-// Mongoose automatically pluralizes the model name to find the collection (e.g., 'Task' -> 'tasks')
+
 const Task = mongoose.models.Task || mongoose.model<ITask>("Task", TaskSchema);
 
 export default Task;

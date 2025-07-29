@@ -19,7 +19,6 @@ const SettingsPage: NextPageWithLayout = () => {
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("profile");
 
-  // Set tab from hash on load
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
     if (hash && tabs.some(tab => tab.id === hash)) {
@@ -35,7 +34,6 @@ const SettingsPage: NextPageWithLayout = () => {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  // Update hash when tab changes
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
     window.location.hash = tabId;
@@ -197,7 +195,6 @@ const SettingsPage: NextPageWithLayout = () => {
       </main>
     </div>
   );
-  // ...existing code...
 };
 
 export default SettingsPage;
