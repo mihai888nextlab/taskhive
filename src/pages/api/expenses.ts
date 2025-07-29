@@ -30,12 +30,8 @@ export default async function handler(
   }
 
   if (req.method === "GET") {
-    const userId = decodedToken.userId;
     const companyId = decodedToken.companyId;
-    const filter: any = {};
-    if (userId) filter.userId = userId;
-    if (companyId) filter.companyId = companyId;
-    const expenses = await (Expense as any).find(filter).sort({ date: -1 });
+    const expenses = await Expense.find({ companyId }).sort({ date: -1 });
     return res.status(200).json(expenses);
   }
 
