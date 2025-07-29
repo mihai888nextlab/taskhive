@@ -34,7 +34,7 @@ const Communication: NextPageWithLayout = () => {
       className={`relative ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"} p-4 lg:px-8`}
     >
       {loadingUser}
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] max-w-8xl mx-auto">
+      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] w-7xl mx-auto">
         <div className="w-full lg:w-1/3 xl:w-1/4 min-w-0">
           <ConversationList
             conversations={conversations}
