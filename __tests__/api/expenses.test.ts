@@ -98,7 +98,6 @@ describe("/api/expenses", () => {
   });
 
   it("returns 401 if no token", async () => {
-    // Patch isValidObjectId to return true to avoid 400 error
     const mongoose = require("mongoose");
     mongoose.isValidObjectId.mockReturnValue(true);
     const req = mockReq("POST", {}, {}, "");
@@ -125,7 +124,7 @@ describe("/api/expenses", () => {
     const req = mockReq("GET", {}, { userId: "u1" });
     const res = mockRes();
     await handler(req, res);
-    expect(findMock).toHaveBeenCalledWith({ userId: "u1" });
+    expect(findMock).toHaveBeenCalledWith({ userId: "u1", companyId: "c1" });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(expect.any(Array));
   });

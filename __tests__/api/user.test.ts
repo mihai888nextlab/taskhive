@@ -162,6 +162,7 @@ describe("/api/user handler", () => {
   it("returns 404 if userCompany not found", async () => {
     const userCompanyModelNotFound = {
       findOne: jest.fn().mockResolvedValue(null),
+      find: jest.fn().mockResolvedValue([]),
     };
     const handlerNotFound = createUserHandler({
       userModel: userModel as any,
@@ -178,7 +179,7 @@ describe("/api/user handler", () => {
     await handlerNotFound(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ message: "UserCompany not found" });
+    expect(res.json).toHaveBeenCalledWith({ message: "User company not found" });
   });
 
   it("returns 500 on internal error", async () => {

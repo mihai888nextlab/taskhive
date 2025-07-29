@@ -64,7 +64,7 @@ export default async function handler(
           lastName: existingUser.lastName,
         },
         JWT_SECRET,
-        { expiresIn: "1d" } // Token expires in 1 hour
+        { expiresIn: "1d" }
       );
 
       res.setHeader(
