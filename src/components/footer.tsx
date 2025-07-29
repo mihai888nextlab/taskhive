@@ -36,7 +36,10 @@ const Footer: React.FC = () => {
             <NavigationMenuList className="flex flex-col sm:flex-row gap-2 sm:gap-6 justify-center items-center w-full">
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link href="/contact" className="hover:text-primary hover:bg-transparent transition-colors">
+                  <Link
+                    href="/contact"
+                    className="hover:text-primary hover:bg-transparent transition-colors"
+                  >
                     Contact
                   </Link>
                 </NavigationMenuLink>
@@ -55,11 +58,15 @@ const Footer: React.FC = () => {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link href="/help" className="hover:text-primary hover:bg-transparent transition-colors">
+                  <Link
+                    href="/help"
+                    className="hover:text-primary hover:bg-transparent transition-colors"
+                  >
                     Help
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
+
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <a
@@ -70,6 +77,17 @@ const Footer: React.FC = () => {
                   >
                     GitHub
                   </a>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/demo-accounts"
+                    className="hover:text-primary hover:bg-transparent transition-colors"
+                  >
+                    Demo Accounts
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -103,10 +121,12 @@ const Footer: React.FC = () => {
         </div>
       </div>
       <div className="max-w-7xl mx-auto pt-6 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 px-4 sm:px-8 border-t border-accent/20 mt-8 text-center md:text-left gap-2 md:gap-0">
-        <span className="w-full md:w-auto">Privacy Policy · Terms of Service</span>
         <span className="w-full md:w-auto">
-          Built with{" "}
-          <span className="text-primary font-bold">♥</span> for teams.
+          Privacy Policy · Terms of Service
+        </span>
+        <span className="w-full md:w-auto">
+          Built with <span className="text-primary font-bold">♥</span> for
+          teams.
         </span>
       </div>
     </footer>
